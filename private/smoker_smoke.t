@@ -69,7 +69,7 @@ use_ok( 'Test::Smoke::Smoker' );
     like( $report, qr/^
         \[stdio\/perlio\]\s*
         -DDEBUGGING\s+
-        smoke\/minitest\.t\.+FAILED
+        \.\.\/t\/smoke\/minitest\.t\.+FAILED
     /xm, "Failures report" );
           
 

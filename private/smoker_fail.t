@@ -70,8 +70,8 @@ use_ok( 'Test::Smoke::Smoker' );
     like( $report, qr/^
         \[stdio\/perlio\]\s+
         -DDEBUGGING\s+
-        smoke\/die\.t\.+FAILED\ \?+\s+
-        smoke\/many\.t\.+FAILED\ \d+(?:[\s-]+\d+)*\s+
+        \.\.\/t\/smoke\/die\.t\.+FAILED\ \?+\s+
+        \.\.\/t\/smoke\/many\.t\.+FAILED\ \d+(?:[\s-]+\d+)*\s+
         \s+\d+(?:[\s-]+\d+)*\s+
     /xm, "Failures report" );
           
