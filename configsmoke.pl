@@ -13,7 +13,7 @@ use Test::Smoke::Util qw( do_pod2usage );
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.025';
+$VERSION = '0.026';
 
 use Getopt::Long;
 my %options = ( 
@@ -152,6 +152,7 @@ my %opt = (
         alt => [ ],
         dft => File::Spec->rel2abs( File::Spec->catdir( File::Spec->updir,
                                                         'perl-current' ) ),
+        chk => '.+',
     },
     use_old => {
         msg => "It looks like there is already a source-tree there.\n" .
@@ -199,12 +200,14 @@ my %opt = (
         alt => [ ],
         dft => File::Spec->rel2abs( File::Spec->catdir( File::Spec->updir,
                                                         'perl-master' ) ),
+        chk => '.+',
     },
     forest_hdir => {
         msg => 'Where would you like the intermediate source-tree?',
         alt => [ ],
         dft => File::Spec->rel2abs( File::Spec->catdir( File::Spec->updir,
                                                         'perl-inter' ) ),
+        chk => '.+',
     },
     fsync => { 
         msg => "How would you like to sync your master source-tree?\n$syncmsg",
@@ -300,12 +303,14 @@ Examples:$untarmsg",
         msg => 'From which directory should the source-tree be copied?',
         alt => [ ],
         dft => undef,
+        chk => '.+',
     },
 
     hdir => {
         msg => 'From which directory should the source-tree be hardlinked?',
         alt => [ ],
         dft => undef,
+        chk => '.+',
     },
 
     patch => {
@@ -389,13 +394,24 @@ Examples:$untarmsg",
         dft => 'y',
     },
     killtime => {
-        msg => "Should this smoke be aborted on/after a specific time?
+        msg => <<EOT,
+Should this smoke be aborted on/after a specific time?
 \tuse HH:MM to specify a point in time (24 hour notation)
 \tuse +HH:MM to specify a duration
-\tleave empty to finish the smoke without aborting",
+\tleave empty to finish the smoke without aborting
+EOT
         dft => "",
         alt => [ ],
         chk => '^(?:(?:\+\d+)|(?:(?:[0-1]?[0-9])|(?:2[0-3])):[0-5]?[0-9])|$',
+    },
+    # Archive?
+    adir => {
+        msg => <<EOT,
+Which directory should be used for the archives?
+\tLeave empty for no archiving.
+EOT
+        alt => [ ],
+        dft => undef,
     },
     # Schedule stuff
     docron => {
@@ -1025,6 +1041,20 @@ if ( $Config{d_alarm} ) {
     $config{ $arg } = prompt( $arg );
 }
 
+=item adir
+
+The smokereports are lost after a new SYNCTREE step, it might be handy
+to archive them along with the logfile.
+
+If you want this then set the directory where you want the stored
+(empty value means no archiving).
+
+=cut
+
+$arg = 'adir';
+$config{ $arg } = prompt_dir( $arg );
+$config{lfile} = $options{log} unless $config{ $arg } eq "";
+
 =item schedule stuff
 
 =over 4
@@ -1192,6 +1222,9 @@ sub sort_configkeys {
 
         # Report related
         qw( mail mail_type mserver from to cc ),
+
+        # Archive report and logfile
+        qw( adir lfile ),
     );
 
     my $i = 0;
@@ -1247,7 +1280,7 @@ continue=''
 if test -f "\$LOCKFILE" && test -s "\$LOCKFILE" ; then
 $handle_lock
 fi
-echo "\$LOCKFILE" > "\$LOCKFILE"
+echo "\$CFGNAME" > "\$LOCKFILE"
 
 PATH=$cwd:$ENV{PATH}
 export PATH
@@ -1298,23 +1331,24 @@ REM       after rerunning $0
 $copycmd
 REM $atline
 
-set WD=$cwd\
+set WD=$cwd\\
 rem Change drive-Letter
 for \%\%L in ( "\%WD\%" ) do \%\%~dL
 cd "\%WD\%"
 set CFGNAME=$options{config}
 set LOCKFILE=$options{prefix}.lck
 if NOT EXIST \%LOCKFILE\% goto START_SMOKE
-    FIND "\%LOCKFILE\%" \%LOCKFILE\% > NUL:
+    FIND "\%CFGNAME\%" \%LOCKFILE\% > NUL:
     if ERRORLEVEL 1 goto START_SMOKE
     echo We seem to be running [or remove \%LOCKFILE\%]>&2
     goto :EOF
 
 :START_SMOKE
-    echo \%LOCKFILE\% > \%LOCKFILE\%
+    echo \%CFGNAME\% > \%LOCKFILE\%
     set OLD_PATH=\%PATH\%
     set PATH=$cwd;\%PATH\%
     $^X smokeperl.pl -c "\%CFGNAME\%" \%* > "\%WD\%\\$options{log}" 2>&1
+
     set PATH=\%OLD_PATH\%
 
 del \%LOCKFILE\%
@@ -1387,6 +1421,11 @@ sub prompt_dir {
     
 
         my $dir = prompt( @_ );
+        if ( $dir eq "" && ! @{ $opt{ $_[0] }->{alt} } && 
+             ! $opt{ $_[0] }->{chk} ) {
+            print "Got []\n";
+            return "";
+        }
 
         # thanks to perlfaq5
         $dir =~ s{^ ~ ([^/]*)}

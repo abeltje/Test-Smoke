@@ -8,6 +8,8 @@ $VERSION = Test::Smoke->VERSION;
 
 use Cwd;
 use File::Spec;
+use File::Path;
+use File::Copy;
 use FindBin;
 use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
 use lib $FindBin::Bin;
@@ -20,7 +22,7 @@ use Test::Smoke::Util qw( get_patch calc_timeout do_pod2usage );
 
 use Getopt::Long;
 my %options = ( config => 'smokecurrent_config', run => 1,
-                fetch => 1, patch => 1, mail => undef, 
+                fetch => 1, patch => 1, mail => undef, archive => undef,
                 continue => 0,
                 is56x => undef, defaultenv => undef, smartsmoke => undef );
 
@@ -31,6 +33,7 @@ GetOptions( \%options,
     'patch!', 
     'mail!',
     'run!',
+    'archive!',
     'is56x',
     'defaultenv!',
     'continue',
@@ -65,6 +68,7 @@ It can take these options
   --nofetch                Skip the synctree step
   --nopatch                Skip the patch step
   --nomail                 Skip the mail step
+  --noarchive              Skip the archive step (if applicable)
 
   --continue               Try to continue an interrupted smoke
   --is56x                  This is a perl-5.6.x smoke
@@ -90,10 +94,10 @@ defined Test::Smoke->config_error and
 
 # Correction for backward compatability
 !defined $options{ $_ } && !exists $conf->{ $_ } and $options{ $_ } = 1
-    for qw( run fetch patch mail );
+    for qw( run fetch patch mail archive );
 # Make command-line options override configfile
 defined $options{ $_ } and $conf->{ $_ } = $options{ $_ }
-    for qw( is56x defaultenv smartsmoke run fetch patch mail );
+    for qw( is56x defaultenv smartsmoke run fetch patch mail archive );
 
 if ( $options{continue} ) {
     $options{v} and print "Will try to continue current smoke\n";
@@ -117,6 +121,7 @@ call_mktest();
 call_mkovz();
 mailrpt();
 chdir $cwd;
+archiverpt();
 
 sub synctree {
     my $was_patchlevel = get_patch( $conf->{ddir} ) || -1;
@@ -207,6 +212,37 @@ sub mailrpt {
     $mailer->mail or warn "[$conf->{mail_type}] " . $mailer->error;
 }
 
+sub archiverpt {
+    return unless $conf->{archive};
+    return unless exists $conf->{adir};
+    return if $conf->{adir} eq "";
+    -d $conf->{adir} or do {
+        mkpath( $conf->{adir}, 0, 0775 ) or 
+            die "Cannot create '$conf->{adir}': $!";
+    };
+
+    my $patch_level = get_patch( $conf->{ddir} );
+    $patch_level =~ tr/ //sd;
+
+    my $archived_rpt = "rpt${patch_level}.rpt";
+
+    # Do not archive if it is already done
+    return if -f File::Spec->catfile( $conf->{adir}, $archived_rpt );
+
+    copy( File::Spec->catfile( $conf->{ddir}, 'mktest.rpt' ),
+          File::Spec->catfile( $conf->{adir}, $archived_rpt ) ) or
+        die "Cannot copy to '$archived_rpt': $!";
+
+    SKIP_LOG: {
+        my $archived_log = "log${patch_level}.log";
+        last SKIP_LOG unless defined $conf->{lfile};
+        last SKIP_LOG 
+            unless -f File::Spec->catfile( $FindBin::Bin, $conf->{lfile} );
+        copy( File::Spec->catfile( $FindBin::Bin, $conf->{lfile} ),
+              File::Spec->catfile( $conf->{adir}, $archived_log ) ) or
+            die "Cannot copy to '$archived_log': $!";
+    }
+}
 
 sub configs_from_log {
     my( $dir ) = @_;

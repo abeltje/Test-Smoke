@@ -148,6 +148,21 @@ Small wrapper around B<Test::Smoke::Mailer> that can use the settings
 from the smoke-configuration file. It will check if the report is
 already generated and do so if not (by calling F<mkovz.pl>).
 
+=item B<archiverpt.pl>
+
+This script copies the report and the logfile to a configurable place.
+
+=item B<smokestatus.pl>
+
+This script prints a little status report for a smoke confifuration:
+
+    $ ./smokestatus.pl -c smoke58x
+    Busy smoking patchlevel 20562.
+    13 out of 18 configurations finished in 7 hours 19 minutes.
+    10 configuration(s) showed failures (F).
+    0 failure(s) in the running configuration.
+    5 configuration(s) to finish, in est. 2 hours 49 minutes.
+
 =item B<W32Configure.bat>
 
 Small wrapper around B<Test::Smoke::Util::Configure_win32()> that can

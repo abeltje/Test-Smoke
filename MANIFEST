@@ -7,6 +7,7 @@ ChangeLog
 Configure.pl
 FAQ
 Makefile.PL
+archiverpt.pl
 configsmoke.pl
 mailrpt.pl
 mktest.pl
@@ -22,6 +23,7 @@ w32current.cfg
 smoke56x_dfconfig
 smoke58x_dfconfig
 smokeperl.pl
+smokestatus.pl
 synctree.pl
 W32Configure.pl
 lib/Mail/Sendmail.pm
