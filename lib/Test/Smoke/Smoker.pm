@@ -5,9 +5,11 @@ use strict;
 use vars qw( $VERSION );
 $VERSION = '0.002';
 
+use Cwd;
+use File::Spec;
 use Config;
 use Test::Smoke::Util;
-use Cwd;
+BEGIN { eval q{ use Time::HiRes qw( time ) } }
 
 my %CONFIG = (
     df_v              => 0,
@@ -17,6 +19,7 @@ my %CONFIG = (
     df_locale         => '',
     df_force_c_locale => 0,
     df_default_env    => 0,
+    df_ddir           => File::Spec->curdir(),
 
     df_is_win32       => $^O eq 'MSWin32',
     df_w32cc          => 'MSVC60',
@@ -52,7 +55,10 @@ Test::Smoke::Smoker - OO interface to do one smoke cycle.
 
 C<new()> takes a mandatory (opened) filehandle and some other options:
 
+    ddir            build directory
+    fdir            The forest source
     v               verbose level: 0..2
+    defaultenv      'make test' without $ENV{PERLIO}
     is56x           skip the PerlIO stuff?
     locale          do another testrun with $ENV{LC_ALL}
     force_c_locale  set $ENV{LC_ALL} = 'C' for all smoke runs
@@ -91,6 +97,16 @@ sub new {
     $fields{defaultenv} = 1 if $fields{is56x};
 
     bless { %fields }, $class;
+}
+
+sub mark_in {
+    my $self = shift;
+    $self->log( sprintf "Started smoke at %d\n", time() );
+}
+
+sub mark_out {
+    my $self = shift;
+    $self->log( sprintf "Stopped smoke at %d\n", time() );
 }
 
 =item Test::Smoke::Smoker->config( $key[, $value] )
@@ -155,9 +171,8 @@ Prints a message to both the default and the logfile filehandles.
 
 sub ttylog {
     my $self = shift;
-    my $message = join "", @_;
-    print { $self->{logfh} } $message;
-    print $message;
+    $self->log( @_ );
+    $self->tty( @_ );
 }
 
 =item $smoker->smoke( $config[, $policy] )

@@ -1,8 +1,9 @@
 package Test::Smoke;
 use strict;
 
+# $Id$
 use vars qw( $VERSION $conf @EXPORT );
-$VERSION = '1.17_53'; # $Id$
+$VERSION = '1.17_55';
 
 use base 'Exporter';
 @EXPORT  = qw( $conf &read_config &run_smoke );
@@ -110,6 +111,7 @@ sub run_smoke {
     my $BuildCFG = Test::Smoke::BuildCFG->new( $conf->{cfg}, v => $conf->{v} );
 
     my $smoker   = Test::Smoke::Smoker->new( \*LOG, $conf );
+    $smoker->mark_in;
 
     unless ( $continue ) {
         $smoker->ttylog( "Smoking patch $patch\n" ); 
@@ -118,7 +120,7 @@ sub run_smoke {
 
     chdir $conf->{ddir} or die "Cannot chdir($conf->{ddir}): $!";
     foreach my $this_cfg ( $BuildCFG->configurations ) {
-
+        $smoker->mark_out; $smoker->mark_in;
         if ( skip_config( $this_cfg ) ) {
             $smoker->ttylog( "Skipping: '$this_cfg'\n" );
             next;
@@ -130,6 +132,7 @@ sub run_smoke {
     }
 
     $smoker->ttylog( "Finished smoking $patch\n" );
+    $smoker->mark_out;
 
     close LOG or do {
         require Carp;
