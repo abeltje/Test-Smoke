@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 
-use Test::More tests => 9;
+use Test::More tests => 13;
 my $verbose = 0;
 
 use FindBin;
@@ -20,6 +20,8 @@ use_ok "Test::Smoke::SysInfo";
     ok $si->cpu_type, $si->cpu_type;
     ok $si->cpu, $si->cpu;
     is $si->ncpu, '', "no ncpu";
+    ok $si->os, $si->os;
+    ok $si->host, $si->host;
 }
 
 {
@@ -29,4 +31,6 @@ use_ok "Test::Smoke::SysInfo";
     ok $si->cpu_type, "cpu_type: " . $si->cpu_type;
     ok $si->cpu,      "cpu: " . $si->cpu;
     ok $si->ncpu,     "number of cpus: " . $si->ncpu;
+    ok $si->os, $si->os;
+    ok $si->host, $si->host;
 }

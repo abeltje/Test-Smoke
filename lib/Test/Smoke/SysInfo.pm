@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.002';
+$VERSION = '0.003';
 
 =head1 NAME
 
@@ -18,10 +18,12 @@ Test::Smoke::SysInfo - OO interface to system specific information
     printf "Number of CPU's: %d\n", $si->ncpu;
     printf "Processor type: %s\n", $si->cpu_type;   # short
     printf "Processor description: %s\n", $si->cpu; # long
+    printf "OS version: %s\n", $si->si;
 
 =head1 DESCRIPTION
 
-Sometimes one wants a more eleborate description of the system one is smoking.
+Sometimes one wants a more eleborate description of the system one is
+smoking.
 
 =head1 METHODS
 
@@ -29,7 +31,7 @@ Sometimes one wants a more eleborate description of the system one is smoking.
 
 =item Test::Smoke::SysInfo->new( )
 
-Dispatch to one of the OS-specific packages.
+Dispatch to one of the OS-specific subs.
 
 =cut
 
@@ -59,7 +61,7 @@ sub new {
     return bless Generic(), $class;
 }
 
-my %info = map { ($_ => undef ) } qw( ncpu cpu cpu_type host );
+my %info = map { ($_ => undef ) } qw( os ncpu cpu cpu_type host );
 
 sub AUTOLOAD {
     my $self = shift;
@@ -78,7 +80,55 @@ This is the short info string about the Operating System.
 
 sub __get_os {
     require POSIX;
-    return "@{[(POSIX::uname())[0,2]]}";
+    my $os = join " ", (POSIX::uname())[0,2];
+    MOREOS: {
+        local $_ = $^O;
+
+        /aix/i             && do {
+            chomp( $os = `oslevel -r` );
+            if ( $os =~ m/^(\d+)-(\d+)$/ ) {
+                $os = ( join ".", split //, $1 ) . "/ML$2";
+            } else {
+                chomp( $os = `oslevel` );
+
+                # And try figuring out at what maintainance level we are
+                my $ml = "00";
+                for ( grep m/ML\b/ => `instfix -i` ) {
+                    if ( m/All filesets for (\S+) were found/ ) {
+                        $ml = $1;
+                        $ml =~ m/^\d+-(\d+)_AIX_ML/ and $ml = "ML$1";
+                        next;
+                    }
+                    $ml =~ s/\+*$/+/;
+                }
+                $os .= "/$ml";
+            }
+            $os =~ s/^/AIX /;
+            last MOREOS;
+        };
+        /irix/i            && do {
+            chomp( my $osvers = `uname -R` );
+            my( $osn, $osv ) = split ' ', $os;
+            $osvers =~ s/^$osv\s+(?=$osv)//;
+            $os = "$osn $osvers";
+            last MOREOS;
+        };
+        /linux/i           && do {
+            my( $distro ) = grep /\brelease\b/ => glob( '/etc/*' );
+            last MOREOS unless $distro;
+            $distro =~ s|^/etc/||;
+            $distro =~ s/-?release//i;
+            $os .= " [$distro]" if $distro;
+            last MOREOS;
+        };
+        /windows|mswin32/i && do {
+            eval { require Win32 };
+            $@ and last MOREOS;
+            ( $os = join " ", Win32::GetOSName() ) =~ s/Service\s+Pack\s+/SP/;
+            last MOREOS;
+        };
+    }
+    return $os;
 }
 
 =item __get_cpu_type( )
@@ -148,34 +198,16 @@ sub AIX {
     my( $cpu ) = grep /^enable:[^:\s]+/ => `lsattr -E -O -l $info`;
     ( $cpu ) = $cpu =~ /^enable:([^:\s]+)/;
     $cpu =~ s/\bPowerPC(?=\b|_)/PPC/i;
-    (my $cpu_type = $cpu) =~ s/_.*//;
 
-    chomp (my $os = `oslevel -r`);
-    if ($os =~ m/^(\d+)-(\d+)$/) {
-	$os = (join ".", split //, $1) . "/ML$2";
-	}
-    else {
-	chomp ($os = `oslevel`);
-	# And try figuring out at what maintainance level we are
-	my $ml = "00";
-	print STDERR "l";
-	for (grep m/ML\b/, `instfix -i`) {
-	    if (m/All filesets for (\S+) were found/) {
-		$ml = $1;
-		$ml =~ m/^\d+-(\d+)_AIX_ML/ and $ml = "ML$1";
-		next;
-		}
-	    $ml =~ s/\+*$/+/;
-	    }
-	$os .= "/$ml";
-	}
-    $os =~ s/^/AIX /;
-    if ($> == 0) {
-	chomp (my $k64 = `bootinfo -K 2>/dev/null`);
-	$k64 and $os       .= "/$k64";
-	chomp (my $a64 = `bootinfo -y 2>/dev/null`);
+    ( my $cpu_type = $cpu ) =~ s/_.*//;
+
+    my $os = __get_os();
+    if ( $> == 0 ) {
+        chomp( my $k64 = `bootinfo -K 2>/dev/null` );
+        $k64 and $os .= "/$k64";
+	chomp( my $a64 = `bootinfo -y 2>/dev/null` );
 	$a64 and $cpu_type .= "/$a64";
-	}
+    }
 
     return {
         _os       => $os,
@@ -195,39 +227,48 @@ Use the L<ioscan> program to find information.
 sub HPUX {
     my $hpux = Generic();
     my $ncpu = grep /^processor/ => `ioscan -fnkC processor`;
-    unless ($ncpu) {	# not root?
-	if (open my $lst, "< /var/adm/syslog/syslog.log") {
-	    while (<$lst>) {
-		m/\bprocessor$/ and $ncpu++;
-		}
-	    }
-	}
+    unless ( $ncpu ) {	# not root?
+        local *SYSLOG;
+        if ( open SYSLOG, "< /var/adm/syslog/syslog.log" ) {
+            while ( <SYSLOG> ) {
+                m/\bprocessor$/ and $ncpu++;
+            }
+        }
+    }
     $hpux->{_ncpu} = $ncpu;
     # http://wtec.cup.hp.com/~cpuhw/hppa/hversions.html
-    my (@cpu, $lst);
-    chomp (my $model = `model`);
-    (my $m = $model) =~ s:.*/::;
-    open $lst, "</usr/sam/lib/mo/sched.models" and
-	@cpu = grep m/$m/i, <$lst>;
-    @cpu == 0 && open $lst, "</opt/langtools/lib/sched.models" and
-	@cpu = grep m/$m/i, <$lst>;
-    if (@cpu == 0 && open my $lst, "echo 'sc product cpu;il' | /usr/sbin/cstm |") {
-	while (<$lst>) {
-	    s/^\s*(PA)\s*(\d+)\s+CPU Module.*/$m 1.1 $1$2/ or next;
-	    $2 =~ m/^8/ and s/ 1.1 / 2.0 /;
-	    push @cpu, $_;
-	    }
-	}
-    $hpux->{_os} =~ s/ B\./ /;
-    chomp (my $k64 = `getconf KERNEL_BITS`);
-    $k64 and $hpux->{_os} .= "/$k64";
-    if ($cpu[0] =~ m/^\S+\s+(\d+\.\d+)\s+(\S+)/) {
-	my ($arch, $cpu) = ("PA-$1", $2);
-	$hpux->{_cpu} = $cpu;
-	$hpux->{_cpu_type} = `getconf HW_32_64_CAPABLE` =~ m/^1/ ? "$arch/64" : "$arch/32";
-	}
-    return $hpux;
+    my( @cpu, $lst );
+    chomp( my $model = `model` );
+    ( my $m = $model ) =~ s:.*/::;
+    local *LST;
+    open LST, "< /usr/sam/lib/mo/sched.models" and
+	@cpu = grep m/$m/i, <LST>;
+    close LST;
+
+    @cpu == 0 && open LST, "< /opt/langtools/lib/sched.models" and
+	@cpu = grep m/$m/i, <LST>;
+    close LST;
+
+    if (@cpu == 0 && open LST, "echo 'sc product cpu;il' | /usr/sbin/cstm |") {
+        while (<$lst>) {
+            s/^\s*(PA)\s*(\d+)\s+CPU Module.*/$m 1.1 $1$2/ or next;
+            $2 =~ m/^8/ and s/ 1.1 / 2.0 /;
+            push @cpu, $_;
+        }
     }
+    $hpux->{_os} =~ s/ B\./ /;
+
+    chomp( my $k64 = `getconf KERNEL_BITS` );
+    $k64 and $hpux->{_os} .= "/$k64";
+
+    if ($cpu[0] =~ m/^\S+\s+(\d+\.\d+)\s+(\S+)/) {
+	my( $arch, $cpu ) = ("PA-$1", $2);
+	$hpux->{_cpu} = $cpu;
+	$hpux->{_cpu_type} = `getconf HW_32_64_CAPABLE` =~ m/^1/ 
+            ? "$arch/64" : "$arch/32";
+    }
+    return $hpux;
+}
 
 =item BSD( )
 
@@ -301,7 +342,7 @@ sub Linux {
     if ( open CPUINFO, "< /proc/cpuinfo" ) {
         chomp( my @cpu_info = <CPUINFO> );
         close CPUINFO;
-        # every processor has its own 'block', so count the blocks
+        # every Intel processor has its own 'block', so count the blocks
         $ncpu = $type =~ /sparc/
             ? __from_proc_cpuinfo( 'ncpus active', \@cpu_info )
             : scalar grep /^processor\s+:\s+/ => @cpu_info;
@@ -382,7 +423,7 @@ L<Test::Smoke::Smoker>
 (c) 2002-2003, Abe Timmerman <abeltje@cpan.org> All rights reserved.
 
 With contributions from Jarkko Hietaniemi, Merijn Brand, Campo
-Weijerman.
+Weijerman, Alan Burlison, Allen Smith.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
