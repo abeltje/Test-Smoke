@@ -31,6 +31,9 @@ BEGIN {
         { plevel => 19008, os => 'linux', osvers => '2.4.21-1 [redhat]',
           arch => 'i686/1 cpu', sum => 'FAIL(F)', version => '5.8.3',
           cpu => 'Pentium III (Coppermine) (GenuineIntel 731MHz)' },
+        { plevel => 19009, os => 'AIX 5.1.0.0/ML04/32', osvers => '',
+          arch => 'PPC/32/1 cpu', sum => 'FAIL(F)', version => '5.8.3',
+          cpu => 'PPC_604' },
     );
     plan tests => 1 + @eg;
 }
@@ -40,6 +43,8 @@ BEGIN { use_ok( 'Test::Smoke::Util', 'parse_report_Config' ); }
 foreach my $eg ( @eg ) {
     my $ccvers = $eg->{ccvers} || 42;
     my $cpu = $eg->{cpu} || 'A very long(R) archstring(C) (999MHz)';
+    my $os_info = $eg->{os} || 'unknown';
+    $os_info .= " - $eg->{osvers}" if $eg->{osvers};
     my $report = <<__EOR__;
 Automated smoke report for $eg->{version} patch $eg->{plevel}
 host: $cpu ($eg->{arch})
