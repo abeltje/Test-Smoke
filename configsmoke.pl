@@ -339,7 +339,7 @@ EOMSG
         dft => '',
     },
     force_c_locale => {
-        msg => "Should $ENV{LC_ALL} be forced to 'C'?"
+        msg => "Should $ENV{LC_ALL} be forced to 'C'?",
         alt => [qw( N y )],
         dft => 'n',
     },
