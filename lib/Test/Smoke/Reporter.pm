@@ -8,6 +8,7 @@ $VERSION = '0.001';
 use Cwd;
 use File::Spec;
 require File::Path;
+use Text::ParseWords;
 
 my %CONFIG = (
     df_ddir       => File::Spec->curdir,
@@ -185,6 +186,7 @@ sub _parse {
     return $self unless defined $self->{_outfile};
 
     my( %rpt, $cfgarg, $debug, $tstenv, $start );
+    # reverse and use pop() instead of using unshift()
     my @lines = reverse split /\n+/, $self->{_outfile};
     while ( defined( local $_ = pop @lines ) ) {
         m/^\s*$/ and next;
@@ -227,15 +229,13 @@ sub _parse {
 
         if ( m/(?:PERLIO|TSTENV)\s*=\s*([-\w:.]+)/ ) {
             $tstenv = $1;
-            $rpt{$cfgarg}->{$debug}{minitest} = "M"
-                if $tstenv eq 'minitest';
+            $rpt{$cfgarg}->{$debug}{$tstenv} = "?";
             # Deal with harness output
             s/^(?:PERLIO|TSTENV)\s*=\s+[-\w:.]+(?: :crlf)?\s*//;
         }
 
         if ( m/^\s*All tests successful/ ) {
-            $rpt{$cfgarg}->{$debug}{$tstenv} = 
-                $rpt{$cfgarg}{$debug}{minitest} || "O";
+            $rpt{$cfgarg}->{$debug}{$tstenv} = "O";
             next;
         }
 
@@ -272,6 +272,7 @@ sub _parse {
     }
 
     $self->{_rpt} = \%rpt;
+    $self->_post_process;
 }
 
 =item $self->_post_process( )
@@ -283,7 +284,7 @@ sort the buildenvironments.
 
 sub _post_process {
     my $self = shift;
-    my %bldenv;
+    my( %bldenv, %cfgargs );
     my $rpt = $self->{_rpt};
     foreach my $config ( @{ $rpt->{cfglist} } ) {
         foreach my $buildenv ( keys %{ $rpt->{ $config }{N} } ) {
@@ -292,7 +293,91 @@ sub _post_process {
         foreach my $buildenv ( keys %{ $rpt->{ $config }{D} } ) {
             $bldenv{ $buildenv }++;
         }
+        $cfgargs{$_}++ for grep defined $_ => quotewords( '\s+', 1, $config );
     }
+    my %common_args = map {
+        ( $_ => 1)
+    } grep $cfgargs{ $_ } == @{ $rpt->{cfglist} } && ! /^-[DU]use/
+        => keys %cfgargs;
+
+    $rpt->{_common_args} = \%common_args;
+    $rpt->{common_args} = join " ", sort keys %common_args;
+    $rpt->{common_args} ||= 'none';
+
+    $self->{_tstenv} = [ reverse sort keys %bldenv ];
+    my( %failures, %order ); my $ord = 1;
+    foreach my $config ( @{ $rpt->{cfglist} } ) {
+        foreach my $dbinfo (qw( N D )) {
+            my $cfg = $config;
+            $cfg .= " -DDEBUGGING" if $dbinfo eq "D";
+            foreach my $tstenv ( reverse sort keys %bldenv ) {
+                ( my $showenv = $tstenv ) =~ s/^locale://;
+                my $status = $self->{_rpt}{ $config }{ $dbinfo };
+                $status->{ $tstenv } ||= '-';
+                if ( ref $status->{ $tstenv } eq "ARRAY" ) {
+                    my $failed = join "\n", @{ $status->{ $tstenv } };
+                    if ( exists $failures{ $failed } &&
+                         @{ $failures{ $failed } } && 
+                         $failures{ $failed }->[-1]{cfg} eq $cfg ) {
+                        push @{ $failures{ $failed }->[-1]{env} }, $showenv;
+                    } else {
+                        push @{ $failures{ $failed } }, 
+                             { cfg => $cfg, env => [ $showenv ] };
+                        $order{ $failed } ||= $ord++;
+                    }
+                    $status->{ $tstenv } = $failed =~ /^Inconsistant/
+                        ? "X" : "F";
+                }
+                if ( $tstenv eq 'minitest' ) {
+                    $status->{stdio} = "M";
+                    delete $status->{minitest};
+                }
+                $self->{v} and print "$cfg: $status->{$tstenv}\n";
+            }
+        }
+    }
+    my @failures = map {
+        { tests => $_,
+          cfgs  => [ map {
+              my $env = join "/", @{ $_->{env} };
+              "[$env] $_->{cfg}";
+        } @{ $failures{ $_ } }],
+      }
+    } sort { $order{$a} <=> $order{ $b} } keys %failures;
+    $self->{_failures} = \@failures;
+}
+
+=item $reporter->smoke_matrix( )
+
+C<smoke_matrix()> returns a string with the result-letters and their
+configs.
+
+=cut
+
+sub smoke_matrix {
+    my $self = shift;
+    my $rpt  = $self->{_rpt};
+
+    # Maximum of 6 letters => 11 positions
+    my $pad = " " x int( (11 - length( $rpt->{patch} ))/2 );
+    my $patch = $pad . $rpt->{patch};
+    my $report = sprintf "%-11s  Configuration (common) %s\n", 
+                         $patch, $rpt->{common_args};
+    $report .= ("-" x 11) . " " . ("-" x 57) . "\n";
+
+    foreach my $config ( @{ $rpt->{cfglist} } ) {
+        my $letters = "";
+        foreach my $dbinfo (qw( N D )) {
+            foreach my $tstenv ( @{ $self->{_tstenv} } ) {
+                $letters .= "$rpt->{$config}{$dbinfo}{$tstenv} ";
+            }
+        }
+        my $cfg = join " ", grep ! exists $rpt->{_common_args}{ $_ }
+            => quotewords( '\s+', 1, $config );
+        $report .= sprintf "%-12s %s\n", $letters, $cfg;
+    }
+
+    return $report;
 }
 
 1;
