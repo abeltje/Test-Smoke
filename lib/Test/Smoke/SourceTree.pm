@@ -2,7 +2,7 @@ package Test::Smoke::SourceTree;
 use strict;
 
 use vars qw( $VERSION @EXPORT_OK %EXPORT_TAGS );
-$VERSION = '0.003';
+$VERSION = '0.004';
 
 use File::Spec;
 use File::Find;
@@ -149,10 +149,10 @@ sub check_MANIFEST {
     open MANIFEST, "< $manifile" or 
         croak( "Can't open '$manifile': $!" );
 
-    my %manifest = ( ".patch" => ST_MISSING, map { 
-        s/\s.*$//;
-        ( $_ => ST_MISSING );
-    } <MANIFEST> );
+    my %manifest = map { 
+        m|(\S+)|;
+        ( $1 => ST_MISSING );
+    } <MANIFEST>, ".patch", @_;
     close MANIFEST;
 
     # Walk the tree, remove all found files from %manifest
@@ -181,7 +181,7 @@ not declared in the B<MANIFEST> file.
 sub clean_from_MANIFEST {
     my $self = shift;
 
-    my $mani_check = $self->check_MANIFEST;
+    my $mani_check = $self->check_MANIFEST( @_ );
     my @to_remove = grep $mani_check->{ $_ } == ST_UNDECLARED 
         => keys %$mani_check;
 
