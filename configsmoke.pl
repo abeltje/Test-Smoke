@@ -30,7 +30,7 @@ foreach my $opt (qw( config jcl log )) {
 }
 
 use vars qw( $VERSION $conf );
-$VERSION = '0.010';
+$VERSION = '0.011';
 
 eval { require $options{config} };
 print "Using '$options{config}' for defaults.\n" unless $@;
@@ -66,17 +66,26 @@ sub is_win32() { $^O eq 'MSWin32' }
 
 my %mailers = get_avail_mailers();
 my @mailers = sort keys %mailers;
+my @syncers = get_avail_sync();
+my $syncmsg = join "\n", @{ 
+    { rsync    => "\trsync - Use the rsync(1) program [preferred]",
+      copy     => "\tcopy - Use File::Copy to copy from a local directory",
+      hardlink => "\thardlink - Copy from a local directory using link()",
+      snapshot => "\tsnapshot - Get a snapshot using Net::FTP", }
+}{ @syncers };
 
 my %opt = (
     # is this a perl-5.6.x smoke?
     is56x => {
-        msg => 'Is this configuration for perl-5.6.x (MAINT)?',
+        msg => "Is this configuration for perl-5.6.x (MAINT)?
+\tThis will ensure only one pass of 'make test'.",
         alt => [qw( N y )],
         dft => 'N',
     },
     # Destination directory
     ddir => {
-        msg => 'Where would you like the new source-tree?',
+        msg => "Where would you like the new source-tree?
+\tThis directory is also used as the build directory.",
         alt => [ ],
         dft => File::Spec->rel2abs( File::Spec->catdir( File::Spec->updir,
                                                         'perl-current' ) ),
@@ -89,7 +98,7 @@ my %opt = (
     },
     # misc
     cfg => {
-        msg => 'Which configuration file would you like to use?',
+        msg => 'Which build-configuration file would you like to use?',
         alt => [ ],
         dft => File::Spec->rel2abs( is_win32
                                     ? 'w32current.cfg' : 'perlcurrent.cfg' ),
@@ -112,7 +121,8 @@ my %opt = (
     },
     # syncing the source-tree
     want_forest => {
-        msg => "Would you like the 'Nick Clark' master sync trees?",
+        msg => "Would you like the 'Nick Clark' master sync trees?
+\tPlease see 'perldoc $0' for an explanation.",
         alt => [qw( N y )],
         dft => 'n',
     },
@@ -129,14 +139,14 @@ my %opt = (
                                                         'perl-inter' ) ),
     },
     fsync => { 
-        msg => 'How would you like to sync your master source-tree?',
-        alt => [ get_avail_sync() ], 
-        dft => 'rsync' 
+        msg => "How would you like to sync your master source-tree?\n$syncmsg",
+        alt => [ @syncers ], 
+        dft => $syncers[0],
     },
     sync_type => { 
-        msg => 'How would you like to sync your source-tree?',
-        alt => [ get_avail_sync() ], 
-        dft => 'rsync' 
+        msg => "How would you like to sync your source-tree?\n$syncmsg",
+        alt => [ @syncers ], 
+        dft => $syncers[0],
     },
     source => {
         msg => 'Where would you like to rsync from?',
