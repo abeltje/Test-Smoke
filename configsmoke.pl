@@ -31,7 +31,7 @@ foreach my $opt (qw( config jcl log )) {
 }
 
 use vars qw( $VERSION $conf );
-$VERSION = '0.017';
+$VERSION = '0.018';
 
 eval { require $options{config} };
 $options{oldcfg} = 1, print "Using '$options{config}' for defaults.\n" 
@@ -308,6 +308,11 @@ Examples:$untarmsg",
     },
 
     # mail stuff
+    mail => {
+        msg => "Would you like your reports send by e-mail?",
+        alt => [qw( Y n )],
+        dft => 'y',
+    },
     mail_type => {
         msg => 'Which mail facility should be used?',
         alt => [ @mailers ],
@@ -778,13 +783,20 @@ $list
     $config{ $arg } = prompt( $arg );
 }
 
+=item mail
+
+C<{mail}> will set the new default for L<smokeperl.pl>
+
 =item mail_type
 
 See L<Test::Smoke::Mailer> and L<mailrpt.pl>
 
 =cut
 
+$arg = 'mail';
+$config{ $arg } = prompt_yn( $arg );
 MAIL: {
+    last MAIL unless $config{mail};
     $arg = 'mail_type';
     $config{ $arg } = prompt( $arg );
 
@@ -853,6 +865,8 @@ EO_MSG
     $config{w32make} = prompt( 'w32make' );
 
     $config{w32args} = [ 
+        "--win32-cctype" => $config{w32cc},
+        "--win32-maker"  => $config{w32make},
         "osvers=$osvers", 
         $compilers{ $config{w32cc} }->{ccversarg},
     ];

@@ -9,7 +9,7 @@ use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
 
 use Getopt::Long;
 my %options = ( config => 'smokecurrent_config', run => 1,
-                fetch => 1, patch => 1, mail => 1, 
+                fetch => 1, patch => 1, mail => undef, 
                 is56x => undef, smartsmoke => undef );
 GetOptions( \%options, 
     'config|c=s', 
@@ -61,8 +61,12 @@ unless ( read_config( $config_file ) ) {
 defined Test::Smoke->config_error and 
     die "!!!Please run 'configsmoke.pl'!!!\nCannot find configuration: $!";
 
-$conf->{is56x} = $options{is56x} if defined $options{is56x};
-$conf->{smartsmoke} = $options{smartsmoke} if defined $options{smartsmoke};
+# Correction for backward compatability
+!defined $options{ $_ } && !exists $conf->{ $_ } and $options{ $_ } = 1
+    for qw( run fetch patch mail );
+# Make command-line options override configfile
+defined $options{ $_ } and $conf->{ $_ } = $options{ $_ }
+    for qw( is56x smartsmoke run fetch patch mail );
 
 use Test::Smoke::Syncer;
 use Test::Smoke::Patcher;
