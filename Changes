@@ -8,6 +8,213 @@ The filelists have a short symbolic indicator:
 
 Enjoy!
 ---------------------------------------------------------------------------
+[   169] By: abeltje                          on 2003-06-12 16:49:01 +0200
+        Log: * [FIX] typos
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/BuildCFG.pm,
+             /Test-Smoke/lib/Test/Smoke/Smoker.pm
+---------------------------------------------------------------------------
+[   168] By: abeltje                          on 2003-06-12 15:34:06 +0200
+        Log: * [ADD] --continue
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm, /Test-Smoke/smokeperl.pl
+---------------------------------------------------------------------------
+[   167] By: abeltje                          on 2003-06-12 15:27:06 +0200
+        Log: * [ADD]
+	       - "make distclean" for {fdir} as before
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm
+---------------------------------------------------------------------------
+[   166] By: abeltje                          on 2003-06-12 15:23:11 +0200
+        Log: * [ADD]
+	       - Passing a hashref to new() will directly initialize the
+	     serialized list
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/BuildCFG.pm
+---------------------------------------------------------------------------
+[   164] By: abeltje                          on 2003-06-08 14:32:33 +0200
+        Log: * [FIX]
+	       - Default values in prompt()
+	       - Single-space input means empty-value in prompt()
+	       - Typo in {killtime} message
+	     * [ADD]
+	       + Support for MIME::Lite (at last)
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+---------------------------------------------------------------------------
+[   160] By: abeltje                          on 2003-06-06 18:05:43 +0200
+        Log: * Set $Id$ and svn:keywords "Id"
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/FAQ.pod
+---------------------------------------------------------------------------
+[   159] By: abeltje                          on 2003-06-06 17:59:00 +0200
+        Log: * [MERGE] $Id$ and svn::Keywords "Id"
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/W32Configure.pl, /Test-Smoke/configsmoke.pl,
+             /Test-Smoke/lib/Test/Smoke/Mailer.pm,
+             /Test-Smoke/lib/Test/Smoke/Patcher.pm,
+             /Test-Smoke/lib/Test/Smoke/Policy.pm,
+             /Test-Smoke/lib/Test/Smoke/SourceTree.pm,
+             /Test-Smoke/lib/Test/Smoke/Syncer.pm,
+             /Test-Smoke/lib/Test/Smoke/Util.pm,
+             /Test-Smoke/lib/Test/Smoke.pm, /Test-Smoke/mailrpt.pl,
+             /Test-Smoke/mkovz.pl, /Test-Smoke/mktest.pl,
+             /Test-Smoke/patchtree.pl, /Test-Smoke/smokeperl.pl,
+             /Test-Smoke/synctree.pl
+---------------------------------------------------------------------------
+[   158] By: abeltje                          on 2003-06-06 17:48:15 +0200
+        Log: * Start a new ReleaseNotes file for 1.18
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/ReleaseNotes
+---------------------------------------------------------------------------
+[   157] By: abeltje                          on 2003-06-06 17:46:46 +0200
+        Log: * Mention the {killtime} feature
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/FAQ.pod
+---------------------------------------------------------------------------
+[   156] By: abeltje                          on 2003-06-06 17:46:02 +0200
+        Log: * [FIX] do not count F<mktest.out> as MISSING from MANIFEST
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+---------------------------------------------------------------------------
+[   154] By: abeltje                          on 2003-06-06 17:39:56 +0200
+        Log: * Add the version of the that runs us
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/mkovz.pl
+---------------------------------------------------------------------------
+[   153] By: abeltje                          on 2003-06-06 17:38:42 +0200
+        Log: * Make the Test::Smoke::Smoker object a true replacement for
+	     F<mktest.pl>
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm
+---------------------------------------------------------------------------
+[   152] By: abeltje                          on 2003-06-06 17:25:35 +0200
+        Log: * [ADD] {mail} option to F<configsmoke.pl>
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl, /Test-Smoke/smokeperl.pl
+---------------------------------------------------------------------------
+[   140] By: abeltje                          on 2003-05-18 15:18:13 +0200
+        Log: * [CHANGE]
+	       + Add the standard OPTIONS section
+	       - Get {w32make} from the new _config format
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/W32Configure.pl
+---------------------------------------------------------------------------
+[   139] By: abeltje                          on 2003-05-18 13:51:30 +0200
+        Log: * [CHANGE]
+	       - prepare F<configsmoke.pl> for the new Test::Smoke::Smoker
+	       - take out the call to F<mktest.pl> in F<smokeperl.pl> and
+	     use Test::Smoke::run_smoke
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl, /Test-Smoke/smokeperl.pl
+---------------------------------------------------------------------------
+[   138] By: abeltje                          on 2003-05-18 13:46:23 +0200
+        Log: * Move the distribution to a configurable directory
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/mkdist.sh
+---------------------------------------------------------------------------
+[   137] By: abeltje                          on 2003-05-18 13:45:03 +0200
+        Log: * [CHANGE]  Added run_smoke() as a replacement for mktest.pl
+	       - This uses Test::Smoke::BuildCFG to handle the build
+	     configurations
+	       - This uses Test::Smoke::Smoker to handle the actual
+	     smoking
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+---------------------------------------------------------------------------
+[   136] By: abeltje                          on 2003-05-18 13:33:02 +0200
+        Log: * [CHANGE] Configure_win32() now returns the name of the
+	     makefile
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Util.pm
+---------------------------------------------------------------------------
+[   135] By: abeltje                          on 2003-05-18 13:30:44 +0200
+        Log: * [RENAME] that was a silly typo
+        Url: http://ati2/svn/Test-Smoke
+           - /Test-Smoke/t/builcfg.t
+          !> /Test-Smoke/t/buildcfg.t =(/Test-Smoke/t/builcfg.t:129)
+---------------------------------------------------------------------------
+[   134] By: abeltje                          on 2003-05-18 13:05:07 +0200
+        Log: * [ADD] OO interface to do one smoke cycle
+        Url: http://ati2/svn/Test-Smoke
+           + /Test-Smoke/lib/Test/Smoke/Smoker.pm
+---------------------------------------------------------------------------
+[   133] By: abeltje                          on 2003-05-18 13:04:02 +0200
+        Log: * [CHANGE] Add some verbosity
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/BuildCFG.pm
+---------------------------------------------------------------------------
+[   132] By: abeltje                          on 2003-05-18 13:02:13 +0200
+        Log: * [ADD]
+	       + Test::Smoke::BuildCFG
+	       + Test::Smoke::Smoker
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/MANIFEST, /Test-Smoke/test_compile.pl,
+             /Test-Smoke/test_pod.pl
+---------------------------------------------------------------------------
+[   131] By: abeltje                          on 2003-05-18 12:50:16 +0200
+        Log: * [CHANGE] test the new parameters for
+	     Test::Smoke::SourceTree::check_MANIFEST()
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/t/tree.t
+---------------------------------------------------------------------------
+[   130] By: abeltje                          on 2003-05-18 12:46:34 +0200
+        Log: * [CHANGE]
+	       - check_MANIFEST() now takes a list of extra files
+	       - clean_from_MANIFEST() now takes a list of extra files
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SourceTree.pm
+---------------------------------------------------------------------------
+[   129] By: abeltje                          on 2003-05-10 13:32:29 +0200
+        Log: * [ADD] OO interface to the build configurations
+        Url: http://ati2/svn/Test-Smoke
+           + /Test-Smoke/lib/Test/Smoke/BuildCFG.pm,
+             /Test-Smoke/t/builcfg.t
+---------------------------------------------------------------------------
+[   124] By: abeltje                          on 2003-04-29 20:55:16 +0200
+        Log: * [FIX] more write_bat() trouble
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+---------------------------------------------------------------------------
+[   122] By: abeltje                          on 2003-04-29 20:28:06 +0200
+        Log: * [FIX] copy_from_MANIFEST()
+	       - checked the wrong directory
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SourceTree.pm
+---------------------------------------------------------------------------
+[   111] By: abeltje                          on 2003-04-29 17:01:07 +0200
+        Log: * [FIX] write_bat()
+	       - chdir before testing/writing the lockfile!
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+---------------------------------------------------------------------------
+[   105] By: abeltje                          on 2003-04-27 13:55:44 +0200
+        Log: * [FIX] Test::Smoke::SourceTree::copy_from_MANIFEST()
+	       - I found I had to unlink existing destinations files
+	     before copying
+	       - I also needed to enforce source file file-mode
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SourceTree.pm
+---------------------------------------------------------------------------
+[   103] By: abeltje                          on 2003-04-27 13:35:54 +0200
+        Log: * [FIX] we want to see {gccversion}
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/mkovz.pl
+---------------------------------------------------------------------------
+[   100] By: abeltje                          on 2003-04-27 13:24:03 +0200
+        Log: * [FIX]
+	       - {sync_type} default setting from older config file was
+	     not taken over
+	       - You need to change drive on Win32 when installed on
+	     another drive
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+---------------------------------------------------------------------------
+[    98] By: abeltje                          on 2003-04-21 03:12:09 +0200
+        Log: At last: This is REV-1.17
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/Changes
+---------------------------------------------------------------------------
 [    97] By: abeltje                          on 2003-04-21 02:34:48 +0200
         Log: Update version
         Url: http://ati2/svn/Test-Smoke
@@ -25,39 +232,42 @@ Enjoy!
 ---------------------------------------------------------------------------
 [    94] By: abeltje                          on 2003-04-21 02:26:44 +0200
         Log: * [CHANGE]
-               - Be more sensible about accepting the builddirectory
-               - Save the 'renice' and 'umask' value in the config file
-               - Implement some sort of locking in the shell script
+	       - Be more sensible about accepting the builddirectory
+	       - Save the 'renice' and 'umask' value in the config file
+	       - Implement some sort of locking in the shell script
         Url: http://ati2/svn/Test-Smoke
            ! /Test-Smoke/configsmoke.pl
 ---------------------------------------------------------------------------
 [    93] By: abeltje                          on 2003-04-21 02:01:37 +0200
         Log: * [CHANGE]
-               - Small changes to make the output more useful
+	       - Small changes to make the output more useful
         Url: http://ati2/svn/Test-Smoke
            ! /Test-Smoke/mkdist.sh
 ---------------------------------------------------------------------------
 [    92] By: abeltje                          on 2003-04-21 01:50:38 +0200
         Log: * [REMOVE]
-               All -Duse64bitall in the build-configurations.
+	       All -Duse64bitall in the build-configurations.
         Url: http://ati2/svn/Test-Smoke
            ! /Test-Smoke/perl56x.cfg, /Test-Smoke/perlcurrent.cfg
 ---------------------------------------------------------------------------
 [    90] By: abeltje                          on 2003-04-06 19:15:13 +0200
-        Log: * Changed the report header a bit to fit the Sys::Hostname::hostname() in
+        Log: * Changed the report header a bit to fit the
+	     Sys::Hostname::hostname() in
         Url: http://ati2/svn/Test-Smoke
            ! /Test-Smoke/mkovz.pl
 ---------------------------------------------------------------------------
 [    89] By: abeltje                          on 2003-04-06 19:10:15 +0200
         Log: * [ADD]
-               The --[no]mail option
-               The --[no]report option to force creation of a new report
+	       The --[no]mail option
+	       The --[no]report option to force creation of a new report
         Url: http://ati2/svn/Test-Smoke
            ! /Test-Smoke/mailrpt.pl
 ---------------------------------------------------------------------------
 [    88] By: abeltje                          on 2003-03-30 11:28:32 +0200
-        Log: * [ADD] get_ncpu(): POSIX::uname() returns "sunos" not "solaris"
-             * [FIX] get_smoked_Config(): update the POD to reflect reality
+        Log: * [ADD] get_ncpu(): POSIX::uname() returns "sunos" not
+	     "solaris"
+	     * [FIX] get_smoked_Config(): update the POD to reflect
+	     reality
         Url: http://ati2/svn/Test-Smoke
            ! /Test-Smoke/lib/Test/Smoke/Util.pm
 ---------------------------------------------------------------------------
@@ -78,7 +288,7 @@ Enjoy!
 ---------------------------------------------------------------------------
 [    84] By: abeltje                          on 2003-03-28 14:25:01 +0100
         Log: * [FIX] get_smoked_Config()
-               - There is a problem with cygwin line-endings
+	       - There is a problem with cygwin line-endings
         Url: http://ati2/svn/Test-Smoke
            ! /Test-Smoke/lib/Test/Smoke/Util.pm
 ---------------------------------------------------------------------------
@@ -94,7 +304,7 @@ Enjoy!
 ---------------------------------------------------------------------------
 [    81] By: abeltje                          on 2003-03-16 18:26:12 +0100
         Log: * [ADD]
-               - New rule for cygwin in C<Test::Smoke::skip_filter()>
+	       - New rule for cygwin in C<Test::Smoke::skip_filter()>
         Url: http://ati2/svn/Test-Smoke
            ! /Test-Smoke/lib/Test/Smoke/Util.pm,
              /Test-Smoke/t/skip_filter.t
@@ -111,8 +321,8 @@ Enjoy!
 ---------------------------------------------------------------------------
 [    75] By: abeltje                          on 2003-03-14 22:41:24 +0100
         Log: * [FIX]
-               - Specify the number of tests
-               - Resolve Windows issues with unescaped paths
+	       - Specify the number of tests
+	       - Resolve Windows issues with unescaped paths
         Url: http://ati2/svn/Test-Smoke
            ! /Test-Smoke/t/regenstuff.t
 ---------------------------------------------------------------------------
@@ -158,24 +368,26 @@ Enjoy!
            ! /Test-Smoke/MANIFEST
 ---------------------------------------------------------------------------
 [    66] By: abeltje                          on 2003-03-13 00:38:16 +0100
-        Log: * [ADD] F<Changes> generated from Subversion (Keep CVS F<ChangeLog>)
+        Log: * [ADD] F<Changes> generated from Subversion (Keep CVS
+	     F<ChangeLog>)
         Url: http://ati2/svn/Test-Smoke
            + /Test-Smoke/Changes
            ! /Test-Smoke/MANIFEST
 ---------------------------------------------------------------------------
 [    65] By: abeltje                          on 2003-03-13 00:15:52 +0100
         Log: * More enhancements:
-               - Ask for perl_version early and set defaults
-               - No need for the silly 'is56x' question
-               - F<smoke5?x_dfconfig> now only holds 'perl_version'
+	       - Ask for perl_version early and set defaults
+	       - No need for the silly 'is56x' question
+	       - F<smoke5?x_dfconfig> now only holds 'perl_version'
         Url: http://ati2/svn/Test-Smoke
            ! /Test-Smoke/configsmoke.pl, /Test-Smoke/smoke56x_dfconfig,
              /Test-Smoke/smoke58x_dfconfig
 ---------------------------------------------------------------------------
 [    64] By: abeltje                          on 2003-03-12 23:15:03 +0100
         Log: * [ADD]
-               - detect if a report is already in place,
-                 otherwise call F<mkovz.pl> (helps if you break off a smoke)
+	       - detect if a report is already in place,
+		 otherwise call F<mkovz.pl> (helps if you break off a
+	     smoke)
         Url: http://ati2/svn/Test-Smoke
            ! /Test-Smoke/mailrpt.pl
 ---------------------------------------------------------------------------
@@ -192,13 +404,13 @@ Enjoy!
 ---------------------------------------------------------------------------
 [    61] By: abeltje                          on 2003-03-11 22:01:31 +0100
         Log: * [FIX]
-               - Old 'patch' programs don't know about '--verbose'
+	       - Old 'patch' programs don't know about '--verbose'
         Url: http://ati2/svn/Test-Smoke
            ! /Test-Smoke/lib/Test/Smoke/Patcher.pm
 ---------------------------------------------------------------------------
 [    60] By: abeltje                          on 2003-03-11 14:21:08 +0100
         Log: * [FIX]
-               - Typo in 'df_sendmailbin' [Thanks to Jos Boumans]
+	       - Typo in 'df_sendmailbin' [Thanks to Jos Boumans]
         Url: http://ati2/svn/Test-Smoke
            ! /Test-Smoke/lib/Test/Smoke/Mailer.pm
 ---------------------------------------------------------------------------
@@ -209,7 +421,8 @@ Enjoy!
 ---------------------------------------------------------------------------
 [    57] By: abeltje                          on 2003-03-11 00:13:23 +0100
         Log: * FIX: rt-ticket 2202:
-               - "require File::Copy;" was missing from copy_from_MANIFAST()
+	       - "require File::Copy;" was missing from
+	     copy_from_MANIFAST()
         Url: http://ati2/svn/Test-Smoke
            ! /Test-Smoke/lib/Test/Smoke/SourceTree.pm
 ---------------------------------------------------------------------------
@@ -235,7 +448,7 @@ Enjoy!
 ---------------------------------------------------------------------------
 [    42] By: abeltje                          on 2003-03-09 21:16:44 +0100
         Log: * FIX: The default syncer must exist!
-             + Added more explanation to some questions
+	     + Added more explanation to some questions
         Url: http://ati2/svn/Test-Smoke
            ! /Test-Smoke/configsmoke.pl
 ---------------------------------------------------------------------------
@@ -271,25 +484,25 @@ Enjoy!
 ---------------------------------------------------------------------------
 [    35] By: abeltje                          on 2003-03-09 19:57:50 +0100
         Log: Now uses Test::Smoke
-             -c without argument now assumes 'smokecurrent_config'
+	     -c without argument now assumes 'smokecurrent_config'
         Url: http://ati2/svn/Test-Smoke
            ! /Test-Smoke/synctree.pl
 ---------------------------------------------------------------------------
 [    34] By: abeltje                          on 2003-03-09 19:57:30 +0100
         Log: Now uses Test::Smoke
-             -c without argument now assumes 'smokecurrent_config'
+	     -c without argument now assumes 'smokecurrent_config'
         Url: http://ati2/svn/Test-Smoke
            ! /Test-Smoke/patchtree.pl
 ---------------------------------------------------------------------------
 [    33] By: abeltje                          on 2003-03-09 19:57:13 +0100
         Log: Now uses Test::Smoke
-             -c without argument now assumes 'smokecurrent_config'
+	     -c without argument now assumes 'smokecurrent_config'
         Url: http://ati2/svn/Test-Smoke
            ! /Test-Smoke/mailrpt.pl
 ---------------------------------------------------------------------------
 [    32] By: abeltje                          on 2003-03-09 19:56:45 +0100
         Log: Now uses Test::Smoke
-             -c without argument now assumes 'smokecurrent_config'
+	     -c without argument now assumes 'smokecurrent_config'
         Url: http://ati2/svn/Test-Smoke
            ! /Test-Smoke/W32Configure.pl
 ---------------------------------------------------------------------------
@@ -304,17 +517,20 @@ Enjoy!
            + /Test-Smoke/t/TestLib.pm
 ---------------------------------------------------------------------------
 [    29] By: abeltje                          on 2003-03-09 19:49:11 +0100
-        Log: Use the new *_regen_headers routines in Test::Smoke::Util (change 18852)
+        Log: Use the new *_regen_headers routines in Test::Smoke::Util
+	     (change 18852)
         Url: http://ati2/svn/Test-Smoke
            ! /Test-Smoke/lib/Test/Smoke/Patcher.pm
 ---------------------------------------------------------------------------
 [    28] By: abeltje                          on 2003-03-09 19:46:57 +0100
-        Log: Added C<get_regen_headers()> and C<run_regen_headers()> (change 18852)
+        Log: Added C<get_regen_headers()> and C<run_regen_headers()>
+	     (change 18852)
         Url: http://ati2/svn/Test-Smoke
            ! /Test-Smoke/lib/Test/Smoke/Util.pm
 ---------------------------------------------------------------------------
 [    27] By: abeltje                          on 2003-03-09 19:45:38 +0100
-        Log: Tests for the new *_regen_headers routines in Test::Smoke::Util (change 18852)
+        Log: Tests for the new *_regen_headers routines in
+	     Test::Smoke::Util (change 18852)
         Url: http://ati2/svn/Test-Smoke
            + /Test-Smoke/t/regenstuff.t
 ---------------------------------------------------------------------------
@@ -335,7 +551,7 @@ Enjoy!
 ---------------------------------------------------------------------------
 [    23] By: abeltje                          on 2003-03-09 19:33:21 +0100
         Log: Added F<t/regenstuff.t>
-             Added F<lib/Test/Smoke.pm> and F<t/ts_config.t>
+	     Added F<lib/Test/Smoke.pm> and F<t/ts_config.t>
         Url: http://ati2/svn/Test-Smoke
            ! /Test-Smoke/MANIFEST
 ---------------------------------------------------------------------------
@@ -468,4 +684,4 @@ Enjoy!
              /Test-Smoke/t/win32, /Test-Smoke/t/win32/Makefile,
              /Test-Smoke/t/win32/makefile.mk, /Test-Smoke/test_compile.pl,
              /Test-Smoke/test_pod.pl
--- Changes generated by 'svnchanges' (0.005) --
+-- Changes generated by 'svnchanges' (0.006) --
