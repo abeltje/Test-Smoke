@@ -3,8 +3,12 @@ use strict;
 
 # $Id$
 
-use Test::More tests => 44;
+use Test::More tests => 46;
 my $verbose = 0;
+
+use FindBin;
+use lib $FindBin::Bin;
+use TestLib;
 
 use_ok "Test::Smoke::BuildCFG";
 
@@ -117,9 +121,57 @@ __EOCFG__
     is_deeply $bcfg->{_sections}, $dft_sect, "Default configuration";
 }
 
-package CatchOut;
+# Now we need to test the C<continue()> constructor
+{
+    my $dft_cfg = <<EOCFG;
 
-sub TIEHANDLE { bless \(my $self), shift }
-sub PRINT { my $self = shift; $$self .= shift }
-sub PRINTF { my $self = shift; my $fmt =shift; $$self .= sprintf $fmt, @_ }
-sub CLOSE {}
+-Dusethreads
+=
+/-DDEBUGGING/
+
+-DDEBUGGING
+EOCFG
+
+    my $mktest_out = <<OUT;
+Smoking patch 20000
+
+Configuration: -Dusedevel
+----------------------------------------------------------------------
+PERLIO=stdio	All tests successful.
+
+PERLIO=perlio	All tests successful.
+
+Configuration: -Dusedevel -DDEBUGGING
+----------------------------------------------------------------------
+PERLIO=stdio	All tests successful.
+
+PERLIO=perlio	All tests successful.
+
+Configuration: -Dusedevel -Dusethreads
+----------------------------------------------------------------------
+PERLIO=stdio	
+OUT
+
+    put_file( $mktest_out, 'mktest.out' );
+    my $bcfg = Test::Smoke::BuildCFG->continue( 'mktest.out', \$dft_cfg );
+    isa_ok( $bcfg, 'Test::Smoke::BuildCFG' );
+
+    my @not_seen;
+    push @not_seen, "$_" for $bcfg->configurations;
+
+    is_deeply( \@not_seen, ["-Dusedevel -Dusethreads", 
+                            "-Dusedevel -Dusethreads -DDEBUGGING" ],
+               "The right configs are left for continue" );
+    1 while unlink 'mktest.out';
+}
+
+
+package Test::BCFGTester;
+use strict;
+
+use Test::Builder;
+use base 'Exporter';
+
+use vars qw( $VERSION @EXPORT );
+$VERSION = '0.001';
+@EXPORT = qw( &config_ok );
