@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION $REVISION $conf @EXPORT );
-$VERSION  = '1.19_50';
+$VERSION  = '1.19_51';
 $REVISION = __get_ts_patchlevel();
 
 use base 'Exporter';
@@ -144,13 +144,13 @@ sub run_smoke {
     $conf->{v} && $conf->{defaultenv} and
         $smoker->tty( "Running smoke tests without \$ENV{PERLIO}\n" );
 
+    chdir $conf->{ddir} or die "Cannot chdir($conf->{ddir}): $!";
     unless ( $continue ) {
-        $smoker->_make( "-i distclean 2>/dev/null" );
+        $smoker->make_distclean( );
         $smoker->ttylog( "Smoking patch $patch\n" ); 
         do_manifest_check( $conf->{ddir}, $smoker );
     }
 
-    chdir $conf->{ddir} or die "Cannot chdir($conf->{ddir}): $!";
     foreach my $this_cfg ( $BuildCFG->configurations ) {
         $smoker->mark_out; $smoker->mark_in;
         if ( skip_config( $this_cfg ) ) {
