@@ -16,6 +16,7 @@ my %options = (
     log     => undef,
     default => undef,
     prefix  => undef,
+    oldcfg  => 0,
 );
 GetOptions( \%options, 
     'config|c=s', 'jcl|j=s', 'log|l=s', 
@@ -30,16 +31,18 @@ foreach my $opt (qw( config jcl log )) {
 }
 
 use vars qw( $VERSION $conf );
-$VERSION = '0.012';
+$VERSION = '0.014';
 
 eval { require $options{config} };
-print "Using '$options{config}' for defaults.\n" unless $@;
+$options{oldcfg} = 1, print "Using '$options{config}' for defaults.\n" 
+    unless $@;
 if ( $@ || $options{default} ) {
     my $df_key = $options{default} ? 'default' : 'prefix';
     my $df_config = "$options{ $df_key }_dfconfig";
     local $@;
     eval { require $df_config };
-    print "Using '$df_config' for more defaults.\n" unless $@;
+    $options{oldcfg} = 1, print "Using '$df_config' for more defaults.\n"
+        unless $@;
 } 
 
 =head1 NAME
@@ -481,6 +484,9 @@ BUILDDIR: {
     my $manifest  = File::Spec->catfile( $config{ $arg }, 'MANIFEST' );
     my $dot_patch = File::Spec->catfile( $config{ $arg }, '.patch' );
     if ( -e $manifest && -e $dot_patch ) {
+        $opt{use_old}->{dft} = $options{oldcfg} && 
+                               $conf->{ddir} eq $config{ddir}
+            ? 'y' : $opt{use_old}->{dft};
         my $use_old = lc prompt( 'use_old' );
         redo BUILDDIR unless $use_old eq 'y';
     }
@@ -856,11 +862,12 @@ C<renice> will add a line in the shell-script that starts the smoke.
 
 =cut
 
-my( $umask, $renice );
 unless ( is_win32 ) {
-    $umask = prompt( 'umask' );
+    $arg = 'umask';
+    $config{ $arg } = prompt( $arg );
 
-    $renice = prompt( 'renice' );
+    $arg = 'renice';
+    $config{ $arg } = prompt( $arg );
 }
 
 =item v
@@ -1020,12 +1027,22 @@ sub write_sh {
 # @{[ scalar localtime ]}
 #
 # $cronline
-@{[ renice( $renice ) ]}
+@{[ renice( $config{renice} ) ]}
 cd $cwd
+CFGNAME=$options{config}
+LOCKFILE=$options{prefix}.lck
+if test -f "\$LOCKFILE" && test -s "\$LOCKFILE" ; then
+    echo "We seem to be running (or remove \$LOCKFILE)" >& 2
+    exit 200
+fi
+echo "\$LOCKFILE" > "\$LOCKFILE"
+
 PATH=$cwd:$ENV{PATH}
 export PATH
-umask $umask
-$^X smokeperl.pl -c $options{config} \$\* > $options{log} 2>&1
+umask $config{umask}
+$^X smokeperl.pl -c "\$CFGNAME" \$\* > $options{log} 2>&1
+
+rm "\$LOCKFILE"
 EO_SH
     close MYSMOKESH or warn "Error writing '$jcl': $!";
 
@@ -1060,13 +1077,22 @@ REM @{[ scalar localtime ]}
 $copycmd
 REM $atline
 
-set WD=$cwd\
-cd "\%WD\%"
-set OLD_PATH=\%PATH\%
-set PATH=$cwd;\%PATH\%
-$^X smokeperl.pl -c $options{config} \%* > "\%WD\%\\$options{log}" 2>&1
-set PATH=\%OLD_PATH\%
-set WD=
+set CFGNAME=$options{config}
+set LOCKFILE=$options{prefix}.lck
+if NOT EXIST \%LOCKFILE\% goto START_SMOKE
+    FIND "\%LOCKFILE\%" \%LOCKFILE\% > NUL:
+    if NOT ERRORLEVEL 1 (echo We seem to be running (or remove \$LOCKFILE)>&2) && exit /B 200
+
+:START_SMOKE
+    echo \%LOCKFILE\% > \%LOCKFILE\%
+    set WD=$cwd\
+    cd "\%WD\%"
+    set OLD_PATH=\%PATH\%
+    set PATH=$cwd;\%PATH\%
+    $^X smokeperl.pl -c "\%CFGNAME\%" \%* > "\%WD\%\\$options{log}" 2>&1
+    set PATH=\%OLD_PATH\%
+
+del \%LOCKFILE\%
 EO_BAT
     close MYSMOKEBAT or warn "Error writing '$jcl': $!";
 
@@ -1080,17 +1106,24 @@ sub prompt {
         @{ $opt{ $_[0] } }{qw( msg alt dft chk )};
 
     $df_val = $conf->{ $_[0] } if exists $conf->{ $_[0] };
-    return $df_val unless defined $message;
+    unless ( defined $message ) {
+        my $retval = defined $df_val ? $df_val : "undef";
+        (caller 1)[3] or print "Got [$retval]\n";
+        return $df_val;
+    }
     $message =~ s/\s+$//;
-
-    $chk ||= '.*';
-
-    my $default = defined $df_val ? $df_val : 'undef';
-    my $alts    = @$alt ? "<" . join( "|", @$alt ) . "> " : "";
-    print "\n$message\n";
 
     my %ok_val;
     %ok_val = map { (lc $_ => 1) } @$alt if @$alt;
+    $chk ||= '.*';
+
+    my $default = defined $df_val ? $df_val : 'undef';
+    if ( @$alt && defined $df_val ) {
+        $default = $alt->[0] unless exists $ok_val{ $df_val };
+    }
+    my $alts    = @$alt ? "<" . join( "|", @$alt ) . "> " : "";
+    print "\n$message\n";
+
     my $input;
     INPUT: {
         print "$alts\[$default] \$ ";
