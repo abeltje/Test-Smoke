@@ -109,11 +109,14 @@ else
 fi
 
 SMOKE_SOURCE=`svn info | perl -nae 's/^Url: // and print'`
+#SMOKE_SNAP_BASE="http://source.test-smoke.org/svn/snapshots/"
+SMOKE_SNAP_BASE="http://yola/svn/snapshots/"
+SMOKE_SNAP_DIR="${SMOKE_SNAP_BASE}Test-Smoke-$SMOKE_VERSION"
 if [ "$SMOKE_CI_SNAP" == "1" ] ; then
+    echo "Snapshot: $SMOKE_SNAP_DIR"
     # Create a snapshot in the repository
-    svn cp "$SMOKE_SOURCE" \
-       "http://source.Test-Smoke.org/svn/snapshots/Test-Smoke-$SMOKE_VERSION" \
-        -m "* [SVN] Create a branch for $SMOKE_VERSION"
+    svn cp "$SMOKE_SOURCE"  "$SMOKE_SNAP_DIR" \
+           -m "* [SVN] Create a branch for $SMOKE_VERSION"
 else
     echo "Skipping branch from '$SMOKE_SOURCE' ($SMOKE_VERSION)"
 fi
