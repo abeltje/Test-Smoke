@@ -1,4 +1,4 @@
-#! /usr/bin/perl -w
+#!/usr/bin/perl -w
 use strict;
 
 use Config;
@@ -30,7 +30,7 @@ foreach my $opt (qw( config jcl log )) {
 }
 
 use vars qw( $VERSION $conf );
-$VERSION = '0.011';
+$VERSION = '0.012';
 
 eval { require $options{config} };
 print "Using '$options{config}' for defaults.\n" unless $@;
@@ -41,7 +41,6 @@ if ( $@ || $options{default} ) {
     eval { require $df_config };
     print "Using '$df_config' for more defaults.\n" unless $@;
 } 
-
 
 =head1 NAME
 
@@ -64,6 +63,8 @@ Current options:
 
 sub is_win32() { $^O eq 'MSWin32' }
 
+my %config = ( perl_version => '5.9.x' );
+
 my %mailers = get_avail_mailers();
 my @mailers = sort keys %mailers;
 my @syncers = get_avail_sync();
@@ -74,7 +75,52 @@ my $syncmsg = join "\n", @{
       snapshot => "\tsnapshot - Get a snapshot using Net::FTP", }
 }{ @syncers };
 
+my %versions = (
+    '5.6.x' => { source => 'ftp.linux.activestate.com::perl-5.6.x',
+                 ddir   => File::Spec->rel2abs( 
+                               File::Spec->catdir( File::Spec->updir,
+                                                   'perl-5.6.x' ) ),
+                 cfg    => 'perl56x.cfg',
+                 text   => 'Perl 5.6.2-to-be',
+                 is56x  => 1 },
+    '5.8.x' => { source =>  'ftp.linux.activestate.com::perl-5.8.x',
+                 server => 'ftp.perl.org',
+                 sdir   => '/CPAN/src/',
+                 sfile  => 'perl-5.8.0.tar.gz',
+                 pdir   => '/pub/staff/gsar/APC/perl-5.8.x-diffs',
+                 ddir   => File::Spec->rel2abs( 
+                               File::Spec->catdir( File::Spec->updir,
+                                                   'perl-5.8.x' ) ),
+                 cfg    => $^O eq 'MSWin32' 
+                        ? 'w32current.cfg' :'perlcurrent.cfg',
+                 text   => 'Perl 5.8.1-to-be',
+                 is56x  => 0 },
+    '5.9.x' => { source => 'ftp.linux.activestate.com::perl-current',
+                 server => 'ftp.funet.fi',
+                 sdir   => '/pub/languages/perl/snap/',
+                 sfile  => '',
+                 pdir   => '/pub/staff/gsar/APC/perl-current-diffs',
+                 ddir   => File::Spec->rel2abs( 
+                               File::Spec->catdir( File::Spec->updir,
+                                                   'perl-current' ) ),
+                 cfg    => $^O eq 'MSWin32' 
+                        ? 'w32current.cfg' :'perlcurrent.cfg',
+                 text   => 'Perl 5.10.0-to-be',
+                 is56x  => 0 },
+);
+
+my $smoke_version = join "\n", map {
+    "\t$_ - $versions{$_}->{text}"
+} sort keys %versions;
+
+
 my %opt = (
+    perl_version => {
+        msg => "Which version are you going to smoke?\n$smoke_version",
+        alt => [ sort keys %versions ],
+        dft => ( sort keys %versions )[-1],
+    },
+
     # is this a perl-5.6.x smoke?
     is56x => {
         msg => "Is this configuration for perl-5.6.x (MAINT)?
@@ -117,7 +163,7 @@ my %opt = (
     v => {
         msg => 'How verbose do you want the output?',
         alt => [qw( 0 1 2 )],
-        dft => 0,
+        dft => 1,
     },
     # syncing the source-tree
     want_forest => {
@@ -169,11 +215,16 @@ my %opt = (
         alt => [ ],
         dft => 'ftp.funet.fi',
     },
-
     sdir => {
         msg => 'Which directory should the snapshots be FTPed from?',
         alt => [ ],
         dft => '/pub/languages/perl/snap',
+    },
+    sfile => {
+        msg => "Which file should be FTPed?
+\tLeave empty to automatically find newest.",
+        alt => [ ],
+        dft => '',
     },
 
     tar => {
@@ -186,7 +237,7 @@ EOMSG
     },
 
     snapext => {
-        msg => 'What type of snapshots shoul be FTPed?',
+        msg => 'What type of snapshots should be FTPed?',
         alt => [qw( tgz tbz )],
         dft => 'tgz',
     },
@@ -200,7 +251,7 @@ EOMSG
     pserver => {
         msg => 'Which server would you like the patches FTPed from?',
         alt => [ ],
-        dft => 'ftp2.activestate.com',
+        dft => 'ftp.linux.activestate.com',
     },
 
     pdir => {
@@ -248,7 +299,8 @@ EOMSG
 
     pfile => {
         msg => "What file is used for specifying patches " .
-               "(leave empty for none)?",
+               "(leave empty for none)?
+\tPlease read the documentation.",
         alt => [ ],
         dft => ''
     },
@@ -287,7 +339,7 @@ EOMSG
         dft => '',
     },
     force_c_locale => {
-        msg => 'Should $ENV{LC_ALL} be forced to "C"',
+        msg => "Should $ENV{LC_ALL} be forced to 'C'?"
         alt => [qw( N y )],
         dft => 'n',
     },
@@ -317,12 +369,13 @@ EOMSG
     },
 );
 
-my %config;
-
 print <<EOMSG;
 
-Welcome to the Perl core smoke test suite.
+Welcome to the Perl core smoke test suite. 
+
 You will be asked some questions in order to configure this test suite.
+Please make sure to read the documentation "perldoc configsmoke.pl"
+in case you do not understand a question.
 
 EOMSG
 
@@ -378,16 +431,29 @@ Here is a description of the configuration sections.
 
 =over 4
 
-=item is56x
+=item perl_version
 
-C<is56x> is passed as a switch to F<mktest.pl> to indicate that
-only one run of B<make test> is needed as there are no PerlIO layers
-in pre 5.7.? perl.
+C<perl_version> sets a number of default_values. 
+This makes the F<smoke5?x_dfconfig> files almost obsolete, 
+although they still provide a nice way to set the prefix
+and set the perl_version.
 
 =cut
 
-$arg = 'is56x';
-$config{ $arg } = prompt_yn( $arg );
+$arg = 'perl_version';
+my $pversion = prompt( $arg );
+$config{ $arg } = $pversion; 
+
+foreach my $var ( keys %{ $versions{ $pversion } } ) {
+    $var eq 'text' and next;
+    $opt{ $var }->{dft} = $versions{ $pversion }->{ $var };
+}
+
+$config{is56x} = $versions{ $pversion }->{is56x};
+
+# Now we need to reset avail_sync; no snapshots for 5.6.x!
+$opt{fsync}->{alt} = $opt{sync_type}->{alt} = [ get_avail_sync() ];
+$opt{fsync}->{dft} = $opt{sync_type}->{dft} = $opt{fsync}->{alt}[0];
 
 =item ddir
 
@@ -520,7 +586,7 @@ C<sync_type> (or C<fsync> if you want_forest) can be one of four:
 This will use the B<rsync> program to sync up with the repository.
 F<configsmoke.pl> checks to see if it can find B<rsync> in your path.
 
-The default switches passed to B<rsync> are B<-az --delete>
+The default switches passed to B<rsync> are: S<< B<-az --delete> >>
 
 =item snapshot
 
@@ -534,16 +600,16 @@ all the seperate patches from the repository and applying them.
 =item copy
 
 This will use B<File::Copy> and B<File::Find> to just copy from a
-source directory.
+local source directory.
 
 =item hardlink
 
 This will use B<File::Find> and the B<link> function to copy from a 
-source directory. (This is also used if you choose "forest".)
+local source directory. (This is also used if you choose "forest".)
 
 =back
 
-See L<Test::Smoke::Syncer>
+See also L<Test::Smoke::Syncer>
 
 =cut
 
@@ -567,9 +633,15 @@ SYNCER: {
     };
 
     /^snapshot$/ && do {
-        for $arg ( qw( server sdir tar snapext ) ) {
+        for $arg ( qw( server sdir sfile ) ) {
             $config{ $arg } = prompt( $arg );
         }
+        unless ( $config{sfile} ) {
+            $arg = ' snapext';
+            $config{ $arg } = prompt( $arg );
+        }
+        $arg = 'tar';
+        $config{ $arg } = prompt( $arg );
 
         $arg = 'patchup';
         if ( whereis( 'patch' ) ) {
@@ -616,13 +688,18 @@ revesing an already applied patch. The file format is simple:
   * one patchfile per line
   * optionally followed by ';' and options to pass to patch
 
+If the file does not exist yet, a skeleton version will be created
+for you.
+
 You will need a working B<patch> program to use this feature.
 
+B<TODO>:
 There is an issue when using the "forest" sync, but I will look into that.
 
 =cut
 
-my $patchbin = whereis( 'patch' );
+# Is it just my NetBSD-1.5 box with an old patch?
+my $patchbin = whereis( 'gpatch' ) || whereis( 'patch' );
 PATCHER: {
     last PATCHER unless $patchbin;
     $config{patch} = $patchbin;
@@ -662,10 +739,10 @@ unless ( $config{is56x} ) {
 =item locale
 
 C<locale> and its value are passed to F<mktest.pl> and its value is passed
-to F<mkovz.pl>. F<mktest.pl> will do an extra run of B<make test> with 
-C<< $ENV{LC_ALL} >> set to that locale (and C<< $ENV{PERL_UNICODE} = 1; >>,
+to F<mkovz.pl>. F<mktest.pl> will do an extra pass of B<make test> with 
+C<< $ENV{LC_ALL} >> set to that locale (and C<< $ENV{PERL_UNICODE} = ""; >>,
 C<< $ENV{PERLIO} = "perlio"; >>). This feature should only be used with
-UTF8 locales, that is why this is checked.
+UTF8 locales, that is why this is checked (by regex only).
 
 B<If you know of a way to get the utf8 locales on your system, which is
 not coverd here, please let me know!>
@@ -947,16 +1024,14 @@ sub write_sh {
 @{[ renice( $renice ) ]}
 cd $cwd
 PATH=$cwd:$ENV{PATH}
+export PATH
 umask $umask
-./smokeperl.pl -c $options{config} \$\* > $options{log} 2>&1
+$^X smokeperl.pl -c $options{config} \$\* > $options{log} 2>&1
 EO_SH
     close MYSMOKESH or warn "Error writing '$jcl': $!";
 
     chmod 0755, $jcl or warn "Cannot chmod 0755 $jcl: $!";
     print "Finished writing '$jcl'\n";
-
-#    print "\nYou can add this line to your crontab:\n\t$cronline\n"
-#        if $cronline;
 
     return File::Spec->canonpath( File::Spec->rel2abs( $jcl ) );
 }
@@ -1145,7 +1220,8 @@ sub get_avail_sync {
 
     my @synctype = qw( copy hardlink );
     eval { local $^W; require Net::FTP };
-    unshift @synctype, 'snapshot' unless $@;
+    unshift @synctype, 'snapshot' unless $@ || 
+                                         ( $config{perl_version} ne '5.9.x' );
     unshift @synctype, 'rsync' if whereis( 'rsync' );
     return @synctype;
 }
@@ -1301,9 +1377,9 @@ See:
 
 =over 4
 
-=item * http://www.perl.com/perl/misc/Artistic.html
+=item * L<http://www.perl.com/perl/misc/Artistic.html>
 
-=item * http://www.gnu.org/copyleft/gpl.html
+=item * L<http://www.gnu.org/copyleft/gpl.html>
 
 =back
 
