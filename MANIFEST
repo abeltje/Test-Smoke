@@ -12,6 +12,7 @@ patchtree.pl
 runsmoke.pl
 perl55x.cfg
 perl562.cfg
+perl58x.cfg
 perlcurrent.cfg
 w32current.cfg
 smoke55x_dfconfig

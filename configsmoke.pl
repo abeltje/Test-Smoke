@@ -126,7 +126,7 @@ my %versions = (
                                                    'perl-5.8.x' ) ),
                  text   => 'Perl 5.8.2-to-be',
                  cfg    => ( $^O eq 'MSWin32' 
-                        ? 'w32current.cfg' :'perlcurrent.cfg' ),
+                        ? 'w32current.cfg' :'perl58x.cfg' ),
                  is56x  => 0 },
     '5.9.x' => { source => 'ftp.linux.activestate.com::perl-current',
                  server => 'ftp.funet.fi',
