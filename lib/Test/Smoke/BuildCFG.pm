@@ -232,6 +232,8 @@ sub _parse {
                  [ sort {$opts{ $a } <=> $opts{ $b}} keys %opts ];
         }
     }
+    push @{ $self->{_sections} }, [ "" ] unless @{ $self->{_sections} };
+
     $self->{v} > 1 and printf "Left with %d parsed sections\n", 
                               scalar @{ $self->{_sections} };
     $self->_serialize;
