@@ -2,14 +2,15 @@
 
 # Create matrix for smoke test results
 # (c)'02 H.Merijn Brand [11 Apr 2002]
-# REVISION: #1.15
+# REVISION: 1.19
 
 # mkovz.pl [ e-mail [ folder ]]
 
 use strict;
 
+use Test::Smoke;
 use vars qw($VERSION);
-$VERSION = $main::VERSION || '1.16_22';
+$VERSION = Test::Smoke->VERSION;
 
 use File::Spec;
 use Cwd;
