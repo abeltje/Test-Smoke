@@ -5,7 +5,8 @@ distdir=~/distro
 perl test_compile.pl || exit
 perl test_pod.pl     || exit
 cd private
-perl smoker.t || (cd .. ; exit)
+perl -MTest::Harness -e 'runtests( @ARGV, 1)' smoker_*.t || (cd .. ; exit)
+#perl smoker_mini.t || (cd .. ; exit)
 cd ..
 PERL_MM_USE_DEFAULT=y
 export PERL_MM_USE_DEFAULT
