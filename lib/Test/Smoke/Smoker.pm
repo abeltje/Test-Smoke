@@ -27,6 +27,7 @@ my %CONFIG = (
     df_w32args        => [ ],
 
     df_makeopt        => "",
+    df_testmake       => 'make',
 );
 
 # Define some constants that we can use for
@@ -391,7 +392,7 @@ sub make_test {
             chdir ".." or die "unable to chdir () out of 'win32'";
         } else {
             local $ENV{PERL} = "./perl";
-            open TST, "make $test_target |" or do {
+            open TST, "$self->{testmake} $test_target |" or do {
                 use Carp;
                 Carp::carp "Cannot fork 'make _test': $!";
                 next;

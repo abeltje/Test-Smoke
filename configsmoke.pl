@@ -13,7 +13,7 @@ use Test::Smoke::Util qw( do_pod2usage );
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.026';
+$VERSION = '0.027';
 
 use Getopt::Long;
 my %options = ( 
@@ -331,6 +331,23 @@ Examples:$untarmsg",
 \tPlease read the documentation.",
         alt => [ ],
         dft => ''
+    },
+
+    # make fine-tuning
+    makeopt => {
+        msg => <<EOT,
+Specify extra arguments for "make".
+\t(for the build step and test-prep step)
+EOT
+        alt => [ ],
+        dft => '',
+    },
+    testmake => {
+        msg => <<EOT,
+Specify a different make program for "make _test".
+EOT
+        alt => [ ],
+        dft => 'make',
     },
 
     # mail stuff
@@ -974,6 +991,25 @@ EO_MSG
     ];
 }
 
+=item make finetuning
+
+Two different config options to accomodate the same thing: 
+I<parallel build> and I<serial testing>
+
+  * makeopt  => used by Test::Smoke::Smoker::_make()
+  * testmake => use a different binary for "make _test"
+
+=cut
+
+$arg = 'makeopt';
+$opt{ $arg }->{dft} = '-nologo' if is_win32 && $config{w32make} =~ /nmake/i;
+$config{ $arg } = prompt( $arg );
+
+unless ( is_win32 ) {
+    $arg = 'testmake';
+    $config{ $arg } = prompt( $arg ) || 'make';
+}
+
 =item umask
 
 C<umask> will be set in the shell-script that starts the smoke.
@@ -1225,6 +1261,9 @@ sub sort_configkeys {
 
         # Archive report and logfile
         qw( adir lfile ),
+
+        # make fine-tuning
+        qw( makeopt testmake ),
     );
 
     my $i = 0;
