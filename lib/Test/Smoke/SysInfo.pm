@@ -154,7 +154,7 @@ sub __get_cpu { return __get_cpu_type() }
 
 =item __get_hostname( )
 
-Get the hostname from C<POSIX::uname()).
+Get the hostname from C<POSIX::uname()>.
 
 =cut
 
