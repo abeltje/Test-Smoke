@@ -2,7 +2,7 @@ package Test::Smoke::BuildCFG;
 use strict;
 
 use vars qw( $VERSION );
-$VERSION = '0.001';
+$VERSION = '0.002';
 
 use File::Spec;
 use Cwd;
@@ -145,6 +145,10 @@ sub _read {
     } elsif ( ref $nameorref eq 'ARRAY' ) {
         $self->{_buildcfg} = join "", @$nameorref;
         $vmsg = "internal content";
+    } elsif ( ref $nameorref eq 'HASH' ) {
+        $self->{_buildcfg} = undef;
+        $self->{_list} = $nameorref->{_list};
+        $vmsg = "continuing smoke";
     } elsif ( ref $nameorref eq 'GLOB' ) {
 	*BUILDCFG = *$nameorref;
         $self->{_buildcfg} = do { local $/; <BUILDCFG> };
@@ -182,12 +186,12 @@ that should be in the ccflags variable in the F<Policy.sh> file
 
 A B<policy-section> can have only one (1) target-option.
 
-=back
-
 =cut
 
 sub _parse {
     my $self = shift;
+
+    return unless defined $self->{_buildcfg} || $self->{_list};
 
     $self->{_sections} = [ ];
     my @sections = split m/^=.*\n/m, $self->{_buildcfg};
@@ -449,6 +453,10 @@ sub has_arg {
 1;
 
 =back
+
+=head1 REVISION
+
+$Id$
 
 =head1 SEE ALSO
 
