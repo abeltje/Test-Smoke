@@ -3,12 +3,12 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.005';
+$VERSION = '0.006';
 
 use Cwd;
 use File::Spec;
 use Config;
-use Test::Smoke::Util;
+use Test::Smoke::Util qw( get_smoked_Config skip_filter );
 BEGIN { eval q{ use Time::HiRes qw( time ) } }
 
 my %CONFIG = (
@@ -198,7 +198,18 @@ sub smoke {
 
     $self->handle_policy( $policy, $config->policy );
 
-    $self->Configure( $config ) or do {
+    my $c_result = $self->Configure( $config );
+    # Log the compiler info now, the last config could fail
+    { # can we config.sh without Configure success?
+        my %cinfo = get_smoked_Config( $self->{ddir} => qw(
+            cc ccversion gccversion
+        ));
+        my $version = $cinfo{gccversion} || $cinfo{ccversion};
+        $self->log( "\nCompiler info: $cinfo{cc} version $version\n" )
+            if $cinfo{cc};
+    }
+
+    $c_result or do {
         $self->ttylog( "Unable to configure perl in this configuration\n" );
         return 0;
     };
@@ -375,7 +386,7 @@ sub make_test {
             $ENV{LC_ALL} = $self->{locale};
             $perlio_logmsg .= ":$self->{locale}";
         }
-        $self->ttylog( "PERLIO = $perlio_logmsg\t" );
+        $self->ttylog( "TSTENV = $perlio_logmsg\t" );
 
         unless ( $self->{run} ) {
             $self->ttylog( "bailing out (--norun)...\n" );
@@ -406,7 +417,7 @@ sub make_test {
             skip_filter( $_ ) and next;
 
             # make mkovz.pl's life easier
-            s/(.)(PERLIO\s+=\s+\w+)/$1\n$2/;
+            s/(.)(TSTENV\s+=\s+\w+)/$1\n$2/;
 
             if (m/^u=.*tests=/) {
                 s/(\d\.\d*) /sprintf "%.2f ", $1/ge;
@@ -474,7 +485,7 @@ sub extend_with_harness {
                 "    $name${dots}FAILED $fail\n";
             } else {
                 ( $fail ) = m/^\s+(\d+(?:[-\s]+\d+)*)/;
-                " " x 41 . "$fail\n";
+                " " x 51 . "$fail\n";
             }
         } grep m/^\s+\d+(?:[-\s]+\d+)*/ ||
                m/\S+\.t\s+.+%\s+[\d?]+(?:[-\s+]\d+)*/ => map {
@@ -492,10 +503,12 @@ sub extend_with_harness {
                   } keys %inconsistant
                 : $harness_out ? "" : "All tests successful.";
         } else {
-            $harness_out .= join "", map {
-                my $dots = '.' x (40 - length $_ );
-                "    $_${dots}$inconsistant{ $_ }\n";
-            } keys %inconsistant;
+            $harness_out .=
+                "Inconsistent test results (between TEST and harness):\n" . 
+                join "", map {
+                    my $dots = '.' x (40 - length $_ );
+                    "    $_${dots}$inconsistant{ $_ }\n";
+                } keys %inconsistant;
         }
         $self->ttylog("\n", $harness_out, "\n" );
         $changed_dir and chdir File::Spec->updir;
@@ -512,7 +525,7 @@ I<miniperl>, so we do C<< S<make minitest> >>.
 sub make_minitest {
     my $self = shift;
 
-    $self->ttylog( "PERLIO = minitest\t" );
+    $self->ttylog( "TSTENV = minitest\t" );
     local *TST;
     # MSWin32 builds from its own directory
     if ( $self->{is_win32} ) {
