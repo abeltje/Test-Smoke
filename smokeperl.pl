@@ -25,7 +25,7 @@ use Getopt::Long;
 Getopt::Long::Configure( 'pass_through' );
 my %options = ( config => 'smokecurrent_config', run => 1,
                 fetch => 1, patch => 1, mail => undef, archive => undef,
-                continue => 0, ccp5p_onfail => undef,
+                continue => 0, ccp5p_onfail => undef, killtime => undef,
                 is56x => undef, defaultenv => undef, smartsmoke => undef );
 
 my $myusage = "Usage: $0 [-c configname]";
@@ -42,6 +42,7 @@ GetOptions( \%options,
     'continue',
     'smartsmoke!',
     'snapshot|s=i',
+    'killtime=s',
 
     'help|h', 'man',
 ) or do_pod2usage(  verbose => 1, myusage => $myusage );
@@ -79,6 +80,7 @@ It can take these options
   --defaultenv             Run a smoke in the default environment
   --[no]smartsmoke         Don't smoke unless patchlevel changed
   --snapshot <patchlevel>  Set a new patchlevel for snapshot smokes
+  --killtime (+)hh::mm     (Re)set the guard-time for this smoke
 
 All other arguments are passed to F<Configure>!
 
@@ -103,7 +105,7 @@ defined Test::Smoke->config_error and
     for qw( run fetch patch mail archive );
 # Make command-line options override configfile
 defined $options{ $_ } and $conf->{ $_ } = $options{ $_ }
-    for qw( is56x defaultenv continue
+    for qw( is56x defaultenv continue killtime
             smartsmoke run fetch patch mail ccp5p_onfail archive );
 
 if ( $options{continue} ) {
@@ -182,7 +184,7 @@ sub call_mktest {
     }
     $timeout and local $SIG{ALRM} = sub {
         warn "This smoke is aborted ($conf->{killtime})\n";
-        call_mkovz();
+        genrpt();
         mailrpt();
         exit(42);
     };
