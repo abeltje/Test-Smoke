@@ -202,7 +202,7 @@ sub AIX {
     my @lsdev = grep /Available/ => `lsdev -C -c processor -S Available`;
     my( $info ) = grep /^\S+/ => @lsdev;
     ( $info ) = $info =~ /^(\S+)/;
-    $info .= " -a state,type";
+    $info .= " -a 'state type'";
     my( $cpu ) = grep /^enable:[^:\s]+/ => `lsattr -E -O -l $info`;
     ( $cpu ) = $cpu =~ /^enable:([^:\s]+)/;
     $cpu =~ s/\bPowerPC(?=\b|_)/PPC/i;
