@@ -5,14 +5,14 @@ use FindBin;
 use lib $FindBin::Bin;
 use TestLib;
 
-use Test::More 'no_plan';
+use Test::More tests => 11;
 
 BEGIN { 
     use_ok( 'Test::Smoke::Util', qw( get_regen_headers run_regen_headers ) );
 }
 
 my $ddir = File::Spec->catdir( $FindBin::Bin, 'perl-current' );
-mkpath( $ddir ) or die "Cannot mkpath($ddir): $!";
+mkpath( $ddir, 0, 0755 ) or die "Cannot mkpath($ddir): $!";
 
 {
     my $regen = get_regen_headers( $ddir );
@@ -27,7 +27,7 @@ SKIP: { # Find 'regen_headers.pl'
         or skip "Cannot create '$regen_headers_pl': $!", $to_skip;
     print FILE <<EO_REGEN;
 #! $^X -w
-print "This is '$regen_headers_pl'"
+print "This is '\Q$regen_headers_pl\E'"
 EO_REGEN
 
     close FILE or skip "Cannot write '$regen_headers_pl': $!", $to_skip;
@@ -57,7 +57,7 @@ SKIP: { # Prefer 'regen_headers.pl' over 'regen.pl'
         or skip "Cannot create '$regen_pl': $!", $to_skip;
     print FILE <<EO_REGEN;
 #! $^X -w
-print "This is '$regen_pl'"
+print "This is '\Q$regen_pl\E'"
 EO_REGEN
 
     close FILE or skip "Cannot write '$regen_pl': $!", $to_skip--;
