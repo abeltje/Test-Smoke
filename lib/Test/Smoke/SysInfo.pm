@@ -2,8 +2,11 @@ package Test::Smoke::SysInfo;
 use strict;
 
 # $Id$
-use vars qw( $VERSION );
-$VERSION = '0.005';
+use vars qw( $VERSION @EXPORT_OK );
+$VERSION = '0.006';
+
+use base 'Exporter';
+@EXPORT_OK = qw( &sysinfo );
 
 =head1 NAME
 
@@ -15,10 +18,16 @@ Test::Smoke::SysInfo - OO interface to system specific information
 
     my $si = Test::Smoke::SysInfo->new;
 
-    printf "Number of CPU's: %d\n", $si->ncpu;
+    printf "Hostname: %s\n, $si->host;
+    printf "Number of CPU's: %s\n", $si->ncpu;
     printf "Processor type: %s\n", $si->cpu_type;   # short
     printf "Processor description: %s\n", $si->cpu; # long
-    printf "OS version: %s\n", $si->si;
+    printf "OS and version: %s\n", $si->os;
+
+or
+
+    use Test::Smoke::SysInfo qw( sysinfo );
+    prinft "[%s]\n", sysinfo();
 
 =head1 DESCRIPTION
 
@@ -421,6 +430,17 @@ sub Windows {
         _host     => __get_hostname(),
         _os       => __get_os(),
     };
+}
+
+=item sysinfo( )
+
+C<sysinfo()> returns a string with C<host>, C<os> and C<cpu_type>.
+
+=cut
+
+sub sysinfo {
+    my $si = Test::Smoke::SysInfo->new;
+    return join " ", map $si->$_ => qw( host os cpu_type );
 }
 
 1;

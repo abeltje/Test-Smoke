@@ -3,14 +3,16 @@ use strict;
 
 # $Id$
 
-use Test::More tests => 13;
+use Test::More tests => 15;
 my $verbose = 0;
 
 use FindBin;
 use lib $FindBin::Bin;
 use TestLib;
 
-use_ok "Test::Smoke::SysInfo";
+BEGIN { use_ok "Test::Smoke::SysInfo", "sysinfo" }
+
+ok defined &sysinfo, "sysinfo() imported";
 
 {
     local $^O = 'Generic';
@@ -33,4 +35,7 @@ use_ok "Test::Smoke::SysInfo";
     ok $si->ncpu,     "number of cpus: " . $si->ncpu;
     ok $si->os, $si->os;
     ok $si->host, $si->host;
+
+    is join( " ", map $si->$_ => qw( host os cpu_type ) ), sysinfo(),
+       "test sysinfo() " . sysinfo();
 }
