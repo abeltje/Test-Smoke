@@ -31,7 +31,7 @@ foreach my $opt (qw( config jcl log )) {
 }
 
 use vars qw( $VERSION $conf );
-$VERSION = '0.019'; # $Id$
+$VERSION = '0.020'; # $Id$
 
 eval { require $options{config} };
 $options{oldcfg} = 1, print "Using '$options{config}' for defaults.\n" 
@@ -812,8 +812,7 @@ MAIL: {
             $config{ $arg } = prompt( $arg );
 	};
 
-        /^Mail::Sendmail$/ ||
-        /^MIME::Lite$/     && do {
+        /^(?:Mail::Sendmail|MIME::Lite)$/ && do {
             $arg = 'from';
             $config{ $arg } = prompt( $arg );
 
