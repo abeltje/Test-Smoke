@@ -135,7 +135,7 @@ foreach my $config ( @configs ) {
 
     if ( $rpt->{ccount} > 0 && $opt{matrix} ) {
         print join "\n", map "    $_\n" 
-            => split /\n/, $rpt->{reporter}->matrix;
+            => split /\n/, $rpt->{reporter}->smoke_matrix;
         print join "\n", map "    $_\n" 
             => split /\n/, $rpt->{reporter}->bldenv_legend;
     }
