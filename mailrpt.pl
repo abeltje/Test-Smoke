@@ -10,7 +10,7 @@ use Test::Smoke::Mailer;
 
 use Test::Smoke;
 use vars qw( $VERSION );
-$VERSION = '0.007';
+$VERSION = '0.008';
 
 my %opt = (
     type    => undef,
@@ -21,6 +21,8 @@ my %opt = (
     mserver => undef,
     v       => undef,
 
+    mail    => 1,
+    report  => undef,
     config  => undef,
     help    => 0,
     man     => 0,
@@ -36,7 +38,7 @@ mailrpt.pl - Send the smoke report by mail
 
 =head1 SYNOPSIS
 
-    $ ./mailrpt.pl -t mailx -d ../perl-current [--help | more options]
+    $ ./mailrpt.pl -t mailx -d ../perl-current [more options]
 
 or
 
@@ -64,6 +66,9 @@ Other options can override the settings from the configuration file.
 
     -t | --type <type>       mail mailx sendmail Mail::Sendmail [mandatory]
 
+    --nomail                 Don't send the message
+    --report                 Create a report anyway
+
 =item * B<options for> -t mail/mailx
 
 no extra options
@@ -89,6 +94,8 @@ GetOptions( \%opt,
     'help|h', 'man|m',
 
     'config|c:s',
+
+    'mail|email!', 'report!',
 ) or do_pod2usage( verbose => 1 );
 
 $opt{man}  and do_pod2usage( verbose => 2, exitval => 0 );
@@ -127,9 +134,10 @@ $opt{ddir} && -d $opt{ddir} or do_pod2usage( verbose => 0 );
 
 check_for_report();
 
-my $mailer = Test::Smoke::Mailer->new( $opt{type} => \%opt );
-$mailer->mail;
-
+if ( $opt{mail} ) {
+    my $mailer = Test::Smoke::Mailer->new( $opt{type} => \%opt );
+    $mailer->mail;
+}
 
 # Basically: call mkovz.pl unless -f <builddir>/mktest.rpt
 sub check_for_report {
@@ -138,13 +146,15 @@ sub check_for_report {
 
     if ( -f $report ) {
         $opt{v} and print "Found [$report]\n";
-        return;
+        $opt{report} or return;
+    } else {
+        $opt{v} and print "No report found in [$opt{ddir}].\n";
     }
 
     local @ARGV = ( 'nomail', $conf->{ddir} );
     push  @ARGV, $conf->{locale} if $conf->{locale};
     my $mkovz = File::Spec->catfile( $FindBin::Bin, 'mkovz.pl' );
-    $opt{v} and print "No report found, will now start [$mkovz]\n";
+    $opt{v} and print "Will now start [$mkovz]\n";
     {
         local $0 = $mkovz;
         do $mkovz or die "Error in mkovz.pl: $@";
