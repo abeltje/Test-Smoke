@@ -37,6 +37,7 @@ WriteMakefile(
 
     dist	  => { COMPRESS => "gzip -9f",
                        SUFFIX   => ".gz",
+                       PREOP    => "cpansign -s",
 		     },
     PREREQ_PM     => { 'File::Spec' => 0.82, 'Test::More' => 0},
     PMLIBDIRS     => [ File::Spec->curdir ],

@@ -1,4 +1,5 @@
 MANIFEST	$Id$
+SIGNATURE
 README
 ReleaseNotes
 Changes
@@ -34,6 +35,7 @@ lib/Test/Smoke/Syncer.pm
 lib/Test/Smoke/SourceTree.pm
 lib/Test/Smoke/Util.pm
 t/TestLib.pm
+t/00signature.t
 t/buildcfg.t
 t/cfgstuff.t
 t/for_dmake.t

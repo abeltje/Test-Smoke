@@ -1,0 +1,91 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.28.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It would check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+SHA1 01ee19a0c674cf8f89ac9a679dbe8bdff90ee2a9 ChangeLog
+SHA1 5bba45f2ee0e41587c72c9011c806b5c39dfe480 Changes
+SHA1 2b43309104313890e547be6d4a68a2ed9ad1ca12 Configure.pl
+SHA1 34b972ecb7aae9cfb77aa1e307fa7462d37513a6 FAQ
+SHA1 ad4fd47e793020f8c6cb658b10c6ec9977cd1b31 MANIFEST
+SHA1 58d35f1033bdef4bc21a89ebf0c67d578a2e3125 Makefile.PL
+SHA1 b7ac5f24038350dbc3500e09912b950dfc10368a README
+SHA1 9860775831d4ded038053243da1c100f1a42cca3 ReleaseNotes
+SHA1 7bc570cbc3f00733b591aefde4f2e54aec2f1e0c W32Configure.pl
+SHA1 28bf5c40c4c2aa935b9a113b0159d179c495343b configsmoke.pl
+SHA1 2fad9823a59c904bbd58e03ab2ebc280e53847a3 lib/Mail/Sendmail.pm
+SHA1 66fc0657aae798161a3571ba123be0a60ff21367 lib/Test/Smoke.pm
+SHA1 7481980ba06f4c68fb4d9165a0c5637f9c947113 lib/Test/Smoke/BuildCFG.pm
+SHA1 a2d63725130d33f69701aa4f47c5b48b5bf793c4 lib/Test/Smoke/Mailer.pm
+SHA1 64470ddba6c8a3e8431b063548074fa7890f10a1 lib/Test/Smoke/Patcher.pm
+SHA1 67d56efc543342ddf48118aaae289f29f26c8c50 lib/Test/Smoke/Policy.pm
+SHA1 106eff8fa1a441c6dc5fcdc0f897a50fd63c3279 lib/Test/Smoke/Smoker.pm
+SHA1 1fc5a231d6606787cd6fc25f4967d885764d8101 lib/Test/Smoke/SourceTree.pm
+SHA1 de6d9a59590cc09def0313819d89468eeccefd9b lib/Test/Smoke/Syncer.pm
+SHA1 0d41802eb62abac0a0a0ead7adad836038b55073 lib/Test/Smoke/Util.pm
+SHA1 876b8dc7194c47c050daad16a25a51e7673dc1da mailrpt.pl
+SHA1 eed2df95f72b93cb16ffaf9add0c08531808a4b7 mkovz.pl
+SHA1 1b167078eb738d9bfa95349f8e94bdb2446b9c9d mktest.pl
+SHA1 014f35769d2a6c5ec8c707f6a3776060d2ed5a66 patchtree.pl
+SHA1 d9e4f37541047b755c5561f7ceb9980234321626 perl56x.cfg
+SHA1 56b1e260a1214fa31ad92671f171b55c453e8c06 perlcurrent.cfg
+SHA1 9ea07a2f1a601577bff755ebf4e97648b7e01a8a runsmoke.pl
+SHA1 5ed6a488ae5b7f76e99fdbffddac7af9aebaf4b0 smoke.cfg
+SHA1 387a2689a0e822c5779ddce687c4503187ed843e smoke.sh
+SHA1 012e140475cbeaac8e0e3e1ab0e833709a6a98bb smoke56x_dfconfig
+SHA1 07ab36c58924f058869f74b1c62cb4e414691544 smoke58x_dfconfig
+SHA1 9473fc5bcad024bce4fbd08c159388dd71392363 smokeperl.pl
+SHA1 1415d93b6e550eeedd382da8013862188df02988 smokew32.bat
+SHA1 3dc9817dc41b49625460fa67aee26bafb36b7f7b synctree.pl
+SHA1 1f47dece5b7659bdea67b52e258aed2deb401b41 t/00signature.t
+SHA1 cf36579f8b2b1b252eafd62946bad4675aec7ca8 t/TestLib.pm
+SHA1 ca26b8014ed9f535a27d7dc0a7538ae17a26a913 t/buildcfg.t
+SHA1 d027d2610a1c6222b1fe69d6c8caee58de082ea0 t/cfgstuff.t
+SHA1 4905b002a96090f98a825bed1f36cc34ee4c1a75 t/for_dmake.t
+SHA1 0e5e5be92988c6822f1d2714ae470fd373f6e504 t/for_nmake.t
+SHA1 716df1236987c7e78d81aaa058d7a9a59a6dd3b1 t/ftppub/perl-current-diffs/20000.gz
+SHA1 194fb16fbe001e9c712c0c369ee0d96652e83981 t/ftppub/perl-current-diffs/20001.gz
+SHA1 bed229a60f5506ecffb708de15fca27b9cff1fcd t/ftppub/perl-current-diffs/20003.gz
+SHA1 0080f5ae0b85d88cb2ac76216c45d06da27e1b5c t/ftppub/perl-current-diffs/20004.gz
+SHA1 4df0977bac990e183d3d492e411b530a30344246 t/ftppub/snap/perl@19000.tgz
+SHA1 d2df1ad1f072b6d37ae3c5b4cf3cc6a6a176acb3 t/ftppub/snap/perl@20000.tgz
+SHA1 287a933ba3ef553647f7e85e09d852eda96d6820 t/get_cpus.t
+SHA1 7c7cf2bcd5c435d300c93be4ac2a4f0f7394924f t/get_patch.t
+SHA1 6969815452a6075004e945756e0597fe6a4ca812 t/mailer.t
+SHA1 1a7d7949a0f0d93c3cc697136b04b71d03e56d1c t/manifest.t
+SHA1 6cf541dc989e8318d6ad026bc4c2cd707456f591 t/parse_report.t
+SHA1 e73f5ff1cbcfbe764c83406e7293200a128b15da t/patcher.t
+SHA1 4319b82ac6aa828f777938ac92393813dff9fdc3 t/policy.t
+SHA1 a3fc8177b399e5da286edc456c21ee6df9f39c8b t/regenstuff.t
+SHA1 a420ebf982f5550f5ac3fdb5072c9e3cf21b0859 t/skip_filter.t
+SHA1 d4e6391b171c9a55702fc841a0ea05009d7fec3b t/smoked_config.t
+SHA1 ea01baf262aa9873cd8efa5efeff91571c4ec102 t/smoker.t
+SHA1 2af84904b2d4d4921959c07acf12c0a60dae5bf3 t/syncer_copy.t
+SHA1 e217250acd0c3032dd53a40f28b42a2a24e09c0a t/syncer_ftp.t
+SHA1 8a71c836fafb4bf240e400c640aaf36fae079c20 t/syncer_link.t
+SHA1 5f6fea84eab59f548b5cd2b6ce44125ec1fc661d t/syncer_rsync.t
+SHA1 e03fd16c8cb20f868a5ccd0e4c19144c061f5733 t/syncer_snap.t
+SHA1 813b1e38d41cb78b817e03b3225c40bf5e72ccca t/tree.t
+SHA1 cb98644992bbb9c1364159f4c8b02e1a7ea96a70 t/ts_config.t
+SHA1 90eb31637c63499b83d876308232d7f7edaf8b45 t/win32/Makefile
+SHA1 510cc9ec09cc430b331acd99f2b0686c18cef217 t/win32/makefile.mk
+SHA1 bf19bef65fea0d9d980305228f575437be1f4bce w32current.cfg
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.0.6 (GNU/Linux)
+Comment: For info see http://www.gnupg.org
+
+iD8DBQE/KWDzxqqoeg1/sS8RAsu+AJ9KEnLtLbwtkdrSshJkQxjWwpyoNQCg0oBP
+zqQHX7PnGYn5Ea5dylhZNG4=
+=5LDk
+-----END PGP SIGNATURE-----
