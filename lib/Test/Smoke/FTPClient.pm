@@ -8,7 +8,7 @@ use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
 
 # $Id$
 use vars qw( $VERSION $NOCASE );
-$VERSION = '0.002';
+$VERSION = '0.003';
 
 my %CONFIG = (
     df_fserver  => undef,
@@ -224,7 +224,9 @@ sub __do_mirror {
             $verbose > 1 and print "Leaving '$entry->{name}' [$new_locald]\n";
         } else {
             $entry->{time}  = $ftp->mdtm( $entry->{name} ); #slow down
-            my $destname = catfile( $localdir, canonpath($entry->{name}) );
+            my $fname = __clean_name( $entry->{name} );
+
+            my $destname = catfile( $localdir, canonpath($fname) );
 
             my $skip;
             if ( -e $destname ) {
@@ -250,13 +252,12 @@ sub __do_mirror {
     if ( $cleanup ) {
         $verbose > 1 and print "Cleanup '$localdir'\n";
         my %ok_file = map {
-            my $cmpname = $NOCASE ? uc $_->{name} : $_->{name};
-            ( $cmpname => $_->{type} )
+            ( __clean_name( $_->{name} ) => $_->{type} )
         } @list;
         local *DIR;
         if ( opendir DIR, '.' ) {
             foreach ( readdir DIR ) {
-                my $cmpname = $NOCASE ? uc $_ : $_;
+                my $cmpname = __clean_name( $_ );
                 $^O eq 'VMS' and $cmpname =~ s/\.$//;
                 if( -f $cmpname ) {
                     unless ( exists $ok_file{ $cmpname } && 
@@ -277,6 +278,19 @@ sub __do_mirror {
             closedir DIR;
         }
     }
+}
+
+sub __clean_name {
+    my $fname = shift;
+
+    if ( $^O eq 'VMS' ) {
+        my @parts = split /[.@#]/, $fname;
+       	if ( @parts > 1 ) {
+            my $ext = ( pop @parts ) || '';
+            $fname = join( "_", @parts ) . ".$ext";
+        }
+    }
+    return $NOCASE ? uc $fname : $fname;
 }
 
 =head2 dirlist( $ftp )
