@@ -194,15 +194,18 @@ sub smoke {
         return 0;
      };
 
-    $self->make_ or do {
-        $self->ttylog( "Unable to make perl in this configuration\n" );
-        return 0;
-     };
-
-    $self->make_test_prep or do {
-        $self->ttylog( "Unable to test perl in this configuration\n" );
-        return 0;
-     };
+    MAKE_STEP: {
+        local $_ = $self->make_;
+  
+        /^-1$/ && do {
+            $self->ttylog( "Unable to make miniperl in this configuration\n" );
+            return 0;
+        };
+	/^0$/ && do {
+            $self->ttylog( "Unable to make perl in this configuration\n" );
+            return 0;
+        };
+    }
 
     $self->make_test( "$config" );
 
@@ -297,7 +300,9 @@ sub make_ {
 
     my $exe_ext = $Config{_exe} || $Config{exe_ext};
     my $perl = "perl$exe_ext";
-    return -x $perl;
+    my $miniperl = "miniperl$exe_ext";
+    -x $miniperl or return 0;
+    return -x $perl ? 1 : -1;
 }
 
 =item make_test_prep( )

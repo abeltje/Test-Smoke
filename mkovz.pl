@@ -210,7 +210,8 @@ for (<OUT>) {
         }
         next;
     }
-    if (m/^\s*Unable to (?=([cbmt]))(?:build|configure|make|test) perl/) {
+    if (m/^\s*Unable to (?=([cbmt]))(?:build|configure|make|test) (mini)?perl/) {
+        $2 and $1 = uc $1; # M for no perl but miniperl
         foreach my $layer ( @layers ) {
             $rpt{$conf}{$debug}{ $layer }  = $1;
         }
@@ -248,7 +249,7 @@ Report by Test::Smoke v$VERSION (perl $this_pver)$time_msg
 O = OK  F = Failure(s), extended report at the bottom
 ? = still running or test results not (yet) available
 Build failures during:       - = unknown or N/A
-    c = Configure, m = make, t = make test-prep
+c = Configure, M = fail after miniperl, m = make, t = make test-prep
 
 EOH
 
@@ -302,11 +303,11 @@ for my $conf (@confs) {
     # special casing the '-' should change PASS-so-far
     # to PASS if the report only has 'O' and '-'
     $count{ $_ }++ for map { 
-        /[OFmct]/ ? $_ : /-/ ? 'O' : 'o'
+        /[OFMmct]/ ? $_ : /-/ ? 'O' : 'o'
     } split ' ', $rpt_stat;
 }
 
-my @rpt_sum_stat = grep $count{ $_ } > 0 => qw( F m c t );
+my @rpt_sum_stat = grep $count{ $_ } > 0 => qw( F M m c t );
 my $rpt_summary = '';
 if ( @rpt_sum_stat ) {
     $rpt_summary = "FAIL(" . join( "", @rpt_sum_stat ) . ")";
