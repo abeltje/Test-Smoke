@@ -7,6 +7,7 @@ for argv
         -t)   SMOKE_TEST_ONLY=1;;
         -e)   SMOKE_COVER=1;;
         -c)   SMOKE_CI_FILES=1;;
+        -s)   SMOKE_CI_SNAP=1;;
         -d=*) SMOKE_DIST_DIR=`echo $argv | perl -pe 's/^-d=//'`;;
         -*)   if test "$argv" == "--help" || test "$argv" == "-h" ; then
                   echo ""
@@ -19,6 +20,7 @@ Usage: $0 [-t] [-d=<directory]
     -t              Run tests only, do not make a tarball
     -e              Extend testing by running coverage (sets -t)
     -c              Commit the auto generated files Changes and SIGNATURE
+    -s              Commit this tree as a snapshot (set by -c)
     -d=<directory>  Taret directory for the tarball
 
 EOF
@@ -28,6 +30,11 @@ done
 # Force testingmode for Coverage!
 if [ "$SMOKE_COVER" == "1" ] ; then
     SMOKE_TEST_ONLY=1
+fi
+
+# Force snapshot for -c
+if [ "$SMOKE_CI_FILES" == "1" ] ; then
+    SMOKE_CI_SNAP=1
 fi
 
 # Set the directory where distributions are kept
@@ -94,15 +101,19 @@ mv -v *.tar.gz $distdir
 make veryclean > /dev/null
 rm -f */*/*/*~
 
-SMOKE_SOURCE=`svn info | perl -nae 's/^Url: // and print'`
 if [ "$SMOKE_CI_FILES" == "1" ] ; then
     # Also commit the newly generated SIGNATURE
     svn ci SIGNATURE -m "* regen SIGNATURE for $SMOKE_VERSION"
+else
+    echo "Skipping commit of 'SIGNATURE'"
+fi
+
+SMOKE_SOURCE=`svn info | perl -nae 's/^Url: // and print'`
+if [ "$SMOKE_CI_SNAP" == "1" ] ; then
     # Create a snapshot in the repository
     svn cp "$SMOKE_SOURCE" \
        "http://source.Test-Smoke.org/svn/snapshots/Test-Smoke-$SMOKE_VERSION" \
         -m "* [SVN] Create a branch for $SMOKE_VERSION"
 else
-    echo "Skipping commit of 'SIGNATURE'"
     echo "Skipping branch from '$SMOKE_SOURCE' ($SMOKE_VERSION)"
 fi
