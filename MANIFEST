@@ -14,7 +14,7 @@ smokew32.bat
 perl56x.cfg
 perlcurrent.cfg
 smoke.cfg
-smokew32.cfg
+w32current.cfg
 smoke56x_dfconfig
 smoke58x_dfconfig
 smokeperl.pl
