@@ -23,7 +23,7 @@ WriteMakefile(
 #    EXE_FILES     => [qw( synctree.pl patchtree.pl mailrpt.pl W32Configure.pl
 #                          mktest.pl mkovz.pl smoke.sh smokew32.bat
 #                          configsmoke.pl smokeperl.pl
-#                          smokew32.cfg smoke.cfg perl56x.cfg perlcurrent.cfg
+#                          smoke.cfg perl56x.cfg perlcurrent.cfg w32current.cfg
 #                          smoke56x_dfconfig smoke58x_dfconfig
 #                     )],
     SKIP          => [qw( install )],
