@@ -891,6 +891,7 @@ sub skip_filter {
 #    m,^\s+$testdir/, ||
     m,^sh mv-if-diff\b, ||
     m,File \S+ not changed, ||
+    m,^(not\s+)?ok\s+\d+\s+[-#]\s+(?i:skip\S*[: ]),i ||
     # cygwin
     m,^dllwrap: no export definition file provided, ||
     m,^dllwrap: creating one. but that may not be what you want, ||

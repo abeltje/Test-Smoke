@@ -5,7 +5,7 @@ use strict;
 
 use File::Spec;
 
-use Test::More tests => 15;
+use Test::More tests => 16;
 BEGIN { use_ok( 'Test::Smoke::Util' ); }
 
 while ( <DATA> ) {
@@ -39,3 +39,4 @@ F 54 tests and 609 subtests skipped.
 P C:\usr\local\src\bleadperl\perl\miniperl.exe "-I..\..\lib" "-I..\..\lib" -MExtUtils::Command -e cp bin/piconv blib\script\piconv
 P C:\usr\local\src\bleadperl\perl\miniperl.exe "-I..\..\lib" "-I..\..\lib" -MExtUtils::Command -e cp bin/enc2xs blib\script\enc2xs
 P Creating library file: libExtTest.dll.a
+P not ok 43 # SKIP see perldelta583
