@@ -111,15 +111,18 @@ else
     echo "Skipping commit of 'SIGNATURE'"
 fi
 
-SMOKE_SOURCE=`svn info | perl -nae 's/^Url: // and print'`
+SMOKE_SOURCE=`svn info | perl -ne 's/^Url: // and print'`
+SMOKE_SOURCE=`echo $SMOKE_SOURCE | perl -pe 's|http://([^/]+)/|http://yola/|'`
 #SMOKE_SNAP_BASE="http://source.test-smoke.org/svn/snapshots/"
 SMOKE_SNAP_BASE="http://yola/svn/snapshots/"
 SMOKE_SNAP_DIR="${SMOKE_SNAP_BASE}Test-Smoke-$SMOKE_VERSION"
+SMOKE_SNAP_MSG=svnmsg.ci
 if [ "$SMOKE_CI_SNAP" == "1" ] ; then
     echo "Snapshot: $SMOKE_SNAP_DIR"
     # Create a snapshot in the repository
-    svn cp "$SMOKE_SOURCE"  "$SMOKE_SNAP_DIR" \
-           -m "* [SVN] Create a branch for $SMOKE_VERSION"
+    echo "* [SVN] Create a branch for $SMOKE_VERSION" > $SMOKE_SNAP_MSG
+    svn cp $SMOKE_SOURCE $SMOKE_SNAP_DIR -F $SMOKE_SNAP_MSG
+    rm -f $SMOKE_SNAP_MSG
 else
     echo "Skipping branch from '$SMOKE_SOURCE' ($SMOKE_VERSION)"
 fi
