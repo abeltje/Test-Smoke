@@ -26,6 +26,7 @@ W32Configure.pl
 lib/Mail/Sendmail.pm
 lib/Test/Smoke.pm
 lib/Test/Smoke/BuildCFG.pm
+lib/Test/Smoke/FTPClient.pm
 lib/Test/Smoke/Mailer.pm
 lib/Test/Smoke/Patcher.pm
 lib/Test/Smoke/Policy.pm
@@ -55,6 +56,7 @@ t/smoked_config.t
 t/smoker.t
 t/syncer_copy.t
 t/syncer_ftp.t
+t/syncer_ftpclient.t
 t/syncer_link.t
 t/syncer_rsync.t
 t/syncer_snap.t
@@ -67,6 +69,11 @@ t/win32/makefile.mk
 t/ftppub/bugtst01.out
 t/ftppub/bugtst02.out
 t/ftppub/bugtst03.out
+t/ftppub/perl-current/MANIFEST
+t/ftppub/perl-current/patchlevel.h
+t/ftppub/perl-current/patchme.txt
+t/ftppub/perl-current/win32/Makefile
+t/ftppub/perl-current/win32/makefile.mk
 t/ftppub/perl-current-diffs/20000.gz
 t/ftppub/perl-current-diffs/20001.gz
 t/ftppub/perl-current-diffs/20003.gz
