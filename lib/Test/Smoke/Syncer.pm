@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.011';
+$VERSION = '0.012';
 
 use Config;
 use Cwd;
@@ -48,7 +48,7 @@ my %CONFIG = (
 
 # these settings have to do with synctype==hardlink
     df_hdir    => undef,
-    df_haslink => $Config{d_link} eq 'define',
+    df_haslink => ($Config{d_link}||'') eq 'define',
 
     hardlink   => [qw( hdir haslink )],
 
@@ -60,7 +60,7 @@ my %CONFIG = (
     forest     => [qw( fsync mdir fdir )],
 
 # these settings have to do with synctype==ftp
-    df_ftphost => 'ftp.linux.activestate.co',
+    df_ftphost => 'ftp.linux.activestate.com',
     df_ftpusr  => 'anonymous',
     df_ftppwd  => 'smokers@perl.org',
     df_ftpsdir => '/pub/staff/gsar/APC/perl-current',
