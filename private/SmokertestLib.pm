@@ -3,10 +3,14 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT );
-$VERSION = '0.003';
+$VERSION = '0.004';
 
 use base 'Exporter';
-@EXPORT = qw( &clean_mktest_stuff &make_report &get_report );
+@EXPORT = qw( 
+    &clean_mktest_stuff
+    &make_report &get_report
+    &get_Win32_args
+);
 
 use File::Spec::Functions;
 
@@ -42,6 +46,25 @@ sub get_report {
     my $report = do { local $/; <REPORT> };
     close REPORT;
     return $report;
+}
+
+sub get_Win32_args {
+    my %w32args  = ( w32cct => "", is_win32 => 0 );
+    if ( $^O eq 'MSWin32' ) {
+        my $w32make = exists $ENV{SMOKE_W32MAKE} 
+            ? $ENV{SMOKE_W32MAKE} : 'dmake';
+        $w32make ||= 'dmake';
+        my $w32cc = exists $ENV{SMOKE_W32CC} 
+            ? $ENV{SMOKE_W32CC} : "GCC";
+        $w32cc ||= "GCC";
+        %w32args = (
+            is_win32 => 1,
+            w32cc    => $w32cc,
+            w32cct   => "-DCCTYPE=$w32cc",
+            w32make  => $w32make,
+        );
+    }
+    return %w32args;
 }
 
 1;

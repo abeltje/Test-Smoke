@@ -29,8 +29,9 @@ use_ok( 'Test::Smoke::Smoker' );
     open KEEPERR, ">&STDERR" and open STDERR,  ">&DEVNULL"
         unless $verbose;
 
-    my $cfg    = "\n=\n\n-DDEBUGGING";
-    my $config = Test::Smoke::BuildCFG->new( \$cfg );
+    my %w32args = get_Win32_args;
+    my $cfg     = "$w32args{w32cct}\n=\n\n-DDEBUGGING";
+    my $config  = Test::Smoke::BuildCFG->new( \$cfg );
 
     my $ddir   = catdir( $FindBin::Bin, 'perl' );
     my $l_name = catfile( $ddir, 'mktest.out' );
@@ -42,6 +43,7 @@ use_ok( 'Test::Smoke::Smoker' );
         ddir => $ddir,
         cfg  => $config,
         v    => $verbose,
+        %w32args,
     } );
 
     isa_ok( $smoker, 'Test::Smoke::Smoker' );

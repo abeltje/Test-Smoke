@@ -29,8 +29,8 @@ use_ok( 'Test::Smoke::Smoker' );
     open KEEPERR, ">&STDERR" and open STDERR, ">&DEVNULL"
         unless $verbose;
 
-    my $w32_cc = $^O eq 'MSWin32' ? "-DCCTYPE=GCC" : "";
-    my $cfg    = "$w32_cc\n=\n\n-DDEBUGGING";
+    my %w32args = get_Win32_args;
+    my $cfg    = "$w32args{w32cct}\n=\n\n-DDEBUGGING";
     my $config = Test::Smoke::BuildCFG->new( \$cfg );
 
     my $ddir   = catdir( $FindBin::Bin, 'perl' );
@@ -41,6 +41,7 @@ use_ok( 'Test::Smoke::Smoker' );
     my $smoker = Test::Smoke::Smoker->new( \*LOG => {
         ddir => $ddir,
         cfg  => $config,
+        %w32args,
     } );
 
     isa_ok( $smoker, 'Test::Smoke::Smoker' );
@@ -54,7 +55,7 @@ use_ok( 'Test::Smoke::Smoker' );
     for my $bcfg ( $config->configurations ) {
         $smoker->mark_out; $smoker->mark_in;
         $smoker->make_distclean;
-        ok( $smoker->Configure( '' ), "Configure $bcfg" );
+        ok( $smoker->Configure( $bcfg ), "Configure $bcfg" );
 
         $smoker->log( "\nConfiguration: $bcfg\n", '-' x 78, "\n" );
         my $stat = $smoker->make_;
