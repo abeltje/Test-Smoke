@@ -4,13 +4,15 @@ $| = 1;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.013';
+$VERSION = '0.014';
 
 use Cwd;
 use File::Spec;
-use FindBin;
-use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
-use lib $FindBin::Bin;
+my $findbin;
+use File::Basename;
+BEGIN { $findbin = dirname $0; }
+use lib File::Spec->catdir( $findbin, 'lib' );
+use lib $findbin;
 use Test::Smoke::Reporter;
 use Test::Smoke::Mailer;
 use Test::Smoke;
@@ -124,7 +126,7 @@ $opt{help} and do_pod2usage( verbose => 1, exitval => 0, myusage => $my_usage);
 if ( defined $opt{config} ) {
     $opt{config} eq "" and $opt{config} = 'smokecurrent_config';
     read_config( $opt{config} ) or do {
-        my $config_name = File::Spec->catfile( $FindBin::Bin, $opt{config} );
+        my $config_name = File::Spec->catfile( $findbin, $opt{config} );
         read_config( $config_name );
     };
 
@@ -148,7 +150,9 @@ foreach( keys %$defaults ) {
     $opt{ $_ } = defined $conf->{ $_ } ? $conf->{ $_ } : $defaults->{ $_ };
 }
 
-exists $valid_type{ $opt{type} } or do_pod2usage( verbose => 0 );
+if ( $opt{mail} ) {
+    exists $valid_type{ $opt{type} } or do_pod2usage( verbose => 0 );
+}
 
 $opt{ddir} && -d $opt{ddir} or do_pod2usage( verbose => 0 );
 
