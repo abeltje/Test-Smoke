@@ -43,7 +43,8 @@ WriteMakefile(
     PMLIBDIRS     => [ File::Spec->curdir ],
     EXE_FILES     => [qw( synctree.pl patchtree.pl mailrpt.pl W32Configure.pl
                           mktest.pl mkovz.pl smoke.sh smokew32.bat
-                          configsmoke.pl smokeperl.pl runsmoke.pl )],
+                          configsmoke.pl smokeperl.pl runsmoke.pl
+                          archiverpt.pl smokestatus.pl )],
     %install
 );
 

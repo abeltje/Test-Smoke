@@ -1,6 +1,6 @@
 =head1 NAME
 
-ReleaseNotes - These are the Release Notes for 1.18
+ReleaseNotes - These are the Release Notes for 1.18.02
 
 =head1 SYNOPSIS
 
@@ -10,6 +10,34 @@ These are the major changes since version 1.17.
 
 I have done more refactoring and wrote some new code and documentation
 since v1.17.
+
+Here is a list of changes for 1.18.xx MAINT:
+
+=over 4
+
+=item 1
+
+I forgot to call C<< S<make -i distclean> >> before do_manifest_check().
+
+=item 2
+
+Added the new report status B<X> to report failing tests under 
+C<< S<make _test> >> that do not fail under C<harness>.
+
+=item 3
+
+Added a little archive script, that archives the report and the
+logfile.
+
+=item 4
+
+Alan Burlison asked for something to give a status report on running
+smokes. So I put something together in F<smokestatus.pl>, thank you
+Alan for this good idea.
+
+=cut
+
+Major changes since 1.17
 
 =over 4
 
