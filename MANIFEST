@@ -21,6 +21,7 @@ smokeperl.pl
 synctree.pl
 W32Configure.pl
 lib/Mail/Sendmail.pm
+lib/Test/Smoke.pm
 lib/Test/Smoke/Mailer.pm
 lib/Test/Smoke/Patcher.pm
 lib/Test/Smoke/Policy.pm
@@ -38,6 +39,7 @@ t/manifest.t
 t/patcher.t
 t/parse_report.t
 t/policy.t
+t/regenstuff.t
 t/skip_filter.t
 t/smoked_config.t
 t/syncer_copy.t
@@ -46,6 +48,7 @@ t/syncer_link.t
 t/syncer_rsync.t
 t/syncer_snap.t
 t/tree.t
+t/ts_config.t
 t/win32/Makefile
 t/win32/makefile.mk
 t/ftppub/perl-current-diffs/20000.gz
