@@ -79,6 +79,7 @@ require Test::Smoke::Patcher; # for testing only
 # Now begin testing
 use_ok( 'Test::Smoke::Syncer' );
 
+my $patch = whereis( 'patch' );
 SKIP: { # Here we try for 'Archive::Tar'/'Compress::Zlib'
 
     eval { require Archive::Tar; };
@@ -93,6 +94,7 @@ SKIP: { # Here we try for 'Archive::Tar'/'Compress::Zlib'
         tar     => 'Archive::Tar',
         unzip   => 'Compress::Zlib',
         cleanup => 3,
+        patch   => $patch,
     } );
 
     isa_ok( $syncer, 'Test::Smoke::Syncer::Snapshot' );
@@ -101,6 +103,7 @@ SKIP: { # Here we try for 'Archive::Tar'/'Compress::Zlib'
 
     is( $plevel, 20000, "Patchlevel $plevel by $syncer->{tar}" );
 
+    skip "Cannot find a 'patch' program", 1 unless $patch;
     my $plevel2 = $syncer->patch_a_snapshot( $plevel );
 
     is( $plevel2, 20004, "A patched snapshot $plevel2 by $syncer->{unzip}" );
@@ -126,6 +129,7 @@ SKIP: { # Here we try for gzip/tar
         tar     => $unpack,
         unzip   => $gzip,
         cleanup => 3,
+        patch   => $patch,
     } );
 
     isa_ok( $syncer, 'Test::Smoke::Syncer::Snapshot' );
@@ -135,6 +139,7 @@ SKIP: { # Here we try for gzip/tar
     is( $plevel, 20000, "Patchlevel $plevel by $syncer->{tar}" );
 
     skip "Can't seem to find 'gzip/gunzip/zcat'", 1 unless $gzip;
+    skip "Cannot find a 'patch' program", 1 unless $patch;
 
     my $plevel2 = $syncer->patch_a_snapshot( $plevel );
 
