@@ -93,9 +93,13 @@ B<rsync> program. This currently seems only available with Cygwin
 <http://www.cygwin.com>. (All the cygwin tools run perfectly well
 under CMD.EXE, so don't let that stop you.)
 
+Some problems have been reported with older versions of cygwin and the
+patch program during the C<< S<[nd]make test> >> stage of
+Test::Smoke. Don't worry about it if you do not intend to use patch.
+
 Windows 95/98/ME do not seem to be ideal platforms to run Test::Smoke
 on. F<COMMAND.COM> gives some problems while building perl. (See
-F<README.win32>)
+F<README.win32>.)
 
 We have found some problems with the default windows debugger
 B<Dr.Watson>. By default Dr.Watson will pop-up when the moral equivalent
@@ -136,14 +140,14 @@ run time of Test::Smoke.
 
     <daily-build-reports@perl.org> 
         [subscribe: <daily-build-reports-subscribe@perl.org>]
-    http://archive.develooper.com/daily-build-reports@perl.org/
+    http://nntp.x.perl.org/group/perl.daily-build.reports
     news:nntp.perl.org/perl.daily-build.reports
 
 =item B<Smokers>
 
     <daily-build@perl.org> 
         [subscribe: <daily-build-subscribe@perl.org>]
-    http://archive.develooper.com/daily-build@perl.org/
+    http://nntp.x.perl.org/group/perl.daily-build
     news:nntp.perl.org/perl.daily-build
 
 =item B<Others>

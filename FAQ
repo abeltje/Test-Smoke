@@ -223,6 +223,75 @@ L<http://nntp.x.perl.org/group/perl.daily-build.reports>
 
 =back
 
+=head2 How do I investigate failures?
+
+When investigating a testfailure you need to make sure you have
+I<Configure>d and build perl with the same options as the one with the
+failures.
+
+    $ cd <builddir>
+    $ make distclean
+    $ sh Configure -des -Dusedevel [other build options]
+    $ make
+    $ make test-prep
+    $ cd t
+
+Now you can start with a manual run of the failing test:
+
+    $ ./perl harness -v <pathto/failingtest>
+
+=over 4
+
+=item B<Note for Win32>
+
+As Windows lacks a Configure to create the Makefile, Test::Smoke
+supplies the helper script F<W32Configure.bat> that will create a new
+Makefile with the right options: F<< <builddir>\win32\smoke.mk >>.
+
+After that you can:
+
+    S:\perl-current\win32>nmake -f smoke.mk
+    S:\perl-current\win32>nmake -f smoke.mk test-prep
+    S:\perl-current\win32>cd ..\t
+
+=back
+
+For -Duseperlio builds (per default) failures can occur in different
+environments, and you will also need to set these up:
+
+=over 4
+
+=item B<PERLIO=stdio>
+
+    $ PERLIO=stdio ./perl harness -v <pathto/failingtest>
+
+Note that Windows builds (MSVC, Borland or MinGW) also need the "crlf"
+layer:
+
+    C:>(set PERLIO=stdio :crlf) && .\perl harness -v <pathto\failingtest>
+
+Be careful with the environment variables on Windows, they are sticky.
+
+=item B<PERLIO=perlio>
+
+    $ PERLIO=perlio ./perl harness -v <pathto/failingtest>
+
+Note that Windows builds (MSVC, Borland or MinGW) also need the "crlf"
+layer:
+
+    C:>(set PERLIO=perlio :crlf) && .\perl harness -v <pathto\failingtest>
+
+Be careful with the environment variables on Windows, they are sticky.
+
+=item B<UTF-8 locale>
+
+If the failure occurs in the UTF-8 locale test-run the environment
+setup is a bit different (assuming "en_US.utf8"):
+
+    $ PERL_UNICODE= LC_ALL=en_US.utf8 ./perl harness -v <pathto/failingtest>
+
+=back
+
 =head2 What's with the "daily-build" and "smokers" names?
 
 There has been enough discussion on the subject, so lets agree to
