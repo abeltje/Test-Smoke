@@ -47,7 +47,6 @@ WriteMakefile(
     PREREQ_PM     => { 'File::Spec' => 0.82, 'Test::More' => 0},
     PMLIBDIRS     => [ File::Spec->curdir ],
     EXE_FILES     => [qw( synctree.pl patchtree.pl mailrpt.pl W32Configure.pl
-                          mktest.pl mkovz.pl smoke.sh smokew32.bat
                           configsmoke.pl smokeperl.pl runsmoke.pl
                           archiverpt.pl smokestatus.pl )],
     %install
