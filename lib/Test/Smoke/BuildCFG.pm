@@ -224,7 +224,11 @@ sub _parse {
                  [ sort {$opts{ $a } <=> $opts{ $b}} keys %opts ];
         }
     }
+    $self->{v} > 1 and printf "Left with %d parsed sections\n", 
+                              scalar @{ $self->{_sections} };
     $self->_serialize;
+    $self->{v} > 1 and printf "Found %d (unfiltered) configurations\n", 
+                              scalar @{ $self->{_list} };
 }
 
 =item $self->_serialize( )
