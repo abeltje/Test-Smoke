@@ -1,6 +1,6 @@
 =head1 NAME
 
-README - Perl Core Test Smoke Suite
+README - Perl Core Test Smoke Suite (1.16_30)
 
 =head1 SYNOPSIS
 
@@ -30,20 +30,15 @@ the configurations "by hand" to check if your environment is okay.
 
 =head1 INSTALLATION
 
-This package doesn't follow the standard Perl installation mantra!
-Although there is a standard F<Makefile.PL> it will not create an
-B<install> target in the resulting F<Makefile>. B<We presume the
-programs will be run from the directory it was extracted in>.
+The standard Perl installation commands:
 
-If you want to make sure that Test::Smoke runs on your system, please
-run the tests:
-
-    $ perl Makefile.pl
+    $ perl Makefile.PL
+    $ make
     $ make test
+    $ make install
 
-If this is all ok, you can clean up again:
-
-    $ make distclean
+The F<Makefile.PL> program will ask for a directory in which
+Test::Smoke should be installed (unless you specify one yourself).
 
 You are now ready to run the F<configsmoke.pl> configuration program:
 
@@ -65,13 +60,13 @@ We still supply the old way to run the perl core test smoke suite, but
 it is not really maintained or supported. Here is what Merijn used to
 say about installing that:
 
-Edit F<smoke.sh> and change the PC= definition to reflect the location you
-choose as a builddir. Theoretically you are now ready to go, just
-use B<at> to give it a first shot for tonight.
-
-Optionally delete lines from F<config.cfg> (or a local copy with a
-different name) for which you are certain your system doesn't support
-it (like threading or 64bit configurations)
+  Edit F<smoke.sh> and change the PC= definition to reflect the
+  location you choose as a builddir. 
+  Theoretically you are now ready to go, just use B<at> to give
+  it a first shot for tonight.
+  Optionally delete lines from F<config.cfg> (or a local copy
+  with a different name) for which you are certain your system
+  doesn't support it (like threading or 64bit configurations)
 
 =head1 CONFIGURATION
 
@@ -127,7 +122,7 @@ Edit the F<smokew32.bat> batch file and set the right values.
 =head1 Note to MSWin32 users
 
 To make it clear, the perl core test smoke suite treats B<cygwin> and
-B<DJGPP> as a unixy platforms and not as true MSWin32.
+B<DJGPP> as unixy platforms and not as true MSWin32.
 
 To keep in sync with the source-tree, it is recommended you use the
 B<rsync> program. This currently seems only available with Cygwin
@@ -259,7 +254,7 @@ Contributors and/or co-authors:
 			Abe Timmerman <abeltje@cpan.org>
     Cygwin		John Peacock <jpeacock@rowman.com>
     Sharing issues	Blair Zajac <blair@orcaware.com>
-    Good ideas          Jos Boumans <kane@dwin.org>
+    Good ideas          Jos Boumans <kane@dwim.org>
 
 and all the people having useful suggestions and nits, starting at
 YAPC::Europe-2.0.01, where Michael talked Merijn into simplifying his own
@@ -273,14 +268,18 @@ As always, have the appropriate amount of fun
 
 =head1 SEE ALSO
 
-L<ReleaseNotes>
+L<ReleaseNotes>, L<FAQ>
 
 =head1 TODO
 
-    * Scheduler stuff in F<configsmoke.pl>
-    * Start an FAQ
-    * More refactoring
-    * Test-suite
-    * VMS?
+=over 4
+
+=item * More refactoring
+
+=item * Test-suite
+
+=item * VMS?
+
+=back
 
 =cut

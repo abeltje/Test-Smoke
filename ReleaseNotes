@@ -1,29 +1,30 @@
 =head1 NAME
 
-ReleaseNotes - These are the Release Notes for 1.16_22
+ReleaseNotes - These are the Release Notes for 1.16_30
 
 =head1 SYNOPSIS
 
-THIS IS A DEVELOPMENT SNAPSHOT!
-(Sorry about the shouting, but it may have bugs or be incomplete)
+This is a development snapshot! (posing as v1.17_RC1)
+(Sorry, but it may still have bugs or be incomplete)
 
 =head1 DESCRIPTION
 
-I have done a lot of refactoring and wrote loads of new code.
+I have done a lot of refactoring and wrote loads of new code and
+documentation.
 
 =over 4
 
 =item 1
 
-B<smokeperl.pl> is the new way to smoke. It is a wrapper script around
+F<smokeperl.pl> is the new way to smoke. It is a wrapper script around
 good ol' F<mktest.pl> and F<mkovz.pl>
 
 It also uses the backends to B<synctree.pl> and B<mailrpt.pl>
 
 =item 2
 
-B<configsmoke.pl> helps you create a (mandatory) configuration for
-B<perlsmoke.pl>. This configuration is stored in a separate file, so
+F<configsmoke.pl> helps you create a (mandatory) configuration for
+F<smokeperl.pl>. This configuration is stored in a separate file, so
 that it is possible to have different configurations.
 
 One can think of different perl versions or different compiler
@@ -58,7 +59,7 @@ The subject of the message  containing the report has changed:
 =item 8
 
 If your platform supports B<UTF-8 locales> you will now be able to do
-an extra run of B<make test> with B<$ENV{LC_ALL}> set to such a
+an extra pass of B<make test> with B<$ENV{LC_ALL}> set to such a
 locale.
 
 =item 9
@@ -86,23 +87,9 @@ To configre Test::Smoke for smoking perl-5.8.x(MAINT):
 
     $ perl configsmoke.pl -p smoke58x
 
-=back
+=item 13
 
-=head1 TODO
-
-I don't know if all of these will make it into 1.17...
-
-=over 4
-
-=item B<make install> needs to be sorted out!
-
-=item B<Start an FAQ>
-
-=item B<crontab/at stuff for configsmoke.pl>
-
-=item B<More refactoring>
-
-=item B<Clean up/extend the testsuite>
+I think I finally got B<make install> to do what I want.
 
 =back
 
