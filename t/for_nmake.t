@@ -5,7 +5,7 @@ use strict;
 
 use File::Spec;
 
-use Test::More tests => 61;
+use Test::More tests => 67;
 BEGIN { use_ok( 'Test::Smoke::Util' ); }
 END { 
     1 while unlink 'win32/smoke.mk';
@@ -30,7 +30,7 @@ is( -s 'win32/Makefile', (-s $smoke_mk ) - $extra_len,
     "Sizes are equal for standard options (-Duseithreads)" );
 
 # Now we can start testing this stuff
-ok( unlink( $smoke_mk ), "Remove makefile" );
+ok( my_unlink( $smoke_mk ), "Remove makefile" );
 
 $config =  '-DINST_DRV=F:';
 Configure_win32( './Configure ' . $config, 'nmake' );
@@ -57,7 +57,7 @@ SKIP: {
 }
 
 # Here we test the setting of CCTYPE
-ok( unlink( $smoke_mk ), "Remove makefile" );
+ok( my_unlink( $smoke_mk ), "Remove makefile" );
 
 $config = '-DCCTYPE=MSVC60';
 Configure_win32( './Configure ' . $config, 'nmake' );
@@ -83,7 +83,7 @@ SKIP: {
 }
 
 # Check that all three are set for -Duseithreads
-ok( unlink( $smoke_mk ), "Remove makefile" );
+ok( my_unlink( $smoke_mk ), "Remove makefile" );
 
 $config = '-Dusethreads';
 Configure_win32( './Configure ' . $config, 'nmake' );
@@ -103,7 +103,7 @@ SKIP: {
 }
 
 # This will be a full configuration:
-ok( unlink( $smoke_mk ), "Remove makefile" );
+ok( my_unlink( $smoke_mk ), "Remove makefile" );
 
 $config = '-Duselargefiles';
 Configure_win32( './Configure ' . $config, 'nmake' );
@@ -122,7 +122,7 @@ SKIP: {
 }
 
 # This will be a full configuration:
-ok( unlink( $smoke_mk ), "Remove makefile" );
+ok( my_unlink( $smoke_mk ), "Remove makefile" );
 
 $config = '-des -Dusedevel -Duseithreads -Dusemymalloc ' .
           '-DCCTYPE=MSVC60 -Dcf_email=abeltje@cpan.org';
@@ -150,7 +150,7 @@ SKIP: {
           "Untuched CCTYPE" );
 }
 
-ok( unlink( $smoke_mk ), "Remove makefile" );
+ok( my_unlink( $smoke_mk ), "Remove makefile" );
 
 $config = '-des -Dusedevel';
 my @cfg_args = ( 'osvers=5.0 W2000Pro' );
@@ -173,7 +173,7 @@ SKIP: {
     /mx', "CFG_VARS macro for Config.pm" );
 }
 
-ok( unlink( $smoke_mk ), "Remove makefile" );
+ok( my_unlink( $smoke_mk ), "Remove makefile" );
 
 $config = '-des -Dusedevel';
 @cfg_args = ( 'osvers=5.0 W2000Pro', "", 'ccversion=cl 6.0' );
@@ -197,7 +197,7 @@ SKIP: {
     /mx', "CFG_VARS macro for Config.pm" );
 }
 
-ok( unlink( $smoke_mk ), "Remove makefile" );
+ok( my_unlink( $smoke_mk ), "Remove makefile" );
 
 $config = '-des -Dusedevel';
 @cfg_args = ( 'osvers=5.0 W2000Pro', "trash", 'ccversion=cl 6.0' );
@@ -221,7 +221,7 @@ SKIP: {
     /mx', "CFG_VARS macro for Config.pm" );
 }
 
-ok( unlink( $smoke_mk ), "Remove makefile" );
+ok( my_unlink( $smoke_mk ), "Remove makefile" );
 
 $config = $dft_args . " -Accflags='-DPERL_COPY_ON_WRITE'";
 Configure_win32( './Configure '. $config, 'nmake' );
@@ -238,7 +238,7 @@ SKIP: {
     /mx', "-Accflags= is translated to BUILDOPT = \$(BUILDOPT)" );
 }
 
-ok( unlink( $smoke_mk ), "Remove makefile" );
+ok( my_unlink( $smoke_mk ), "Remove makefile" );
 
 $config = $dft_args . " -Accflags='-DPERL_COPY_ON_WRITE'".
                       " -Accflags='-DPERL_POLLUTE'";
@@ -255,4 +255,29 @@ SKIP: {
                         BUILDOPT\t=\s\$\(BUILDOPT\)\ -DPERL_POLLUTE\n
                         #+\ CHANGE THESE ONLY IF YOU MUST\ #+
     /mx', "-Accflags= is translated to BUILDOPT = \$(BUILDOPT)" );
+}
+
+# Testing: -Duseithreads -Uuseimpsys
+$config = $dft_args . " -Uuseimpsys";
+Configure_win32( './Configure ' . $config, 'nmake' );
+ok( -f $smoke_mk, "New makefile ($config)" );
+SKIP: {
+    local *MF;
+    ok open(MF, "< $smoke_mk"), "Opening makefile" or
+        skip "Cannot read from '$smoke_mk': $!", 1;
+    my $makefile = do { local $/; <MF> };
+    close MF;
+
+    #These should be unset
+    like( $makefile, '/^USE_MULTI\s*= define\n/m', '$(USE_MULTI)' );
+    like( $makefile, '/^USE_ITHREADS\s*= define\n/m', '$(USE_ITHREADS)' );
+    like( $makefile, '/^#USE_IMP_SYS\s*= define\n/m', '#$(USE_IMP_SYS)' );
+}
+
+ok( my_unlink( $smoke_mk ), "Remove makefile" );
+
+sub my_unlink {
+    my $file = shift;
+    1 while unlink $file;
+    return ! -e $file;
 }

@@ -51,6 +51,7 @@ t/parse_report.t
 t/policy.t
 t/reporter.t
 t/regenstuff.t
+t/skip_config.t
 t/skip_filter.t
 t/smoked_config.t
 t/smoker.t

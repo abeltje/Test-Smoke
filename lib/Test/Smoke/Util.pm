@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.30';
+$VERSION = '0.31';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -167,6 +167,7 @@ sub Configure_win32 {
 	"-Duseperlio"		=> "USE_PERLIO",
 	"-Dusemultiplicity"	=> "USE_MULTI",
 	"-Duseimpsys"		=> "USE_IMP_SYS",
+	"-Uuseimpsys"		=> "USE_IMP_SYS",
         "-Dusemymalloc"         => "PERL_MALLOC",
         "-Duselargefiles"       => "USE_LARGE_FILES",
 	"-DDEBUGGING"		=> "USE_DEBUGGING",
@@ -213,26 +214,35 @@ sub Configure_win32 {
     my $def_re = '((?:(?:PERL|USE|IS)_\w+)|BCCOLD)';
     my @w32_opts = grep ! /^$def_re/, keys %opts;
     my $config_args = join " ", 
-        grep /^-D[a-z_]+/, quotewords( '\s+', 1, $command );
+        grep /^-[DU][a-z_]+/, quotewords( '\s+', 1, $command );
     push @args, "config_args=$config_args";
 
     my @buildopt;
     $command =~ m{^\s*\./Configure\s+(.*)} or die "unable to parse command";
-    foreach ( quotewords( '\s+', 1, $1) ) {
+    my $cmdln = $1;
+    foreach ( quotewords( '\s+', 1, $cmdln ) ) {
 	m/^-[des]{1,3}$/ and next;
 	m/^-Dusedevel$/  and next;
         if ( /^-Accflags=(['"]?)(.+)\1/ ) { #emacs' syntaxhighlite
            push @buildopt, $2;
            next;
         }
-        my( $option, $value ) = /^(-D\w+)(?:=(.+))?$/;
+        my( $option, $value ) = /^(-[DU]\w+)(?:=(.+))?$/;
 	die "invalid option '$_'" unless exists $opt_map{$option};
 	$opts{$opt_map{$option}} = $value ? $value : 1;
+        $option =~ /^-U/ and $opts{$opt_map{$option}} = 0;
     }
 
     # If you set one, we do all, so you can have fork()
-    if ( $opts{USE_MULTI} || $opts{USE_ITHREADS} || $opts{USE_IMP_SYS} ) {
-        $opts{USE_MULTI} = $opts{USE_ITHREADS} = $opts{USE_IMP_SYS} = 1;
+    # unless you set -Uuseimpsys
+    unless ( $cmdln =~ /-Uuseimpsys\b/ ) {
+        if ( $opts{USE_MULTI} || $opts{USE_ITHREADS} || $opts{USE_IMP_SYS} ) {
+            $opts{USE_MULTI} = $opts{USE_ITHREADS} = $opts{USE_IMP_SYS} = 1;
+        }
+    } else {
+        if ( $opts{USE_MULTI} || $opts{USE_ITHREADS} ) {
+            $opts{USE_MULTI} = $opts{USE_ITHREADS} = 1;
+        }
     }
 
     # If you -Dgcc_v3_2 you 'll *want* CCTYPE = GCC
@@ -875,7 +885,13 @@ sub skip_config {
     my( $config ) = @_;
 
     my $skip = $config->has_arg(qw( -Uuseperlio -Dusethreads )) ||
-               $config->has_arg(qw( -Uuseperlio -Duseithreads ));
+               $config->has_arg(qw( -Uuseperlio -Duseithreads )) ||
+               ( $^O eq 'MSWin32' && 
+               (( $config->has_arg(qw( -Duseithreads -Dusemymalloc )) &&
+                !$config->has_arg( '-Uuseimpsys' ) ) ||
+               ( $config->has_arg(qw( -Dusethreads -Dusemymalloc )) &&
+                !$config->has_arg( '-Uuseimpsys' ) ))
+               );
     return $skip;
 }
 
