@@ -1,4 +1,90 @@
+2003-03-09  Abe Timmerman  <abeltje@local>
+
+	* smokeperl.pl: 1.11: (abeltje)
+	  * Now uses Test::Smoke
+
+	* configsmoke.pl: 1.08: (abeltje)
+	  * FIX: The default syncer must exist!
+	  + Added more explanation to some questions
+
+	* lib/Test/Smoke/Patcher.pm: 1.08: (abeltje)
+	  * Use the new Test::Smoke::Util::get_regen_headers()
+
+	* lib/Test/Smoke.pm: 1.02: (abeltje)
+	  * API change (so quick?) error() is now known as config_error()
+
+	* Makefile.PL: 1.11: (abeltje)
+	  * Introduce Test::Smoke
+
+	* mkovz.pl: 1.19: (abeltje)
+	  * Now uses Test::Smoke
+
+	* test_pod.pl: 1.02: (abeltje)
+	  + Added F<lib/Test/Smoke.pm>
+
+	* test_compile.pl: Make sure it works before committing
+
+	* test_compile.pl: Increase the number of tests when you add one.
+
+	* test_compile.pl: 1.02: (abeltje)
+	  + Added F<lib/Test/Smoke.pm>
+
+	* MANIFEST: 1.21: (abeltje)
+	  + Added F<lib/Test/Smoke.pm>, F<t/ts_config.t>
+
+	* W32Configure.pl: 1.04: (abeltje)
+	  * Now uses Test::Smoke
+	  * -c without argument now assumes 'smokecurrent_config'
+
+	* mailrpt.pl: 1.07: (abeltje)
+	  * Don't declare '$conf', it's exported by Test::Smoke
+
+	* patchtree.pl: 1.05: (abeltje)
+	  * don't declare '$conf' it's exported by Test::Smoke
+
+	* mailrpt.pl: 1.06: (abeltje)
+	  * Now uses Test::Smoke
+	  * -c without argument now assumes 'smokecurrent_config'
+
+	* patchtree.pl: 1.04: (abeltje)
+	  * now uses Test::Smoke
+	  * -c without argument now assumes 'smokecurrent_config'
+
+	* synctree.pl: 1.11: (abeltje)
+	  * Now uses Test::Smoke
+	  * -c switch without argument now assumes 'smokecurrent_config'
+
+	* t/ts_config.t: New tests for Test::Smoke
+
+	* lib/Test/Smoke.pm:
+	New module to keep the version and read the configuration
+
+2003-03-08  Abe Timmerman  <abeltje@local>
+
+	* lib/Test/Smoke/Util.pm: 1.09: (abeltje)
+	  + Added get_regen_headers() and run_regen_headers() (change 18852)
+
+	* MANIFEST: 1.20: (abeltje)
+	  + Added 't/regenstuff.t'
+
+	* t/TestLib.pm: 1.02: (abeltje)
+	  + Added POD
+
+	* t/regenstuff.t: 1.01: (abeltje)
+	  * Test the new regen_headers stuff in Test::Smoke::Util
+
+	* mktest.pl: 1.18: (abeltje)
+	  * More $ENV{LC_ALL} fiddling
+
+	* t/TestLib.pm: 1.01: (abeltje)
+	  * Added to the repository
+
 2003-03-05  Abe Timmerman  <abeltje@local>
+
+	* lib/Test/Smoke/FTPClient.pm: 1.01: (abeltje)
+	  * New module, A simple FTP-mirror object.
+
+	* ChangeLog: This is REV-1_16_22
 
 	* ReleaseNotes: 1.05: (abeltje)
 	  * Keep up with versions
