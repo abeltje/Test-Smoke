@@ -9,6 +9,7 @@ use Data::Dumper;
 use FindBin;
 use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
 use lib $FindBin::Bin;
+use Test::Smoke::Util qw( do_pod2usage );
 
 use Getopt::Long;
 my %options = ( 
@@ -19,10 +20,19 @@ my %options = (
     prefix  => undef,
     oldcfg  => 0,
 );
+my $myusage = "Usage: $0 -p <prefix>[ -d <defaultsprefix>]";
 GetOptions( \%options, 
     'config|c=s', 'jcl|j=s', 'log|l=s', 
-    'prefix|p=s', 'default|d=s'
-);
+    'prefix|p=s', 'default|d=s',
+
+    'help|h', 'man',
+) or do_pod2usage( verbose => 1, myusage => $myusage );
+
+$options{ man} and 
+    do_pod2usage( verbose => 2, exitval => 0, myusage => $myusage );
+$options{help} and 
+    do_pod2usage( verbose => 1, exitval => 0, myusage => $myusage );
+
 $options{prefix} = 'smokecurrent' unless defined $options{prefix};
 
 my %suffix = ( config => '_config', jcl => '', log => '.log' );
@@ -33,7 +43,7 @@ foreach my $opt (qw( config jcl log )) {
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.023';
+$VERSION = '0.024';
 
 eval { require $options{config} };
 $options{oldcfg} = 1, print "Using '$options{config}' for defaults.\n" 
@@ -53,16 +63,17 @@ configsmoke.pl - Create a configuration for B<smokeperl.pl>
 
 =head1 SYNOPSIS
 
-   $ perl configsmoke.pl [options]
+   $ perl configsmoke.pl -p <prefix>[ -d <defaultsprefix>]
 
 =head1 OPTIONS
 
 Current options:
 
-  -c configname When ommited 'perlcurrent_config' is used
-  -j jclname    When ommited 'perlcurrent' is used
-  -l logfile    When ommited 'perlcurrent.log' is used
-  -p prefix     Set -c and -j and -l at once
+  -d dfvalsprefix   Set prefix for a _dfconfig file (<prefix>)
+  -c configprefix   When ommited 'perlcurrent' is used
+  -j jclprefix      When ommited 'perlcurrent' is used
+  -l logprefix      When ommited 'perlcurrent' is used
+  -p prefix         Set -c and -j and -l at once
 
 =cut
 
@@ -129,7 +140,7 @@ my %opt = (
 
     # is this a perl-5.6.x smoke?
     is56x => {
-        msg => "Is this configuration for perl-5.6.x (MAINT)?
+        msg => "Is this configuration for perl-5.6.2 (MAINT)?
 \tThis will ensure only one pass of 'make test'.",
         alt => [qw( N y )],
         dft => 'N',
@@ -445,7 +456,7 @@ is redirected to a logfile called F<smokecurrent.log> by the small jcl.
 (Use C<< -l <prefix> >> or C<< -p <prefix> >> to override).
 
 There are two additional configuration default files
-F<smoke56x_dfconfig> and F<smoke58x_dfconfig> to help you configure 
+F<smoke562_dfconfig> and F<smoke58x_dfconfig> to help you configure 
 B<Test::Smoke> for these two maintenance branches of the source-tree.
 
 To create a configuration for the perl 5.8.x brach:
@@ -456,9 +467,15 @@ This will read additional defaults from F<smoke58x_dfconfig> and create
 F<smoke58x_config> and F<smoke58x.sh>/F<smoke58x.cmd> and logfile will be
 F<smoke58x.log>.
 
-The same goes for the perl 5.6.x branch:
+To create another configuration for the same branch (and have the
+right defaults) you can add the C<-d> option:
 
-    $perl configsmoke.pl -p smoke56x
+    $ perl configsmokepl -p snap58x -d smoke58x
+
+
+To create a configuration for the perl 5.6.2 brach:
+
+    $ perl configsmoke.pl -p smoke562
 
 =head1 CONFIGURATION
 
@@ -554,11 +571,11 @@ There are several build-cfg files provided with the distribution:
 
 =item F<w32current.cfg> for 5.8.x+ on MSWin32
 
-=item F<perl56x.cfg> for 5.6.x (MAINT) on unixy systems
+=item F<perl562.cfg> for 5.6.2 (MAINT) on unixy systems
 
 =back
 
-Note: 5.6.x on MSWin32 is not yet provided, but commenting out the
+Note: 5.6.2 on MSWin32 is not yet provided, but commenting out the
 B<-Duselargefiles> section from F<w32current.cfg> should be enough.
 
 =cut
@@ -1218,6 +1235,8 @@ EO_DIE
 #
 # Written by $0 v$VERSION
 # @{[ scalar localtime ]}
+# NOTE: Changes made in this file wil be \*lost\*
+#       after rerunning $0
 #
 # $cronline
 @{[ renice( $config{renice} ) ]}
@@ -1274,6 +1293,8 @@ setlocal
 
 REM Written by $0 v$VERSION
 REM @{[ scalar localtime ]}
+REM NOTE: Changes made in this file wil be \*lost\*
+REM       after rerunning $0
 $copycmd
 REM $atline
 
@@ -1323,7 +1344,7 @@ sub prompt {
 
     my $default = defined $df_val ? $df_val : 'undef';
     if ( @$alt && defined $df_val ) {
-        $default = $df_val = $alt->[0] unless exists $ok_val{ $df_val };
+        $default = $df_val = $alt->[0] unless exists $ok_val{ lc $df_val };
     }
     my $alts    = @$alt ? "<" . join( "|", @$alt ) . "> " : "";
     print "\n$message\n";
@@ -1471,7 +1492,7 @@ sub get_avail_sync {
     # (has_ftp && 5.9.x) || (has_lwp && !5.6.x)
     unshift @synctype, 'snapshot' 
         if ( $has_ftp && $pversion eq '5.9.x' ) ||
-           ( $has_lwp && $pversion ne '5.6.x' );
+           ( $has_lwp && $pversion ne '5.6.2' );
     unshift @synctype, 'rsync' if whereis( 'rsync' );
     return @synctype;
 }
@@ -1647,6 +1668,12 @@ sub check_buildcfg {
             # No -Duse64bitall
             @no_option = qw( -Duse64bitall );
         };
+
+        /mswin32/i && do {
+            # No -Duselargefiles for 5.6.2 branche
+            @no_option = qw( -Duselargefiles ) if $config{is56x};
+        };
+
         foreach my $option ( @no_option ) {
             !/^#/ && /\Q$option\E/ && s/^/#/ for @bcfg;
         }
