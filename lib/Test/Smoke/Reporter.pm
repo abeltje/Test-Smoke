@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.010';
+$VERSION = '0.011';
 
 use Cwd;
 use File::Spec::Functions;
@@ -285,7 +285,7 @@ sub _parse {
             next;
         }
 
-        if ( m/FAILED/ || m/DIED/) {
+        if ( m/FAILED/ || m/DIED/ || m/dubious$/) {
             ref $rpt{$cfgarg}->{$debug}{$tstenv} or
                 $rpt{$cfgarg}->{$debug}{$tstenv} = [ ];
             push @{ $rpt{$cfgarg}->{$debug}{$tstenv} }, $_;
