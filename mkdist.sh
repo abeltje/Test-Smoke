@@ -10,7 +10,9 @@ echo 'Create Makefile'
 perl Makefile.PL
 make
 (make test) || exit
-make dist
+
+echo 'Create distribution'
+make dist 
 mv *.tar.gz ../
 
 make veryclean
