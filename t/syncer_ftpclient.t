@@ -1,5 +1,6 @@
 #! /usr/bin/perl -w
 use strict;
+use Data::Dumper;
 
 # $Id$
 ##### syncer_ftpclient.t
@@ -14,11 +15,17 @@ use strict;
 # we can concentrate on doing the untargz and patch stuff
 #
 #####
-use FindBin;
-use lib $FindBin::Bin;
-use TestLib;
-use File::Spec;
+
+use File::Spec::Functions;
+use File::Basename;
 use Cwd;
+my $extra_lib;
+BEGIN {
+    $extra_lib = File::Spec->rel2abs( dirname( $0 ), cwd() );
+    print "Using '$extra_lib' as extra \@INC\n";
+}
+use lib $extra_lib;
+use TestLib;
 
 use Test::More;
 
@@ -27,7 +34,7 @@ BEGIN {
     $@ and plan( skip_all => "No 'Net::FTP' found!\n" . 
                              "!!!You will not be able to smoke from " .
                              "FTP-archive without it!!!" );
-    plan tests => 5;
+    plan tests => 7;
 }
 
 # Can we get away with redefining the Net::FTP stuff?
@@ -35,8 +42,8 @@ BEGIN {
 BEGIN { $^W = 0; } # no warnings 'redefine';
 sub Net::FTP::new {
     bless {
-        root => File::Spec->catdir( $FindBin::Bin, 'ftppub' ),
-        cwd  => File::Spec->catdir( $FindBin::Bin, 'ftppub' ),
+        root => File::Spec->catdir( $extra_lib, 'ftppub' ),
+        cwd  => File::Spec->catdir( $extra_lib, 'ftppub' ),
     }, 'Net::FTP';
 }
 sub Net::FTP::login { return 1 }
@@ -62,7 +69,7 @@ sub Net::FTP::ls {
     my $self = shift;
     local *DLDIR;
     opendir DLDIR, $self->{cwd} or return ( );
-    return grep ! /\.{1,2}$/ => readdir DLDIR;
+    return grep ! /^\.{1,2}$/ && ! /.svn\b/  => readdir DLDIR;
 }
 sub Net::FTP::dir {
     my $self = shift;
@@ -130,14 +137,16 @@ sub Net::FTP::DESTROY { }
 BEGIN { $^W = 1; }
 
 # Now begin testing
-use_ok( 'Test::Smoke::Syncer' );
+use_ok      'Test::Smoke::Syncer';
+require_ok 'Test::Smoke::SourceTree';
 
 {
+    my $stree = catdir $extra_lib, 'perl-59x';
     my $sync = Test::Smoke::Syncer->new( ftp => { v => $ENV{SMOKE_VERBOSE},
        ftphost => 'localhost',
        ftpsdir => '/perl-current',
        ftpcdir => '/perl-current-diffs',
-       ddir    => 't/perl-59x',
+       ddir    => $stree,
     } );
 
     isa_ok $sync, 'Test::Smoke::Syncer::FTP';
@@ -147,5 +156,12 @@ use_ok( 'Test::Smoke::Syncer' );
 
     is $plevel, '20004', "Patchlevel ok";
 
-    ok rmtree( 't/perl-59x' ), "Clean-up";
+#    system "dir/size $stree";
+    my $tree = Test::Smoke::SourceTree->new( $stree );
+    my $mc = $tree->check_MANIFEST;
+
+    is scalar keys %$mc, 0, "No files in manicheck" or
+        diag Dumper $mc;
+
+    ok rmtree( $stree ), "Clean-up";
 }

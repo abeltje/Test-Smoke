@@ -61,7 +61,7 @@ require_ok( 'Test::Smoke::SourceTree' );
 
 chdir 't';
 SKIP: {
-    my $syncer = Test::Smoke::Syncer->new( copy => { v => 0,
+    my $syncer = Test::Smoke::Syncer->new( copy => { v => $ENV{SMOKE_VERBOSE},
         ddir => $ddir,
         cdir => $cdir, 
     } );

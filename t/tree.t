@@ -4,8 +4,9 @@ use strict;
 # $Id$
 
 use Data::Dumper;
-require File::Spec;
+use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs splitpath splitdir );
 use File::Find;
+use Cwd;
 
 use Test::More tests => 22;
 
@@ -20,23 +21,32 @@ sub mani_file_from_list($;@) {
     
 sub MANIFEST_from_dir($) {
     my( $path ) = @_;
+
+    my $cwd = cwd();
+    chdir $path or die "Cannot chdir($path): $!\n";
     my @files = qw( MANIFEST );
+
     find sub {
         -f or return;
-        my $relfile = File::Spec->abs2rel( $File::Find::name, $path );
-        my( undef, $dirs, $file ) = File::Spec->splitpath( $relfile );
-        my @dirs = grep length $_ => File::Spec->splitdir( $dirs );
+        my $relfile = canonpath( $File::Find::name );
+        my( undef, $dirs, $file ) = splitpath( $relfile );
+        my @dirs = grep $_ && length $_ => splitdir( $dirs );
+        $^O eq 'VMS' and $file =~ s/\.$//;
         push @dirs, $file;
         push @files, join '/', @dirs;
-    }, $path;
+    }, '.';
 
+    chdir $cwd;
     my $mani_file = File::Spec->catfile( $path, 'MANIFEST' );
     mani_file_from_list( $mani_file => @files );
 }
 
 BEGIN { use_ok( 'Test::Smoke::SourceTree', ':const' ); }
 
-my $path = File::Spec->rel2abs( 't' );
+my $cwd = cwd();
+chdir 't' or die "Cannot chdir(t): $!";
+my $path = cwd();
+chdir $cwd;
 {
     my $tree = Test::Smoke::SourceTree->new( 't' );
     isa_ok( $tree, 'Test::Smoke::SourceTree' );
@@ -44,7 +54,7 @@ my $path = File::Spec->rel2abs( 't' );
     is( $tree->canonpath, File::Spec->canonpath( $path ) , "canonpath" );
 
     is( $tree->rel2abs, $path, "rel2abs" );
-    my $rel = File::Spec->abs2rel( File::Spec->rel2abs( 't' ) );
+    my $rel = File::Spec->abs2rel( $path );
     is( $tree->abs2rel, $rel, "abs2rel" );
 
     is( $tree->mani2abs( 'win32/Makefile' ),
@@ -62,7 +72,8 @@ SKIP: {
 
     my $mani_check = $tree->check_MANIFEST;
 
-    is( keys %$mani_check, 0, "No dubious files" );
+    is( keys %$mani_check, 0, "No dubious files" ) or
+        diag Dumper $mani_check;
 
     my $mani_file = File::Spec->catfile( $tree->canonpath, 'MANIFEST' );
 
@@ -78,7 +89,8 @@ SKIP: { # Check that we can pass extra files to check_MANIFEST()
 
     my $mani_check = $tree->check_MANIFEST( 'does_not_exist' );
 
-    is( keys %$mani_check, 0, "No dubious files [skips are not reported]" );
+    is( keys %$mani_check, 0, "No dubious files [skips are not reported]" ) or
+        diag Dumper $mani_check;
 
     my $mani_file = File::Spec->catfile( $tree->canonpath, 'MANIFEST' );
     1 while unlink $mani_file;
@@ -114,11 +126,17 @@ SKIP: { # Check that check_MANIFEST() finds dubious files
 
     my $mani_check = $tree->check_MANIFEST( 'skip_it' );
 
-    is( keys %$mani_check, 2, "Two dubious files" );
-    is_deeply( $mani_check, 
-               { undeclared => ST_UNDECLARED,
-                 missing    => ST_MISSING    },
-               "Hash contents" );
+    is( keys %$mani_check, 2, "Two dubious files" ) or
+        diag Dumper $mani_check;
+
+    my $check = { undeclared => ST_UNDECLARED, missing => ST_MISSING };
+    if ( $Test::Smoke::SourceTree::NOCASE ) {
+        my %uccheck = map { ( uc $_ => $check->{ $_ } ) } keys %$check;
+        $check = \%uccheck;
+    }
+
+    is_deeply( $mani_check, $check, "Hash contents" );
+
     my $und_cnt = grep $mani_check->{ $_ } == ST_UNDECLARED()
         => keys %$mani_check;
     is( $und_cnt, 1, "One undeclared file" );
@@ -165,11 +183,17 @@ SKIP: { # Check that check_MANIFEST() finds dubious files with MANIFEST.SKIP
 
     my $mani_check = $tree->check_MANIFEST( );
 
-    is( keys %$mani_check, 2, "[MANIFEST.SKIP] Two dubious files" );
-    is_deeply( $mani_check, 
-               { undeclared => ST_UNDECLARED,
-                 missing    => ST_MISSING    },
-               "[MANIFEST.SKIP] Hash contents" );
+    is( keys %$mani_check, 2, "[MANIFEST.SKIP] Two dubious files" ) or
+        diag Dumper $mani_check;
+
+    my $check = { undeclared => ST_UNDECLARED, missing => ST_MISSING };
+    if ( $Test::Smoke::SourceTree::NOCASE ) {
+        my %uccheck = map { ( uc $_ => $check->{ $_ } ) } keys %$check;
+        $check = \%uccheck;
+    }
+
+    is_deeply( $mani_check, $check, "[MANIFEST.SKIP] Hash contents" );
+
     my $und_cnt = grep $mani_check->{ $_ } == ST_UNDECLARED()
         => keys %$mani_check;
     is( $und_cnt, 1, "[MANIFEST.SKIP] One undeclared file" );

@@ -7,7 +7,7 @@ use File::Path;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
 
 # $Id$
-use vars qw( $VERSION );
+use vars qw( $VERSION $NOCASE );
 $VERSION = '0.002';
 
 my %CONFIG = (
@@ -19,6 +19,8 @@ my %CONFIG = (
 
     valid      => [qw( fuser fpasswd fpassive )],
 );
+
+$NOCASE = $^O eq 'MSWin32' || $^O eq 'VMS';
 
 =head1 NAME
 
@@ -222,7 +224,7 @@ sub __do_mirror {
             $verbose > 1 and print "Leaving '$entry->{name}' [$new_locald]\n";
         } else {
             $entry->{time}  = $ftp->mdtm( $entry->{name} ); #slow down
-            my $destname = File::Spec->catfile( $localdir, $entry->{name} );
+            my $destname = catfile( $localdir, canonpath($entry->{name}) );
 
             my $skip;
             if ( -e $destname ) {
@@ -247,19 +249,28 @@ sub __do_mirror {
     }
     if ( $cleanup ) {
         $verbose > 1 and print "Cleanup '$localdir'\n";
-        my %ok_file = map { ( $_->{name} => $_->{type} ) } @list;
+        my %ok_file = map {
+            my $cmpname = $NOCASE ? uc $_->{name} : $_->{name};
+            ( $cmpname => $_->{type} )
+        } @list;
         local *DIR;
         if ( opendir DIR, '.' ) {
             foreach ( readdir DIR ) {
-                if( -f ) {
-                    unless (exists $ok_file{ $_ } && $ok_file{ $_ } eq 'f') {
+                my $cmpname = $NOCASE ? uc $_ : $_;
+                $^O eq 'VMS' and $cmpname =~ s/\.$//;
+                if( -f $cmpname ) {
+                    unless ( exists $ok_file{ $cmpname } && 
+                             $ok_file{ $cmpname } eq 'f' ) {
                         $verbose and printf "Delete %s\n",
-                                             abs2rel( rel2abs( $_ ), $lroot );
+                                             abs2rel( rel2abs( $cmpname ),
+                                                      $lroot );
                         unlink $_;
                     }
                 } elsif ( -d && ! /^..?\z/ ) {
-                     unless (exists $ok_file{ $_ } && $ok_file{ $_ } eq 'd') {
-                        rmtree( $_, $verbose );
+                     $^O eq 'VMS' and $cmpname =~ s/\.DIR$//i;
+                     unless ( exists $ok_file{ $cmpname } &&
+                              $ok_file{ $cmpname } eq 'd' ) {
+                        rmtree( $cmpname, $verbose );
                     }
                 }
             }
