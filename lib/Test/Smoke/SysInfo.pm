@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.017';
+$VERSION = '0.018';
 
 use base 'Exporter';
 @EXPORT_OK = qw( &sysinfo &tsuname );
@@ -50,23 +50,24 @@ sub new {
     my $proto = shift;
     my $class = ref $proto ? ref $proto : $proto;
 
-    for ( $^O ) {
+    my $chk_os;
+    for $chk_os ( $^O ) {
 
-        /aix/i        && return bless AIX(),     $class;
+        $chk_os =~ /aix/i        && return bless AIX(),     $class;
 
-        /darwin|bsd/i && return bless BSD(),     $class;
+        $chk_os =~ /darwin|bsd/i && return bless BSD(),     $class;
 
-        /hp-?ux/i     && return bless HPUX(),    $class;
+        $chk_os =~ /hp-?ux/i     && return bless HPUX(),    $class;
 
-        /linux/i      && return bless Linux(),   $class;
+        $chk_os =~ /linux/i      && return bless Linux(),   $class;
 
-        /irix/i       && return bless IRIX(),    $class;
+        $chk_os =~ /irix/i       && return bless IRIX(),    $class;
 
-        /solaris|sunos|osf/i 
-                      && return bless Solaris(), $class;
+        $chk_os =~ /solaris|sunos|osf/i 
+                                 && return bless Solaris(), $class;
 
-        /cygwin|mswin32|windows/i
-                      && return bless Windows(), $class;
+        $chk_os =~ /cygwin|mswin32|windows/i
+                                 && return bless Windows(), $class;
     }
     return bless Generic(), $class;
 }
@@ -92,9 +93,10 @@ sub __get_os {
     require POSIX;
     my $os = join " - ", (POSIX::uname())[0,2];
     $os =~ s/(\S+)/\L$1/;
-    for ( $^O ) {
+    my $chk_os;
+    for $chk_os ( $^O ) {
 
-        /aix/i             && do {
+        $chk_os =~ /aix/i && do {
             chomp( $os = `oslevel -r` );
             if ( $os =~ m/^(\d+)-(\d+)$/ ) {
                 $os = ( join ".", split //, $1 ) . "/ML$2";
@@ -116,14 +118,14 @@ sub __get_os {
             $os =~ s/^/AIX - /;
             last;
         };
-        /irix/i            && do {
+        $chk_os =~ /irix/i && do {
             chomp( my $osvers = `uname -R` );
             my( $osn, $osv ) = split ' ', $os;
             $osvers =~ s/^$osv\s+(?=$osv)//;
             $os = "$osn - $osvers";
             last;
         };
-        /linux/i           && do {
+        $chk_os =~ /linux/i && do {
             my $dist_re = '[-_](?:release|version)\b';
             my( $distro ) = grep /$dist_re/ => glob( '/etc/*' );
             last MOREOS unless $distro;
@@ -132,7 +134,7 @@ sub __get_os {
             $os .= " [$distro]" if $distro;
             last;
         };
-        /solaris|sunos/i   && do {
+        $chk_os =~ /solaris|sunos/i && do {
             my( $osn, $osv ) = (POSIX::uname())[0,2];
             $osv > 5 and do {
                 $osn = 'Solaris';
@@ -141,12 +143,16 @@ sub __get_os {
             $os = join " - ", $osn, $osv;
             last;
         };
-        /windows|mswin32/i && do {
+        $chk_os =~ /windows|mswin32/i && do {
             eval { require Win32 };
             $@ and last MOREOS;
             $os = "$^O - " . join " ", Win32::GetOSName();
             $os =~ s/Service\s+Pack\s+/SP/;
             last;
+        };
+        $chk_os =~ /vms/i && do {
+            $os = join " - ", (POSIX::uname())[0,3];
+            $os =~ s/(\S+)/\L$1/;
         };
     }
     return $os;
@@ -253,8 +259,9 @@ sub HPUX {
     unless ( $ncpu ) {	# not root?
         local *SYSLOG;
         if ( open SYSLOG, "< /var/adm/syslog/syslog.log" ) {
-            while ( <SYSLOG> ) {
-                m/\bprocessor$/ and $ncpu++;
+            my $line;
+            while ( $line = <SYSLOG> ) {
+                $line =~ m/\bprocessor$/ and $ncpu++;
             }
         }
     }
@@ -273,10 +280,11 @@ sub HPUX {
     close LST;
 
     if (@cpu == 0 && open LST, "echo 'sc product cpu;il' | /usr/sbin/cstm |") {
-        while (<LST>) {
-            s/^\s*(PA)\s*(\d+)\s+CPU Module.*/$m 1.1 $1$2/ or next;
-            $2 =~ m/^8/ and s/ 1.1 / 2.0 /;
-            push @cpu, $_;
+        my $line;
+        while ( $line = <LST> ) {
+            $line =~ s/^\s*(PA)\s*(\d+)\s+CPU Module.*/$m 1.1 $1$2/ or next;
+            $2 =~ m/^8/ and $line =~ s/ 1.1 / 2.0 /;
+            push @cpu, $line;
         }
     }
     $hpux->{_os} =~ s/ B\.(\d+)/ $1/;
