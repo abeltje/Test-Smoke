@@ -94,9 +94,10 @@ By specifying a diffent prefix to F<configsmoke.pl>:
 This will create the smokeconfiguration F<mysmoke_config> and a small
 shellscript F<mysmoke.sh> (or F<mysmoke.cmd> if you are on Windows).
 
-There are two (2) special prefixes: B<smoke562> and B<smoke58x>. These
-will set the default answers for F<configsmoke.pl> to be appropriate
-for smoking the maintenance branches for these versions of perl.
+There are three (3) special prefixes: B<smoke55x>, B<smoke562> and
+B<smoke58x>. These will set the default answers for F<configsmoke.pl>
+to be appropriate for smoking the maintenance branches for these
+versions of perl.
 
 =head2 How do I include I<copy-on-write> testing in my smokes?
 
@@ -109,7 +110,7 @@ general.
 
 =item B<-Accflags='-DPERLL_COPY_ON_WRITE'>
 
-The fastest way to do it is to add a new section to your
+The fastest way to do it, is to add a new section to your
 buildconfiguration file, like this:
 
     =
@@ -119,6 +120,8 @@ buildconfiguration file, like this:
     =
 
 That will always work, but IMO looks a bit "loud" in the reports.
+
+B<NOTE>: This is the only way to smoke COW on MSWin32!
 
 =item B<< Default F<Policy.sh> >>
 
@@ -169,14 +172,15 @@ specified in the patches-to-be-applied file.
 
 Small wrapper around B<Test::Smoke::run_smoke()> that can use the
 settings from the smoke-configuration file. It runs the smoke cycle
-for all configurations and is a replacement for the now unmaintained
+for all configurations and is a replacement for the now removed
 B<mktest.pl>.
 
 =item B<mailrpt.pl>
 
 Small wrapper around B<Test::Smoke::Mailer> that can use the settings
 from the smoke-configuration file. It will check if the report is
-already generated and do so if not.
+already generated and do so if not. This is the replacement for the
+now removed B<mkovz.pl>.
 
 =item B<archiverpt.pl>
 
@@ -187,13 +191,13 @@ This script copies the report and the logfile to a configurable place.
 This script prints a little status report for a smoke confifuration:
 
     $ ./smokestatus.pl -c smoke58x
-    Checking status for configuration 'smoke58x'
+    Checking status for configuration 'smoke58x' (5.8.x)
       Change number 21537 started on Sun Oct 26 06:30:39 2003.
         4 out of 10 configurations finished in 3 hours 6 minutes.
         1 configuration showed failures (F).
         0 failures in the running configuration.
         6 configurations to finish, estimated completion in 4 hours 40 minutes
-        Average smoke duration: 46 minutes 42.250 seconds.
+        Average smoke duration: 46 minutes 42 seconds.
 
 =item B<W32Configure.bat>
 
@@ -247,6 +251,7 @@ C<basedir> variable (thank you Johan Vromans for helping with this).
         fi
     }
 
+    echo $$ > "$pidfile"
     while test 1 ; do
         checkstop
         touch "$pidfile"
