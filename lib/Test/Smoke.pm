@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION $conf @EXPORT );
-$VERSION = '1.18_50';
+$VERSION = '1.18_51';
 
 use base 'Exporter';
 @EXPORT  = qw( $conf &read_config &run_smoke );
@@ -14,7 +14,7 @@ use Test::Smoke::Policy;
 use Test::Smoke::BuildCFG;
 use Test::Smoke::Smoker;
 use Test::Smoke::SourceTree qw( :mani_const );
-use Test::Smoke::Util qw( get_patch );
+use Test::Smoke::Util qw( get_patch skip_config );
 use Config;
 
 =head1 NAME
@@ -106,15 +106,21 @@ configurations.
 
 sub run_smoke {
     my $continue = shift;
+    defined $continue or $continue = $conf->{continue};
     my $patch = shift || Test::Smoke::Util::get_patch( $conf->{ddir} );
+
+
+    my $logfile = File::Spec->catfile( $conf->{ddir}, 'mktest.out' );
+    my $BuildCFG = $continue 
+        ? Test::Smoke::BuildCFG->continue( $logfile, $conf->{cfg}, 
+                                           v => $conf->{v} )
+        : Test::Smoke::BuildCFG->new( $conf->{cfg}, v => $conf->{v} );
 
     local *LOG;
     my $mode = $continue ? ">>" : ">";
-    open LOG, "$mode " . File::Spec->catfile( $conf->{ddir}, 'mktest.out' )  or
-        die "Cannot create 'mktest.out': $!";
+    open LOG, "$mode $logfile" or die "Cannot create 'mktest.out': $!";
 
     my $Policy   = Test::Smoke::Policy->new( File::Spec->updir, $conf->{v} );
-    my $BuildCFG = Test::Smoke::BuildCFG->new( $conf->{cfg}, v => $conf->{v} );
 
     my $smoker   = Test::Smoke::Smoker->new( \*LOG, $conf );
     $smoker->mark_in;
@@ -148,20 +154,6 @@ sub run_smoke {
         require Carp;
         Carp::carp "Error on closing logfile: $!";
    };
-}
-
-=item skip_config( $config ) 
-
-Returns true if this config should be skipped.
-
-=cut
-
-sub skip_config {
-    my( $config ) = @_;
-
-    my $skip = $config->has_arg(qw( -Uuseperlio -Dusethreads )) ||
-               $config->has_arg(qw( -Uuseperlio -Duseithreads ));
-    return $skip;
 }
 
 1;

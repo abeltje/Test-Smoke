@@ -111,6 +111,7 @@ GetOptions( \%opt,
     'w32cc|win32-cctype=s',
 
     'dry_run|dry-run|n', 'run!',
+    'continue!',
     'v|verbose=i',
 
     'help|h', 'man',
@@ -162,7 +163,7 @@ $timeout and local $SIG{ALRM} = sub {
 };
 $Config{d_alarm} and alarm $timeout;
 
-run_smoke();
+run_smoke( $conf->{config} );
 
 =head1 SEE ALSO
 
