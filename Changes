@@ -1,3 +1,55 @@
+rev 75:  abeltje 2003-03-14 22:41:24 +0100 (Fri, 14 Mar 2003)
+    * /Test-Smoke/t/regenstuff.t
+
+      * [FIX]
+        - Specify the number of tests
+        - Resolve Windows issues with unescaped paths
+
+rev 74:  abeltje 2003-03-14 22:12:08 +0100 (Fri, 14 Mar 2003)
+    * /Test-Smoke/lib/Test/Smoke.pm
+
+      VERSION = 1.16_30
+
+rev 73:  abeltje 2003-03-14 22:09:30 +0100 (Fri, 14 Mar 2003)
+    * /Test-Smoke/FAQ.pod, /Test-Smoke/MANIFEST
+
+      * [ADD] F<FAQ.pod>
+
+rev 72:  abeltje 2003-03-14 22:07:32 +0100 (Fri, 14 Mar 2003)
+    * /Test-Smoke/configsmoke.pl
+
+      * [FIX] unescaped $ instring
+
+rev 71:  abeltje 2003-03-14 22:06:23 +0100 (Fri, 14 Mar 2003)
+    * /Test-Smoke/mkdist.sh
+
+      Cope with the new F<Makefile.PL>
+
+rev 70:  abeltje 2003-03-14 21:57:18 +0100 (Fri, 14 Mar 2003)
+    * /Test-Smoke/README, /Test-Smoke/ReleaseNotes
+
+      * This should be 1.17-RC1
+
+rev 69:  abeltje 2003-03-14 15:49:10 +0100 (Fri, 14 Mar 2003)
+    * /Test-Smoke/Makefile.PL
+
+      * 'make install' now works the way I wanted it.
+
+rev 68:  abeltje 2003-03-13 00:48:09 +0100 (Thu, 13 Mar 2003)
+    * /Test-Smoke/configsmoke.pl
+
+      * [FIX] typo
+
+rev 67:  abeltje 2003-03-13 00:46:12 +0100 (Thu, 13 Mar 2003)
+    * /Test-Smoke/MANIFEST
+
+      * [FIX] typo in filename
+
+rev 66:  abeltje 2003-03-13 00:38:16 +0100 (Thu, 13 Mar 2003)
+    * /Test-Smoke/Changes, /Test-Smoke/MANIFEST
+
+      * [ADD] F<Changes> generated from Subversion (Keep CVS F<ChangeLog>)
+
 rev 65:  abeltje 2003-03-13 00:15:52 +0100 (Thu, 13 Mar 2003)
     * /Test-Smoke/configsmoke.pl, /Test-Smoke/smoke56x_dfconfig, /Test-Smoke/smoke58x_dfconfig
 
