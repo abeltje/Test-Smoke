@@ -6,7 +6,7 @@ use vars qw( $VERSION );
 $VERSION = '0.008';
 
 use Cwd;
-use File::Spec::Functions;
+use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
 use Config;
 use Test::Smoke::Util qw( get_smoked_Config skip_filter );
 BEGIN { eval q{ use Time::HiRes qw( time ) } }
@@ -463,25 +463,21 @@ sub extend_with_harness {
     my( $self, @nok ) = @_;
     my( @harness, %inconsistent );
     for ( @nok ) {
-        m!^(?:\.\.[\\/])?(\w+/[-\w/]+)\.*(.*)! or next;
-        # harness chdir()s into t, so -f is false for t/op/*.t etc
+        m!^(?:\.\.[\\/])?(\w+/[-\w/\\]+)\.*(.*)! or next;
+        # t/harness chdir()s into t/, so -f is false for t/op/*.t etc
         my $test_name = "$1.t";
         my $status = $2;
-        my $test_path = (-f $test_name) 
-            ? catdir( updir(), $test_name )
-            : $test_name;
+        my $test_base = catdir( $self->{ddir}, 't' );
+        my $test_path = abs2rel( rel2abs( $test_name, $self->{ddir} ), 
+                                 $test_base);
+        $test_path =~ tr!\\!/! if $self->{is_win32};
         $inconsistent{ $test_path } = $status
             unless exists $inconsistent{ $test_path };
     }
     @harness = sort keys %inconsistent;
     if ( @harness ) {
         local $ENV{PERL_SKIP_TTY_TEST} = 1;
-        my $harness = $self->{is_win32} ?
-        join " ", map { 
-            s{^\.\.[/\\]}{};
-            m/^(?:lib|ext)/ and $_ = catfile( updir(), $_ );
-            $_;
-        } @harness : "@harness";
+        my $harness = "@harness";
         $self->tty( "\nExtending failures with harness:\n\t$harness\n" );
         my $changed_dir;
         chdir 't' and $changed_dir = 1;
