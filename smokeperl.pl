@@ -14,7 +14,7 @@ my %options = ( config => 'smokecurrent_config', run => 1,
                 is56x => undef, smartsmoke => undef );
 GetOptions( \%options, 
     'config|c=s', 
-    'continue'
+    'continue',
     'fetch!', 
     'patch!', 
     'mail!',
@@ -27,6 +27,7 @@ use Config;
 use Test::Smoke;
 use vars qw( $VERSION );
 $VERSION = Test::Smoke->VERSION;
+# $Id$
 
 =head1 NAME
 
@@ -77,8 +78,8 @@ use Test::Smoke::Mailer;
 use Test::Smoke::Util qw( get_patch );
 use Cwd;
 
-if ( $opt{continue} ) {
-    $opt{v} and print "Will try to continue current smoke\n";
+if ( $options{continue} ) {
+    $options{v} and print "Will try to continue current smoke\n";
     my $cfg = Test::Smoke::BuildCFG->new( $conf->{cfg}, v => $conf->{v} );
     my @found = configs_from_log( $conf->{ddir} );
     my %found = map { ( $_ => 1 ) } @found;
@@ -168,7 +169,7 @@ sub call_mkovz {
 }
 
 sub mailrpt {
-    unless ( $options{mail} && $options{run} ) {
+    unless ( $conf->{mail} && $options{run} ) {
         $conf->{v} and print "Skipping mailrpt\n";
         return;
     }
