@@ -1089,7 +1089,8 @@ sub save_config {
 }
 
 sub sort_configkeys {
-    my @order = qw( perl_version is56x
+    my @order = qw( 
+        perl_version is56x defaultenv
         cfg ddir sync_type fsync 
         rsync opts source 
         tar server sdir sfile patchup pserver pdir unzip patch cleanup
