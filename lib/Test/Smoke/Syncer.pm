@@ -299,16 +299,19 @@ sub check_dot_patch {
     local *PATCHLEVEL_H;
     my $patchlevel_h = File::Spec->catfile( $self->{ddir}, 'patchlevel.h' );
     if ( open PATCHLEVEL_H, "< $patchlevel_h" ) {
+        my $declaration_seen = 0;
         while ( <PATCHLEVEL_H> ) {
-            /"(?:DEVEL|MAINT)(\d+)"/ or next;
-            $patch_level = $1;
+            $declaration_seen ||= /local_patches\[\]/;
+            $declaration_seen && /^\s+,"(?:DEVEL|MAINT)(\d+)|(RC\d+)"/ or next;
+            $patch_level = $1 || $2 || '?????';
+            $patch_level++ unless $patch_level =~ /^RC/;
         }
         # save 'patchlevel.h' mtime, so you can set it on '.patch'
         my $mtime = ( stat PATCHLEVEL_H )[9];
         close PATCHLEVEL_H;
         # Now create '.patch' and return if $patch_level
         # The patchlevel is off by one in snapshots
-        if ( ++$patch_level ) {
+        if ( $patch_level ) {
             if ( open DOTPATCH, "> $dot_patch" ) {
                 print DOTPATCH "$patch_level\n";
                 close DOTPATCH; # no use generating the error

@@ -5,7 +5,7 @@ use strict;
 
 use File::Spec;
 
-use Test::More tests => 4;
+use Test::More tests => 5;
 BEGIN { use_ok( 'Test::Smoke::Util' ); }
 
 chdir 't' or die "chdir: $!" if -d 't';
@@ -51,6 +51,29 @@ SKIP: {
     -f '.patch' and skip "Can't unlink '.patch'", 1;
     ( my $get_patch = get_patch() ) =~ tr/0-9//cd;
     is( $get_patch, $snap_level, "Found snaplevel(2): $get_patch" );
+}
+
+SKIP: { # Check for Release Candidates
+    # better safe; try and unlink '.patch'
+    1 while unlink '.patch';
+    -f '.patch' and skip "Can't unlink '.patch'", 1;
+
+    my $rc = '3';
+    local *PL;
+    open PL, '> patchlevel.h' or skip "Couldn't crate patchlevel.h: $!", 1;
+    printf PL <<'EO_PATCHLEVEL', $rc;
+#if !defined(PERL_PATCHLEVEL_H_IMPLICIT) && !defined(LOCAL_PATCH_COUNT)
+static  char    *local_patches[] = {
+        NULL
+        ,"RC%d"
+        ,NULL
+};
+EO_PATCHLEVEL
+    close PL or skip 1, "Couldn't close patchlevel.h: $!";
+
+    my $get_patch = get_patch();
+
+    is( $get_patch, "RC$rc", "Found Release Candidate: $get_patch" );
 }
 
 END { 

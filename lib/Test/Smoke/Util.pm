@@ -437,25 +437,31 @@ B<patchlevel.h> as a fallback.
 
 sub get_patch {
     my( $ddir ) = @_;
-    local *OK;
-    my $p_file = defined $ddir 
-               ? File::Spec->catfile( $ddir, '.patch' ) 
-               : '.patch';
-    my $patch;
-    if ( open OK, "< $p_file" ) {
-        chomp( $patch = <OK> );
-        close OK;
-        return $patch;
+    $ddir ||= File::Spec->curdir;
+
+    my $dot_patch = File::Spec->catfile( $ddir, '.patch' );
+    local *DOTPATCH;
+    my $patch_level = '?????';
+    if ( open DOTPATCH, "< $dot_patch" ) {
+        chomp( $patch_level = <DOTPATCH> );
+        close DOTPATCH;
+        $patch_level =~ tr/0-9//cd;
+        return $1 if $patch_level =~/^([0-9]+)$/;
     }
-    $p_file = defined $ddir 
-            ? File::Spec->catfile( $ddir, 'patchlevel.h' ) 
-            : 'patchlevel.h';
-    if ( !$patch and open OK, "< $p_file" ) {
-        local $/ = undef;
-        ( $patch ) = ( <OK> =~ m/^\s+,"(?:DEVEL|MAINT)(\d+)"\s*$/m );
-        close OK;
-        return "$patch(+)";
+
+    # There does not seem to be a '.patch', try 'patchlevel.h'
+    local *PATCHLEVEL_H;
+    my $patchlevel_h = File::Spec->catfile( $ddir, 'patchlevel.h' );
+    if ( open PATCHLEVEL_H, "< $patchlevel_h" ) {
+        my $declaration_seen = 0;
+        while ( <PATCHLEVEL_H> ) {
+            $declaration_seen ||= /local_patches\[\]/;
+            $declaration_seen && /^\s+,"(?:DEVEL|MAINT)(\d+)|(RC\d+)"/ or next;
+            $patch_level = $1 || $2 || '?????';
+            $patch_level .= '(+)' unless $patch_level =~ /^RC/;
+        }
     }
+    return $patch_level;
 }
 
 =item version_from_patchlevel_h( $ddir )
