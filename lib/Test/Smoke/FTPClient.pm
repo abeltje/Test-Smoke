@@ -90,7 +90,7 @@ sub  new {
 
 }
 
-=item $ftpclient->connect( )
+=head2 $ftpclient->connect( )
 
 Returns true for success after connecting and login.
 
@@ -197,6 +197,7 @@ Recursive sub to mirror a tree from an FTP server.
 
 sub __do_mirror {
     my( $ftp, $ftpdir, $localdir, $lroot, $verbose, $cleanup ) = @_;
+    $verbose ||= 0;
 
     $ftp->cwd( $ftpdir );
     $verbose > 1 and printf "Entering %s\n", $ftp->pwd;
@@ -326,7 +327,7 @@ sub __get_mode_from_text {
     return $mode;
 }
 
-=item __time_from_ls( $mname, $day, $time_or_year )
+=head2 __time_from_ls( $mname, $day, $time_or_year )
 
 This takes the three date/time related columns from the C<ls -la> output
 and returns a localtime-stamp.
