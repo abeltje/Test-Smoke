@@ -1,3 +1,5 @@
+#! /usr/bin/perl
+# $Id$
 use strict;
 use 5.004;
 use ExtUtils::MakeMaker;
