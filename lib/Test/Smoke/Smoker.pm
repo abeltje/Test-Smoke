@@ -462,11 +462,18 @@ sub extend_with_harness {
         my $harness_all_ok = 0;
         my $harness_out = join "", map {
             my( $name, $fail ) = 
-                m/(\S+\.t)\s+.+[?%]\s+(\d+(?:[-\s]+\d+)*)/;
-            my $dots = '.' x (30 - length $name );
-            "    $name${dots}FAILED $fail\n";
-        } grep m/\S+\.t\s+.+?\d+(?:[-\s+]\d+)*/ => map {
+                m/(\S+\.t)\s+.+%\s+([\d?]+(?:[-\s]+\d+)*)/;
+            if ( $name ) {
+                my $dots = '.' x (30 - length $name );
+                "    $name${dots}FAILED $fail\n";
+            } else {
+                ( $fail ) = m/^\s+(\d+(?:[-\s]+\d+)*)/;
+                " " x 41 . "$fail\n";
+            }
+        } grep m/^\s+\d+(?:[-\s]+\d+)/ ||
+               m/\S+\.t\s+.+%\s+[\d?]+(?:[-\s+]\d+)*/ => map {
             /All tests successful/ && $harness_all_ok++;
+            $self->{v} > 1 and $self->tty( $_ );
             $_;
         } $self->_run( "./perl harness $harness" );
         $harness_out =~ s/^\s*$//;
