@@ -1,0 +1,187 @@
+=head1 NAME
+
+FAQ - Test::Smoke frequently asked questions
+
+=head1 DESCRIPTION
+
+
+=head2 What is Test::Smoke?
+
+B<Test::Smoke> is the symbolic name for set of scripts and modules
+that try to run the perl core tests on as many configurations as
+possible and combine the results into an easy to read report.
+
+The basic cycle looks like:
+
+    fetch_sourcetree
+    foreach $config ( @configurations ) {
+        make distclean
+        ./Configure $config
+        make
+        make test (and log failures)
+    }
+    create_report()
+    mail_report()
+
+=head2 Why is Test::Smoke?
+
+The reports from B<Test::Smoke> give a good picture of the current state
+of Perl development. We try to get as many of the supported platforms
+as possible.
+
+=head2 Where is Test::Smoke?
+
+On CPAN: L<http://search.cpan.org/authour/ABELTJE/Test-Smoke>
+
+=head2 What are these configuration files about?
+
+B<Test::Smoke> uses two types of configuration files:
+
+=over 4
+
+=item B<smoke-configuration-file>
+
+This is a file that uses a B<_config> suffix and contains settings for
+the F<smokeperl.pl> program and is created by F<configsmoke.pl>.
+
+This is basically a Data::Dumper::Dump() of a hash.
+
+=item B<build-configurations-file>
+
+This file contains the information needed to assemble the list of
+perl configurations that will be used to build and test perl.
+
+The file is devided into sections separated by a line that starts with
+an equals-sign (B<=>). Each line in a section is combined with all
+lines from all the other sections. The default build-configurations
+file F<perlcurrent.cfg> constist of four (4) sections:
+
+=over 4
+
+=item B<section 1> one (1) (blank) line
+
+=item B<section 2> two (2) lines
+
+=item B<section 3> seven (7) lines
+
+=item B<section 4> two (2) lines (and a policy indicator line)
+
+=back
+
+This file wil yield 1 * 2 * 7 * 2 = 28 configurations. B<Test::Smoke>
+will build perl in all of these 28 configurations and run the core
+test suite one (1), two (2) or three (3) times for each of those
+perls:
+
+=over 4
+
+=item * with C<< $ENV{PERLIO}=stdio >> (allways)
+
+=item * with C<< $ENV{PERLIO}=perlio >> (unless -Uuseperlio)
+
+=item * with C<< $ENV{PERL_UNICODE}="", $ENV{LC_ALL}=xx_YY.utf8 >> (if
+specified and !-Uuseperlio) 
+
+=back
+
+=back
+
+=head2 How do I create different smoke-configurations?
+
+By specifying a diffent prefix to F<configsmoke.pl>:
+
+    $ perl configsmoke.pl -p mysmoke
+
+This will create the smokeconfiguration F<mysmoke_config> and a small
+shellscript F<mysmoke.sh> (or F<mysmoke.cmd> if you are on Windows).
+
+There are two (2) special prefixes: B<smoke56x> and B<smoke58x>. These
+will set the default answers for F<configsmoke.pl> to be appropriate
+for smoking the maintenance releases for these versions of perl.
+
+=head2 What are all the scripts in the smoke suite for?
+
+=over 4
+
+=item B<smokeperl.pl>
+
+This is a wrapper script that goes through all the steps in the smoke
+process.
+
+=item B<synctree.pl>
+
+Small wrapper around B<Test::Smoke::Syncer> that can use the settings
+from the smoke-configuration file. It will bring the source-tree in
+sync.
+
+=item B<patchtree.pl>
+
+Small wrapper around B<Test::Smoke::Patcher> that can use the settings
+from the smoke-configuration file. It will apply the patches that are
+specified in the patches-to-be-applied file.
+
+=item B<mktest.pl>
+
+This is the main script that runs I<Configure>, I<make> and S<< I<make
+test> >> for all configurations and log the results in F<<
+<builddir>/mktest.out >>.
+
+=item B<mkovz.pl>
+
+This script generates the report as F<< <builddir>/mktest.rpt >> from
+F<< <builddir>/mktest.out >>. It can also send the report, but
+F<mailrpt.pl> is the preferred way.
+
+=item B<mailrpt.pl>
+
+Small wrapper around B<Test::Smoke::Mailer> that can use the settings
+from the smoke-configuration file. It will check if the report is
+already generated and do so if not (by calling F<mkovz.pl>).
+
+=item B<W32Configure.bat>
+
+Small wrapper around B<Test::Smoke::Util::Configure_win32()> that can
+use some of the settings from the smoke-configuration file.
+
+This helps users on Windows to create the F<<
+<builddir>/win32/smoke.mk >> makefile for a specific configuration in
+a unixy way.
+
+=back
+
+=head2 Can I interrupt a smoke run?
+
+Yes, you can kill all the smoke related processes. Each stage is
+directly logged in F<< <builddir>/mktest.out >>.
+(Can somebody provide some more insight here?)
+
+=head2 Can I still generate a report after an interrupted smoke?
+
+Yes, but some information might be missing (the compiler info).
+
+    $ perl mailrpt.pl -c [configname]
+
+=head1 COPYRIGHT
+
+(c) 2002-2003, All rights reserved.
+
+  * Abe Timmerman <abeltje@cpan.org>
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+See:
+
+=over 4
+
+=item * L<http://www.perl.com/perl/misc/Artistic.html>
+
+=item * L<http://www.gnu.org/copyleft/gpl.html>
+
+=back
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=cut

@@ -4,6 +4,7 @@ ReleaseNotes
 Changes
 ChangeLog
 Configure.pl
+FAQ.pod
 Makefile.PL
 configsmoke.pl
 mailrpt.pl
