@@ -2,7 +2,7 @@ package Test::Smoke::Patcher;
 use strict;
 
 use vars qw( $VERSION @EXPORT );
-$VERSION = '0.003';
+$VERSION = '0.004';
 
 use base 'Exporter';
 use File::Spec;
@@ -16,16 +16,17 @@ sub TRY_REGEN_HEADERS() { 1 }
 
 my %CONFIG = (
 
-    df_ddir  => File::Spec->rel2abs( cwd ),
-    df_pfile => undef,
-    df_patch => 'patch',
-    df_popts => '',       # '-p1' is added in call_patch()
-    df_flags => 0,
-    df_v     => 0,
+    df_ddir     => File::Spec->rel2abs( cwd ),
+    df_pfile    => undef,
+    df_patch    => 'patch',
+    df_popts    => '',       # '-p1' is added in call_patch()
+    df_flags    => 0,
+    df_oldpatch => 0,
+    df_v        => 0,
 
     valid_type => { single => 1, multi => 1 },
-    single     => [qw( pfile patch popts flags )],
-    multi      => [qw( pfile patch popts flags )],
+    single     => [qw( pfile patch popts flags oldpatch )],
+    multi      => [qw( pfile patch popts flags oldpatch )],
 );
 
 =head1 NAME
@@ -345,7 +346,7 @@ sub _make_opts {
     my $opts = $switches || $self->{popts} || "";
     $opts .= " -p1" unless $opts =~ /-[a-zA-Z]*p\d/;
 #    $opts .= " -b" unless $opts =~ /-[a-zA-Z]*b/i;
-    $opts .= " --verbose" if $self->{v} > 1;
+    $opts .= " --verbose" if $self->{v} > 1 && !$self->{oldpatch};
 
     return $opts;
 }
