@@ -7,9 +7,9 @@ use lib $FindBin::Bin;
 use TestLib;
 use Cwd;
 
-use Test::More tests => 30;
+use Test::More tests => 32;
 
-use_ok( 'Test::Smoke::Patcher' );
+BEGIN { use_ok( 'Test::Smoke::Patcher' ) };
 
 {
     my $tdir = 't';
@@ -145,6 +145,17 @@ EOPINFO
     $newfile = get_file(qw( t perl patchme.txt ));
     unlike( $newfile, '/^VERSION == 20001$/m', "Conent OK" );
     1 while unlink $pinfo;
+}
+
+{
+    ok( defined &TRY_REGEN_HEADERS, "Exported \&TRY_REGEN_HEADERS" );
+    Test::Smoke::Patcher->config( flags => TRY_REGEN_HEADERS );
+    my $patcher = Test::Smoke::Patcher->new( single => { v => 0,
+        ddir => File::Spec->catdir(qw( t perl )),
+    } );
+    is( $patcher->{flags}, TRY_REGEN_HEADERS, "flags set from config()" );
+
+    # Should test if it calls 'regen_headers.pl'
 }
 
 END {

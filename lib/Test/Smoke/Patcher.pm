@@ -1,11 +1,16 @@
 package Test::Smoke::Patcher;
 use strict;
 
-use vars qw( $VERSION );
-$VERSION = '0.002';
+use vars qw( $VERSION @EXPORT );
+$VERSION = '0.003';
 
+use base 'Exporter';
 use File::Spec;
 use Cwd;
+
+@EXPORT = qw( &TRY_REGEN_HEADERS );
+
+sub TRY_REGEN_HEADERS() { 1 }
 
 my %CONFIG = (
 
@@ -13,11 +18,12 @@ my %CONFIG = (
     df_pfile => undef,
     df_patch => 'patch',
     df_popts => '',       # '-p1' is added in call_patch()
+    df_flags => 0,
     df_v     => 0,
 
     valid_type => { single => 1, multi => 1 },
-    single     => [qw( pfile patch popts )],
-    multi      => [qw( pfile patch popts )],
+    single     => [qw( pfile patch popts flags )],
+    multi      => [qw( pfile patch popts flags )],
 );
 
 =head1 NAME
@@ -108,6 +114,8 @@ The patch-resource can also be specified in four (4) ways.
 
 =over 4
 
+=cut
+
 =item Test::Smoke::Patcher->new( $type => \%args );
 
 C<new()> crates the object. Valid types are B<single> and B<multi>.
@@ -190,6 +198,39 @@ sub patch {
 
     my $method = "patch_$self->{ptype}";
     $self->$method( @_ );
+    $self->perl_regen_headers;
+}
+
+=item perl_regen_headers( )
+
+Try to run F<regen_headers.pl> if the flag is set.
+
+=cut
+
+sub perl_regen_headers {
+    my $self = shift;
+    return unless $self->{flags} & TRY_REGEN_HEADERS;
+
+    my $regen_headers_pl = File::Spec->catfile( $self->{ddir},
+                                                'regen_headers.pl' );
+    SKIP: if ( -f $regen_headers_pl ) {
+        my $cwd = cwd;
+        chdir $self->{ddir} or last SKIP;
+        local *RUN_REGEN;
+        if ( open RUN_REGEN, "$^X $regen_headers_pl |" ) {
+            while ( <RUN_REGEN> ) {
+                $self->{v} and print;
+            }
+            close RUN_REGEN or do {
+                require Carp;
+                Carp::carp "Error while running '$regen_headers_pl'";
+            };
+        } else {
+            require Carp;
+            Carp::carp "Could not fork '$regen_headers_pl'";
+        }
+        chdir $cwd;
+    }
 }
 
 =item $patcher->patch_single( )
