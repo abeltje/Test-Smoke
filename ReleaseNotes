@@ -1,104 +1,38 @@
 =head1 NAME
 
-ReleaseNotes - These are the Release Notes for 1.17
+ReleaseNotes - These are the Release Notes for 1.17_50 (1.18 to be)
 
 =head1 SYNOPSIS
 
-These are the major changes since version 1.16.
+These are the major changes since version 1.17.
 
 =head1 DESCRIPTION
 
 I have done a lot of refactoring and wrote loads of new code and
-documentation since v1.16.
+documentation since v1.17.
 
 =over 4
 
 =item 1
 
-F<smokeperl.pl> is the new way to smoke. It is a wrapper script around
-good ol' F<mktest.pl> and F<mkovz.pl>
+Jarkko suggested a timeout mechanism so that smokes are stopped on a
+specific time or after a specified duration.
 
-It also uses the backends to B<synctree.pl> and B<mailrpt.pl>
+    {killtime} eq '07:30' stops the smoke at 07:30 (AM)
+    {killtime} eq '+9:30' stop after 9.5 hours
+
+(this change was integrated into 1.17.02 MAINT)
 
 =item 2
 
-F<configsmoke.pl> helps you create a (mandatory) configuration for
-F<smokeperl.pl>. This configuration is stored in a separate file, so
-that it is possible to have different configurations.
-
-One can think of different perl versions or different compiler
-versions.
+L<Test::Smoke::BuildCFG> is a new interface for handling build
+configurations. This OO interface will serialise the parsed build
+configurations and give you the ability to itterate over them.
 
 =item 3
 
-New ways to sync the source-tree (see L<synctree.pl> and
-L<Test::Smoke::Syncer>).
-
-=item 4
-
-Distribution now contains Mail::Sendmail (esp. for Win32)
-
-=item 5
-
--Uuseperlio will now only do one (1) testrun and it's back in 
-F<perlcurrent.cfg>
-
-=item 6
-
-An implementation of Nick Clark's 'Hardlink Forest', with the extra
-B<< --forest <directory> >> option to B<mktest.pl>. This will change
-the way to B<make distclean> to another (hopefully faster).
-
-=item 7
-
-The subject of the message  containing the report has changed:
-
- Smoke [perlversion] <patch> <summary> <os> - <osvers> (<arch>/<cpus>)
-
-=item 8
-
-If your platform supports B<UTF-8 locales> you will now be able to do
-an extra pass of B<make test> with B<$ENV{LC_ALL}> set to such a
-locale.
-
-=item 9
-
-All the backends now have a front end script (F<synctree.pl>,
-F<patchtree.pl>, F<mailrpt.pl> and F<W32Configure.pl>
-
-=item 10
-
-There now is a B<--smartsmoke> option that will exit after the
-SYNCTREE step if the the patchlevel is the same as before.
-
-=item 11
-
-Some hacks are in place to support the smoking of perl-5.6.2 to be, as
-it doesn't need the extended PerlIO testing we use for 5.8+.
-
-=item 12
-
-To configure Test::Smoke for smoking perl-5.6.x(MAINT):
-
-    $ perl configsmoke.pl -p smoke56x
-
-To configre Test::Smoke for smoking perl-5.8.x(MAINT):
-
-    $ perl configsmoke.pl -p smoke58x
-
-=item 13
-
-I think I finally got B<make install> to do what I want.
-
-=item 14
-
-We now include the hostname of the machine in the report for easy
-recognition.
-
-=item 15
-
-The shellscript (F<smokecurrent.sh>/F<smokecurrent.cmd>) implements a
-sort of lock machanism, so that "overlapping" smokes are prevented.
+L<Test::Smoke::Smoker> is a new interface for running a smoke
+cycle. It basically replaces the inner works of F<mktest.pl>.
 
 =back
 
