@@ -174,7 +174,11 @@ for (<OUT>) {
     }
     if (m/PERLIO\s*=\s*(\w+)/) {
         $perlio = $1;
-#        next;
+        if ( $^O =~  /MSWin32/ ) {
+            s/^PERLIO\s*=\s+\w+io(?: :crlf)?\s*//;
+        } else {
+            next;
+        }
     }
     if (m/^\s*All tests successful/) {
         $rpt{$conf}{$debug}{$perlio} = "O";
