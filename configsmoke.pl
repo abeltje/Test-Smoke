@@ -31,7 +31,7 @@ foreach my $opt (qw( config jcl log )) {
 }
 
 use vars qw( $VERSION $conf );
-$VERSION = '0.021'; # $Id$
+$VERSION = '0.022'; # $Id$
 
 eval { require $options{config} };
 $options{oldcfg} = 1, print "Using '$options{config}' for defaults.\n" 
@@ -152,6 +152,11 @@ my %opt = (
         alt => [ ],
         dft => File::Spec->rel2abs( is_win32
                                     ? 'w32current.cfg' : 'perlcurrent.cfg' ),
+    },
+    change_cfg => {
+        msg => undef, # Set later...
+        alt => [qw( Y n )],
+        dft => 'y',
     },
     umask => {
         msg => 'What umask can be used (0 preferred)?',
@@ -396,6 +401,10 @@ You will be asked some questions in order to configure this test suite.
 Please make sure to read the documentation "perldoc configsmoke.pl"
 in case you do not understand a question.
 
+* Values in angled-brackets (<>) are alternatives (none other allowed)
+* Values in square-brackets ([]) are default values (<Enter> confirms)
+* Use single space to clear a value
+
 EOMSG
 
 my $arg;
@@ -446,7 +455,23 @@ The same goes for the perl 5.6.x branch:
 
 =head1 CONFIGURATION
 
-B<If you want to clear a setting use a single space!>
+Use of the program:
+
+=over 4
+
+=item *
+
+Values in angled-brackets (<>) are alternatives (none other allowed)
+
+=item *
+
+Values in square-brackets ([]) are default values (<Enter> confirms)
+
+=item *
+
+Use single space to clear a value
+
+=back
 
 Here is a description of the configuration sections.
 
@@ -504,10 +529,10 @@ BUILDDIR: {
     my $dot_patch = File::Spec->catfile( $config{ $arg }, '.patch' );
     if ( -e $manifest && -e $dot_patch ) {
         $opt{use_old}->{dft} = $options{oldcfg} && 
-                               $conf->{ddir} eq $config{ddir}
+                               ($conf->{ddir}||"") eq $config{ddir}
             ? 'y' : $opt{use_old}->{dft};
-        my $use_old = lc prompt( 'use_old' );
-        redo BUILDDIR unless $use_old eq 'y';
+        my $use_old = prompt_yn( 'use_old' );
+        redo BUILDDIR unless $use_old;
     }
 }
 
@@ -533,6 +558,7 @@ B<-Duselargefiles> section from F<w32current.cfg> should be enough.
 
 $arg = 'cfg';
 $config{ $arg } = prompt_file( $arg );
+check_buildcfg( $config{ $arg } );
 
 =item Nick Clark hardlink forest
 
@@ -715,7 +741,7 @@ SYNCER: {
 C<pfile> is the path to a textfile that holds the names of patches to
 be applied before smoking. This can be used to run a smoke test on proposed
 patches that have not been applied (yet) or to see the effect of
-revesing an already applied patch. The file format is simple:
+reversing an already applied patch. The file format is simple:
 
   * one patchfile per line
   * optionally followed by ';' and options to pass to patch
@@ -1054,13 +1080,41 @@ Have the appropriate amount of fun!
 EOMSG
 
 sub save_config {
+    my $dumper = Data::Dumper->new([ \%config ], [ 'conf' ]);
+    Data::Dumper->can( 'Sortkeys' ) and 
+        $dumper->Sortkeys( \&sort_configkeys );
     local *CONFIG;
     open CONFIG, "> $options{config}" or
         die "Cannot write '$options{config}': $!";
-    print CONFIG Data::Dumper->Dump( [\%config], ['conf'] );
+    print CONFIG $dumper->Dump;
     close CONFIG or warn "Error writing '$options{config}': $!" and return;
 
     print "Finished writing '$options{config}'\n";
+}
+
+sub sort_configkeys {
+    my @order = qw( perl_version is56x
+        cfg ddir sync_type fsync 
+        rsync opts source 
+        tar server sdir sfile patchup pserver pdir unzip patch cleanup
+        cdir hdir
+        patch pfile
+        force_c_locale locale
+        mail mail_type mserver to from cc
+        w32args w32cc w32make
+        umask renice
+        smartsmoke v
+        killtime );
+
+    my $i = 0;
+    my %keyorder = map { $_ => $i++ } @order;
+
+    my @keyord = sort { 
+        $a <=> $b 
+    } @keyorder{ grep exists $keyorder{ $_}, keys %{ $_[0] } };
+
+    return [ @order[ @keyord ], 
+             sort grep !exists $keyorder{ $_ }, keys %{ $_[0] } ];
 }
 
 sub write_sh {
@@ -1460,6 +1514,92 @@ sub get_Win_version {
     $win_version .= " $osversion[0]" if $osversion[0];
 
     return $win_version;
+}
+
+=item check_buildcfg
+
+We will try to check the build configurations file to see if we should
+comment some options out.
+
+=cut
+
+sub check_buildcfg {
+    my( $file_name ) = @_;
+
+    local *BCFG;
+    open BCFG, "< $file_name" or do {
+        warn "Cannot read '$file_name': $!\n" .
+             "Will not check the build configuration file!";
+        return;
+    };
+    my @bcfg = <BCFG>;
+    close BCFG;
+    my $oldcfg = join "", grep !/^#/ => @bcfg;
+
+    my @no_option = ( );
+    OSCHECK: {
+        local $_ = $^O;
+        /darwin|bsd/i && do { 
+            # No -Duselongdouble, -Dusemorebits, -Duse64bitall
+            @no_option = qw( -Duselongdouble -Dusemorebits -Duse64bitall );
+        };
+
+	/linux/i && do {
+            # No -Duse64bitall
+            @no_option = qw( -Duse64bitall );
+        };
+        foreach my $option ( @no_option ) {
+            !/^#/ && /\Q$option\E/ && s/^/#/ for @bcfg;
+        }
+    }
+    my $newcfg = join "", grep !/^#/ => @bcfg;
+    return if $oldcfg eq $newcfg;
+
+    my $options = join "|", map "\Q$_\E" => sort {
+        lenght( $b||"" ) <=> length( $a||"" )
+    } @no_option;
+
+    my $display = join "", map "\t$_" 
+        => grep !/^#/ || ( /^#/ && /$options/ ) => @bcfg;
+    $opt{change_cfg}->{msg} = <<EOMSG;
+Some options that do not apply to your platform were found.
+(Comment-lines left out below, but will be written to disk.)
+$display
+Write the changed config to disk?
+EOMSG
+
+    my $write_it = prompt_yn( 'change_cfg' );
+    finish_cfgcheck( $write_it, $file_name, \@bcfg);
+}
+
+=item finish_cfgcheck
+
+
+=cut
+
+sub finish_cfgcheck {
+    my( $overwrite, $fname, $bcfg ) = @_;
+
+    if ( $overwrite ) {
+        my $backup = "$fname.bak";
+        -f $backup and chmod( 0775, $backup ) and unlink $backup;
+        rename $fname, $backup or 
+            warn "Cannot rename '$fname' to '$backup': $!";
+    } else {
+        $fname = "$options{prefix}.cfg";
+    }
+    # change the filemode (make install makes perlcurrent.cfg readonly)
+    -f $fname and chmod 0775, $fname;
+    open BCFG, "> $fname" or do {
+        warn "Cannot write '$fname': $!";
+        return;
+    };
+    print BCFG @$bcfg;
+    close BCFG or do {
+        warn "Error on close '$fname': $!";
+        return;
+    };
+    print "Wrote '$fname'\n";
 }
 
 =back
