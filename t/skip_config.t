@@ -10,8 +10,10 @@ BEGIN {
     @tests = (
         { os => $^O, skip => 1, args => '-Uuseperlio -Dusethreads' },
         { os => $^O, skip => 1, args => '-Uuseperlio -Duseithreads' },
-        { os => $^O, skip => 0, args => '-Dusethreads -Dusemymalloc' },
-        { os => $^O, skip => 0, args => '-Duseithreads -Dusemymalloc' },
+        { os => $^O, skip => $^O eq 'MSWin32',
+          args => '-Dusethreads -Dusemymalloc' },
+        { os => $^O, skip => $^O eq 'MSWin32',
+          args => '-Duseithreads -Dusemymalloc' },
         { os => 'MSWin32', skip => 1,
           args => '-Dusethreads -Dusemymalloc' },
         { os => 'MSWin32', skip => 1,
