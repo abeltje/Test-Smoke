@@ -10,6 +10,234 @@ The filelists have a short symbolic indicator:
 
 Enjoy!
 ___________________________________________________________________________
+[   824] By: abeltje                          on 2005-02-11 11:03:46 +0100
+        Log: * Prepare for 1.19_65 snapshot
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   823] By: abeltje                          on 2005-02-11 10:59:20 +0100
+        Log: * [FIX]
+	       * make sure the reference tests follow $^O!
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/t/skip_config.t
+___________________________________________________________________________
+[   822] By: abeltje                          on 2005-02-11 10:54:10 +0100
+        Log: * [FIX]
+	       * a directory separator thing for MSWin32 (/ and \)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/t/tree.t
+___________________________________________________________________________
+[   821] By: abeltje                          on 2005-02-11 10:50:33 +0100
+        Log: * [CHANGE]
+	       + add support for -Dusethreads -Duemymalloc -Uuseimpsys on
+		 MSWin32
+	       + new testfile for Test::Smoke::Util::skip_config()
+	       + skip_config() for -Dusethreads -Dusemymalloc without
+		 -Uuseimpsys
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           + /Test-Smoke/t/skip_config.t
+           ! /Test-Smoke/MANIFEST, /Test-Smoke/lib/Test/Smoke/Util.pm,
+	     /Test-Smoke/t/for_dmake.t, /Test-Smoke/t/for_nmake.t
+___________________________________________________________________________
+[   820] By: abeltje                          on 2005-02-11 08:58:20 +0100
+        Log: * [CHANGE]
+	       + add tests for change 816/817
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/t/syncer_ftpclient.t
+___________________________________________________________________________
+[   819] By: abeltje                          on 2005-02-11 08:53:22 +0100
+        Log: * [CHANGE]
+	       * Make the tests obey $SMOKE_VERBOSE
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/t/syncer_ftp.t, /Test-Smoke/t/syncer_link.t
+___________________________________________________________________________
+[   818] By: abeltje                          on 2005-02-11 08:50:20 +0100
+        Log: * [CHANGE]
+	       * Implement perl-change 23554, that splits Config.pm into
+		 two files (Config_heavy.pl)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Util.pm,
+	     /Test-Smoke/t/smoked_config.t
+___________________________________________________________________________
+[   817] By: abeltje                          on 2005-02-11 08:42:58 +0100
+        Log: * [CHANGE]
+	       * Test::Smoke::Syncer::FTP::sync() now returns true/false
+		 for success/failure
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Syncer.pm
+___________________________________________________________________________
+[   816] By: abeltje                          on 2005-02-11 08:36:49 +0100
+        Log: * [CHANGE]
+	       * mirror() returns false/true on fail/success
+	       * make the unlink()s VMS friendly
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/FTPClient.pm
+___________________________________________________________________________
+[   815] By: abeltje                          on 2005-01-23 13:30:18 +0100
+        Log: * [CHANGE]
+	       * clean up the "make -i distclean" mess at the beginning
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Makefile.PL
+___________________________________________________________________________
+[   813] By: abeltje                          on 2005-01-23 11:21:27 +0100
+        Log: * [CHANGE]
+	       * more VMS specific onfigure stuff
+	       * added vms_whereis()
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl, /Test-Smoke/t/TestLib.pm
+___________________________________________________________________________
+[   812] By: abeltje                          on 2005-01-21 18:25:33 +0100
+        Log: * [FIXFIX]
+	       * I buggered up change 811, now done right
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Syncer.pm
+___________________________________________________________________________
+[   811] By: abeltje                          on 2005-01-21 18:01:09 +0100
+        Log: * [FIX] (bug found by Steve Peters)
+	       * Make sure the list of patches in
+		 Test::Smoke::Syncer::Snapshot::_get_patches() is sorted
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Syncer.pm
+___________________________________________________________________________
+[   810] By: abeltje                          on 2004-12-03 12:18:36 +0100
+        Log: * [CHANGE]
+	       * Move FAQ to the lib/ directory, now it's Test::Smoke::FAQ
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           - /Test-Smoke/FAQ
+           ! /Test-Smoke/MANIFEST
+          !> /Test-Smoke/lib/Test/Smoke/FAQ =(/Test-Smoke/FAQ:809)
+___________________________________________________________________________
+[   809] By: abeltje                          on 2004-12-03 12:14:47 +0100
+        Log: * [CHANGE]
+	       * reverse 799,800,801
+	       * Makefile.PL PMLIBDIRS => must have a Unixpath to help
+		 File::Find
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           - /Test-Smoke/bin, /Test-Smoke/lib/Test/Smoke/FAQ
+           ! /Test-Smoke/MANIFEST, /Test-Smoke/Makefile.PL,
+	     /Test-Smoke/private/test_compile.pl,
+	     /Test-Smoke/private/test_pod.pl, /Test-Smoke/t/cfgstuff.t
+          !> /Test-Smoke/FAQ =(/Test-Smoke/FAQ:798),
+	     /Test-Smoke/W32Configure.pl
+	     =(/Test-Smoke/W32Configure.pl:798), /Test-Smoke/archiverpt.pl
+	     =(/Test-Smoke/archiverpt.pl:798), /Test-Smoke/configsmoke.pl
+	     =(/Test-Smoke/configsmoke.pl:798), /Test-Smoke/mailrpt.pl
+	     =(/Test-Smoke/mailrpt.pl:798), /Test-Smoke/patchtree.pl
+	     =(/Test-Smoke/patchtree.pl:798), /Test-Smoke/perl55x.cfg
+	     =(/Test-Smoke/perl55x.cfg:798), /Test-Smoke/perl562.cfg
+	     =(/Test-Smoke/perl562.cfg:798), /Test-Smoke/perl58x.cfg
+	     =(/Test-Smoke/perl58x.cfg:798), /Test-Smoke/perlcurrent.cfg
+	     =(/Test-Smoke/perlcurrent.cfg:798), /Test-Smoke/runsmoke.pl
+	     =(/Test-Smoke/runsmoke.pl:798), /Test-Smoke/smoke55x_dfconfig
+	     =(/Test-Smoke/smoke55x_dfconfig:798),
+	     /Test-Smoke/smoke562_dfconfig
+	     =(/Test-Smoke/smoke562_dfconfig:798),
+	     /Test-Smoke/smoke56x_dfconfig
+	     =(/Test-Smoke/smoke56x_dfconfig:798),
+	     /Test-Smoke/smoke58x_dfconfig
+	     =(/Test-Smoke/smoke58x_dfconfig:798),
+	     /Test-Smoke/smokeperl.pl =(/Test-Smoke/smokeperl.pl:798),
+	     /Test-Smoke/smokestatus.pl =(/Test-Smoke/smokestatus.pl:798),
+	     /Test-Smoke/synctree.pl =(/Test-Smoke/synctree.pl:798),
+	     /Test-Smoke/vmsperl.cfg =(/Test-Smoke/vmsperl.cfg:798),
+	     /Test-Smoke/w32current.cfg =(/Test-Smoke/w32current.cfg:798)
+___________________________________________________________________________
+[   808] By: abeltje                          on 2004-12-03 12:07:26 +0100
+        Log: * [CHANGE] Suggested by Craig Berry
+	       * Better hardware diagnostics for OpenVMS
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[   807] By: abeltje                          on 2004-12-03 12:04:10 +0100
+        Log: * [FIX]
+	       * change 804 wasn't enough to enable minitest for OpenVMS
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm
+___________________________________________________________________________
+[   806] By: abeltje                          on 2004-11-28 19:30:58 +0100
+        Log: * [FIX]
+	       * wrong variable in the Solaris/osf code :(
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[   805] By: abeltje                          on 2004-11-28 19:20:49 +0100
+        Log: * [CHANGE]
+	       * Jarkko Hietaniemi send some osf information
+	       * I'm still working on OpenVMS...
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[   804] By: abeltje                          on 2004-11-28 19:16:49 +0100
+        Log: * [CHANGE]
+	       * changes 23498 and 23560 added the minitest target for
+		 OpenVMS
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm
+___________________________________________________________________________
+[   800] By: abeltje                          on 2004-11-20 14:06:37 +0100
+        Log: * [CHANGE]
+	       * This shouldn't have moved :-(
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           - /Test-Smoke/bin/sprove.pl
+___________________________________________________________________________
+[   799] By: abeltje                          on 2004-11-20 13:59:32 +0100
+        Log: * [CHANGE]
+	       * BIG reorganisation of the source-tree. Needed to make the
+		 distro work on OpenVMS.
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           + /Test-Smoke/bin
+           - /Test-Smoke/FAQ, /Test-Smoke/W32Configure.pl,
+	     /Test-Smoke/archiverpt.pl, /Test-Smoke/configsmoke.pl,
+	     /Test-Smoke/mailrpt.pl, /Test-Smoke/patchtree.pl,
+	     /Test-Smoke/perl55x.cfg, /Test-Smoke/perl562.cfg,
+	     /Test-Smoke/perl58x.cfg, /Test-Smoke/perlcurrent.cfg,
+	     /Test-Smoke/runsmoke.pl, /Test-Smoke/smoke55x_dfconfig,
+	     /Test-Smoke/smoke562_dfconfig, /Test-Smoke/smoke56x_dfconfig,
+	     /Test-Smoke/smoke58x_dfconfig, /Test-Smoke/smokeperl.pl,
+	     /Test-Smoke/smokestatus.pl, /Test-Smoke/synctree.pl,
+	     /Test-Smoke/vmsperl.cfg, /Test-Smoke/w32current.cfg
+           ! /Test-Smoke/MANIFEST, /Test-Smoke/Makefile.PL,
+	     /Test-Smoke/SIGNATURE, /Test-Smoke/lib/Test/Smoke.pm,
+	     /Test-Smoke/t/cfgstuff.t
+          !> /Test-Smoke/bin/W32Configure.pl
+	     =(/Test-Smoke/W32Configure.pl:737),
+	     /Test-Smoke/bin/archiverpt.pl
+	     =(/Test-Smoke/archiverpt.pl:737),
+	     /Test-Smoke/bin/configsmoke.pl
+	     =(/Test-Smoke/configsmoke.pl:788), /Test-Smoke/bin/mailrpt.pl
+	     =(/Test-Smoke/mailrpt.pl:786), /Test-Smoke/bin/patchtree.pl
+	     =(/Test-Smoke/patchtree.pl:737), /Test-Smoke/bin/perl55x.cfg
+	     =(/Test-Smoke/perl55x.cfg:737), /Test-Smoke/bin/perl562.cfg
+	     =(/Test-Smoke/perl562.cfg:737), /Test-Smoke/bin/perl58x.cfg
+	     =(/Test-Smoke/perl58x.cfg:737),
+	     /Test-Smoke/bin/perlcurrent.cfg
+	     =(/Test-Smoke/perlcurrent.cfg:737),
+	     /Test-Smoke/bin/runsmoke.pl =(/Test-Smoke/runsmoke.pl:737),
+	     /Test-Smoke/bin/smoke55x_dfconfig
+	     =(/Test-Smoke/smoke55x_dfconfig:737),
+	     /Test-Smoke/bin/smoke562_dfconfig
+	     =(/Test-Smoke/smoke562_dfconfig:737),
+	     /Test-Smoke/bin/smoke56x_dfconfig
+	     =(/Test-Smoke/smoke56x_dfconfig:737),
+	     /Test-Smoke/bin/smoke58x_dfconfig
+	     =(/Test-Smoke/smoke58x_dfconfig:737),
+	     /Test-Smoke/bin/smokeperl.pl =(/Test-Smoke/smokeperl.pl:737),
+	     /Test-Smoke/bin/smokestatus.pl
+	     =(/Test-Smoke/smokestatus.pl:737), /Test-Smoke/bin/sprove.pl
+	     =(/Test-Smoke/sprove.pl:737), /Test-Smoke/bin/synctree.pl
+	     =(/Test-Smoke/synctree.pl:760), /Test-Smoke/bin/vmsperl.cfg
+	     =(/Test-Smoke/vmsperl.cfg:769),
+	     /Test-Smoke/bin/w32current.cfg
+	     =(/Test-Smoke/w32current.cfg:737),
+	     /Test-Smoke/lib/Test/Smoke/FAQ =(/Test-Smoke/FAQ:737)
+___________________________________________________________________________
+[   797] By: abeltje                          on 2004-11-19 23:05:54 +0100
+        Log: * [AUTOCOMMIT]
+	       * Regenerate 'Changes', 'SIGNATURES', 'META.yml'
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Changes, /Test-Smoke/META.yml,
+	     /Test-Smoke/SIGNATURE
+___________________________________________________________________________
 [   796] By: abeltje                          on 2004-11-19 23:01:39 +0100
         Log: * prepare for the 1.19_53 snapshot!
         Url: http://source.Test-Smoke.org/svn/Test-Smoke
