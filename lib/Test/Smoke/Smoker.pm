@@ -581,11 +581,10 @@ sub _transform_testnames {
     my %inconsistent;
     for my $nok ( @notok ) {
         $nok =~ m!^(?:\.\.[\\/])?(\w+/[-\w/\\]+)\.*(.*)! or next;
-        my( $test_name, $status ) = split /\.{3,}/, $nok;
-        $test_name or next;
+        my( $test_name, $status ) = ( $1, $2 );
         $test_name .= '.t';
 
-        $nok =~ /^\w/ and $test_name = $nok =~ /^(?:ext|lib|t)\b/
+        $test_name = $test_name =~ /^(?:ext|lib|t)\b/
             ? catfile( updir(), $test_name )
             : catfile( updir(), 't', $test_name );
 

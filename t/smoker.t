@@ -9,6 +9,8 @@ use Cwd;
 use Test::More tests => 4;
 use_ok( 'Test::Smoke::Smoker' );
 
+my $debug = exists $ENV{SMOKE_DEBUG} && $ENV{SMOKE_DEBUG};
+
 {
     my %config = (
         v => 0,
@@ -65,6 +67,7 @@ use_ok( 'Test::Smoke::Smoker' );
     }
     is_deeply \%tests, \%expect, "transform testnames" or diag Dumper \%tests;
 
+    $debug and diag Dumper { tests => \%tests, expect => \%expect };
     close LOG;
 }
 
