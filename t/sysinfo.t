@@ -6,8 +6,10 @@ use strict;
 use Test::More tests => 55;
 my $verbose = 0;
 
-use FindBin;
-use lib $FindBin::Bin;
+my $findbin;
+use File::Basename;
+BEGIN { $findbin = dirname $0; }
+use lib $findbin;
 use TestLib;
 
 BEGIN { use_ok "Test::Smoke::SysInfo", qw( sysinfo tsuname ) }
@@ -33,7 +35,10 @@ ok defined &tsuname, "tsuname() imported";
     isa_ok $si => 'Test::Smoke::SysInfo';
     ok $si->cpu_type, "cpu_type: " . $si->cpu_type;
     ok $si->cpu,      "cpu: " . $si->cpu;
-    ok $si->ncpu,     "number of cpus: " . $si->ncpu;
+    SKIP: {
+        $si->ncpu or skip "No #cpu code for this platform", 1;
+        ok $si->ncpu,     "number of cpus: " . $si->ncpu
+    }
     ok $si->os, $si->os;
     ok $si->host, $si->host;
 

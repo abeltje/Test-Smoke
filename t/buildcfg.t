@@ -3,11 +3,13 @@ use strict;
 
 # $Id$
 
-use Test::More tests => 79;
+use Test::More tests => 81;
 my $verbose = 0;
 
-use FindBin;
-use lib $FindBin::Bin;
+my $findbin;
+use File::Basename;
+BEGIN { $findbin = dirname $0; }
+use lib $findbin;
 use TestLib;
 
 use_ok "Test::Smoke::BuildCFG";
@@ -261,6 +263,16 @@ OUT
     is "$bcfg", "", "stringify empty";
 
     ok !$bcfg->has_arg( '-Duseithreads' ), "hasnt_arg(-Duseithreads)";
+}
+
+{
+    my $cfg = q/-Dusedevel -Dprefix="sys$login:[perl59x]"/;
+    my $bcfg = Test::Smoke::BuildCFG::new_configuration( $cfg );
+    isa_ok $bcfg, 'Test::Smoke::BuildCFG::Config';
+
+    is $bcfg->vms,
+       q/-"Dusedevel" -"Dprefix=sys$login:[perl59x]"/,
+       "check vms cmdline";
 }
 
 package Test::BCFGTester;

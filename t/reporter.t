@@ -5,8 +5,10 @@ $| = 1;
 # $Id$
 
 use File::Spec::Functions;
-use FindBin;
-use lib $FindBin::Bin;
+my $findbin;
+use File::Basename;
+BEGIN { $findbin = dirname $0; }
+use lib $findbin;
 use TestLib;
 
 my $verbose = exists $ENV{SMOKE_VERBOSE} ? $ENV{SMOKE_VERBOSE} : 0;
@@ -16,11 +18,11 @@ use Test::More tests => 53;
 
 use_ok 'Test::Smoke::Reporter';
 
-my $config_sh = catfile( $FindBin::Bin, 'config.sh' );
+my $config_sh = catfile( $findbin, 'config.sh' );
 {
     create_config_sh( $config_sh, version => '5.6.1' );
     my $reporter = Test::Smoke::Reporter->new(
-        ddir       => $FindBin::Bin,
+        ddir       => $findbin,
         v          => $verbose, 
         outfile    => '',
         showcfg    => $showcfg,
@@ -84,7 +86,7 @@ __EOM__
 {
     create_config_sh( $config_sh, version => '5.8.3' );
     my $reporter = Test::Smoke::Reporter->new(
-        ddir    => $FindBin::Bin,
+        ddir    => $findbin,
         v       => $verbose, 
         outfile => '',
         showcfg => $showcfg,
@@ -186,7 +188,7 @@ __EOM__
 {
     create_config_sh( $config_sh, version => '5.9.0' );
     my $reporter = Test::Smoke::Reporter->new(
-        ddir    => $FindBin::Bin,
+        ddir    => $findbin,
         v       => $verbose, 
         outfile => '',
     );
@@ -271,7 +273,7 @@ unlink $config_sh;
 { # This test is just to test 'PASS' (and not PASS-so-far)
 #    create_config_sh( $config_sh, version => '5.00504' );
     my $reporter = Test::Smoke::Reporter->new( 
-        ddir    => $FindBin::Bin,
+        ddir    => $findbin,
         v       => $verbose, 
         outfile => '',
         is56x   => 1,
@@ -321,7 +323,7 @@ __EOM__
 { # Test a bug reported by Merijn
   # the c's were reported for locale: only
     ok( my $reporter = Test::Smoke::Reporter->new(
-        ddir       => catfile( $FindBin::Bin, 'ftppub' ),
+        ddir       => catfile( $findbin, 'ftppub' ),
         is56x      => 0,
         defaultenv => 0,
         locale     => 'EN_US.UTF-8',
@@ -361,7 +363,7 @@ __EOM__
 
 { # report from cygwin
     ok( my $reporter = Test::Smoke::Reporter->new(
-        ddir       => catdir( $FindBin::Bin, 'ftppub' ),
+        ddir       => catdir( $findbin, 'ftppub' ),
         is56x      => 0,
         defaultenv => 0,
         outfile    => 'bugtst02.out',
@@ -402,7 +404,7 @@ __EOM__
 
 { # report from Win32
     ok( my $reporter = Test::Smoke::Reporter->new(
-        ddir       => catdir( $FindBin::Bin, 'ftppub' ),
+        ddir       => catdir( $findbin, 'ftppub' ),
         is56x      => 0,
         defaultenv => 1,
         is_win32   => 1,

@@ -1,10 +1,13 @@
 #! /usr/bin/perl -w
 use strict;
+use Data::Dumper;
 
 # $Id$
 
-use FindBin;
-use lib $FindBin::Bin;
+my $findbin;
+use File::Basename;
+BEGIN { $findbin = dirname $0; }
+use lib $findbin;
 use TestLib;
 use File::Spec;
 
@@ -23,20 +26,25 @@ SETUP: {
 
     mkdir $cdir, 0744 or plan skip_all => "Cannot create test-tree: $!";
     # Copy all *.t files to the new dir
+    my $count = 0;
     foreach my $test ( glob '*.t' ) {
-        File::Copy::copy( $test, File::Spec->catfile( $cdir, $test ) );
+        $count += File::Copy::copy( $test,
+                                     File::Spec->catfile( $cdir, $test ) );
     }
+    $ENV{SMOKE_VERBOSE} and diag "Copied files ($cdir): $count";
     # Copy the subdir 'win32' also
     my $subdir = File::Spec->catdir( $cdir, 'win32' );
     mkdir $subdir, 0744 or plan skip_all => "Cannot create '$subdir': $!";
     local *DIR;
     opendir DIR, 'win32' or plan skip_all => "Cannot opendir 'win32': $!";
+    $count = 0;
     while ( my $file = readdir DIR ) {
         -f File::Spec->catfile('win32', $file ) or next;
-        File::Copy::copy( File::Spec->catfile( 'win32', $file ),
-                          File::Spec->catfile( $subdir, $file ) );
+        $count += File::Copy::copy( File::Spec->catfile( 'win32', $file ),
+                                    File::Spec->catfile( $subdir, $file ) );
     }
     closedir DIR;
+    $ENV{SMOKE_VERBOSE} and diag "Copied files ($subdir): $count";
     # Create a '.patch'
     local *DOTPATCH;
     my $dot_patch = File::Spec->catfile( $cdir, '.patch' );
@@ -68,6 +76,7 @@ SKIP: {
 
     isa_ok( $syncer, 'Test::Smoke::Syncer' );
     isa_ok( $syncer, 'Test::Smoke::Syncer::Copy' );
+diag Dumper $syncer;
 
     my $patch = $syncer->sync;
     is( $patch, 20000, "Patchlevel after copy: $patch" );

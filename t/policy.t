@@ -6,8 +6,10 @@ $| = 1;
 # This file checks to see if the new Test::Smoke::Policy object
 # does the same as the old way Merijn originaly wrote
 
-use FindBin;
-use lib $FindBin::Bin;
+my $findbin;
+use File::Basename;
+BEGIN { $findbin = dirname $0; }
+use lib $findbin;
 use TestLib;
 use Test::Smoke::Util qw( get_config );
 use Data::Dumper;

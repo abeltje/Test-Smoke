@@ -59,7 +59,8 @@ my $debug = exists $ENV{SMOKE_DEBUG} && $ENV{SMOKE_DEBUG};
     my %expect;
     my $test_base = catdir( cwd, 't' );
     foreach my $test ( keys %raw ) {
-        my $test_name = rel2abs( $test, $test_base );
+        my $cname = canonpath( $test );
+        my $test_name = rel2abs( $cname, $test_base );
 
         my $test_path = abs2rel( $test_name, $test_base );
         $test_path =~ tr!\\!/! if $^O eq 'MSWin32';

@@ -3,8 +3,10 @@ use strict;
 
 # $Id$
 
-use FindBin;
-use lib $FindBin::Bin;
+my $findbin;
+use File::Basename;
+BEGIN { $findbin = dirname $0; }
+use lib $findbin;
 use TestLib;
 
 use Test::More tests => 11;
@@ -12,7 +14,7 @@ BEGIN {
     use_ok( 'Test::Smoke::Util', qw( get_regen_headers run_regen_headers ) );
 }
 
-my $ddir = File::Spec->catdir( $FindBin::Bin, 'perl-current' );
+my $ddir = File::Spec->catdir( $findbin, 'perl-current' );
 -d $ddir or mkpath( $ddir, 0, 0755 ) or die "Cannot mkpath($ddir): $!";
 END { -d $ddir and rmtree( $ddir ); }
 
@@ -41,7 +43,7 @@ EO_REGEN
 
     local *REGENRUN;
     if ( ok open( REGENRUN, "$regen |" ), "Start pipe" ) {
-        my $output = <REGENRUN>;
+        chomp( my $output = <REGENRUN> );
         close REGENRUN;
         is( $output, "This is '$regen_headers_pl'",
             "Run regen_headers manually" );
@@ -71,7 +73,7 @@ EO_REGEN
 
     local *REGENRUN;
     if ( ok open( REGENRUN, "$regen |" ), "Start pipe" ) {
-        my $output = <REGENRUN>;
+        chomp( my $output = <REGENRUN> );
         close REGENRUN;
         is( $output, "This is '$regen_headers_pl'",
             "Run regen_headers manually" );
@@ -95,7 +97,7 @@ SKIP: { # as of 18852: 'regen_headers.pl' is now 'regen.pl'
 
     local *REGENRUN;
     if ( ok open( REGENRUN, "$regen |" ), "Start pipe" ) {
-        my $output = <REGENRUN>;
+        chomp( my $output = <REGENRUN> );
         close REGENRUN;
         is( $output, "This is '$regen_pl'",
             "Run regen_headers manually" );

@@ -4,8 +4,10 @@ use strict;
 # $Id$
 
 use File::Spec;
-use FindBin;
-use lib $FindBin::Bin;
+my $findbin;
+use File::Basename;
+BEGIN { $findbin = dirname $0; }
+use lib $findbin;
 use TestLib;
 use Cwd;
 

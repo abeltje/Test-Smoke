@@ -73,6 +73,7 @@ format.
 sub manify_path($) {
     my $path = shift or return;
     # There should be no volume on these file_paths
+    $path = File::Spec->canonpath( $path );
     my( undef, $dirs, $file ) = File::Spec->splitpath( $path );
     my @subdirs = grep $_ && length $_ => File::Spec->splitdir( $dirs );
     push @subdirs, $file;
@@ -87,13 +88,17 @@ Returns a list of filenames (no directory-names) in C<$path>.
 
 sub get_dir($) {
     my( $path ) = @_;
+    my $cwd = cwd();
+    chdir $path or die "Cannot chdir($path): $!";
     my @files;
     find sub {
         -f or return;
-        my $name = File::Spec->abs2rel( $File::Find::name, $path );
+        my $cname = File::Spec->canonpath( $File::Find::name );
+        my $name = File::Spec->abs2rel( $cname, $path );
         push @files, $name;
-    }, $path;
+    }, '.';
 
+    chdir $cwd or die "Cannot chdir($cwd) back: $!";
     return @files;
 }
 

@@ -6,9 +6,6 @@ use strict;
 use Test::More;
 my $verbose = 0;
 
-use FindBin;
-use lib $FindBin::Bin;
-
 my( @diffs, @fixed );
 BEGIN {
     @diffs = (

@@ -69,7 +69,11 @@ sub Net::FTP::ls {
     my $self = shift;
     local *DLDIR;
     opendir DLDIR, $self->{cwd} or return ( );
-    return grep ! /^\.{1,2}$/ && ! /.svn\b/  => readdir DLDIR;
+    return map {
+        my $fname = $_;
+        $^O eq 'VMS' and $fname =~ s/\.(?:DIR)?$//i;
+        $fname;
+    } grep ! /^\.{1,2}$/ && ! /.svn\b/  => readdir DLDIR;
 }
 sub Net::FTP::dir {
     my $self = shift;

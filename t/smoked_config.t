@@ -4,9 +4,10 @@ use strict;
 # $Id$
 
 use File::Spec;
-use FindBin;
-use lib $FindBin::Bin;
-
+my $findbin;
+use File::Basename;
+BEGIN { $findbin = dirname $0; }
+use lib $findbin;
 use TestLib;
 
 use Test::More tests => 20;
@@ -26,7 +27,7 @@ version='$version'
 
 SKIP: {
     my $to_skip = 5;
-    my $libpath = File::Spec->catdir( $FindBin::Bin, 'lib' );
+    my $libpath = File::Spec->catdir( $findbin, 'lib' );
     -d $libpath or mkpath( $libpath )  or 
         skip "Can't create '$libpath': $!", $to_skip;
     my $Config_pm = File::Spec->catfile( $libpath, 'Config.pm' );
@@ -48,7 +49,7 @@ $config_sh
 EOCONFIG
     close CONFIGPM or skip "Error '$Config_pm': $!", $to_skip;
 
-    my %Config = get_smoked_Config( $FindBin::Bin,
+    my %Config = get_smoked_Config( $findbin,
                                     qw( archname cf_email version
                                         osname osvers ));
 
@@ -63,7 +64,7 @@ EOCONFIG
 
 SKIP: { # get info from config.sh
     my $to_skip = 5;
-    my $libpath = File::Spec->catdir( $FindBin::Bin );
+    my $libpath = File::Spec->catdir( $findbin );
     my $Config_sh = File::Spec->catfile( $libpath, 'config.sh' );
 
     local *CONFIGSH;
@@ -84,7 +85,7 @@ $config_sh
 EOCONFIG
     close CONFIGSH or skip "Error '$Config_sh': $!", $to_skip;
 
-    my %Config = get_smoked_Config( $FindBin::Bin,
+    my %Config = get_smoked_Config( $findbin,
                                     qw( archname cf_email version
                                         osname osvers ));
 
@@ -98,7 +99,7 @@ EOCONFIG
 }
 
 {
-    my %Config = get_smoked_Config( $FindBin::Bin,
+    my %Config = get_smoked_Config( $findbin,
                                     qw( archname cf_email version
                                         osname osvers ));
 
@@ -110,7 +111,7 @@ EOCONFIG
 
 SKIP: {
     my $to_skip = 5;
-    my $libpath = File::Spec->catdir( $FindBin::Bin, 'lib' );
+    my $libpath = File::Spec->catdir( $findbin, 'lib' );
     -d $libpath or mkpath( $libpath )  or 
         skip "Can't create '$libpath': $!", $to_skip;
     my $Config_pm = File::Spec->catfile( $libpath, 'Config.pm' );
@@ -135,7 +136,7 @@ our \$Config_SH : unique = \$_;
 EOCONFIG
     close CONFIGPM or skip "Error '$Config_pm': $!", $to_skip;
 
-    my %Config = get_smoked_Config( $FindBin::Bin,
+    my %Config = get_smoked_Config( $findbin,
                                     qw( archname cf_email version
                                         osname osvers ));
 
@@ -150,5 +151,5 @@ EOCONFIG
 
 
 END {
-    rmtree( File::Spec->catdir( $FindBin::Bin, 'lib' ) )
+    rmtree( File::Spec->catdir( $findbin, 'lib' ) )
 }

@@ -35,7 +35,7 @@ SKIP: {
 # When found, t/ftppub/snap/perl@20000.tgz can be extracted
 # and used as a base for the hardlink sync
 
-    my $to_skip = 2;
+    my $to_skip = 4;
     my $tar = find_uncompress() or
         skip "Cannot find decompression stuff", $to_skip;
 
@@ -74,7 +74,7 @@ SKIP: { # Check that the same works for {haslink} == 0
 # When found, t/ftppub/snap/perl@20000.tgz can be extracted
 # and used as a base for the hardlink sync
 
-    my $to_skip = 2;
+    my $to_skip = 3;
     my $tar = find_uncompress() or
         skip "Cannot find decompression stuff", $to_skip;
 

@@ -14,8 +14,10 @@ use strict;
 # we can concentrate on doing the untargz and patch stuff
 #
 #####
-use FindBin;
-use lib $FindBin::Bin;
+my $findbin;
+use File::Basename;
+BEGIN { $findbin = dirname $0; }
+use lib $findbin;
 use TestLib;
 use File::Spec;
 
