@@ -551,7 +551,7 @@ sub get_ncpu {
 	};
 
         /irix/i && do {
-            my @output = `hinv -c processor`;
+            my @output = grep /\s+processors?$/i => `hinv -c processor`;
             $cpus = (split " ", $output[0])[0];
             last OS_CHECK;
         };
