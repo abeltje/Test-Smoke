@@ -220,7 +220,7 @@ sub copy_from_MANIFEST {
     $verbose and printf " %d items OK\n", scalar @manifest_files;
 
     my $dest = $self->new( $dest_dir );
-    File::Path::mkpath( $$dest, $verbose ) unless -d;
+    File::Path::mkpath( $$dest, $verbose ) unless -d $$dest;
 
     require File::Basename;
     require File::Copy;
