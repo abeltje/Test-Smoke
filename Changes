@@ -9,6 +9,17 @@ The filelists have a short symbolic indicator:
 
 Enjoy!
 ___________________________________________________________________________
+[   322] By: abeltje                          on 2003-08-03 17:33:36 +0200
+        Log: * [FIX] check_dotpatch() did not return anything for freshly
+	     unpacked snapshots!
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Syncer.pm
+___________________________________________________________________________
+[   321] By: abeltje                          on 2003-08-03 15:47:02 +0200
+        Log: * Regen Changes for 1.18
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/Changes
+___________________________________________________________________________
 [   320] By: abeltje                          on 2003-08-03 15:41:09 +0200
         Log: * This 1.18!
         Url: http://ati2/svn/Test-Smoke
