@@ -15,6 +15,7 @@ perl55x.cfg
 perl562.cfg
 perl58x.cfg
 perlcurrent.cfg
+vmsperl.cfg
 w32current.cfg
 smoke55x_dfconfig
 smoke562_dfconfig
