@@ -2,6 +2,7 @@
 use strict;
 
 use Config;
+use Carp;
 use Cwd;
 use File::Spec;
 use File::Path;
@@ -16,7 +17,7 @@ use Test::Smoke::Util qw( do_pod2usage );
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.043';
+$VERSION = '0.045';
 
 use Getopt::Long;
 my %options = ( 
@@ -680,7 +681,7 @@ you will need to confirm your choice.
 =cut
 
 {
-    # Hack -des to keep the safeguards
+    # Hack -des (--usedft) to keep the safeguards
     local $options{usedft} = $options{usedft};
     BUILDDIR: {
         $arg = 'ddir';
@@ -1132,6 +1133,27 @@ EO_MSG
     ];
 }
 
+=item vmsmake
+
+Get the make program to use for VMS (MMS or MMK). Start with the one
+this perl was build with.
+
+=cut
+
+VMSMAKE: {
+    is_vms or last VMSMAKE;
+
+    my %vmsmakers = get_avail_vms_make();
+
+    $arg = 'vmsmake';
+    $opt{ $arg } = {
+        msg => "Wich maker should be used?",
+        alt => [ sort keys %vmsmakers ],
+        dft => ( $Config{make} || (sort keys %vmsmakers)[0] ),
+    };
+    $config{ $arg } = prompt( $arg );
+}
+
 =item make finetuning
 
 Two different config options to accomodate the same thing: 
@@ -1146,7 +1168,7 @@ $arg = 'makeopt';
 $opt{ $arg }->{dft} = '-nologo' if is_win32 && $config{w32make} =~ /nmake/i;
 $config{ $arg } = prompt( $arg );
 
-unless ( is_win32 ) {
+unless ( is_win32 || is_vms ) {
     $arg = 'testmake';
     $config{ $arg } = prompt( $arg ) || 'make';
 }
@@ -1559,6 +1581,7 @@ Write a simple DCL script that helps running the smoke suite.
 
 sub write_com {
     my $jcl = "$options{jcl}.com";
+    my $cwd = File::Spec->canonpath( cwd() );
     local *MYSMOKECOM;
     open MYSMOKECOM, "> $jcl" or
         die "Cannot write '$jcl': $!";
@@ -1570,11 +1593,11 @@ sub write_com {
 \$! NOTE: Changes made in this file will be \*lost\*
 \$!       after rerunning $0
 \$! Try:
-\$!       SUBMIT/NOPRINT/NOTIFY $jcl
+\$!       SUBMIT/NOPRINTER/NOTIFY $cwd$jcl
 \$!
-\$  SET DEFAULT $findbin
+\$  SET DEFAULT $cwd
 \$! DEFINE/USER sys\$output $options{log}
-\$  MCR $^X smokeperl.pl "-c=$options{config}"
+\$  MCR $^X ${findbin}smokeperl.pl "-c=$options{config}"
 EO_COM
     close MYSMOKECOM or warn "Error writing '$jcl': $!";
 
@@ -1717,6 +1740,7 @@ sub prompt_yn {
 sub whereis {
     my( $prog, $find_all ) = @_;
     return '' unless $prog; # you shouldn't call it '0'!
+    is_vms and return vms_whereis( $prog, $find_all );
 
     $ENV{PATH} or return wantarray ? ( ) : [ ];
 
@@ -1736,6 +1760,50 @@ sub whereis {
         }
     }
     return @fnames ? wantarray ? @fnames : \@fnames : '';
+}
+
+=item vms_whereis( $prog )
+
+First look in the SYMBOLS to see if C<$prog> is there.
+Next look in the KFE-table C<INSTALL LIST> if it is there.
+As a last resort we can scan C<DCL$PATH> like we do on *nix/Win32
+
+=cut
+
+sub vms_whereis {
+    my( $prog, $find_all ) = @_;
+
+    # Check SYMBOLS
+    eval { require VMS::DCLsym };
+    if ( $@ ) {
+        carp "Oops, cannot load VMS::DCLsym: $@";
+    } else {
+        VMS::DCLsym->import;
+        my $syms = VMS::DCLsym->new;
+        return $prog if scalar $syms->getsym( uc $prog );
+    }
+    # Check Known File Entry table (INSTALL LIST)
+    my $img_re = '^\s+([\w\$]+);\d+';
+    my %kfe = map {
+        my $img = /$img_re/ ? $1 : '';
+        ( uc $img => undef )
+    } grep /$img_re/ => qx/INSTALL LIST/;
+    return $prog if exists $kfe{ uc $prog };
+
+    my $dclp_env = 'DCL$PATH';
+    my @path = $ENV{ $dclp_env }
+        ?split /$Config{path_sep}/, $ENV{ $dclp_env } : ();
+    my @pext = ( $Config{exe_ext} || $Config{_exe}, '.COM' );
+
+    foreach my $dir ( @path ) {
+        foreach my $ext ( @pext ) {
+            my $fname = File::Spec->catfile( $dir, "$prog$ext" );
+            if ( -x $fname ) {
+                return $ext eq '.COM' ? "\@$fname" : "$fname";
+            }
+        }
+    }
+    return '';
 }
 
 sub find_a_patch {
@@ -1917,6 +1985,24 @@ sub get_avail_w32compilers {
     return map {
        ( $map{ $_ }->{CCTYPE} => $map{ $_ } )
     } grep length $map{ $_ }->{ccbin} => keys %map;
+}
+
+sub get_avail_vms_make {
+
+    return map +( $_ => undef ) => grep defined $_ && length( $_ ) 
+        => map vms_whereis( $_ ) => qw( MMK MMS );
+ 
+    local *QXERR; open *QXERR, ">&STDERR"; close STDERR;
+
+    my %makers = map {
+        my $maker = $_;
+        map +( $maker => /V([\d.-]+)/ ? $1 : '' )
+        => grep /\b$maker\b/ && /V[\d.-]+/ => qx($maker/IDENT)
+    } qw( MMK MMS );
+
+    open STDERR, ">&QXERR"; close QXERR;
+
+    return %makers;
 }
 
 sub get_Win_version {

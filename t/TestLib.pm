@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT );
-$VERSION = '0.04';
+$VERSION = '0.05';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -32,6 +32,8 @@ What is in here?
 
 =cut
 
+use Config;
+use Carp;
 use File::Find;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs splitdir );
 require File::Path;
@@ -48,6 +50,7 @@ Rreturns a full file-path (with extension) to it.
 sub whereis {
     my $prog = shift;
     return undef unless $prog; # you shouldn't call it '0'!
+    $^O eq 'VMS' and return vms_whereis( $prog );
 
     my $p_sep = $Config::Config{path_sep};
     my @path = split /\Q$p_sep\E/, $ENV{PATH};
@@ -58,6 +61,48 @@ sub whereis {
         foreach my $ext ( @pext ) {
             my $fname = File::Spec->catfile( $dir, "$prog$ext" );
             return $fname if -x $fname;
+        }
+    }
+    return '';
+}
+
+=item vms_whereis( $prog )
+
+First look in the SYMBOLS to see if C<$prog> is there.
+Next look in the KFE-table C<INSTALL LIST> if it is there.
+As a last resort we can scan C<DCL$PATH> like we do on *nix/Win32
+
+=cut
+
+sub vms_whereis {
+    my $prog = shift;
+
+    # Check SYMBOLS
+    eval { require VMS::DCLsym };
+    if ( $@ ) {
+        carp "Oops, cannot load VMS::DCLsym: $@";
+    } else {
+        my $syms = VMS::DCLsym->new;
+        return $prog if scalar $syms->getsym( $prog );
+    }
+    # Check Known File Entry table (INSTALL LIST)
+    my $img_re = '^\s+([\w\$]+);\d+';
+    my %kfe = map {
+        my $img = /$img_re/ ? $1 : '';
+        ( uc $img => undef )
+    } grep /$img_re/ => qx/INSTALL LIST/;
+    return $prog if exists $kfe{ uc $prog };
+
+    my $dclp_env = 'DCL$PATH';
+    my @path = split /$Config{path_sep}/, $ENV{ $dclp_env };
+    my @pext = ( $Config{exe_ext} || $Config{_exe}, '.COM' );
+
+    foreach my $dir ( @path ) {
+        foreach my $ext ( @pext ) {
+            my $fname = File::Spec->catfile( $dir, "$prog$ext" );
+            if ( -x $fname ) {
+                return $ext eq '.COM' ? "\@$fname" : "$fname";
+            }
         }
     }
     return '';
