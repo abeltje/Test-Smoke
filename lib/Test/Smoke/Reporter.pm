@@ -348,7 +348,7 @@ sub _post_process {
     foreach my $config ( @{ $rpt->{cfglist} } ) {
         foreach my $dbinfo (qw( N D )) {
             my $cfg = $config;
-            ( $cfg .=  $cfg ? "-DDEBUGGING $cfg" : "-DDEBUGGING" )
+            ( $cfg =  $cfg ? "-DDEBUGGING $cfg" : "-DDEBUGGING" )
                 if $dbinfo eq "D";
             $self->{v} and print "Processing [$cfg]\n";
             my $status = $self->{_rpt}{ $config }{ $dbinfo };
