@@ -92,7 +92,7 @@ my %opt = (
         msg => 'Which configuration file would you like to use?',
         alt => [ ],
         dft => File::Spec->rel2abs( is_win32
-                                    ? 'smokew32.cfg' : 'perlcurrent.cfg' ),
+                                    ? 'w32current.cfg' : 'perlcurrent.cfg' ),
     },
     umask => {
         msg => 'What umask can be used (0 preferred)?',
