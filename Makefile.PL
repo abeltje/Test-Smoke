@@ -68,8 +68,7 @@ sub MY::libscan {
         /\w$/ and $_ = "$_\\b";
         $_;
     } @nopaths;
-    print "$path($patt):\n";
-    print  "\t" . ($path =~ m:$patt: ? "" : $path) . "\n";
+
     return $path =~ m:$patt: ? "" : $path;
 }
 
