@@ -5,6 +5,7 @@ use strict;
 
 use FindBin;
 use Data::Dumper;
+use vars qw( $conf );
 
 use Test::More tests => 6;
 BEGIN { use_ok( 'Test::Smoke' ) }
@@ -16,8 +17,9 @@ ok( defined &read_config, "read_config() is exported" );
 my $test = { ddir => '../' };
 
 SKIP: {
+    my $prefix = 'smokecurrent';
     my $config_name = File::Spec->catfile( $FindBin::Bin, 
-                                           'smokecurrent_config' );
+                                           "${prefix}_config" );
     local *FILE;
     open FILE, "> $config_name" or skip "Cannot write file: $!", 2;
     print FILE Data::Dumper->Dump( [$test], ['conf'] );
@@ -26,6 +28,12 @@ SKIP: {
     ok( read_config( $config_name ), "read_config($config_name)" );
     is( Test::Smoke->config_error, undef, "No errors" );
     is_deeply( $conf, $test, "Configuration compares" );
+
+    undef $conf;
+    my $config_short = File::Spec->catfile( $FindBin::Bin, $prefix );
+    ok( read_config( $config_short ), "read_config($config_short)" );
+    is( Test::Smoke->config_error, undef, "No errors" );
+    is_deeply( $conf, $test, "Configuration compares after reloading" );
 
     1 while unlink $config_name;
 }
