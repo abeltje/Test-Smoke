@@ -770,13 +770,13 @@ sub time_in_hhmm {
     $diff -= 60*60 * $hour;
     my $mins = int( $diff / 60 );
     $diff -=  60 * $mins;
+    $diff = sprintf "%.${digits}f", $diff;
 
     my @parts;
     $days and push @parts, sprintf "%d day%s",   $days, $days == 1 ? "" : 's';
     $hour and push @parts, sprintf "%d hour%s",  $hour, $hour == 1 ? "" : 's';
     $mins and push @parts, sprintf "%d minute%s",$mins, $mins == 1 ? "" : 's';
-    $diff && !$days && !$hour and
-        push @parts, sprintf "%.${digits}f seconds", $diff;
+    $diff && !$days && !$hour and push @parts, "$diff seconds";
 
     return join " ", @parts;
 }

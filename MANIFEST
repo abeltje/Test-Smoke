@@ -59,6 +59,7 @@ t/syncer_snap.t
 t/sysinfo.t
 t/tree.t
 t/ts_config.t
+t/util_times.t
 t/win32/Makefile
 t/win32/makefile.mk
 t/ftppub/perl-current-diffs/20000.gz
