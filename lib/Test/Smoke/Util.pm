@@ -135,6 +135,8 @@ Set the cf_email option (Config.pm)
 Adds the option to BUILDOPT. This is implemented differently for 
 B<nmake> and B<dmake>.
 
+Returns the name of the outputfile.
+
 =back
 
 =cut
@@ -275,6 +277,7 @@ sub Configure_win32 {
     }
     close ORG;
     close NEW;
+    return $out;
 } # Configure_win32
 
 =item get_cfg_filename( )
