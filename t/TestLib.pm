@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT );
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -33,7 +33,7 @@ What is in here?
 =cut
 
 use File::Find;
-use File::Spec;
+use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs splitdir );
 require File::Path;
 use Cwd;
 
@@ -75,8 +75,12 @@ sub manify_path($) {
     # There should be no volume on these file_paths
     $path = File::Spec->canonpath( $path );
     my( undef, $dirs, $file ) = File::Spec->splitpath( $path );
+
     my @subdirs = grep $_ && length $_ => File::Spec->splitdir( $dirs );
+    $^O eq 'VMS' and $file =~ s/\.$//;
+
     push @subdirs, $file;
+
     return join '/', @subdirs;
 }
 
@@ -94,8 +98,7 @@ sub get_dir($) {
     find sub {
         -f or return;
         my $cname = File::Spec->canonpath( $File::Find::name );
-        my $name = File::Spec->abs2rel( $cname, $path );
-        push @files, $name;
+        push @files, $cname;
     }, '.';
 
     chdir $cwd or die "Cannot chdir($cwd) back: $!";
