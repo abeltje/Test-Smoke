@@ -21,8 +21,9 @@ GetOptions( \%options,
     'smartsmoke!',
 );
 
-use vars qw( $conf $VERSION );
-$VERSION = '1.16_22';
+use Test::Smoke;
+use vars qw( $VERSION );
+$VERSION = Test::Smoke->VERSION;
 
 =head1 NAME
 
@@ -52,12 +53,12 @@ It can take these options
 
 # Try cwd() first, then $FindBin::Bin
 my $config_file = File::Spec->catfile( cwd(), $options{config} );
--e $config_file and eval { require $config_file; };
-if ( $@ ) {
+unless ( read_config( $config_file ) ) {
     $config_file = File::Spec->catfile( $FindBin::Bin, $options{config} );
-    eval { require $config_file; };
+    read_config( $config_file );
 }
-$@ and die "!!!Please run 'configsmoke.pl'!!!\nCannot find configuration: $!";
+defined Test::Smoke->config_error and 
+    die "!!!Please run 'configsmoke.pl'!!!\nCannot find configuration: $!";
 
 $conf->{is56x} = $options{is56x} if defined $options{is56x};
 $conf->{smartsmoke} = $options{smartsmoke} if defined $options{smartsmoke};
@@ -155,9 +156,9 @@ See:
 
 =over 4
 
-=item * http://www.perl.com/perl/misc/Artistic.html
+=item * L<http://www.perl.com/perl/misc/Artistic.html>
 
-=item * http://www.gnu.org/copyleft/gpl.html
+=item * L<http://www.gnu.org/copyleft/gpl.html>
 
 =back
 
