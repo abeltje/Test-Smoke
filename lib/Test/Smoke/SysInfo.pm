@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.021';
+$VERSION = '0.022';
 
 use base 'Exporter';
 @EXPORT_OK = qw( &sysinfo &tsuname );
@@ -516,7 +516,8 @@ sub Solaris {
         }
         $cpu .= " ($speed$magnitude)";
     } elsif (-x "/usr/sbin/sizer") { # OSF/1.
-       chomp( $cpu = `sizer -implver` );
+        $cpu = $cpu_type;
+        chomp( $cpu_type = `sizer -implver` );
     }
 
     my $ncpu = grep /on-?line/ => `psrinfo`;
@@ -580,11 +581,20 @@ Use some VMS specific stuff to get system information.
 
 sub VMS {
     my $vms = Generic();
-    if ( $vms->{_cpu} =~ /VAX/i ) {
-        $vms->{_ncpu} = grep /CPU \d+ is in RUN state/ => `SHOW CPU/ACTIVE`;
-    } else { # Alpha (there is more info available
-        $vms->{_ncpu} = grep /Active\s+\d+/ => `SHOW CPU/ACTIVE`;
-    }
+
+    my $myname = $vms->{_host};
+    my @cpu_brief = `SHOW CPU/BRIEF`;
+    
+    print "$myname: '@cpu_brief'\n";
+    
+    my( $sysline ) = grep /$myname,(?:\s+a)?\s+/i => @cpu_brief;
+    my( $cpu ) = $sysline =~ /$myname,(?:\s+a)?\s+(.+)/i;
+
+        
+    my $ncpu = grep /^CPU \d+/ && /\bstate\b/i && /\bRUN\b/i => @cpu_brief;
+
+    $vms->{_cpu}  = $cpu;
+    $vms->{_ncpu} = $ncpu;
 
     return $vms;
 }
