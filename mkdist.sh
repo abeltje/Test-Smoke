@@ -63,7 +63,9 @@ make
 SMOKE_SKIP_SIGTEST=1 make test || exit
 
 # Create the distribution and move it to the distribution directory
+perl -i -pe 's/^#?local-user abeltje/local-user abeltje/' ~/.gnupg/options
 make dist
+perl -i -pe 's/^local-user abeltje/#local-user abeltje/' ~/.gnupg/options
 mv -v *.tar.gz $distdir
 
 # Clean up!
