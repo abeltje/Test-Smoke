@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.007';
+$VERSION = '0.008';
 
 use Cwd;
 use File::Spec::Functions;
@@ -322,6 +322,14 @@ sub make_ {
 
     $self->tty( "\nmake ..." );
     $self->_make( "" );
+    if ( $self->{is_win32} ) { # Win32 creates config.sh during make
+        my %cinfo = get_smoked_Config( $self->{ddir} => qw(
+            cc ccversion gccversion
+        ));
+        my $version = $cinfo{gccversion} || $cinfo{ccversion};
+        $self->log( "\nCompiler info: $cinfo{cc} version $version\n" )
+            if $cinfo{cc};
+    }
 
     my $exe_ext  = $Config{_exe} || $Config{exe_ext};
     my $miniperl = "miniperl$exe_ext";
@@ -453,17 +461,19 @@ sub make_test {
 
 sub extend_with_harness {
     my( $self, @nok ) = @_;
-    my( @harness, %inconsistant );
+    my( @harness, %inconsistent );
     for ( @nok ) {
         m!^(?:\.\.[\\/])?(\w+/[-\w/]+)\.*(.*)! or next;
         # harness chdir()s into t, so -f is false for t/op/*.t etc
         my $test_name = "$1.t";
         my $status = $2;
-        push @harness, (-f $test_name) 
+        my $test_path = (-f $test_name) 
             ? catdir( updir(), $test_name )
             : $test_name;
-        $inconsistant{ $harness[-1] } = $status;
+        $inconsistent{ $test_path } = $status
+            unless exists $inconsistent{ $test_path };
     }
+    @harness = sort keys %inconsistent;
     if ( @harness ) {
         local $ENV{PERL_SKIP_TTY_TEST} = 1;
         my $harness = $self->{is_win32} ?
@@ -481,7 +491,7 @@ sub extend_with_harness {
             my( $name, $fail ) = 
                 m/(\S+\.t)\s+.+%\s+([\d?]+(?:[-\s]+\d+)*)/;
             if ( $name ) {
-                delete $inconsistant{ $name };
+                delete $inconsistent{ $name };
                 my $dots = '.' x (40 - length $name );
                 "    $name${dots}FAILED $fail\n";
             } else {
@@ -496,20 +506,20 @@ sub extend_with_harness {
         } $self->_run( "$tst_perl harness $harness" );
         $harness_out =~ s/^\s*$//;
         if ( $harness_all_ok ) {
-            $harness_out .= scalar keys %inconsistant
+            $harness_out .= scalar keys %inconsistent
                 ? "Inconsistent test results (between TEST and harness):\n" . 
                   join "", map {
                       my $dots = '.' x (40 - length $_ );
-                      "    $_${dots}$inconsistant{ $_ }\n";
-                  } keys %inconsistant
+                      "    $_${dots}$inconsistent{ $_ }\n";
+                  } keys %inconsistent
                 : $harness_out ? "" : "All tests successful.";
         } else {
-            $harness_out .= scalar keys %inconsistant
+            $harness_out .= scalar keys %inconsistent
                 ? "Inconsistent test results (between TEST and harness):\n" . 
                   join "", map {
                       my $dots = '.' x (40 - length $_ );
-                      "    $_${dots}$inconsistant{ $_ }\n";
-                  } keys %inconsistant
+                      "    $_${dots}$inconsistent{ $_ }\n";
+                  } keys %inconsistent
                 : "";
         }
         $self->ttylog("\n", $harness_out, "\n" );
