@@ -2,7 +2,7 @@ package Test::Smoke::Util;
 use strict;
 
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.16';
+$VERSION = '0.18';
 use base 'Exporter';
 @EXPORT = qw( 
     &Configure_win32 
@@ -550,7 +550,7 @@ sub get_ncpu {
             last OS_CHECK;
 	};
 
-        /solaris|osf/i && do {
+        /solaris|sunos|osf/i && do {
             my @output = grep /on-line/ => `psrinfo`;
             $cpus =  scalar @output;
             last OS_CHECK;
@@ -573,12 +573,11 @@ sub get_ncpu {
 =item get_smoked_Config( $dir, @keys )
 
 C<get_smoked_Config()> returns a hash (a listified hash) with the
-specified keys. It will try to find B<lib/Config.pm> to get those
-values, if that cannot be found (make error?) we can try B<config.sh>
-which is used to build B<Config.pm>. We give up if that is not there
-(./Configure error?).
-
-[Should we import some stuff from the perl running this smoke?]
+specified keys. It will try to find F<lib/Config.pm> to get those
+values, if that cannot be found (make error?) we can try F<config.sh>
+which is used to build F<lib/Config.pm>. 
+If F<config.sh> is not there (./Configure error?) we try to get some
+fallback information from C<POSIX::uname()> and F<patchlevel.h>.
 
 =cut
 
