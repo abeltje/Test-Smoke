@@ -44,7 +44,7 @@ unless ( @ARGV ) {
 }
 my @scripts = qw( synctree.pl patchtree.pl mailrpt.pl W32Configure.pl
                   configsmoke.pl smokeperl.pl runsmoke.pl
-                  archiverpt.pl smokestatus.pl );
+                  archiverpt.pl smokestatus.pl chkbcfg.pl );
 -f catfile( $findbin, '.patch' ) and push @scripts, '.patch';
 
 WriteMakefile(
