@@ -66,11 +66,21 @@ without C<< $ENV{PERLIO} >> (a single pass for C<< S<make test> >>).
 F<configsmoke.pl> now does a basic check for unsupported build-options
 in the build-configurations file.
 
+B<This feature is still in its infancy, so if you have any information
+regarding your platform, please let us know.>
+
 =item 8
 
 The keys in the F<*_config> files will now be ordered if 
 C<< Data::Dumper->can('Sortkeys') >>. This was a feature request from
 Merijn.
+
+=item 9
+
+In some cases F<miniperl> gets build but no F<perl>. Hugo suggested we
+should run C<< S<make minitest> >> in this case. The new status B<M>
+will appear in the reports and if there are test failures they are
+marked with B<[minitest]>.
 
 =back
 
