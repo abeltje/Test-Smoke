@@ -5,12 +5,12 @@ $| = 1;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.005';
+$VERSION = '0.006';
 
 use File::Spec;
 use FindBin;
-use lib $FindBin::Bin;
 use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
+use lib $FindBin::Bin;
 use Test::Smoke;
 use Test::Smoke::Util qw( Configure_win32 );
 
@@ -48,14 +48,17 @@ Other options can override the settings from the configuration file.
 
   --ddir|-d    <builddir>     Specify the build directory
   --w32make|-m <nmake|dmake>  Specify the make program
-  --verbose|-v (repeat)       verbosity
+
+  --verbose|-v <0..2>         Verbosity level
+  --help|-h                   Show help
+  --man                       Show the full perldoc
 
 =item * B<Configure options>
 
 All configure options should be passed B<after> a double dash ('--'), 
 this is the way L<Getopt::Long> works.
 
-For a list of configuration options please see L<Test::Smoke::Util>
+For a list of configuration options please see L<Test::Smoke::Util>.
 
 =back
 
@@ -72,21 +75,10 @@ the configure options you passed worked into it.
 
 This could help debugging.
 
-=head1 OPTIONS
-
-    --config|-c [configfile]  Specify the configfile
-
-    --ddir|-d <directory>     Set the directory for the source-tree
-    --maker|-m <nmake|dmake>  Set the maker (needed for the makefile)
-
-    --verbose|-v <0..2>       Set verbose level
-    --help|-h                 Show help
-    --man                     Show the full perldoc
-
 =cut
 
 GetOptions( \%opt,
-    'ddir|d=s', 'maker|m=s', 'v|verbose=i',
+    'ddir|d=s', 'maker|w32make|m=s', 'v|verbose=i',
 
     'man', 'help|h',
 
