@@ -9,6 +9,66 @@ The filelists have a short symbolic indicator:
 
 Enjoy!
 ___________________________________________________________________________
+[   317] By: abeltje                          on 2003-08-03 03:15:09 +0200
+        Log: * [FIX] More Release Candidate stuff
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Syncer.pm,
+             /Test-Smoke/lib/Test/Smoke/Util.pm,
+             /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   316] By: abeltje                          on 2003-08-02 14:28:49 +0200
+        Log: * [FIX]
+	       * Allow for multiline failed test numbers
+	       * Release Candidate now in the report
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm, /Test-Smoke/mkovz.pl
+___________________________________________________________________________
+[   315] By: abeltje                          on 2003-08-02 14:22:36 +0200
+        Log: * More private testing of Test::Smoke::Smoker/mkovz.pl
+        Url: http://ati2/svn/Test-Smoke
+           + /Test-Smoke/private/perl/t/smoke/die.t,
+             /Test-Smoke/private/perl/t/smoke/many.t,
+             /Test-Smoke/private/smoker_fail.t
+           ! /Test-Smoke/private/perl/t/smoke/minitest.t,
+             /Test-Smoke/private/smoker_mini.t,
+             /Test-Smoke/private/smoker_ok.t,
+             /Test-Smoke/private/smoker_smoke.t
+___________________________________________________________________________
+[   314] By: abeltje                          on 2003-08-02 04:00:18 +0200
+        Log: * [FIX] more Release Candidate stuff for patch_level
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Util.pm
+___________________________________________________________________________
+[   313] By: abeltje                          on 2003-08-02 03:31:57 +0200
+        Log: * [ADD] do_pod2usage() and --man, --help
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/smokeperl.pl
+___________________________________________________________________________
+[   312] By: abeltje                          on 2003-08-02 03:27:35 +0200
+        Log: * [CHANGE]
+	       * Do log failed tests from "make _test" when "All tests
+	     successful" from harness
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm
+___________________________________________________________________________
+[   311] By: abeltje                          on 2003-08-02 02:23:13 +0200
+        Log: * [CHANGE]
+	       * Release Candidates will return full version (5.8.1-RC3)
+	     as their patchlevel
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Syncer.pm,
+             /Test-Smoke/lib/Test/Smoke/Util.pm, /Test-Smoke/t/get_patch.t
+___________________________________________________________________________
+[   310] By: abeltje                          on 2003-08-01 20:29:10 +0200
+        Log: * [FIX] the number of tests
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/t/ts_config.t
+___________________________________________________________________________
+[   309] By: abeltje                          on 2003-08-01 20:24:58 +0200
+        Log: This should be 1.17_63
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/Changes
+___________________________________________________________________________
 [   308] By: abeltje                          on 2003-08-01 20:21:43 +0200
         Log: * [CHANGE] change 5.6.x => 5.6.2
         Url: http://ati2/svn/Test-Smoke
