@@ -56,12 +56,13 @@ test: test-prep
 
 minitest: test-prep
 [
-	cd t
+	cd ..\t
 	$(FULLPERL) TEST $(MINITESTS)
 ]
 
 distclean:
 [
+	del smoke.mk
 	cd ..
 	rm -f perl.exe miniperl.exe t/perl.exe
 	rm -f *~

@@ -86,23 +86,29 @@ minicompile:
 compile: minicompile
 	$(CCCMD) 01test.c -o perl $(OPTIONS)
 
-test-prep:
-	cd t && (rm -f perl; ln -s $(FULLPERL) perl)
+test-prep: exeperl
+	cd t && (rm -f perl ; ln -s ../exeperl perl)
 
 _test:
-	cd t && $(FULLPERL) TEST smoke/*.t
+	cd t && ./perl TEST smoke/*.t
 
 test: test-prep 
 	$(MAKE) _test
 
 minitest: test-prep
-	cd t && $(FULLPERL) TEST smoke/mini*.t
+	cd t && ./perl TEST smoke/mini*.t
 
 distclean:
-	rm -f perl miniperl t/perl
+	rm -f perl miniperl exeperl t/perl
 	rm -f *~
 	rm -f Makefile
 	rm -f config.sh
+
+exeperl:
+	echo "#! /bin/sh"                  > exeperl
+	echo "PERL5LIB= $(FULLPERL) \$$*" >> exeperl
+	chmod 755 exeperl
+
 EO_MAKEFILE
 
 my $mf_name = catfile( $FindBin::Bin, 'Makefile' );

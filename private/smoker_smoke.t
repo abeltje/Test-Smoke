@@ -64,13 +64,13 @@ use_ok( 'Test::Smoke::Smoker' );
 
     ok( make_report( $ddir ), "Call 'mkovz.pl'" ) or diag( $@ );
     ok( my $report = get_report( $ddir ), "Got a report" );
-    like( $report, qr/^O O F F\s*$/m, "Got F for -DDEBUGGING" );
-    like( $report, qr/^Summary: FAIL\(F\)\s*$/m, "Summary: FAIL(F)" );
-    like( $report, qr/^
+    like( $report, q@/^O O F F\s*$/m@, "Got F for -DDEBUGGING" );
+    like( $report, q@/^Summary: FAIL\(F\)\s*$/m@, "Summary: FAIL(F)" );
+    like( $report, q@/^
         \[stdio\/perlio\]\s*
-        -DDEBUGGING\s+
-        \.\.\/t\/smoke\/minitest\.t\.+FAILED
-    /xm, "Failures report" );
+        -DDEBUGGING.*\s+
+        .*smoke\/minitest\.t\.+FAILED
+    /xm@, "Failures report" );
           
 
     select( DEVNULL ); $| = 1;

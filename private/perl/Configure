@@ -1,2 +1,2 @@
 #! /bin/sh
-/usr/bin/perl Makefile.PL $*
+PERL5LIB= /usr/bin/perl Makefile.PL $*

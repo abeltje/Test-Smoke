@@ -1,0 +1,64 @@
+#! /usr/bin/perl
+use warnings FATAL => 'all';
+use strict;
+
+# $Id$
+use Test::More;
+
+use Getopt::Long;
+my %opt = (
+    perl  => undef,
+    dir   => undef,
+    v     => 0,
+    debug => 0,
+);
+GetOptions \%opt, qw(
+    perl|p=s@
+    dir|directory|d=s@
+    v debug
+);
+
+use POSIX qw( uname );
+unless ( defined $opt{perl} ) {
+     MACHINE: {
+	 local $_ = (uname)[1];
+
+        /fikkie/ && do {
+            $opt{perl} = [qw( 545 553 561 584 592 )];
+            last MACHINE;
+        };
+        /snowy/ && do {
+            $opt{perl} = [qw( 554 562 585 592 )];
+            last MACHINE;
+        };
+     }
+}
+defined $opt{dir}  or $opt{dir} = [ 't', 'private' ];
+$opt{debug} and $opt{v} = 1;
+plan tests => scalar @{ $opt{perl} };
+
+use File::Spec::Functions qw( catfile abs2rel devnull);
+my @tests = sort map {
+    my $mask = $_;
+    $mask !~ /\*\.t$/ and $mask = catfile $mask, '*.t';
+    glob $mask;
+} @{ $opt{dir} };
+@tests = sort @tests;
+
+my $harness = qq/-MTest::Harness -e 'runtests(\@ARGV)'/;
+my $devnull = devnull();
+my $redir = $opt{v} ? "" : "> $devnull 2>&1";
+
+for my $version ( @{ $opt{perl} } ) {
+    my $perl_bin = "perl$version";
+    if ( -x "/usr/local/bin/$perl_bin" ) {
+        $opt{debug} and diag "$perl_bin -Ilib $harness @tests $redir";
+        open my $fh, "$perl_bin -Ilib $harness @tests |"
+            or skip "Cannot fork for $perl_bin", 1;
+        while ( <$fh> ) { $opt{v} and print "[$version]\t$_" }
+        my $result = close $fh ? $?>>8 : 0;
+        is $result, 0 , "test suite on $perl_bin";
+    } else {
+      SKIP: { skip "Could not find '$perl_bin'", 1; }
+    }
+}

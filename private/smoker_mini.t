@@ -30,7 +30,7 @@ use_ok( 'Test::Smoke::Smoker' );
         unless $verbose;
 
     my %w32args = get_Win32_args;
-    my $ccopt   = $w32args{is_win32} ? '-Accflags=--mini' : '--mini';
+    my $ccopt   = $w32args{is_win32} ? '-Accflags=-DDO_ERROR' : '--mini';
     my $cfg     = "$w32args{w32cct}\n=\n$ccopt\n=\n\n-DDEBUGGING";
     my $config  = Test::Smoke::BuildCFG->new( \$cfg );
 
@@ -74,13 +74,15 @@ use_ok( 'Test::Smoke::Smoker' );
 
     ok( make_report( $ddir ), "Call Reporter" ) or diag( $@ );
     ok( my $report = get_report( $ddir ), "Got a report" );
-    like( $report, qr/^M - M -\s*$/m, "Got all M's for default config" );
-    like( $report, qr/^Summary: FAIL\(M\)\s*$/m, "Summary: FAIL(M)" );
-    like( $report, qr/^
-        \[minitest\s*\]\s*
-        -DDEBUGGING\ --mini\s+
-        t\/smoke\/minitest\.+FAILED\ at\ test\ 2
-    /xm, "Failures report" );
+    like( $report, q@/^M - M -\s*$/m@, "Got all M's for default config" );
+    like( $report, q@/^Summary: FAIL\(M\)\s*$/m@, "Summary: FAIL(M)" );
+    my $cfgopt = $w32args{w32cct} ? "$w32args{w32cct} $ccopt" : $ccopt;
+    $cfgopt = "\Q$cfgopt\E";
+    like( $report, qq@/^
+        \\[minitest\\s*\\]\\s*
+        -DDEBUGGING\\ $cfgopt \\s+
+        t[\\\\/]smoke[\\\\/]minitest\\.+FAILED\\ at\\ test\\ 2
+    /xm@, "Failures report" );
           
 
     select( DEVNULL ); $| = 1;

@@ -65,15 +65,17 @@ use_ok( 'Test::Smoke::Smoker' );
 
     ok( make_report( $ddir ), "Call Reporter" ) or diag( $@ );
     ok( my $report = get_report( $ddir ), "Got a report" );
-    like( $report, qr/^O O F F\s*$/m, "Got F for -DDEBUGGING" );
-    like( $report, qr/^Summary: FAIL\(F\)\s*$/m, "Summary: FAIL(F)" );
-    like( $report, qr/^
-        \[stdio\/perlio\]\s+
-        -DDEBUGGING\s+
-        \.\.\/t\/smoke\/die\.t\.+FAILED\ \?+\s+
-        \.\.\/t\/smoke\/many\.t\.+FAILED\ \d+(?:[\s-]+\d+)*\s+
-        \s+\d+(?:[\s-]+\d+)*\s+
-    /xm, "Failures report" );
+    like( $report, q@/^O O F F\s*$/m@, "Got F for -DDEBUGGING" );
+    like( $report, q@/^Summary: FAIL\(F\)\s*$/m@, "Summary: FAIL(F)" );
+    my $cfgopt = $w32args{w32cct} ? " $w32args{w32cct}" : "";
+    $cfgopt = "\Q$cfgopt\E";
+    like( $report, qq@/^
+        \\[stdio\\/perlio\\]\\s+
+        -DDEBUGGING$cfgopt\\s+
+        .*smoke\\/die\\.t\\.+FAILED\\ \\?+\\s+
+        .*smoke\\/many\\.t\\.+FAILED\\ \\d+(?:[\\s-]+\\d+)*\\s+
+        \\d+(?:[\\s-]+\\d+)*\\s+
+    /xm@, "Failures report" );
           
 
     select( $verbose ? \*STDOUT : \*DEVNULL ); $| = 1;

@@ -6,7 +6,7 @@
  *                                                                        *
  *   1) no defines (perl)                                                 *
  *   2) -DMINI (miniperl)                                                 *
- *   3) -DDO_ERROR generates a syntaxerror                                *
+ *   3) -DDO_ERROR generates a syntaxerror (unless -DMINI)                *
  *                                                                        *
  * ********************************************************************** */
 #include <stdio.h>
@@ -15,7 +15,7 @@
 int
 main ()
 {
-    float ver = 0.002;
+    float ver = 0.003;
 #ifdef MINI
     printf( "This is fake miniperl, %.3f with %s\n", ver, local_patches[1] );
 #else
@@ -24,7 +24,8 @@ main ()
 
 #ifdef DO_ERROR
 #    ifndef MINI
-        printf( 'Syntax error' );
+        /* obvious syntax error */
+        printf( "Syntax error"
 #    endif
 #endif
 }
