@@ -166,8 +166,6 @@ sub _get_cc {
     return join ", ", @cc;
 }
 
-=cut
-
 =item Test::Smoke::Mailer->config( $key[, $value] )
 
 C<config()> is an interface to the package lexical C<%CONFIG>, 
