@@ -2,7 +2,7 @@ package Test::Smoke::Syncer;
 use strict;
 
 use vars qw( $VERSION );
-$VERSION = '0.007';
+$VERSION = '0.007'; # $Id$
 
 use File::Spec;
 use Cwd;

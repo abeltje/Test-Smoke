@@ -9,7 +9,7 @@ use Test::Smoke::Syncer;
 
 use Test::Smoke;
 use vars qw( $VERSION );
-$VERSION = '0.008';
+$VERSION = '0.008'; # $Id$
 
 my %opt = (
     type   => undef,

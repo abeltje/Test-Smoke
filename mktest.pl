@@ -4,7 +4,8 @@
 # (c)'01 H.Merijn Brand [27 August 2001]
 #    and Nicholas Clark
 # 20020909: Abe Timmerman
-# REVISION: 1.18
+# REVISION: 1.18 
+# $Id$
 use strict;
 
 sub usage ()

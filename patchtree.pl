@@ -10,7 +10,7 @@ use Test::Smoke::Patcher;
 
 use Test::Smoke;
 use vars qw( $VERSION );
-$VERSION = '0.005';
+$VERSION = '0.005'; # $Id$
 
 my %opt = (
     type    => 'multi',

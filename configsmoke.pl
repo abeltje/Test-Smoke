@@ -31,7 +31,7 @@ foreach my $opt (qw( config jcl log )) {
 }
 
 use vars qw( $VERSION $conf );
-$VERSION = '0.018';
+$VERSION = '0.018'; # $Id$
 
 eval { require $options{config} };
 $options{oldcfg} = 1, print "Using '$options{config}' for defaults.\n" 

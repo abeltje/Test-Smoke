@@ -10,7 +10,7 @@ use strict;
 
 use Test::Smoke;
 use vars qw($VERSION);
-$VERSION = Test::Smoke->VERSION;
+$VERSION = Test::Smoke->VERSION; # $Id$
 
 use File::Spec;
 use Cwd;

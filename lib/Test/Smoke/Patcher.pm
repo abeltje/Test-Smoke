@@ -2,7 +2,7 @@ package Test::Smoke::Patcher;
 use strict;
 
 use vars qw( $VERSION @EXPORT );
-$VERSION = '0.004';
+$VERSION = '0.004'; # $Id$
 
 use base 'Exporter';
 use File::Spec;

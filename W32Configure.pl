@@ -9,7 +9,7 @@ use Test::Smoke::Util qw( Configure_win32 );
 
 use Test::Smoke;
 use vars qw( $VERSION );
-$VERSION = '0.005';
+$VERSION = '0.005'; # $Id$
 
 =head1 NAME
 
