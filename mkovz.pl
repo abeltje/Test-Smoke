@@ -105,6 +105,9 @@ $locale and push @layers, "locale";
 my (%rpt, @confs, %confs, @manifest, $common_cfg);
 
 local $: = " \n";
+local $= = 99999;
+format STDOUT_TOP = 
+.
 format RPT_TOP =
 @||||||||||| Configuration (common) ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 $rpt{patch},                        $common_cfg
