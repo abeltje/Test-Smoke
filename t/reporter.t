@@ -10,7 +10,7 @@ use lib $FindBin::Bin;
 use TestLib;
 
 my $verbose = 0;
-use Test::More tests => 37;
+use Test::More tests => 40;
 
 use_ok 'Test::Smoke::Reporter';
 
@@ -318,6 +318,29 @@ __EOM__
     $r or diag $reporter->smoke_matrix, $reporter->bldenv_legend;
 }
 
+{ # report from cygwin
+    ok( my $reporter = Test::Smoke::Reporter->new(
+        ddir       => catdir( $FindBin::Bin, 'ftppub' ),
+        is56x      => 0,
+        defaultenv => 0,
+        outfile    => 'bugtst02.out',
+        v          => 0,
+    ), "new reporter for bugtst02.out" );
+    isa_ok $reporter, 'Test::Smoke::Reporter';
+
+    my @r_lines = split /\n/, $reporter->smoke_matrix;
+    my $r = is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix 2";
+   22302     Configuration (common) none
+----------- ---------------------------------------------------------
+F F M -     
+F F M -     -Duse64bitint
+F F M -     -Duseithreads
+F F M -     -Duseithreads -Duse64bitint
+__EOM__
+
+    $r or diag $reporter->smoke_matrix, $reporter->bldenv_legend;
+    diag $reporter->report;
+}
 sub create_config_sh {
     my( $file, %cfg ) = @_;
 

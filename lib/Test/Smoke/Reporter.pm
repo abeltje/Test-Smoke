@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.007';
+$VERSION = '0.008';
 
 use Cwd;
 use File::Spec::Functions;
@@ -260,7 +260,7 @@ sub _parse {
             next;
         }
 
-        if ( m/Inconsistent testresults/ ) {
+        if ( m/Inconsistent test ?results/ ) {
             ref $rpt{$cfgarg}->{$debug}{$tstenv} or
                 $rpt{$cfgarg}->{$debug}{$tstenv} = [ ];
             push @{ $rpt{$cfgarg}->{$debug}{$tstenv} }, $_;
@@ -348,11 +348,12 @@ sub _post_process {
     foreach my $config ( @{ $rpt->{cfglist} } ) {
         foreach my $dbinfo (qw( N D )) {
             my $cfg = $config;
-            ( $cfg =  $cfg ? "-DDEBUGGING $cfg" : "-DDEBUGGING" )
+            ( $cfg .=  $cfg ? "-DDEBUGGING $cfg" : "-DDEBUGGING" )
                 if $dbinfo eq "D";
             $self->{v} and print "Processing [$cfg]\n";
             my $status = $self->{_rpt}{ $config }{ $dbinfo };
             foreach my $tstenv ( reverse sort keys %bldenv ) {
+                next if $tstenv eq 'minitest' && ! exists $status->{ $tstenv };
                 ( my $showenv = $tstenv ) =~ s/^locale://;
                 $self->{_locale} ||= $showenv if $tstenv =~ /^locale:/;
                 $status->{ $tstenv } ||= '-';
