@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK %EXPORT_TAGS $NOCASE );
-$VERSION = '0.005';
+$VERSION = '0.006';
 
 use File::Spec;
 use File::Find;
@@ -223,6 +223,16 @@ sub _read_mani_file {
     my %manifest = map { 
         m|(\S+)|;
         my $entry = $NOCASE ? uc $1 : $1;
+        if ( $^O eq 'VMS' ) {
+            my @dirs = split m|/|, $entry;
+            my $file = pop @dirs;
+            my @parts = split /[.@#]/, $file;
+            if ( @parts > 1 ) {
+                my $ext = ( pop @parts ) || '';
+                $file = join( "_", @parts ) . ".$ext";
+            }
+            $entry = @dirs ? join( "/", @dirs, $file ) : $file;
+        }
         ( $entry => ST_MISSING );
     } <MANIFEST>;
     close MANIFEST;
