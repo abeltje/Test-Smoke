@@ -3,14 +3,14 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.001';
+$VERSION = '0.002';
 
 use Cwd;
 use File::Spec;
 require File::Path;
 use Text::ParseWords;
 require Test::Smoke;
-require Test::Smoke::SysInfo;
+use Test::Smoke::SysInfo;
 use Test::Smoke::Util qw( get_smoked_Config time_in_hhmm );
 
 my %CONFIG = (
@@ -18,7 +18,7 @@ my %CONFIG = (
     df_outfile    => 'mktest.out',
 
     df_locale     => undef,
-    df_defaultenv => 0,
+    df_defaultenv => undef,
 
     df_v          => 0,
 );
@@ -219,12 +219,12 @@ sub _parse {
         if ( s/^\s*Configuration:\s*// ) {
             # You might need to do something here with 
             # the previous Configuration: $cfgarg
-            s/-Dusedevel\s+//;
+            s/-Dusedevel(\s+|$)//;
             s/\s*-des//;
             $debug = s/-DDEBUGGING\s*// ? "D" : "N";
             s/\s+$//;
 
-            $cfgarg = $_ || " ";
+            $cfgarg = $_ || "";
 
             push @{ $rpt{cfglist} }, $_ unless $rpt{config}->{ $cfgarg }++;
             next;
@@ -232,7 +232,7 @@ sub _parse {
 
         if ( m/(?:PERLIO|TSTENV)\s*=\s*([-\w:.]+)/ ) {
             $tstenv = $1;
-            $rpt{$cfgarg}->{$debug}{$tstenv} = "?";
+            $rpt{$cfgarg}->{$debug}{$tstenv} ||= "?";
             # Deal with harness output
             s/^(?:PERLIO|TSTENV)\s*=\s+[-\w:.]+(?: :crlf)?\s*//;
         }
@@ -257,6 +257,8 @@ sub _parse {
                \ (?=([cbmt]))(?:build|configure|make|test)
                \ (anything\ but\ mini)?perl/x) {
             $mini and $status = uc $status; # M for no perl but miniperl
+            # $tstenv is only set *after* this
+            $tstenv = $mini ? 'minitest' : 'stdio' unless $tstenv;
             $rpt{$cfgarg}->{$debug}{$tstenv} = $status;
             next;
         }
@@ -308,14 +310,18 @@ sub _post_process {
     $rpt->{common_args} ||= 'none';
 
     $self->{_tstenv} = [ reverse sort keys %bldenv ];
+    my %count = ( O => 0, F => 0, X => 0, M => 0, 
+                  m => 0, c => 0, o => 0, t => 0 );
     my( %failures, %order ); my $ord = 1;
     foreach my $config ( @{ $rpt->{cfglist} } ) {
         foreach my $dbinfo (qw( N D )) {
             my $cfg = $config;
-            $cfg .= " -DDEBUGGING" if $dbinfo eq "D";
+            ( $cfg =  $cfg ? "-DDEBUGGING $cfg" : "-DDEBUGGING" )
+                if $dbinfo eq "D";
+            my $status = $self->{_rpt}{ $config }{ $dbinfo };
             foreach my $tstenv ( reverse sort keys %bldenv ) {
                 ( my $showenv = $tstenv ) =~ s/^locale://;
-                my $status = $self->{_rpt}{ $config }{ $dbinfo };
+                $self->{_locale} ||= $showenv if $tstenv =~ /^locale:/;
                 $status->{ $tstenv } ||= '-';
                 if ( ref $status->{ $tstenv } eq "ARRAY" ) {
                     my $failed = join "\n", @{ $status->{ $tstenv } };
@@ -336,7 +342,16 @@ sub _post_process {
                     delete $status->{minitest};
                 }
                 $self->{v} and print "$cfg: $status->{$tstenv}\n";
-            }
+            } 
+            exists $status->{perlio} or 
+                $status->{perlio} = '-' unless $self->{defaultenv};
+            exists $status->{ "locale:$self->{locale}" } or 
+                $status->{ "locale:$self->{locale}" } = '-' if $self->{locale};
+
+            $count{ $_ }++ for map {
+                $status->{ $_ } =~ m/[OFXMmct]/ 
+                    ? $status->{ $_ } : m/-/ ? 'O' : 'o'
+            } keys %$status;
         }
     }
     my @failures = map {
@@ -348,6 +363,20 @@ sub _post_process {
       }
     } sort { $order{$a} <=> $order{ $b} } keys %failures;
     $self->{_failures} = \@failures;
+
+    $self->{_counters} = \%count;
+    # Need to rebuild the test-environments as minitest changes into stdio
+    my %bldenv2;
+    foreach my $config ( @{ $rpt->{cfglist} } ) {
+        foreach my $buildenv ( keys %{ $rpt->{ $config }{N} } ) {
+            $bldenv2{ $buildenv }++;
+        }
+        foreach my $buildenv ( keys %{ $rpt->{ $config }{D} } ) {
+            $bldenv2{ $buildenv }++;
+        }
+    }
+    $self->{_tstenvraw} = $self->{_tstenv};
+    $self->{_tstenv} = [ reverse sort keys %bldenv2 ];
 }
 
 =item $reporter->report( )
@@ -362,10 +391,14 @@ sub report {
 
     $report .= $self->letter_legend . "\n";
     $report .= $self->smoke_matrix . $self->bldenv_legend . "\n";
+    $report .= $self->summary . "\n";
 
-    $report .= "Failures:\n" . $self->failures
+    $report .= "Failures:\n" . $self->failures . "\n"
         if @{ $self->{_failures} };
+    $report .= "\n" . $self->mani_fail . "\n"
+        if @{ $self->{_mani} };
 
+    $report .= $self->signature;
     return $report;
 }
 
@@ -384,18 +417,19 @@ sub preamble {
     my $archname  = $si->cpu_type;
     $archname .= sprintf "/%s cpu", $si->ncpu if $si->ncpu;
     my $cpu = $si->cpu;
-    my $this_pver = $^V ? sprintf "%vd", $^V : $];
+
     my $this_host = $si->host;
     my $time_msg  = time_in_hhmm( $self->{_rpt}{secs} );
-    $time_msg = " [$time_msg]" if $time_msg;
+#    $time_msg = " [$time_msg]" if $time_msg;
     my $ccvers = $Config{gccversion} || $Config{ccversion} || '';
+    my $os = $si->os;
 
     return <<__EOH__;
 Automated smoke report for $Config{version} patch $self->{_rpt}{patch}
-($this_host) $cpu
-  on $Config{osname} - $Config{osvers} ($archname)
-  using $Config{cc} version $ccvers
-Report by Test::Smoke v$Test::Smoke::VERSION (perl $this_pver)$time_msg
+$this_host: $cpu ($archname)
+    on $Config{osname} - $Config{osvers} ($os)
+    using $Config{cc} version $ccvers
+    total smoketime: $time_msg
 
 __EOH__
 }
@@ -433,6 +467,26 @@ sub smoke_matrix {
     return $report;
 }
 
+=item $reporter->summary( )
+
+Return the B<PASS> or B<FAIL(x)> string.
+
+=cut
+
+sub summary {
+    my $self = shift;
+    my $count = $self->{_counters};
+    my @rpt_sum_stat = grep $count->{ $_ } > 0 => qw( X F M m c t );
+    my $rpt_summary = '';
+    if ( @rpt_sum_stat ) {
+        $rpt_summary = "FAIL(" . join( "", @rpt_sum_stat ) . ")";
+    } else {
+        $rpt_summary = $count->{o} == 0 ? 'PASS' : 'PASS-so-far';
+    }
+
+    return "Summary: $rpt_summary\n";
+}
+
 =item $reporter->failures( )
 
 report the failures (grouped by configurations).
@@ -447,6 +501,18 @@ sub failures {
     } @{ $self->{_failures} };
 }
 
+=item $reporter->mani_fail( )
+
+report the MANIFEST failures.
+
+=cut
+
+sub mani_fail {
+    my $self = shift;
+
+    return join "\n", @{ $self->{_mani} };
+}
+
 =item $reporter->bldenv_legend( )
 
 Returns a string with the legend for build-environments
@@ -455,8 +521,31 @@ Returns a string with the legend for build-environments
 
 sub bldenv_legend {
     my $self = shift;
+    my $locale = $self->{_locale};
+    $self->{defaultenv} = ( @{ $self->{_tstenv} } == 1 )
+        unless defined $self->{defaultenv};
+    return  $locale ? <<EOL : $self->{defaultenv} ? <<EOS : <<EOE;
+| | | | | +- LC_ALL = $locale -DDEBUGGING
+| | | | +--- PERLIO = perlio -DDEBUGGING
+| | | +----- PERLIO = stdio  -DDEBUGGING
+| | +------- LC_ALL = $locale
+| +--------- PERLIO = perlio
++----------- PERLIO = stdio
 
-    return "";
+
+EOL
+| +--------- -DDEBUGGING
++----------- no debugging
+
+
+EOS
+| | | +----- PERLIO = perlio -DDEBUGGING
+| | +------- PERLIO = stdio  -DDEBUGGING
+| +--------- PERLIO = perlio
++----------- PERLIO = stdio
+
+
+EOE
 }
 
 =item $reporter->letter_legend( )
@@ -473,6 +562,15 @@ X = test(s) failed under TEST but not under harness
 Build failures during:       - = unknown or N/A
 c = Configure, m = make, M = make (after miniperl), t = make test-prep
 __EOL__
+}
+
+sub signature {
+    my $this_pver = $^V ? sprintf "%vd", $^V : $];
+    return <<__EOS__
+
+-- 
+Report by Test::Smoke v$Test::Smoke::VERSION (Reporter v$VERSION) running on perl $this_pver
+__EOS__
 }
 
 sub _process_Config {

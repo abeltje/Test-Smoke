@@ -5,12 +5,16 @@ use Data::Dumper;
 # $Id$
 
 my $verbose = 0;
-use Test::More 'no_plan';
+use Test::More tests => 27;
 
 use_ok 'Test::Smoke::Reporter';
 
 {
-    my $reporter = Test::Smoke::Reporter->new( v => $verbose, outfile => '' );
+    my $reporter = Test::Smoke::Reporter->new( 
+        v          => $verbose, 
+        outfile    => '',
+        defaultenv => 1,
+    );
     isa_ok( $reporter, 'Test::Smoke::Reporter' );
 
     my $timer = time - 300;
@@ -18,7 +22,6 @@ use_ok 'Test::Smoke::Reporter';
 Started smoke at @{ [$timer] }
 Smoking patch 20000
 
-MANIFEST did not declare t/perl
 
 Stopped smoke at @{ [$timer += 100] }
 Started smoke at @{ [$timer] }
@@ -54,11 +57,15 @@ EORESULTS
 O O         -Uuseperlio
 __EOM__
 
-    diag $reporter->report;
+#    diag Dumper $reporter->{_counters};
+#    diag $reporter->report;
 }
 
 {
-    my $reporter = Test::Smoke::Reporter->new( v => $verbose, outfile => '' );
+    my $reporter = Test::Smoke::Reporter->new( 
+        v       => $verbose, 
+        outfile => '',
+    );
     isa_ok( $reporter, 'Test::Smoke::Reporter' );
 
     my $timer = time - 1000;
@@ -136,5 +143,84 @@ EORESULTS
 F O F F O F 
 __EOM__
 
-    diag $reporter->report;
+#    diag Dumper $reporter->{_counters};
+#    diag $reporter->report;
+}
+
+{
+    my $reporter = Test::Smoke::Reporter->new( 
+        v       => $verbose, 
+        outfile => '',
+    );
+    isa_ok( $reporter, 'Test::Smoke::Reporter' );
+
+    my $patchlevel = 19000;
+    $reporter->read_parse( \(my $result = <<EORESULTS) );
+Smoking patch 19000
+Stopped smoke at 1073290464
+Started smoke at 1073290464
+
+Configuration: -Dusedevel
+------------------------------------------------------------------------------
+PERLIO = stdio  u=0.05  s=0  cu=0.26  cs=0  scripts=4  tests=107
+All tests successful.
+PERLIO = perlio u=0.03  s=0.01  cu=0.24  cs=0.04  scripts=4  tests=107
+All tests successful.
+Stopped smoke at 1073290465
+Started smoke at 1073290465
+
+Configuration: -Dusedevel -DDEBUGGING
+------------------------------------------------------------------------------
+PERLIO = stdio  u=0.04  s=0.01  cu=0.26  cs=0.02  scripts=3  tests=106
+
+    ../t/smoke/die.t........................FAILED ??
+    ../t/smoke/many.t.......................FAILED 2-6 8-12 14-18 20-24 26-30 32
+                                         36 38-42 44-48 50-54 56-60 62
+                                         66 68-72 74-78 80-84 86-90 92
+                                         96 98-100
+
+PERLIO = perlio u=0.05  s=0.01  cu=0.25  cs=0.02  scripts=3  tests=106
+
+    ../t/smoke/die.t........................FAILED ??
+    ../t/smoke/many.t.......................FAILED 2-6 8-12 14-18 20-24 26-30 32
+                                         36 38-42 44-48 50-54 56-60 62
+                                         66 68-72 74-78 80-84 86-90 92
+                                         96 98-100
+
+Stopped smoke at 1073290467
+EORESULTS
+
+    is( $reporter->{_rpt}{patch}, $patchlevel,
+        "Changenumber $reporter->{_rpt}{patch}" );
+
+    my $cfgarg = "";
+    {   local $" = "', '";
+        my @bldenv = sort keys %{ $reporter->{_rpt}{$cfgarg}{N} };
+        is_deeply( \@bldenv, [qw( perlio stdio )],
+                   "Buildenvironments '@bldenv'" );
+        @bldenv = sort @{ $reporter->{_tstenv} };
+        is_deeply( \@bldenv, [qw( perlio stdio )],
+                   "Buildenvironments '@bldenv'" );
+    }
+
+    is( $reporter->{_rpt}{$cfgarg}{N}{stdio}, 'O',
+        "'$cfgarg' (stdio) reports OK" );
+    is( $reporter->{_rpt}{$cfgarg}{D}{stdio}, 'F',
+        "'$cfgarg -DDEBUGGING' (stdio) reports failure" );
+
+    is( $reporter->{_rpt}{$cfgarg}{N}{perlio}, 'O',
+        "'$cfgarg' (perlio) reports OK" );
+    is( $reporter->{_rpt}{$cfgarg}{D}{perlio}, 'F',
+        "'$cfgarg -DDEBUGGING' (perlio) reports Failure" );
+
+    my @r_lines = split /\n/, $reporter->smoke_matrix;
+    is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";
+   19000     Configuration (common) none
+----------- ---------------------------------------------------------
+O O F F     
+__EOM__
+
+    like $reporter->report, 
+         '/^Failures:\n\[stdio\/perlio\]\s* -DDEBUGGING/m',
+         "Failures:";
 }
