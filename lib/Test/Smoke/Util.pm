@@ -755,7 +755,8 @@ sub skip_filter {
     m,\.+skipped$, ||
     m,^\s*pl2bat\.bat [\w\\]+, ||
     m,^Making , ||
-    m,^Skip ,
+    m,^Skip , ||
+    m,^Creating library file: libExtTest.dll.a,
 }
 
 1;
