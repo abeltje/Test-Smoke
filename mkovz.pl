@@ -324,7 +324,7 @@ for my $conf (@confs) {
     # special casing the '-' should change PASS-so-far
     # to PASS if the report only has 'O' and '-'
     $count{ $_ }++ for map { 
-        /[OFMmct]/ ? $_ : /-/ ? 'O' : 'o'
+        /[OFXMmct]/ ? $_ : /-/ ? 'O' : 'o'
     } split ' ', $rpt_stat;
 }
 

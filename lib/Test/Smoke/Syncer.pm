@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.008';
+$VERSION = '0.009';
 
 use Cwd;
 use File::Spec;
@@ -547,7 +547,7 @@ sub _fetch_snapshot {
     return $self->_fetch_snapshot_HTTP if $self->{server} =~ m|^https?://|i;
 
     require Net::FTP;
-    my $ftp = Net::FTP->new( $self->{server}, Debug => 0 ) or do {
+    my $ftp = Net::FTP->new($self->{server}, Debug => 0, Passive => 1) or do {
         require Carp;
         Carp::carp "[Net::FTP] Can't open $self->{server}: $@";
         return undef;
@@ -568,7 +568,7 @@ sub _fetch_snapshot {
     };
 
     my $snap_name = $self->{sfile} ||
-                    __find_snap_name( $ftp, $self->{snapext} );
+                    __find_snap_name( $ftp, $self->{snapext}, $self->{v} );
 
     unless ( $snap_name ) {
         require Carp;
@@ -636,7 +636,7 @@ sub _fetch_snapshot_HTTP {
     }
 }
 
-=item __find_snap_name( $ftp, $snapext )
+=item __find_snap_name( $ftp, $snapext[, $verbose] )
 
 [Not a method!]
 
@@ -646,17 +646,19 @@ return the one with the highes number.
 =cut
 
 sub __find_snap_name {
-    my( $ftp, $snapext ) = @_;
+    my( $ftp, $snapext, $verbose ) = @_;
     $snapext ||= 'tgz';
+    $verbose ||= 0;
 
     my @list = $ftp->ls();
 
     my $snap_name = ( map $_->[0], sort { $a->[1] <=> $b->[1] } map {
+        $verbose and print "Kept: $_\n";
         [ $_, /^perl\@(\d+)/ ]
     } grep {
     	/^perl\@\d+/ &&
     	/$snapext$/ 
-    } @list )[-1];
+    } map { $verbose > 1 and print "Found: $_\n"; $_ } @list )[-1];
 
     return $snap_name;
 }
@@ -826,7 +828,7 @@ consecutive.
 sub _get_patches {
     my( $self, $patch_number ) = @_;
 
-    my $ftp = Net::FTP->new( $self->{pserver}, Debug => 0 ) or do {
+    my $ftp = Net::FTP->new($self->{pserver}, Debug => 0, Passive => 1) or do {
         require Carp;
         Carp::carp "[Net::FTP] Can't open '$self->{pserver}': $@";
         return undef;

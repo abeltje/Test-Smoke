@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.004';
+$VERSION = '0.005';
 
 use Cwd;
 use File::Spec;
@@ -25,6 +25,8 @@ my %CONFIG = (
     df_w32cc          => 'MSVC60',
     df_w32make        => 'nmake',
     df_w32args        => [ ],
+
+    df_makeopt        => "",
 );
 
 # Define some constants that we can use for
@@ -570,6 +572,7 @@ stuff to help MSWin32 (the right maker, the directory).
 sub _make {
     my $self = shift;
     my $cmd = shift;
+    $self->{makeopt} and $cmd = "$self->{makeopt} $cmd";
 
     $self->{is_win32} or return $self->_run( "make $cmd" );
 

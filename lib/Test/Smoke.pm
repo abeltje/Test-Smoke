@@ -123,6 +123,7 @@ sub run_smoke {
         $smoker->tty( "Running smoke tests without \$ENV{PERLIO}\n" );
 
     unless ( $continue ) {
+        $smoker->_make( "-i distclean 2>/dev/null" );
         $smoker->ttylog( "Smoking patch $patch\n" ); 
         do_manifest_check( $conf->{ddir}, $smoker );
     }
