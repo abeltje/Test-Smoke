@@ -1,6 +1,26 @@
 #! /bin/sh
 
 # $Id$
+
+for argv
+    do case $argv in
+        -t)   SMOKE_TEST_ONLY=1;;
+        -d=*) SMOKE_DIST_DIR=`echo $argv | perl -pe 's/^-d=//'`;;
+        -*)   if test "$argv" == "--help" || test "$argv" == "-h" ; then
+                  echo ""
+              else
+                  echo "Unknown argument '$argv'"
+              fi
+              cat <<EOF && exit;;
+Usage: $0 [-t] [-d=<directory]
+
+    -t              Run tests only, do not make a tarball
+    -d=<directory>  Taret directory for the tarball
+
+EOF
+    esac
+done
+
 # Set the directory where distributions are kept
 distdir=./
 if [ "`uname -n`" == "fikkie" ] ; then
@@ -19,26 +39,28 @@ perl private/test_pod.pl     || exit
 
 # Run the private Test::Smoke::Smoker tests
 cd private
-for test in smoker_*.t; do
-    perl $test 2>/dev/null || (cd .. ; exit)
+for tst in smoker_*.t ; do
+    perl $tst 2>/dev/null || (cd .. ; exit)
 done
 cd ..
 
 if [ "$SMOKE_TEST_ONLY" == "1" ] ; then
+    for tst in t/*.t ; do
+        SMOKE_SKIP_SIGTEST=1 perl -Ilib $tst || exit
+    done
     echo "SMOKE_TEST_ONLY was set, quitting..."
     exit
 fi
 
 # Clean up before we start
-make -i veryclean > /dev/null
+make -i veryclean > /dev/null 2>&1
 
 # Now create the Makefile and and run the public test-suite
-PERL_MM_USE_DEFAULT=y
-export PERL_MM_USE_DEFAULT
-echo Set default input: $PERL_MM_USE_DEFAULT
-perl Makefile.PL
+PERL_MM_USE_DEFAULT=y perl Makefile.PL
+
 make
-(SMOKE_SKIP_SIGTEST=1 make test) || exit
+
+SMOKE_SKIP_SIGTEST=1 make test || exit
 
 # Create the distribution and move it to the distribution directory
 make dist
