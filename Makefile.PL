@@ -14,9 +14,17 @@ use File::Path;
 
 # Some strange stuff happens when WriteMakefile() is called
 # on a non-clean distribution, cleanup before
-my $devnull = File::Spec->devnull;
-my $hideout = $^O eq 'VMS' ? '' : ' >$devnull 2>&1';
-system "$Config{make} -i distclean$hideout";
+MAKE_DISTCLEAN: {
+    local *SAVEERR; open SAVEERR, ">&STDERR";
+    local *SAVEOUT; open SAVEOUT, ">&STDOUT";
+    close STDERR; close STDOUT;
+
+    my $opt = $^O eq 'VMS' ? '/IGNORE' : ' -i';
+    system "$Config{make}$opt distclean";
+
+    open STDOUT, ">&SAVEOUT"; close SAVEOUT;
+    open STDERR, ">&SAVEERR"; close SAVEERR;
+}
 
 my %install = ( );
 unless ( @ARGV ) {
