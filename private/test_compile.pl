@@ -17,7 +17,7 @@ BEGIN {
         => qw ( Util.pm Policy.pm SourceTree.pm
                 Syncer.pm Patcher.pm Mailer.pm
                 SysInfo.pm Reporter.pm
-                BuildCFG.pm Smoker.pm );
+                BuildCFG.pm Smoker.pm FTPClient.pm );
 
     push @scripts, map File::Spec->catfile(qw( lib Test ), $_ )
         => qw ( Smoke.pm );

@@ -15,7 +15,7 @@ BEGIN {
     );
     push @test_files, map File::Spec->catfile( 'lib', 'Test', 'Smoke', $_ )
         => qw( Syncer.pm SourceTree.pm Policy.pm Util.pm 
-               SysInfo.pm Reporter.pm
+               SysInfo.pm Reporter.pm FTPClient.pm
                Patcher.pm Mailer.pm BuildCFG.pm Smoker.pm );
     push @test_files, map File::Spec->catfile( 'lib', 'Test', $_ )
         => qw( Smoke.pm );
