@@ -1,6 +1,8 @@
 # This is a test makefile.mk for Configure_win32()
 # I need this to test all possible configuration stuff.
 #
+# $Id$
+#
 # These are not touched by default (Must be checked either way)
 INST_DRV	*= C:
 INST_TOP	*= $(INST_DRV)\perl
@@ -50,6 +52,9 @@ CCHOME		*= C:\MingW
 .ELSE
 CCHOME		*= $(MSVCDIR)
 .ENDIF
+
+# IS_WIN95 is self explanatory (not found in Makefile)
+#IS_WIN95	*= define
 
 # EMAIL is used to set -Dcf_email=xxx
 #EMAIL		*= 

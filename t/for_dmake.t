@@ -5,7 +5,7 @@ use strict;
 
 use File::Spec;
 
-use Test::More tests => 82;
+use Test::More tests => 88;
 BEGIN { use_ok( 'Test::Smoke::Util' ); }
 END { 
 #    1 while unlink 'win32/smoke.mk'; 
@@ -66,6 +66,7 @@ SKIP: {
           '#$(USE_IMP_SYS)' );
     like( $makefile, '/^#USE_LARGE_FILES\s*\*= define\n/m', 
           '#$(USE_LARGE_FILES)' );
+    like( $makefile, '/^#IS_WIN95\s*\*= define\n/m', '#$(IS_WIN95)' );
 }
 
 # Now we can start testing this stuff
@@ -352,3 +353,21 @@ SKIP: {
                         #+\ CHANGE THESE ONLY IF YOU MUST\ #+
     /mx', "-Accflags= is translated to BUILDOPT +=" );
 }
+
+ok( unlink( $smoke_mk ), "Remove makefile" );
+
+$config = $dft_args . " -DIS_WIN95";
+Configure_win32( './Configure ' . $config, 'dmake' );
+ok( -f $smoke_mk, "New makefile ($config)" );
+SKIP: {
+    local *MF;
+    ok open(MF, "< $smoke_mk"), "Opening makefile" or
+        skip "Cannot read from '$smoke_mk': $!", 1;
+    my $makefile = do { local $/; <MF> };
+    close MF;
+
+    like( $makefile, '/^IS_WIN95\s+\*= define\n/m',
+          "-DIS_WIN95" );
+}
+
+ok( unlink( $smoke_mk ), "Remove makefile" );

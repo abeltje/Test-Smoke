@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.24';
+$VERSION = '0.25';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -122,6 +122,10 @@ installation.
 Set the base directory for the C compiler.
 B<$(CCHOME)\bin> still needs to be in the path!
 
+=item * B<-DIS_WIN95>
+
+sets IS_WIN95 to 'define' to indicate this is Win9[58]
+
 =item * B<-DCRYPT_SRC=...>
 
 The file to use as source for des_fcrypt()
@@ -172,6 +176,7 @@ sub Configure_win32 {
         "-Dgcc_v3_2"            => "USE_GCC_V3_2",
         "-Dbccold"              => "BCCOLD",
         "-DCCHOME"              => "CCHOME",
+        "-DIS_WIN95"            => "IS_WIN95",
         "-DCRYPT_SRC"           => "CRYPT_SRC",
         "-DCRYPT_LIB"           => "CRYPT_LIB",
     );
@@ -197,11 +202,12 @@ sub Configure_win32 {
         USE_GCC_V3_2    => 0,
         BCCOLD          => 0,
         CCHOME          => undef,
+        IS_WIN95        => 0,
         CRYPT_SRC       => undef,
         CRYPT_LIB       => undef,
     );
-#    my $def_re = qr/((?:(?:PERL|USE)_\w+)|BCCOLD)/;
-    my $def_re = '((?:(?:PERL|USE)_\w+)|BCCOLD)';
+#    my $def_re = qr/((?:(?:PERL|USE|IS)_\w+)|BCCOLD)/;
+    my $def_re = '((?:(?:PERL|USE|IS)_\w+)|BCCOLD)';
     my @w32_opts = grep ! /^$def_re/, keys %opts;
     my $config_args = join " ", 
         grep /^-D[a-z_]+/, quotewords( '\s+', 1, $command );
