@@ -9,6 +9,21 @@ The filelists have a short symbolic indicator:
 
 Enjoy!
 ___________________________________________________________________________
+[   320] By: abeltje                          on 2003-08-03 15:41:09 +0200
+        Log: * This 1.18!
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   319] By: abeltje                          on 2003-08-03 13:24:26 +0200
+        Log: * [ADD] include cygwin in check_buildcfg()
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[   318] By: abeltje                          on 2003-08-03 03:28:00 +0200
+        Log: Keep up with 5.8.1: 1.17_65 aka RC4
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/Changes
+___________________________________________________________________________
 [   317] By: abeltje                          on 2003-08-03 03:15:09 +0200
         Log: * [FIX] More Release Candidate stuff
         Url: http://ati2/svn/Test-Smoke
