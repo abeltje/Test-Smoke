@@ -16,6 +16,7 @@ my $debug = exists $ENV{SMOKE_DEBUG} && $ENV{SMOKE_DEBUG};
         v => 0,
         ddir => 'perl-current',
         defaultenv => 1,
+        testmake   => 'make',
     );
 
     local *LOG;

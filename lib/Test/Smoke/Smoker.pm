@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.021';
+$VERSION = '0.022';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -31,7 +31,7 @@ my %CONFIG = (
     df_w32args        => [ ],
 
     df_makeopt        => "",
-    df_testmake       => 'make',
+    df_testmake       => undef,
 );
 
 # Define some constants that we can use for
@@ -110,6 +110,11 @@ sub new {
     $fields{defaultenv} = 1 if $fields{is56x};
     $^O =~ /VMS/i and $fields{is_vms} = 1;
 
+    unless ( defined $fields{testmake} ) {
+        $fields{testmake} = 'make';
+        $fields{is_win32} and $fields{testmake} = $fields{w32make};
+        $fields{is_vms}   and $fields{testmake} = $fields{vmsmake};
+    }
     my $self = bless { %fields }, $class;
 
     return $self;
