@@ -8,12 +8,12 @@ warn "\n'Makefile.PL' no longer configures your perl core smoke suite!!!\n" .
 WriteMakefile(
     NAME	  => "Test-Smoke",
     DISTNAME	  => "Test-Smoke",
-    VERSION_FROM  => "smokeperl.pl",
+    VERSION_FROM  => "lib/Test/Smoke.pm",
     $] >= 5.005 ? (
     AUTHOR	  => 'H.Merijn Brand <h.m.brand@hccnet.nl>, '.
 		     'Nicholas Clark <nick@plum.flirble.org> and ' .
                      'Abe Timmerman <abeltje@cpan.org>',
-#    ABSTRACT_FROM => 'smokeperl.pl',
+    ABSTRACT_FROM => 'lib/Test/Smoke.pm',
     ) : (),
 
     dist	  => { COMPRESS => "gzip -9f",
