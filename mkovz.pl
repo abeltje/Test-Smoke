@@ -187,6 +187,9 @@ for (<OUT>) {
         $rpt{$conf}{$debug}{$perlio} = $rpt{$conf}{$debug}{minitest} || "O";
         next;
     }
+    if ( m/Inconsistent testresults/ ) {
+        push @{ $rpt{$conf}{$debug}{$perlio} }, $_;
+    }
     if (m/^\s*Skipped this configuration/) {
 	if ($^O =~ m/^(?: hpux | freebsd )$/x) {
 	    (my $dup = $conf) =~ s/ -Duselongdouble//;
@@ -258,6 +261,7 @@ Automated smoke report for $Config{version} patch $rpt{patch} on $Config{osname}
 Report by Test::Smoke v$VERSION (perl $this_pver)$time_msg
 
 O = OK  F = Failure(s), extended report at the bottom
+X = test(s) failed under TEST but not under harness
 ? = still running or test results not (yet) available
 Build failures during:       - = unknown or N/A
 c = Configure, m = make, M = make (after miniperl), t = make test-prep
@@ -277,7 +281,7 @@ $common_cfg = join " ", sort keys %common_args;
 
 $common_cfg ||= 'none';
 
-my %count = ( O => 0, F => 0, M => 0, m => 0, c => 0, o => 0, t => 0);
+my %count = ( O => 0, F => 0, X => 0, M => 0, m => 0, c => 0, o => 0, t => 0);
 my @fail;
 for my $conf (@confs) {
     ( $rpt_stat, $rpt_config ) = ( "", $conf );
@@ -289,7 +293,9 @@ for my $conf (@confs) {
 
 	    my $res = $rpt{$conf}{$debug}{$perlio};
 	    if (ref $res) {
-                $rpt_stat .= $bldenv eq 'minitest' ? "M " : "F ";
+                my $stat_x = grep /Inconsistent testresults/ => $res->[0];
+                $rpt_stat .= $bldenv eq 'minitest' 
+                    ? "M " : $stat_x ? "X " : "F ";
 		my $s_conf = $conf;
 		$debug and substr ($s_conf, 0, 0) = "-DDEBUGGING ";
 		if ( $perlio eq "stdio" && ref $rpt{$conf}{$debug}{perlio} 
@@ -322,7 +328,7 @@ for my $conf (@confs) {
     } split ' ', $rpt_stat;
 }
 
-my @rpt_sum_stat = grep $count{ $_ } > 0 => qw( F M m c t );
+my @rpt_sum_stat = grep $count{ $_ } > 0 => qw( X F M m c t );
 my $rpt_summary = '';
 if ( @rpt_sum_stat ) {
     $rpt_summary = "FAIL(" . join( "", @rpt_sum_stat ) . ")";
