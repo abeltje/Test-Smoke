@@ -1,0 +1,1093 @@
+2003-02-24  Abe Timmerman  <abeltje@local>
+
+	* smokeperl.pl: 1.08: (abeltje)
+	  + Added the '--force-c-locale' setting for F<mktest.pl>
+
+	* mktest.pl: 1.16: (abeltje)
+	  * FIX: Policy changes were passed around wrong (all builds, but the
+	  first were -DDEBUGGING)
+	  + Added the 'is56x' hack
+	  + Added the extra '--locale' test-run
+	  + Added the 'force-c-locale' switch
+	  * Updated the COPYRIGHT pod-section
+
+	* mkovz.pl: 1.16: (abeltje)
+	  * FIX: reportsqueeze when also running under utf8-locale
+	  * Changed the summary for all O's and -'s from PASS-so-far to PASS
+	  + Added the 'is56x' hack
+	  * Updated the COPYRIGHT pod-section
+
+	* configsmoke.pl: 1.06: (abeltje)
+	  + Added '--log/-l' switch
+	  + Added the use previous settings feature
+	  + Added the use extra defaults feature
+	  + Added more configuration options
+	  * More than should be
+
+	* README: 1.16: (abeltje)
+	  * Some rewording
+
+	* Makefile.PL: 1.09: (abeltje)
+	  * More fiddling, but it still isn't right
+
+	* MANIFEST: 1.18: (abeltje)
+	  - Remove F<t/01basic.t>
+
+2003-02-23  Abe Timmerman  <abeltje@local>
+
+	* smokeperl.pl: 1.07: (abeltje)
+	  + Added the implementation for 'smartsmoke'
+	  + Added the implementation for 'is56x'
+	  + Added the implementation for 'norun'
+	  * Updated the COPYRIGHT pod-section
+
+	* ReleaseNotes: Updated for 1.16_20
+
+	* README: 1.15: (abeltje)
+	  * Removed most references to the old-way to smoke
+	  * FIX: pod error
+	  * Use the new name scheme
+	  * Updated the COPYRIGHT pod-section
+
+	* W32Configure.pl: 1.03: (abeltje)
+	  * Updated the COPYRIGHT pod-section
+
+	* lib/Test/Smoke/Patcher.pm: 1.06: (abeltje)
+	  * FIX: pod error
+
+	* test_pod.pl: 1.01: (abeltje)
+	  * Test the pod in all files before making a distribution
+
+	* test_compile.pl: 1.01: (abeltje)
+	  * Moved from the user test-suite
+
+	* t/01basic.t: This doesn't belong in the user-tests
+
+	* mkdist.sh: 1.08: (abeltje)
+	  + Added test_compile.pl and test_pod.pl
+
+	* synctree.pl: 1.10: (abeltje)
+	  * Don't commit before *all* pod-errors are fixed :-(
+
+	* synctree.pl: 1.09: (abeltje)
+	  * FIX: pod errors
+
+	* mailrpt.pl: 1.05: (abeltje)
+	  * Update the COPYRIGHT pod-section
+
+	* patchtree.pl: 1.02: (abeltje)
+	  * Update the COPYRIGHT pod-section
+
+	* synctree.pl: 1.08: (abeltje)
+	  + Added 'hardlink' as a valid sync-type (with pod)
+	  * cleanup
+	  * FIX: Get all defaults from the configuration file
+	  * Update the COPYRIGHT pod-section
+
+	* lib/Test/Smoke/Util.pm: 1.07: (abeltje)
+	  * Make the regex in Configure_win32() 5.004 friendly
+
+	* lib/Test/Smoke/Syncer.pm: 1.08: (abeltje)
+	  * Make source path absolute in clean_from_directory()
+
+2003-02-21  Abe Timmerman  <abeltje@local>
+
+	* t/syncer_ftp.t: 1.07: (abeltje)
+	  * Help this testfile by preloading Test::Smoke::Patcher
+
+	* t/tree.t: 1.05: (abeltje)
+	  * Make the testsuite 5.004_05 complient
+
+	* t/syncer_rsync.t: 1.06: (abeltje)
+	  * Make the testsuite 5.004_05 compliant
+
+	* t/syncer_link.t, t/policy.t: 1.04: (abeltje)
+	  * Make the testsuite 5.004_05 compliant
+
+	* t/patcher.t: 1.05: (abeltje)
+	  * Make the testsuite 5.004_05 complient
+
+	* t/manifest.t: 1.10: (abeltje)
+	  * Make the testsuite 5.004_05 complient
+
+	* t/get_cpus.t: 1.07: (abeltje)
+	  * Make the testsuite 5.004_05 complient
+
+	* t/for_nmake.t, t/for_dmake.t: 1.11: (abeltje)
+	  * Make the testsuite 5.004_05 complient
+
+2003-02-17  Abe Timmerman  <abeltje@local>
+
+	* mailrpt.pl: 1.04: (abeltje)
+	  * Updated the COPYRIGHT section in the pod
+
+	* MANIFEST: 1.17: (abeltje)
+	  * Rename perl5?x_dfconfig to smoke5?x_dfconfig
+
+	* perl58x_dfconfig: This is now know as 'smoke58x_dfconfig'
+
+	* smoke58x_dfconfig: This used to be 'perl58x_dfconfig'
+
+	* perl56x_dfconfig: This is now known as 'smoke56x_dfconfig'
+
+	* smoke56x_dfconfig: This used to be 'perl56x_dfconfig'
+
+2003-02-16  Abe Timmerman  <abeltje@local>
+
+	* MANIFEST: 1.16: (abeltje)
+	  + Add default configurations for perl-5.6.x and perl-5.8.x
+
+	* t/patcher.t: 1.04: (abeltje)
+	  - Remove the the test for the '-b' switch (it is gone from
+	  Test::Smoke::Patcher)
+
+2003-02-14  Abe Timmerman  <abeltje@local>
+
+	* lib/Test/Smoke/Util.pm: 1.06: (abeltje)
+	  * Updated the COPYRIGHT section in the pod
+
+	* lib/Test/Smoke/Syncer.pm: 1.07: (abeltje)
+	  * Moved the $self->clean_from_directory() from
+	  Test::Smoke::Syncer::Forest->sync() to
+	  Test::Smoke::Syncer::Hardlink->sync() (where it should be :)
+	  * Updated the COPYRIGHT section in the pod
+
+	* lib/Test/Smoke/SourceTree.pm: 1.02: (abeltje)
+	  * Updated the SYNOPSIS and COPYRIGHT section in the pod
+
+	* lib/Test/Smoke/Policy.pm: 1.04: (abeltje)
+	  * Updated the COPYRIGHT section in the pod
+
+	* lib/Test/Smoke/Patcher.pm, lib/Test/Smoke/Mailer.pm: 1.05: (abeltje)
+	  * Updated the COPYRIGHT section in the pod
+
+	* lib/Test/Smoke/Util.pm: 1.05: (abeltje)
+	  + Added version_from_patchlevel_h()
+	  + Added an optional <directory> argument to get_patch()
+	  + Added some fall-back values for get_smoked_Config()
+
+2003-02-07  Abe Timmerman  <abeltje@local>
+
+	* lib/Test/Smoke/Policy.pm: 1.03: (abeltje)
+	  + Added code to support verbosity
+
+	* lib/Test/Smoke/Patcher.pm: 1.04: (abeltje)
+	  - Removed the addition of the '-b' switch to patch as OpenBSD's
+	  patch handles '-b' different
+
+	* perl58x_dfconfig:
+	This file helps the defaults for "perl configsmoke.pl -p perl58x" for
+	smoking perl-5.8.1 to be
+
+	* perl56x_dfconfig:
+	This file helps the defaults for "perl configsmoke.pl -p perl56x" to
+	smoke perl-5.6.2 to be
+
+	* perl56x.cfg: New smoke configuration for smoking perl-5.6.2 to be
+
+2003-02-03  Abe Timmerman  <abeltje@local>
+
+	* t/policy.t: 1.03: (abeltje)
+	  + Added more tests (default configuration)
+
+2003-01-27  Abe Timmerman  <abeltje@local>
+
+	* ChangeLog: This is REV-1_16_17
+
+	* lib/Test/Smoke/Policy.pm: 1.02: (abeltje)
+	  + Added code to pass a Policy directly with SCALAR ref, ARRAY ref,
+	  GLOB ref
+
+2003-01-26  Abe Timmerman  <abeltje@local>
+
+	* lib/Test/Smoke/Patcher.pm: 1.03: (abeltje)
+	  * Change to use the same %CONFIG skeleton as Test::Smoke::Syncer
+	  + Added Test::Smoke::Patcher->config()
+
+	* mktest.pl: 1.15: (abeltje)
+	  * This is a jigsaw-job exchanging the Policy code for the
+	  objectified code. (it took some time...)
+
+	* smokeperl.pl: 1.06: (abeltje)
+	  * Keep up with versions
+
+	* mkovz.pl: 1.15: (abeltje)
+	  * Keep up with versions
+
+	* W32Configure.pl: 1.02: (abeltje)
+	  * Newline
+
+	* ReleaseNotes: 1.03: (abeltje)
+	  * Keep up with the developments
+
+	* Makefile.PL: 1.08: (abeltje)
+	  + Added (and commented out) the EXE_FILES attribute
+
+	* MANIFEST: 1.15: (abeltje)
+	  + Added patchtree.pl, W32Configure.pl Test::Smoke::Policy, t/policy.t
+
+	* t/01basic.t: 1.11: (abeltje)
+	  + Added Test::Smoke::Policy and W32Configure.pl
+
+	* t/mailer.t: 1.03: (abeltje)
+	  * We now have a plan for Test::More
+
+	* t/manifest.t: 1.09: (abeltje)
+	  * Reworked to use t/TestLib.pm
+
+	* t/patcher.t: 1.03: (abeltje)
+	  + Added the two missing tests for multi and filehandle/filename
+
+	* t/policy.t: 1.02: (abeltje)
+	  * Changed the tests a bit, to check two policy targets
+
+	* t/syncer_copy.t: 1.04: (abeltje)
+	  * Reworked to use t/TestLib.pm
+
+	* t/syncer_ftp.t: 1.06: (abeltje)
+	  * Reworked to use t/TestLib.pm
+
+	* t/policy.t: 1.01: (abeltje)
+	  * Regression test to check the new Object-code does the same as the
+	  old code!
+
+	* lib/Test/Smoke/Policy.pm: 1.01: (abeltje)
+	  * Slight rework of Merijn's code
+
+	* W32Configure.pl: 1.01: (abeltje)
+	  * New, frontend to Test::Smoke::Util::Configure_win32()
+
+	* patchtree.pl: 1.01: (abeltje)
+	  * Frontend for Test::Smoke::Patcher
+
+2003-01-25  Abe Timmerman  <abeltje@local>
+
+	* README: 1.14: (abeltje)
+	  * Most of it rewritten.
+
+	* lib/Test/Smoke/Mailer.pm, lib/Test/Smoke/Patcher.pm, lib/Test/Smoke/Syncer.pm, mailrpt.pl, smokeperl.pl, synctree.pl, t/01basic.t, t/patcher.t, t/syncer_link.t, MANIFEST, README, configsmoke.pl:
+	1.14: (abeltje)
+	  + Added Test::Smoke::Patcher and t/patcher.t
+
+2003-01-24  Abe Timmerman  <abeltje@local>
+
+	* t/patcher.t: 1.01: (abeltje)
+	  * New file, tests for Test::Smoke::Patcher
+
+	* lib/Test/Smoke/Patcher.pm: 1.01: (abeltje)
+	  * New module to help apply patches.
+
+2003-01-18  Abe Timmerman  <abeltje@local>
+
+	* ChangeLog: This is REV-1_16_15
+
+	* ReleaseNotes: 1.02: (abeltje)
+	  * Some rewording
+	  + Add the UTF-8 locale hack
+
+	* README: 1.12 (abeltje)
+	  * Mention 'mailrpt.pl' for MSWin32 users
+
+	* t/for_nmake.t: 1.10: (abeltje)
+	  * FIX broken tests [for broken Test::Smoke::Util::Configure_win32()]
+
+	* t/for_dmake.t: 1.10: (abeltje)
+	  * FIX broken tests [for broken Test::Smoke::Util::Configure_win32()]
+	  + Added test for file contents
+
+	* lib/Test/Smoke/Util.pm: 1.04: (abeltje)
+	  * Clean up (no dangling commented lines)
+
+	* lib/Test/Smoke/Mailer.pm: 1.03: (abeltje)
+	  + Added Test::Smoke::Mailer::MIME_Lite
+
+	* configsmoke.pl: 1.04: (abeltje)
+	  * More checks on the buildir (cannot be current dir, check for
+	  existing source-tree, like the old Configure.pl)
+	  + Added renice for unixy platforms
+	  + Added some basic MSVC detection for MSWin32
+	  + Added the UTF-8 locale hack
+
+	* smokeperl.pl: 1.04: (abeltje)
+	  + Added the UTF-8 locale hack
+
+	* mkovz.pl: 1.14: (abeltje)
+	  + Added the UTF-8 locale hack (may need some more work)
+
+	* mktest.pl: 1.14: (abeltje)
+	  * FIX: excluding -Uuseperlio -Dusei?threads [optional 'i']
+	  + Exclude is_win32 && BORLAND && -Duselargefiles
+	  + Added the UTF-8 locale hack
+
+	* smoke.cfg: 1.05: (abeltje)
+	  * -Uuseperlio is back ('mktest.pl' now ignores the combination
+	  [-Uuseperlio -Duseithreads])
+
+2003-01-17  Abe Timmerman  <abeltje@local>
+
+	* lib/Test/Smoke/Util.pm: 1.03: (abeltje)
+	  * No binmode() on the input handle seems to take away problems
+	  * push "config_args=$config_args" on the right array
+
+2003-01-12  Abe Timmerman  <abeltje@local>
+
+	* ChangeLog: This is REV-1_16_14
+
+	* README: FIX the name in the =head1 NAME section
+
+	* README: *** empty log message ***
+
+	* mktest.pl: 1.13: (abeltje)
+	  + Added the Hardlink Forest stuff (switch and distclean, no regen_headers)
+	  * BUGFIX: -DCCTYPE= on MSWin32 (missing leading space)
+	  * -Uuseperlio only needs one (1) run of make test
+	  * whitespace/indentation
+
+	* smokeperl.pl: 1.03: (abeltje)
+	  + Added the --forest switch for mktest.pl
+	  * Transfer the current verbosity level to mktest.pl
+
+	* synctree.pl: 1.06: (abeltje)
+	  + Added the interface to the 'Hardlink Forest'
+
+	* configsmoke.pl: 1.03: (abeltje)
+	  + Added the forest stuff
+	  * Changed the order of some questions
+
+	* MANIFEST: 1.13: (abeltje)
+	  * Added some sestfiles
+	  * Added ReleaseNotes
+
+	* ReleaseNotes: 1.01: (abeltje)
+	  * New file, to explain what is going on
+
+	* lib/Test/Smoke/Syncer.pm: 1.05: (abeltje)
+	  * File::Spec::Win32->abs2rel() trouble [ActivePerl 5.6.0]
+
+	* t/tree.t: 1.04: (abeltje)
+	  * File::Spec::Win32->abs2rel() trouble [ActivePerl 5.6.0]
+	  * Escape $0 in regexen (MSWin32)
+
+	* t/syncer_link.t: 1.02: (abeltje)
+	  * Escape $0 in regexen (MSWin32)
+
+	* t/mailer.t: 1.02: (abeltje)
+	  * Get the use lib directory right!
+
+	* t/mailer.t: 1.01: (abeltje)
+	  * New tests for Test::Smoke::Mailer
+
+	* lib/Test/Smoke/Syncer.pm: 1.04: (abeltje)
+	  * Implement verbose in Test::Smoke::Syncer::Forest::sync()
+	  * Don't leave "mktest.out" after Test::Smoke::Syncer::Forest::sync()
+
+2003-01-11  Abe Timmerman  <abeltje@local>
+
+	* t/win32/makefile.mk: 1.05: (abeltje)
+	  * Changed the state of INST_VER and INST_ARCH to match reality
+	  + Added a line for CCTYPE=BORLAND
+	  + Added USE_CGG_V3_2 and BCCOLD
+
+	* t/for_dmake.t: 1.09: (abeltje)
+	  + Added test for new default behaviour INST_VER and INST_ARCH
+	  + Added test for -DCCTYPE=GCC -Dgcc_v3_2
+	  + Added test for -DCCTYPE=BORLAND -Dbccold
+
+	* lib/Test/Smoke/Util.pm: 1.02: (abeltje)
+	  * documented all the Configure_win32() options
+	  + Added -Dbccold for Configure_win32()
+
+	* t/syncer_link.t: 1.01: (abeltje)
+	  * New tests for Test::Smoke::Syncer::Hardlink
+
+2003-01-07  Abe Timmerman  <abeltje@local>
+
+	* lib/Test/Smoke/Syncer.pm: 1.03: (abeltje)
+	  + Added class Test::Smoke::Syncer::Hardlink
+	  + Added class Test::Smoke::Syncer::Forest
+	  + Added method Test::Smoke::Syncer::clean_from_directory()
+
+2003-01-06  Abe Timmerman  <abeltje@local>
+
+	* mkovz.pl: 1.13: (abeltje)
+	  * detypo
+
+	* mkovz.pl: 1.12: (abeltje)
+	  * Forgot about t (make test_prep) in the report summary
+
+2003-01-03  Abe Timmerman  <abeltje@local>
+
+	* ChangeLog: This is REV-1_16_12
+
+	* README: 1.09: (abeltje)
+	  * Document all the changes
+
+	* configsmoke.pl: 1.02: (abeltje)
+	  * Added more config variables
+
+	* mkovz.pl: 1.11: (abeltje)
+	  * The big module change-over
+
+	* mailrpt.pl: 1.02: (abeltje)
+	  * POD tweaks
+
+	* Makefile.PL: 1.07: (abeltje)
+	  * Tweaks...
+
+	* t/01basic.t: 1.09: (abeltje)
+	  + Added the new mailrpt.pl
+
+	* synctree.pl: 1.05: (abeltje)
+	  * The big module change-over
+
+	* smokeperl.pl: 1.02: (abeltje)
+	  * Changed to use Test::Smoke::Mailer
+	  + Added the POD
+	  + Added the --(no)fetch and --(no)mail commandline options
+
+	* MANIFEST: 1.12: (abeltje)
+	  + Added the new mailrpt.pl
+
+	* smokew32.bat: 1.09: (abeltje)
+	  * Use the 'mailrpt.pl' script to email the report
+
+	* mailrpt.pl: 1.01: (abeltje)
+	  * New helper script for sending the report
+
+	* t/01basic.t: 1.08: (abeltje)
+	  * The big module change-over
+	  * Add the new files
+
+	* t/tree.t: 1.03: (abeltje)
+	  * The big module change-over
+
+	* t/syncer_snap.t, t/syncer_rsync.t, t/syncer_ftp.t: 1.05: (abeltje)
+	  * The big module change-over
+
+	* t/syncer_copy.t: 1.03: (abeltje)
+	  * The big module change-over
+
+	* t/skip_filter.t: 1.07: (abeltje)
+	  * The big module change-over
+
+	* t/parse_report.t: 1.05: (abeltje)
+	  * The big module change-over
+
+	* t/manifest.t: 1.08: (abeltje)
+	  * The big module change-over
+
+	* t/get_patch.t: 1.09: (abeltje)
+	  * The big module change-over
+
+	* t/get_cpus.t: 1.06: (abeltje)
+	  * The big module change-over
+
+	* t/for_nmake.t: 1.09: (abeltje)
+	  * The big module change-over
+
+	* t/for_dmake.t, t/cfgstuff.t: 1.08: (abeltje)
+	  * The big module change-over
+
+	* mktest.pl: 1.12: (abeltje)
+	  * The big module change-over
+	  + Add '-DCCTYPE=$win32_cctype' to $config_args if it isn't there
+
+	* MANIFEST: 1.11: (abeltje)
+	  * The *big* module move-over
+
+	* lib/Test/Smoke/Mailer.pm: 1.02: (abeltje)
+	  * The {mail_type} argument shouldn't be lc()ed
+	  * Set the @ISA for derived Test::Smoke::Mailer classes
+
+	* lib/Test/Smoke/Syncer.pm: 1.02: (abeltje)
+	  * Missed one require in the big module move :-(
+
+	* smokew32.cfg: 1.06: (abeltje)
+	  + Added a section for building with/without -Duselargefiles
+
+	* smokew32.bat: 1.08: (abeltje)
+	  * Changed from direct 'rsync' to 'synctree.pl' (with rsync settings)
+
+	* mkdist.sh: 1.07: (abeltje)
+	  * Now do the exit right!
+
+	* mkdist.sh: 1.06: (abeltje)
+	  * exit unless make test OK
+
+	* SmokeTree.pm: Moved to Test::Smoke::SourceTree
+
+	* SmokeSync.pm: Moved to Test::Smoke::Syncer
+
+	* SmokeLib.pm: Moved to Test::Smoke::Util.pm
+
+	* lib/Test/Smoke/Syncer.pm: 1.01: (abeltje)
+	  * This used to be SmokeSync.pm
+
+	* lib/Test/Smoke/SourceTree.pm: 1.01: (abeltje)
+	  * This used to be SmokeTree.pm
+
+	* lib/Test/Smoke/Mailer.pm: 1.01: (abeltje)
+	  * New helper module to send the reports
+
+	* lib/Test/Smoke/Util.pm: 1.01: (abeltje)
+	  * This used to be SmokeLib.pm
+
+	* lib/Mail/Sendmail.pm:
+	Distribute Mail::Sendmail 0.78 with the Test::Smoke
+
+	* t/syncer_copy.t: 1.02: (abeltje)
+	  * Changed the plan from 'no_plan' to the number of tests
+	  + Added require_ok( 'SmokeTree' ) before chdir 't' (Just a test thing)
+
+	* SmokeSync.pm: 1.06: (abeltje)
+	  * Updated the COPYRIGHT POD section
+
+	* SmokeLib.pm: 1.15: (abeltje)
+	  + Added the COPYRIGHT POD section
+
+	* t/tree.t: 1.02: (abeltje)
+	  * Changed the plan from 'no_plan' to actual number of tests
+
+	* t/syncer_snap.t, t/syncer_rsync.t, t/syncer_ftp.t: 1.04: (abeltje)
+	  * Changed the plan from 'no_plan' to actual number of tests
+
+	* t/skip_filter.t: 1.06: (abeltje)
+	  * Changed the plan from 'no_plan' to actual number of tests
+
+	* t/parse_report.t: 1.04: (abeltje)
+	  * Changed the plan from 'no_plan' to actual number of tests
+
+	* t/get_patch.t: 1.08: (abeltje)
+	  * Changed the plan from 'no_plan' to actual number of tests
+
+	* t/manifest.t: 1.07: (abeltje)
+	  * Changed the plan from 'no_plan' to actual number of tests
+
+	* t/get_cpus.t: 1.05: (abeltje)
+	  * Changed the plan from 'no_plan' to actual number of tests
+
+	* t/for_nmake.t: 1.08: (abeltje)
+	  * Changed the plan from 'no_plan' to actual number of tests
+
+	* t/for_dmake.t, t/cfgstuff.t: 1.07: (abeltje)
+	  * Changed the plan from 'no_plan' to actual number of tests
+
+	* t/01basic.t: 1.07: (abeltje)
+	  + Added SmokeSync.pm, SmokeTree.pm, synctree.pl
+	  + Added smokeperl.pl (wrapper) configsmoke.pl (for smokeperl.pl)
+
+2003-01-02  Abe Timmerman  <abeltje@local>
+
+	* mkovz.pl: 1.10: (abeltje)
+	  * detypo
+
+	* smokeperl.pl: 1.01: (abeltje)
+	  * New wrapper to be used instead of shellscript/batchfile
+
+	* configsmoke.pl: 1.01: (abeltje)
+	  * New program to make configurations for smokeperl.pl
+
+2003-01-01  Abe Timmerman  <abeltje@local>
+
+	* SmokeSync.pm: 1.05: (abeltje)
+	  * Changed the semantics of {snapshot.cleanup}
+	  + Added a skip for patches that are already downloaded
+
+	* SmokeLib.pm: 1.14: (abeltje)
+	  + Added parse_report_Config() (also to @EXPORT_OK)
+
+	* mkovz.pl: 1.09: (abeltje)
+	  * Moved get_smoke_Config() to SmokeLib::get_smoked_Config()
+	  * Changed the order of assignment of $mail_from (now prefers
+	  $Config{cf_email}
+	  * More $Config{achname} cleanup
+	  + Added the perl version in the report header and mail subject
+
+	* t/parse_report.t: 1.03: (abeltje)
+	  * Adjust tests to include the perl version (mkovz.pl 1.10)
+
+2002-12-31  Abe Timmerman  <abeltje@local>
+
+	* t/parse_report.t: 1.02: (abeltje)
+	  * Changed the names of the tests to be '$subject'
+
+	* t/parse_report.t: 1.01: (abeltje)
+	  * New test for SmokeLib::parse_report_Config()
+
+2002-12-30  Abe Timmerman  <abeltje@local>
+
+	* MANIFEST: 1.09: (abletje)
+	  * Add loads of files
+
+	* t/get_cpus.t: 1.04: (abeltje)
+	  * Changed the test to reflect the changes in SmokeLib
+	  + Added a test
+
+	* synctree.pl: 1.04: (abeltje)
+	  * Don't make Pod::Usage prerequired (it is not in < 5.6)
+
+	* ChangeLog: This is REV-1_16_08
+
+	* README: 1.07: (abeltje)
+	  * Intermediate version for 1.16_08
+
+	* SmokeSync.pm: 1.04: (abeltje)
+	  * Take care of a 'use of uninitialized value' warning in
+	  SmokeSync::new()
+	  * Use the right class for type eq 'copy'
+	  * rename _check_dot_patch() to check_dot_patch()
+	  * Implement Test::Smoke::Syncer::Copy::sync()
+
+	* SmokeTree.pm: 1.02: (abeltje)
+	  * Only print filenames with $verbose > 1 in copy_from_MANIFEST()
+
+	* t/manifest.t: 1.06: (abeltje)
+	  + Added Data::Dumper (back) it is used for Test::More::diag()
+
+	* t/syncer_copy.t: 1.01: (abeltje)
+	  * New test for Test::Smoke::Syncer::Copy
+
+	* SmokeLib.pm: 1.13: (abeltje/jhi)
+	  * Changed get_cpus() to get_ncpu()
+	  + Added the documentation for get_ncpu() [jhi]
+	  + Added get_smoked_Config() [from mkovz.pl]
+	  * Updated $VERSION
+
+2002-12-21  Abe Timmerman  <abeltje@local>
+
+	* t/win32/makefile.mk, ChangeLog, Configure.pl, MANIFEST, Makefile.PL, README, SmokeLib.pm, SmokeSync.pm, mkdist.sh, mkovz.pl, mktest.pl, smoke.cfg, smoke.sh, smokew32.bat, smokew32.cfg, synctree.pl, t/01basic.t, t/cfgstuff.t, t/for_dmake.t, t/for_nmake.t, t/ftppub/perl-current-diffs/20000.gz, t/ftppub/perl-current-diffs/20001.gz, t/ftppub/perl-current-diffs/20003.gz, t/ftppub/perl-current-diffs/20004.gz, t/ftppub/snap/perl@19000.tgz, t/ftppub/snap/perl@20000.tgz, t/get_cpus.t, t/get_patch.t, t/manifest.t, t/skip_filter.t, t/syncer_ftp.t, t/syncer_rsync.t, t/syncer_snap.t, t/win32/Makefile:
+	Screwed up the repository
+
+	* t/tree.t, SmokeTree.pm: 1.01: (abeltje)
+
+	* ChangeLog, Configure.pl, MANIFEST, Makefile.PL, README, SmokeLib.pm, SmokeSync.pm, mkdist.sh, mkovz.pl, mktest.pl, smoke.cfg, smoke.sh, smokew32.bat, smokew32.cfg, synctree.pl, t/01basic.t, t/cfgstuff.t, t/for_dmake.t, t/for_nmake.t, t/ftppub/perl-current-diffs/20000.gz, t/ftppub/perl-current-diffs/20001.gz, t/ftppub/perl-current-diffs/20003.gz, t/ftppub/perl-current-diffs/20004.gz, t/ftppub/snap/perl@19000.tgz, t/ftppub/snap/perl@20000.tgz, t/get_cpus.t, t/get_patch.t, t/manifest.t, t/skip_filter.t, t/syncer_ftp.t, t/syncer_rsync.t, t/syncer_snap.t, t/win32/Makefile, t/win32/makefile.mk:
+	* mkovz.pl: 1.06: (abeltje)
+	  * more $Config{archname} fiddling
+	  + Add support for SmokeLib::get_cpus()
+	  + Try to read 'config.sh' if lib/Config.pm fails
+	  * Changed the override from $Config{ccvers} to $Config{gccversion}
+
+	* SmokeLib.pm: 1.10: (abeltje)
+	  * deTypo in get_cpus()
+
+	* README: 1.05: (abeltje)
+	  * Some rewording, need to do more...
+
+	* Configure.pl: 1.02: (abeltje)
+	  + Added support for '~' to $ENV{HOME} translation (see perlfaq5)
+
+	* t/syncer_snap.t, t/syncer_rsync.t, t/syncer_ftp.t: 1.01: (abeltje)
+	  * Testscript for syncer
+
+	* synctree.pl: 1.01: (abeltje)
+	  * small helper script to interface with SmokeSync.pm
+
+	* SmokeSync.pm: 1.01: (abeltje)
+	  * new file to handle syncing a source-tree (rsync / ftp)
+
+	* t/ftppub/snap/perl@20000.tgz, t/ftppub/snap/perl@19000.tgz, t/ftppub/perl-current-diffs/20004.gz, t/ftppub/perl-current-diffs/20003.gz, t/ftppub/perl-current-diffs/20001.gz, t/ftppub/perl-current-diffs/20000.gz:
+	1.01: (abeltje)
+	  * New file to help testing SmokeSync.pm
+
+	* ChangeLog: 1.06: (abeltje)
+	  * Need to add more directories (in t)
+
+	* mkovz.pl: 1.06: (abeltje)
+	  * more $Config{archname} fiddling
+	  + Add support for SmokeLib::get_cpus()
+	  + Try to read 'config.sh' if lib/Config.pm fails
+	  * Changed the override from $Config{ccvers} to $Config{gccversion}
+
+	* SmokeLib.pm: 1.10: (abeltje)
+	  * deTypo in get_cpus()
+
+	* README: 1.05: (abeltje)
+	  * Some rewording, need to do more...
+
+	* Configure.pl: 1.02: (abeltje)
+	  + Added support for '~' to $ENV{HOME} translation (see perlfaq5)
+
+	* t/syncer_snap.t, t/syncer_rsync.t, t/syncer_ftp.t: 1.01: (abeltje)
+	  * Testscript for syncer
+
+	* synctree.pl: 1.01: (abeltje)
+	  * small helper script to interface with SmokeSync.pm
+
+	* SmokeSync.pm: 1.01: (abeltje)
+	  * new file to handle syncing a source-tree (rsync / ftp)
+
+2002-12-20  Abe Timmerman  <abeltje@local>
+
+	* t/get_cpus.t: 1.01: (abeltje)
+	  * New testfile for SmokeLib::get_cpus()
+
+	* SmokeLib.pm: 1.09: (abeltje)
+	  + Added a perlish version of Jarkko's ncpu script as get_cpus()
+	  + Added @EXPORT_OK = qw( &get_cpus )
+
+2002-12-17  Abe Timmerman  <abeltje@local>
+
+	* SmokeLib.pm: 1.08: (abeltje)
+	  + set binmode() for the makefiles (ORG, NEW) in Configure_win32()
+	  + close the original makefile after configuring in Configure_win32()
+	  + close the MANIFEST file after it is read in check_MANIFEST()
+
+	* t/win32/makefile.mk: 1.02: (abeltje)
+	 + Add: USE_LARGE_FILES *= define
+
+	* t/win32/Makefile: 1.03: (abeltje)
+	  + Add USE_LARGE_FILES = define
+	  * the values in the CFG_VARS macro must be quoted
+
+	* t/skip_filter.t: 1.03: (abeltje)
+	  - Remove chdir 't'
+
+	* t/manifest.t: 1.03: (abeltje)
+	  * More fiddling with chdir 't'
+
+	* t/get_patch.t: 1.05: (abeltje)
+	  * More fiddling with chdir 't'
+
+	* t/for_nmake.t: 1.05: (abeltje)
+	  * More fiddling with chdir 't'
+	  + Add tests for the new '-Duselargefiles' Configure_win32() option
+
+	* t/for_dmake.t: 1.04: (abeltje)
+	  * More fiddling with chdir 't'
+	  + Add tests for the new '-Duselargefiles' Configure_win32() option
+
+	* t/cfgstuff.t: 1.04: (abeltje)
+	  * More fiddling with the chdir 't'
+
+2002-11-17  Abe Timmerman  <abeltje@local>
+
+	* SmokeLib.pm: 1.07: (abeltje)
+	  * The CFG_VARS should be double-quoted in win32/Makefile
+
+2002-11-16  Abe Timmerman  <abeltje@local>
+
+	* t/01basic.t: 1.04: (abeltje)
+	  * Don't do the BEGIN{ chdir 't' } stuff (CPAN::MakeMaker doesn't
+	  like it)
+
+2002-11-15  Abe Timmerman  <abeltje@local>
+
+	* mktest.pl: 1.09: (abeltje)
+	  * Get the REVISION right :-)
+	  * BUGFIX: get_MANIFEST() -> check_MANIFEST()
+	  + Added 'SEE ALSO' POD section
+
+	* SmokeLib.pm: 1.06: (abeltje)
+	  * Updated the POD for Configure_win32()
+	  + Added local documentation for %opts in Configure_win32()
+	  + Added '-Duselargefiles' to Configure_win32() based on a patch I
+	  submitted to p5p (current default from Configure_win32() id OFF)
+
+	* Makefile.PL: 1.04: (abeltje)
+	  * Changed some of the WriteMakefile() arguments
+	  + Added the "now run 'make test'" message
+
+2002-11-03  Abe Timmerman  <abeltje@local>
+
+	* t/01basic.t: 1.03: (abeltje)
+	  * Make all testfiles start the same
+
+	* t/skip_filter.t, t/manifest.t: 1.02: (abeltje)
+	  * Make all testfiles start the same
+
+	* t/get_patch.t, t/for_nmake.t: 1.04: (abeltje)
+	  * Make all testfiles start the same
+
+	* t/for_dmake.t, t/cfgstuff.t: 1.03: (abeltje)
+	  * Make all testfiles start the same
+
+2002-11-02  Abe Timmerman  <abeltje@local>
+
+	* mktest.pl: 1.08: (abeltje)
+	  * Updated the C<< run() >> documentation
+	  * Moved the MANIFEST stuff to SmokeLib.pm
+
+	* SmokeLib.pm: 1.05: (abeltje)
+	  + Added SmokeLib::check_MANIFEST()
+
+	* MANIFEST: 1.07: (abeltje)
+	  - Remove t/misc.t (it was renamed to t/get_patch.t and forgot to
+	  take it out)
+
+	* t/get_patch.t: 1.03: (abeltje)
+	  * More "1 while unlink ..."
+
+	* t/misc.t: Rename misc.t -> get_patch.t
+
+	* t/misc.t: 1.01: (abeltje)
+	  * New tests for SmokeLib::get_patch()
+
+	* t/manifest.t: 1.01: (abeltje)
+	  * New testfile for the new SmokeLib::check_MANIFEST()
+
+2002-10-28  Abe Timmerman  <abeltje@local>
+
+	* smokew32.bat: 1.05: (abeltje)
+	  + Add the posibility to set 'ccversion' for MSVC and BORLAND compilers
+
+	* mktest.pl: 1.07: (abeltje)
+	  * Change to 'use FindBin' for the local lib path (SmokeLib.pm)
+	  * Change the prototype of run() for the new call to
+	  SmokeLib::Configure_win32()
+	  * Pass arguments to SmokeLib::Configure_win32()
+
+	* t/for_nmake.t: 1.03: (abeltje)
+	  + Added two more tests for the new CFG_VARS macro arguments sanity check
+
+	* t/for_dmake.t: 1.02: (abeltje)
+	  + Added two more tests for the new CFG_VARS macro arguments sanity check
+
+	* SmokeLib.pm: 1.04: (abeltje)
+	  + Added a sanity check for the arguments to put in the CFG_VARS
+	  macro, so we don't get "empty" lines in there
+
+2002-10-18  Abe Timmerman  <abeltje@local>
+
+	* SmokeLib.pm: 0.03: (abeltje)
+	  * Slight fiddle with the warnings stuff
+	  * Adjusted the skip_filter()
+
+	* MANIFEST: 1.06: (abeltje)
+	  + Added the new testfiles:
+	    + t/for_dmake
+	    + t/win32/Makefile
+	    + t/win32/makefile.mk
+	  * Slight reordering of the list
+
+	* t/skip_filter.t: (abeltje)
+	  * New testfile to test the SmokeLib::skip_filter() rules
+
+	* t/win32/Makefile: 1.02: (abeltje)
+	  + Added the CFG_VARS macro for more testing
+
+	* t/for_nmake.t: 1.02: (abeltje)
+	  * DeTypo in a comment
+	  * Get the order of the arguments to Test::More::skip() right
+	  + Added a new test for the CFG_VARS macro
+
+	* t/win32/makefile.mk: (abeltje)
+	  + Add a testfile for 't/for_dmake.t'
+
+	* t/for_dmake.t: (abeltje)
+	  + Add tests for dmake + win32/makefile.mk
+
+2002-10-06  Abe Timmerman  <abeltje@local>
+
+	* t/cfgstuff.t: 1.02: (abeltje)
+	  * Get the arguments to Test::More::skip() in the right order
+	  * change a bit of logic
+
+	* t/get_patch.t: 1.02: (abeltje)
+	  * Get the arguments to Test::More::skip() in the right order
+
+	* t/get_patch.t: (abeltje)
+	  * New tests for SmokeLib::get_patch()
+
+	* SmokeLib.pm: 1.02: (abeltje)
+	    * Fiddle with the warnings
+	    + Add get_patch() and skip_filter() to the @EXPORT
+
+	* t/for_nmake.t: (abeltje)
+	  * Tests for Configure_win32() [nmake + win32/Makefile]
+
+	* smoke.sh: 1.05: (jhi)
+	  * Be a bit more carefull about using a local directory as rsync
+	  reposirory
+	  * Make smoke.sh silent!
+
+	* t/win32/Makefile:
+	This is some basic stuff from the nmake win32/Makefile for testing
+
+	* test.pl: This one moved to the t/ subdirectory
+
+	* t/01basic.t: 1.02: (abeltje)
+	  * Basic compilation testing, I don't want anymore syntax errors in a
+	  distribution
+
+	* t/cfgstuff.t: 1.01: (abeltje)
+	  * Some basic testing for the configurations
+
+2002-10-05  Abe Timmerman  <abeltje@local>
+
+	* t/01basic.t: (abeltje)
+	  * Check perl -c for all scripts in the distribution
+
+	* Configure.pl: 1.01: (abeltje)
+	  * This used to be Makefile.PL
+
+	* ChangeLog: 1.16_05: (abeltje)
+	  * This is (broken) REV_1_16_05
+
+	* MANIFEST: Add the new SmokeLib and teststuff
+
+	* SmokeLib.pm: 1.01: (abeltje)
+	  * This is a new one. It breaks 'mktest.pl' as it stands, but I need
+	  to clean up first.
+
+	* mktest.pl: 1.06: (abeltje)
+	  * Took out a lot of stuff See the new SmokeLib.pm
+
+	* mkovz.pl: 1.05: (abeltje)
+	  * Change the %Config overrides from '=' to '||='
+	  * Cleanup $Config{archname}
+	  * BUGFIX, Text::ParseWords::quotewords() can return 'undef'
+	  + Added report summary: 'PASS', 'FAIL(Fmc)', 'PASS-so-far'
+	  * Changed the Subject: line of the email:
+	    "Smoke $patch $Summary $os $osvers ($arch)"
+
+	* README: 1.04: (abeltje)
+	  * version
+	  * Get the mailing lists right
+	  + Add Jarkko as an inspirator
+	  * Adjust the plan
+
+	* smokew32.cfg: (abeltje)
+	  + Added some text to explai that all the extra Configure arguments
+	  go on *ONE* line in the first section.
+
+	* smokew32.bat: 1.04: (abeltje)
+	  + Add new env-variable %TS_RP% for the rsync repository
+	  * Changed the call to rsync to use the new %TS_RP%
+	  + Added a random sleep before contacting the repository
+
+	* Makefile.PL: 1.03: (abeltje)
+	  * This is the official Makefile.PL (keep the CPAN testers happy)
+
+	* mkdist.sh: (abeltje)
+	    * Changed to call 'perl Makefile.PL' (mkdist.PL is gone)
+
+	* mkdist.PL: (abeltje)
+	  - Remove 'mkdist.PL' it it now Makefile.PL
+
+	* smoke.sh: (abeltje)
+	  + Create a new variable ($TS_RP) for the rsync reporsitory (Jarkko)
+	  * Change the call to rsync to use $TS_RP
+	  + Added a random sleep just before rsync (Jarkko)
+	  * Changed the email-address to <smokers-reports@perl.org>
+
+	* MANIFEST: (abeltje)
+	  * Makefile.PL is now renamed Configure.pl
+	  + Added a CPAN-like Makefile.PL (without an install target)
+
+2002-09-30  Abe Timmerman  <abeltje@local>
+
+	* MANIFEST: (abeltje)
+	  + Add 'test.pl' to the distribution
+
+	* ChangeLog: 1.16(b): (abeltje)
+	  * This is REV_1_16b (REV_1_16a released on CPAN)
+
+	* smokew32.bat: 1.03: (abeltje)
+	  + Add support to pass 'gccversion' and 'osvers' to mktest.pl
+	  + Add some code to set GCC_VERSION from `gcc --version`
+
+2002-09-29  Abe Timmerman  <abeltje@local>
+
+	* ChangeLog: 1.16: (abeltje)
+	  * This is REV_1_16
+
+	* mktest.pl: 1.05 (abeltje):
+	  * Started POD
+	  * Started refactoring [get_cfg_filename(), skip_filter()]
+	  + Added support for -Dggc_v3_2 (--CCTYPE=GCC implied)
+
+	* mkovz.pl: 1.16: (abeltje)
+	  * Version
+	  * Fix the syntaxerror ($mail_from/$email_from)
+	  + Added $Config{archname} to the reports
+
+	* smoke.sh: (abeltje):
+	  + Added 'renice 20 $$' (at Jarkko's request)
+
+	* README: (abeltje):
+	  * Update the version
+
+	* mkdist.sh: (abeltje):
+	  + Added 'make test' for the tiny testsuite
+
+	* smokew32.cfg: (abeltje):
+	  * Change the wording
+	  - Remove -Duseperlio
+	  + Add a hint to the new -Dgcc_v3_2 for MinGW-2
+
+	* test.pl: At least check for syntaxerrors.
+
+2002-09-19  Abe Timmerman  <abeltje@local>
+
+	* smoke.cfg: NO MORE -Uuseperlio (Merijn)
+
+	* smokew32.bat: 1.02: (abeltje)
+	  * get the address right
+
+	* mktest.pl: 1.04: (abeltje)
+	  * A bit more fiddling with the Win32 config args
+	  * bug-fix: Don't change config-params beyond a certain
+
+	* mkovz.pl: 1.03: (abeltje)
+	  * fixed a bug in the mail-to mail-from logic
+	  * changed the RPT_TOP format (common config options moved to the
+	  top)
+
+2002-09-11  Abe Timmerman  <abeltje@local>
+
+	* mktest.pl: (abeltje):
+	  * Minor tweak of Configure_win32()
+
+	* ChangeLog: This is REV-1_15
+
+	* MANIFEST: (abeltje):
+	  * rename smoke.bat to smokew32.bat
+	  * rename smokewin32.cfg to smokew32.cfg
+
+	* mkdist.PL: (abeltje):
+	  * Help to build the distribution
+
+	* smokewin32.cfg: Renamed to 'smokew32.cfg'
+
+	* smokew32.cfg: (abeltje):
+	  * An attempt to make life easier for MSWin32 smokers
+
+	* smokew32.bat: 1.01 (abeltje):
+	  * An attempt to make life easier for MSWin32 smokers
+
+	* smoke.sh: (abeltje):
+	  * Changed the "URI" type call to rsync
+	  * All other output (not caught by mktest.pl) now goes to 'mktest.log'
+
+	* smoke.bat: renamed to smokew32.bat
+
+	* mktest.pl: 1.15 (abeltje):
+	    * Configure() renamed to Configure_win32()
+	    * Extended Configure_win32() to take more makefile vars
+	    + More filtering of 'make test' output
+
+	* mkovz.pl: 1.15 (abeltje):
+	  * Merge 1.13 with my own developments
+	  * Changed the reports to use formats
+	  * Config.pm has changed, so get_smoke_Config() had to change
+
+	* README: (abeltje):
+	  + Added more information for MSWin32 users
+	  * Please don't bug Merijn about Test::Smoke
+
+	* Makefile.PL: (abeltje):
+	  + Add 'Abe Timmerman' to authors
+	  * Change VERSION to VERSION_FROM
+
+2002-09-05  Abe Timmerman  <abeltje@local>
+
+	* mkdist.sh: Just a simple helper thingy
+
+2002-09-03  Abe Timmerman  <abeltje@local>
+
+	* ChangeLog, MANIFEST, Makefile.PL, README, mkovz.pl, mktest.pl, smoke.bat, smoke.cfg, smoke.sh, smokewin32.cfg:
+	New file.
+
+	* ChangeLog, MANIFEST, Makefile.PL, README, mkovz.pl, mktest.pl, smoke.bat, smoke.cfg, smoke.sh, smokewin32.cfg:
+	Put 1.13_10 into CVS
+

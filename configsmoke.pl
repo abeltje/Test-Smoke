@@ -1,0 +1,1304 @@
+#! /usr/bin/perl -w
+use strict;
+
+use Config;
+use Cwd;
+use File::Spec;
+use File::Path;
+use Data::Dumper;
+use FindBin;
+use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
+
+use Getopt::Long;
+my %options = ( 
+    config  => undef, 
+    jcl     => undef, 
+    log     => undef,
+    default => undef,
+    prefix  => undef,
+);
+GetOptions( \%options, 
+    'config|c=s', 'jcl|j=s', 'log|l=s', 
+    'prefix|p=s', 'default|d=s'
+);
+$options{prefix} = 'smokecurrent' unless defined $options{prefix};
+
+my %suffix = ( config => '_config', jcl => '', log => '.log' );
+foreach my $opt (qw( config jcl log )) {
+    my $key = defined $options{$opt} ? $opt : 'prefix';
+    $options{$opt} = "$options{ $key }$suffix{ $opt }";
+}
+
+use vars qw( $VERSION $conf );
+$VERSION = '0.010';
+
+eval { require $options{config} };
+print "Using '$options{config}' for defaults.\n" unless $@;
+if ( $@ || $options{default} ) {
+    my $df_key = $options{default} ? 'default' : 'prefix';
+    my $df_config = "$options{ $df_key }_dfconfig";
+    local $@;
+    eval { require $df_config };
+    print "Using '$df_config' for more defaults.\n" unless $@;
+} 
+
+
+=head1 NAME
+
+configsmoke.pl - Create a configuration for B<smokeperl.pl>
+
+=head1 SYNOPSIS
+
+   $ perl configsmoke.pl [options]
+
+=head1 OPTIONS
+
+Current options:
+
+  -c configname When ommited 'perlcurrent_config' is used
+  -j jclname    When ommited 'perlcurrent' is used
+  -l logfile    When ommited 'perlcurrent.log' is used
+  -p prefix     Set -c and -j and -l at once
+
+=cut
+
+sub is_win32() { $^O eq 'MSWin32' }
+
+my %mailers = get_avail_mailers();
+my @mailers = sort keys %mailers;
+
+my %opt = (
+    # is this a perl-5.6.x smoke?
+    is56x => {
+        msg => 'Is this configuration for perl-5.6.x (MAINT)?',
+        alt => [qw( N y )],
+        dft => 'N',
+    },
+    # Destination directory
+    ddir => {
+        msg => 'Where would you like the new source-tree?',
+        alt => [ ],
+        dft => File::Spec->rel2abs( File::Spec->catdir( File::Spec->updir,
+                                                        'perl-current' ) ),
+    },
+    use_old => {
+        msg => "It looks like there is already a source-tree there.\n" .
+               "Should it still be used for smoke testing?",
+        alt => [qw( N y )],
+        dft => 'n',
+    },
+    # misc
+    cfg => {
+        msg => 'Which configuration file would you like to use?',
+        alt => [ ],
+        dft => File::Spec->rel2abs( is_win32
+                                    ? 'smokew32.cfg' : 'perlcurrent.cfg' ),
+    },
+    umask => {
+        msg => 'What umask can be used (0 preferred)?',
+        alt => [ ],
+        dft => '0',
+    },
+    renice => {
+        msg => "With which value should 'renice' be run " .
+               "(leave '0' for no 'renice')?",
+        alt => [ 0..20 ],
+        dft => 0,
+    },
+    v => {
+        msg => 'How verbose do you want the output?',
+        alt => [qw( 0 1 2 )],
+        dft => 0,
+    },
+    # syncing the source-tree
+    want_forest => {
+        msg => "Would you like the 'Nick Clark' master sync trees?",
+        alt => [qw( N y )],
+        dft => 'n',
+    },
+    forest_mdir => {
+        msg => 'Where would you like the master source-tree?',
+        alt => [ ],
+        dft => File::Spec->rel2abs( File::Spec->catdir( File::Spec->updir,
+                                                        'perl-master' ) ),
+    },
+    forest_hdir => {
+        msg => 'Where would you like the intermediate source-tree?',
+        alt => [ ],
+        dft => File::Spec->rel2abs( File::Spec->catdir( File::Spec->updir,
+                                                        'perl-inter' ) ),
+    },
+    fsync => { 
+        msg => 'How would you like to sync your master source-tree?',
+        alt => [ get_avail_sync() ], 
+        dft => 'rsync' 
+    },
+    sync_type => { 
+        msg => 'How would you like to sync your source-tree?',
+        alt => [ get_avail_sync() ], 
+        dft => 'rsync' 
+    },
+    source => {
+        msg => 'Where would you like to rsync from?',
+        alt => [ ],
+        dft => 'ftp.linux.activestate.com::perl-current',
+    },
+    rsync => {
+        msg => 'Which rsync program should be used?',
+        alt => [ ],
+        dft => whereis( 'rsync' ),
+    },
+    opt => {
+        msg => 'Which arguments should be used for rsync?',
+        alt => [ ],
+        dft => '-az --delete',
+    },
+
+    server => {
+        msg => 'Where would you like to FTP the snapshots from?',
+        alt => [ ],
+        dft => 'ftp.funet.fi',
+    },
+
+    sdir => {
+        msg => 'Which directory should the snapshots be FTPed from?',
+        alt => [ ],
+        dft => '/pub/languages/perl/snap',
+    },
+
+    tar => {
+        msg => <<EOMSG,
+How should the snapshots be extracted?
+Examples:@{[ map "\n\t$_" => get_avail_tar() ] }
+EOMSG
+        alt => [ ],
+        dft => (get_avail_tar())[0],
+    },
+
+    snapext => {
+        msg => 'What type of snapshots shoul be FTPed?',
+        alt => [qw( tgz tbz )],
+        dft => 'tgz',
+    },
+
+    patchup => {
+        msg => 'Would you like to try to patchup your snapshot?',
+        alt => [qw( N y ) ],
+        dft => 'n',
+    },
+
+    pserver => {
+        msg => 'Which server would you like the patches FTPed from?',
+        alt => [ ],
+        dft => 'ftp2.activestate.com',
+    },
+
+    pdir => {
+        msg => 'Which directory should the patches FTPed from?',
+        alt => [ ],
+        dft => '/pub/staff/gsar/APC/perl-current-diffs',
+    },
+
+    unzip => {
+        msg => 'How should the patches be unzipped?',
+        alt => [ ],
+        dft => whereis( 'gzip' ) . " -cd",
+    },
+
+    cleanup => {
+        msg => "Remove applied patch-files?\n" .
+               "0(none) 1(snapshot)",
+        alt => [qw( 0 1 )],
+        dft => 1,
+    },
+
+    cdir => {
+        msg => 'From which directory should the source-tree be copied?',
+        alt => [ ],
+        dft => undef,
+    },
+
+    hdir => {
+        msg => 'From which directory should the source-tree be hardlinked?',
+        alt => [ ],
+        dft => undef,
+    },
+
+    patch => {
+        msg => undef,
+        alt => [ ],
+        dft => whereis( 'patch' ),
+    },
+
+    popts => {
+        msg => undef,
+        alt => [ ],
+        dft => '',
+    },
+
+    pfile => {
+        msg => "What file is used for specifying patches " .
+               "(leave empty for none)?",
+        alt => [ ],
+        dft => ''
+    },
+
+    # mail stuff
+    mail_type => {
+        msg => 'Which mail facility should be used?',
+        alt => [ @mailers ],
+        dft => $mailers[0],
+        nocase => 1,
+    },
+    mserver => {
+        msg => 'Which SMTP server should be used to send the report?' .
+               "\nLeave empty to use local sendmail",
+        alt => [ ],
+        dft => 'localhost',
+    },
+
+    to => {
+       msg => "To which address(es) should the report be send " .
+              "(comma separated list)?",
+       alt => [ ],
+       dft => 'smokers-reports@perl.org',
+    },
+
+    cc => {
+       msg => "To which address(es) should the report be CC'ed " .
+              "(comma separated list)?",
+       alt => [ ],
+       dft => '',
+    },
+
+    from => {
+        msg => 'Which address should be used for From?',
+        alt => [ ],
+        dft => '',
+    },
+    force_c_locale => {
+        msg => 'Should $ENV{LC_ALL} be forced to "C"',
+        alt => [qw( N y )],
+        dft => 'n',
+    },
+    locale => {
+        msg => 'What locale should be used for extra testing ' .
+               '(leave empty for none)?',
+        alt => [ ],
+        dft => '',
+        chk => '(?:utf-?8$)|^$',
+    },
+    smartsmoke => {
+        msg => 'Skip smoke unless patchlevel changed?',
+        alt => [qw( Y n )],
+        dft => 'y',
+    },
+    # Schedule stuff
+    docron => {
+        msg => 'Should the smoke be scheduled?',
+        alt => [qw( Y n )],
+        dft => 'y',
+    },
+    crontime => {
+        msg => 'At what time should the smoke be scheduled?',
+        alt => [ ],
+        dft => '22:25',
+        chk => '(?:random|(?:[012]?\d:[0-5]?\d))',
+    },
+);
+
+my %config;
+
+print <<EOMSG;
+
+Welcome to the Perl core smoke test suite.
+You will be asked some questions in order to configure this test suite.
+
+EOMSG
+
+my $arg;
+
+=head1 DESCRIPTION
+
+B<Test::Smoke> is the symbolic name for a set of scripts and modules
+that try to run the perl core tests on as many configurations as possible
+and combine the results into an easy to read report.
+
+The main script is F<smokeperl.pl>, and this uses a configuration file
+that is created by this program (F<configsmoke.pl>).  There is no default
+configuration as some actions can be rather destructive, so you will need
+to create your own configuration by running this program!
+
+By default the configuration file created is called F<smokecurrent_config>,
+this can be changed by specifying the C<< -c <prefix> >> or C<< -p <prefix> >>
+switch at the command line (C<-c> will override C<-p> when both are specified).
+
+    $ perl configsmoke.pl -c mysmoke
+
+will create F<mysmoke_config> as the configuration file.
+
+After you are done configuring, a small job command list is written.
+For MSWin32 this is called F<smokecurrent.cmd> otherwise this is called
+F<smokecurrent.sh>. Again the default prefix can be overridden by specifying
+the C<< -j <prefix> >> or C<< -p <prefix> >> switch.
+
+All output (stdout, stderr) from F<smokeperl.pl> and its sub-processes
+is redirected to a logfile called F<smokecurrent.log> by the small jcl. 
+(Use C<< -l <prefix> >> or C<< -p <prefix> >> to override).
+
+There are two additional configuration default files
+F<smoke56x_dfconfig> and F<smoke58x_dfconfig> to help you configure 
+B<Test::Smoke> for these two maintenance branches of the source-tree.
+
+To create a configuration for the perl 5.6.x brach:
+
+    $ perl configsmoke.pl -p smoke56x
+
+This will read additional defaults from F<smoke56x_dfconfig> and create
+F<smoke56x_config> and F<smoke56x.sh>/F<smoke56x.cmd> and logfile will be
+F<smoke56x.log>.
+
+The same goes for the perl 5.8.x branch:
+
+    $perl configsmoke.pl -p smoke58x
+
+=head1 CONFIGURATION
+
+Here is a description of the configuration sections.
+
+=over 4
+
+=item is56x
+
+C<is56x> is passed as a switch to F<mktest.pl> to indicate that
+only one run of B<make test> is needed as there are no PerlIO layers
+in pre 5.7.? perl.
+
+=cut
+
+$arg = 'is56x';
+$config{ $arg } = prompt_yn( $arg );
+
+=item ddir
+
+C<ddir> is the destination directory. This is used to put the
+source-tree in and build perl. If a source-tree appears to be there
+you will need to confirm your choice.
+
+=cut
+
+BUILDDIR: {
+    $arg = 'ddir';
+    $config{ $arg } = prompt_dir( $arg );
+    my $cwd = cwd;
+    unless ( chdir $config{ $arg } ) {
+        warn "Can't chdir($config{ $arg }): $!\n";
+        redo BUILDDIR;
+    }
+    my $bdir = $config{ $arg } = cwd;
+    chdir $cwd or die "Can't chdir($cwd) back: $!\n";
+    if ( $cwd eq $bdir ) {
+        print "The current directory *cannot* be used for smoke testing\n";
+        redo BUILDDIR;
+    }
+
+    $config{ $arg } = File::Spec->canonpath( $config{ $arg } );
+    my $manifest  = File::Spec->catfile( $config{ $arg }, 'MANIFEST' );
+    my $dot_patch = File::Spec->catfile( $config{ $arg }, '.patch' );
+    if ( -e $manifest && -e $dot_patch ) {
+        my $use_old = lc prompt( 'use_old' );
+        redo BUILDDIR unless $use_old eq 'y';
+    }
+}
+
+=item cfg
+
+C<cfg> is the path to the file that holds the build-configurations.
+There are several build-cfg files provided with the distribution:
+
+=over 4
+
+=item F<perlcurrent.cfg> for 5.8.x+ on unixy systems
+
+=item F<w32current.cfg> for 5.8.x+ on MSWin32
+
+=item F<perl56x.cfg> for 5.6.x (MAINT) on unixy systems
+
+=back
+
+Note: 5.6.x on MSWin32 is not yet provided, but commenting out the
+B<-Duselargefiles> section from F<w32current.cfg> should be enough.
+
+=cut
+
+$arg = 'cfg';
+$config{ $arg } = prompt_file( $arg );
+
+=item Nick Clark hardlink forest
+
+Here is how Nick described it to me:
+
+My plan is to use a few more directories, and avoid make distclean:
+
+=over 4
+
+=item 1
+
+rsync as before, but to a master directory. this directory is only used 
+for rsyncing from the server
+
+=item 2
+
+copy that directory (as a hardlink forest) - gnu cp can do it as cp -lr,
+and I have a perl script to replicate that (which works nicely on FreeBSD)
+as a clean master source directory for this smoke session
+
+=item 3
+
+run the regen headers script (which 5.9.0 now has as a distinct script)
+rather than just a Makefile target
+
+=back
+
+I now have a clean, up-to-date source tree with accurate headers. For each
+smoking configuration
+
+=over 4
+
+=item 4
+
+copy that directory (hard links again)
+
+=item 5
+
+in the copy directory. Configure, build and test
+
+=item 6
+
+delete the copy directory
+
+=back
+
+deleting a directory seems to be faster than make distclean.
+
+=cut
+
+# Check to see if you want the Nick Clark forest
+$arg = 'want_forest';
+$opt{ $arg }{dft} = exists $conf->{sync_type}
+                  ? $conf->{sync_type} eq 'forest'
+                  : $opt{ $arg }{dft};
+my $want_forest = prompt_yn( $arg );
+FOREST: {
+    last FOREST unless $want_forest;
+
+    $config{mdir} = prompt_dir( 'forest_mdir' );
+
+    $config{fdir} = prompt_dir( 'forest_hdir' );
+
+    $config{sync_type} = 'forest';
+}
+
+=item sync_type (fsync)
+
+C<sync_type> (or C<fsync> if you want_forest) can be one of four:
+
+=over 4
+
+=item rsync
+
+This will use the B<rsync> program to sync up with the repository.
+F<configsmoke.pl> checks to see if it can find B<rsync> in your path.
+
+The default switches passed to B<rsync> are B<-az --delete>
+
+=item snapshot
+
+This will use B<Net::FTP> to try to find the latest snapshot on
+<ftp://ftp.funet.fi/languages/perl/snap/>. 
+
+Snapshots are not in sync with the repository, so if you have a working
+B<patch> program, you can choose to "upgrade" your snapshot by fetching 
+all the seperate patches from the repository and applying them.
+
+=item copy
+
+This will use B<File::Copy> and B<File::Find> to just copy from a
+source directory.
+
+=item hardlink
+
+This will use B<File::Find> and the B<link> function to copy from a 
+source directory. (This is also used if you choose "forest".)
+
+=back
+
+See L<Test::Smoke::Syncer>
+
+=cut
+
+$arg = $want_forest ? 'fsync' : 'sync_type';
+$conf->{sync_type} = $conf->{fsync} || 'rsync' unless $want_forest;
+$config{ $arg } = lc prompt( $arg );
+
+SYNCER: {
+    local $_ = $config{ $arg};
+    /^rsync$/ && do {
+        $arg = 'source';
+        $config{ $arg } = prompt( $arg );
+
+        $arg = 'rsync';
+        $config{ $arg } = prompt( $arg );
+
+        $arg = 'opt';
+        $config{ $arg } = prompt( $arg );
+
+        last SYNCER;
+    };
+
+    /^snapshot$/ && do {
+        for $arg ( qw( server sdir tar snapext ) ) {
+            $config{ $arg } = prompt( $arg );
+        }
+
+        $arg = 'patchup';
+        if ( whereis( 'patch' ) ) {
+            $config{ $arg } = lc prompt( $arg ) eq 'y' ? 1 : 0;
+
+            if ( $config{ $arg } ) {
+                for $arg (qw( pserver pdir unzip patch )) {
+                    $config{ $arg } = prompt( $arg );
+                }
+                $opt{cleanup}->{msg} .= " 2(patches) 3(both)";
+                $opt{cleanup}->{alt}  = [0, 1, 2, 3];
+            }
+	} else {
+	    $config{ $arg } = 0;
+        }
+        $arg = 'cleanup';
+        $config{ $arg } = prompt( $arg );
+
+        last SYNCER;
+    };
+
+    /^copy$/ && do {
+        $arg = 'cdir';
+        $config{ $arg } = prompt( $arg );
+
+        last SYNCER;
+    };
+
+    /^hardlink$/ && do {
+        $arg = 'hdir';
+        $config{ $arg } = prompt_dir( $arg );
+
+        last SYNCER;
+    };
+}
+
+=item pfile
+
+C<pfile> is the path to a textfile that holds the names of patches to
+be applied before smoking. This can be used to run a smoke test on proposed
+patches that have not been applied (yet) or to see the effect of
+revesing an already applied patch. The file format is simple:
+
+  * one patchfile per line
+  * optionally followed by ';' and options to pass to patch
+
+You will need a working B<patch> program to use this feature.
+
+There is an issue when using the "forest" sync, but I will look into that.
+
+=cut
+
+my $patchbin = whereis( 'patch' );
+PATCHER: {
+    last PATCHER unless $patchbin;
+    $config{patch} = $patchbin;
+    print "\nFound [$config{patch}]";
+    $arg = 'pfile';
+    $config{ $arg } = prompt_file( $arg, 1 );
+
+    if ( $config{ $arg } ) {
+        $config{patch_type}  = 'multi';
+        last PATCHER if -f $config{ $arg };
+        local *PATCHES;
+        open PATCHES, "> $config{$arg}" or last PATCHER;
+        print PATCHES <<EOMSG;
+# Put one filename of a patch on a line, optional args for patch
+# follow the filename separated by a semi-colon (;) [-p1] is default
+# /path/to/patchfile.patch;-p0 -R
+# Empty lines and lines starting with '#' are ignored
+# File paths are relative to '$config{ddir}' if not absolute
+EOMSG
+        close PATCHES or last PATCHER;
+        print "Created skeleton '$config{$arg}'\n";
+    }
+}
+
+=item force_c_locale
+
+C<force_c_locale> is passed as a switch to F<mktest.pl> to indicate that
+C<$ENV{LC_ALL}> should be forced to "C" during B<make test>.
+
+=cut
+
+unless ( $config{is56x} ) {
+    $arg = 'force_c_locale';
+    $config{ $arg } = prompt_yn( $arg );
+}
+
+=item locale
+
+C<locale> and its value are passed to F<mktest.pl> and its value is passed
+to F<mkovz.pl>. F<mktest.pl> will do an extra run of B<make test> with 
+C<< $ENV{LC_ALL} >> set to that locale (and C<< $ENV{PERL_UNICODE} = 1; >>,
+C<< $ENV{PERLIO} = "perlio"; >>). This feature should only be used with
+UTF8 locales, that is why this is checked.
+
+B<If you know of a way to get the utf8 locales on your system, which is
+not coverd here, please let me know!>
+
+=cut
+
+UTF8_LOCALE: {
+    my @locale_utf8 = $config{is56x} ? () : check_locale();
+    last UTF8_LOCALE unless @locale_utf8;
+
+    my $list = join " |", @locale_utf8;
+    format STDOUT =
+^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<~~
+$list
+.
+    local $: = "|";
+    $arg = 'locale';
+    print "\nI found these UTF-8 locales:\n";
+    write;
+    $config{ $arg } = prompt( $arg );
+}
+
+=item mail_type
+
+See L<Test::Smoke::Mailer> and L<mailrpt.pl>
+
+=cut
+
+MAIL: {
+    $arg = 'mail_type';
+    $config{ $arg } = prompt( $arg );
+
+    $arg = 'to';
+    while ( !$config{ $arg } ) { $config{ $arg } = prompt( $arg ) }
+
+    MAILER: {
+        local $_ = $config{ 'mail_type' };
+
+        /^mailx?$/         && do { last MAILER };
+        /^sendmail$/       && do {
+            $arg = 'from';
+            $config{ $arg } = prompt( $arg );
+	};
+
+        /^Mail::Sendmail$/ && do {
+            $arg = 'from';
+            $config{ $arg } = prompt( $arg );
+
+            $arg = 'mserver';
+            $config{ $arg } = prompt( $arg );
+        };
+    }
+    $arg = 'cc';
+    $config{ $arg } = prompt( $arg );
+}
+
+=item w32args
+
+For MSWin32 we need some extra information that is passed to
+F<mktest.pl> in order to compensate for the lack of B<Configure>.
+
+See L<Test::Smoke::Util/"Configure_win32( )"> and L<W32Configure.pl>
+
+=cut
+
+WIN32: {
+    last WIN32 unless is_win32;
+
+    my $osvers = get_Win_version();
+    my %compilers = get_avail_w32compilers();
+
+    my $dft_compiler = exists $conf->{w32args} ? $conf->{w32args}[1] : '';
+    $dft_compiler ||= ( sort keys %compilers )[-1];
+    $opt{w32compiler} = {
+        msg => 'What compiler should be used?',
+        alt => [ keys %compilers ],
+        dft => $dft_compiler,
+    };
+
+    print <<EO_MSG;
+
+I see you are on $^O ($osvers).
+No problem, but we need extra information.
+EO_MSG
+
+    my $w32compiler = uc prompt( 'w32compiler' );
+
+    $opt{w32maker} = {
+        alt => $compilers{ $w32compiler }->{maker},
+        dft => ( sort @{ $compilers{ $w32compiler }->{maker} } )[-1],
+    };
+    $opt{w32maker}->{msg} = @{ $compilers{ $w32compiler }->{maker} } > 1 
+        ? "Which make should be used" : undef;
+
+    my $w32maker = prompt( 'w32maker' );
+
+    $config{w32args} = [ 
+        "--win32-cctype", $w32compiler,
+        "--win32-maker",  $w32maker,
+        "osvers=$osvers", 
+        $compilers{ $w32compiler }->{ccversarg},
+    ];
+}
+
+=item umask
+
+C<umask> will be set in the shell-script that starts the smoke.
+
+=item renice
+
+C<renice> will add a line in the shell-script that starts the smoke.
+
+=cut
+
+my( $umask, $renice );
+unless ( is_win32 ) {
+    $umask = prompt( 'umask' );
+
+    $renice = prompt( 'renice' );
+}
+
+=item v
+
+The verbosity level: 0, 1 or 2
+
+=cut
+
+$arg = 'v';
+$config{ $arg } = prompt( $arg );
+
+=item smartsmoke
+
+C<smartsmoke> indicates that the smoke need not happen if the patchlevel
+is the same after syncing the source-tree.
+
+=cut
+
+$arg = 'smartsmoke';
+$config{ $arg } = prompt_yn( $arg );
+
+=item schedule stuff
+
+=over 4
+
+=item cron/crontab
+
+We try to detect 'crontab' or 'cron', read the contents of 
+B<crontab -l>, detect ourself and comment us out.
+Then we add an new entry.
+
+=item MSWin32 at.exe
+
+We only add a new entry, you will need to remove existing entries,
+as F<at.exe> has not got a way comment-out entries.
+
+=back
+
+=cut
+
+my( $cron, $has_crond,  $crontime );
+SCHEDULE: { 
+    ( $cron, $has_crond ) = get_avail_scheduler();
+
+    last SCHEDULE unless $cron;
+
+    print "\nFound '$cron' as your scheduler";
+    print "\nYou do not seem to be running 'cron' or 'crond'"
+        unless is_win32 || $has_crond;
+    my $do_schedule = prompt_yn( 'docron' );
+    last SCHEDULE unless $do_schedule;
+
+    $opt{crontime}->{dft} = sprintf "%02d:%02d", rand(24), rand(60);
+    $crontime = prompt( 'crontime' );
+
+    my( @current_cron, $new_entry );
+    local *CRON;
+    if ( open CRON, is_win32 ? "$cron |" : "$cron -l |" ) {
+        @current_cron = <CRON>;
+        close CRON or warn "Error reading schedule\n";
+    }
+
+    my $cron_smoke = "crontab.smoke";
+    # we might need some cleaning
+    if ( is_win32 ) {
+        @current_cron = grep /^\s+\d+\s+.+\d+:\d+\s/ => @current_cron;
+
+        my $jcl = File::Spec->rel2abs( "$options{jcl}.cmd" );
+        $new_entry = schedule_entry( $jcl, $cron, $crontime );
+
+    } else { # Filter out the BSDish "DO NOT EDIT..." lines
+        if ( "@current_cron" =~ /^# DO NOT EDIT THIS FILE/ ) {
+            splice @current_cron, 0, 3;
+        }
+        foreach ( @current_cron ) {
+            s/^(?<!#)(\d+.+(?:$options{jcl}|smoke)\.sh)/#$1/;
+	}
+
+        my $jcl = File::Spec->rel2abs( "$options{jcl}.sh" );
+        $new_entry = schedule_entry( $jcl, $cron, $crontime );
+        if ( open CRON, "> $cron_smoke" ) {
+            print CRON @current_cron, "$new_entry\n";
+            close CRON or warn "Error while writing '$cron_smoke': $!";
+        }
+
+    }
+
+    print "I will use this to add to:\n", @current_cron;
+    $opt{add2cron} = {
+        msg => "Add this line to your schedule?\n\t$new_entry\n",
+        alt => [qw( Y n )],
+        dft => 'y',
+    };
+    my $add2cron = prompt_yn( 'add2cron' );
+    if ( !is_win32 && !$add2cron ) {
+        print "\nLeft '$cron_smoke' in case you want to use it.\n";
+    }
+    last SCHEDULE unless $add2cron;
+
+    if ( is_win32 ) {
+        system $new_entry;
+    } else {
+        my $nok = system $cron, $cron_smoke;
+        if ( $nok ) {
+            print "\nCouldn't set new crontab\nLeft '$cron_smoke'\n";
+        } else {
+            unlink $cron_smoke;
+        }
+    }
+}
+
+my $jcl;
+SAVEALL: {
+    save_config();
+    if ( is_win32 ) {
+        $jcl = write_bat();
+    } else {
+        $jcl = write_sh();
+    }
+}
+
+print <<EOMSG;
+
+Run the perl core test smoke suite with:
+\t$jcl
+
+Please check "$config{cfg}" 
+for the configurations you want to test.
+
+Have the appropriate amount of fun!
+
+                                    The Test::Smoke team.
+EOMSG
+
+sub save_config {
+    local *CONFIG;
+    open CONFIG, "> $options{config}" or
+        die "Cannot write '$options{config}': $!";
+    print CONFIG Data::Dumper->Dump( [\%config], ['conf'] );
+    close CONFIG or warn "Error writing '$options{config}': $!" and return;
+
+    print "Finished writing '$options{config}'\n";
+}
+
+sub write_sh {
+    my $cwd = cwd();
+    my $jcl = "$options{jcl}.sh";
+    my $cronline = schedule_entry( File::Spec->catfile( $cwd, $jcl ), 
+                                   $cron, $crontime );
+    local *MYSMOKESH;
+    open MYSMOKESH, "> $jcl" or
+        die "Cannot write '$jcl': $!";
+    print MYSMOKESH <<EO_SH;
+#! /bin/sh
+#
+# Written by $0 v$VERSION
+# @{[ scalar localtime ]}
+#
+# $cronline
+@{[ renice( $renice ) ]}
+cd $cwd
+PATH=$cwd:$ENV{PATH}
+umask $umask
+./smokeperl.pl -c $options{config} \$\* > $options{log} 2>&1
+EO_SH
+    close MYSMOKESH or warn "Error writing '$jcl': $!";
+
+    chmod 0755, $jcl or warn "Cannot chmod 0755 $jcl: $!";
+    print "Finished writing '$jcl'\n";
+
+#    print "\nYou can add this line to your crontab:\n\t$cronline\n"
+#        if $cronline;
+
+    return File::Spec->canonpath( File::Spec->rel2abs( $jcl ) );
+}
+
+sub write_bat {
+    my $cwd = File::Spec->canonpath( cwd() );
+
+    my $copycmd = $config{w32args}->[1] ne "BORLAND" ? "" : <<EOCOPYCMD;
+
+REM I found hanging XCOPY while smoking with BORLAND
+set COPYCMD=/Y %COPYCMD%
+
+EOCOPYCMD
+
+    my $jcl = "$options{jcl}.cmd";
+    my $atline = schedule_entry( File::Spec->catfile( $cwd, $jcl ), 
+                                 $cron, $crontime );
+    local *MYSMOKEBAT;
+    open MYSMOKEBAT, "> $jcl" or
+        die "Cannot write '$jcl': $!";
+    print MYSMOKEBAT <<EO_BAT;
+\@echo off
+setlocal
+
+REM Written by $0 v$VERSION
+REM @{[ scalar localtime ]}
+$copycmd
+REM $atline
+
+set WD=$cwd\
+cd "\%WD\%"
+set OLD_PATH=\%PATH\%
+set PATH=$cwd;\%PATH\%
+$^X smokeperl.pl -c $options{config} \%* > "\%WD\%\\$options{log}" 2>&1
+set PATH=\%OLD_PATH\%
+set WD=
+EO_BAT
+    close MYSMOKEBAT or warn "Error writing '$jcl': $!";
+
+    print "Finished writing '$jcl'\n";
+
+    return File::Spec->canonpath( File::Spec->rel2abs( $jcl ) );
+}
+
+sub prompt {
+    my( $message, $alt, $df_val, $chk ) = 
+        @{ $opt{ $_[0] } }{qw( msg alt dft chk )};
+
+    $df_val = $conf->{ $_[0] } if exists $conf->{ $_[0] };
+    return $df_val unless defined $message;
+    $message =~ s/\s+$//;
+
+    $chk ||= '.*';
+
+    my $default = defined $df_val ? $df_val : 'undef';
+    my $alts    = @$alt ? "<" . join( "|", @$alt ) . "> " : "";
+    print "\n$message\n";
+
+    my %ok_val;
+    %ok_val = map { (lc $_ => 1) } @$alt if @$alt;
+    my $input;
+    INPUT: {
+        print "$alts\[$default] \$ ";
+        chomp( $input = <STDIN> );
+        $input =~ s/^\s+//;
+        $input =~ s/\s+$//;
+        $input = $df_val unless length $input;
+
+        printf "Input does not match $chk\n" and redo INPUT
+            unless $input =~ m/$chk/i;
+
+        last INPUT unless %ok_val;
+        printf "Expected one of: '%s'\n", join "', '", @$alt and redo INPUT
+            unless exists $ok_val{ lc $input };
+
+    }
+
+    my $retval = length $input ? $input : $df_val;
+    (caller 1)[3] or print "Got [$retval]\n";
+    return $retval;
+}
+
+sub prompt_dir {
+
+    if ( exists $conf->{ $_[0] } )  {
+        $conf->{ $_[0] } = File::Spec->rel2abs( $conf->{ $_[0] } )
+            unless File::Spec->file_name_is_absolute( $conf->{ $_[0] } );
+    }
+
+    GETDIR: {
+    
+
+        my $dir = prompt( @_ );
+
+        # thanks to perlfaq5
+        $dir =~ s{^ ~ ([^/]*)}
+                 {$1 ? ( getpwnam $1 )[7] : 
+                       ( $ENV{HOME} || $ENV{LOGDIR} || 
+                         "$ENV{HOMEDRIVE}$ENV{HOMEPATH}" )}ex;
+
+        my $cwd = cwd();
+        File::Path::mkpath( $dir, 1, 0755 ) unless -d $dir;
+        chdir $dir or warn "Cannot chdir($dir): $!\n" and redo GETDIR;
+        $dir = File::Spec->canonpath( cwd() );
+        chdir $cwd or die "Cannot chdir($cwd) back: $!";
+
+        print "Got [$dir]\n";
+        return $dir;
+    }
+}
+
+sub prompt_file {
+    my( $arg, $no_valid ) = @_;
+
+    GETFILE: {
+        my $file = prompt( $arg );
+
+
+        # thaks to perlfaq5
+        $file =~ s{^ ~ ([^/]*)}
+                  {$1 ? ( getpwnam $1 )[7] : 
+                   ( $ENV{HOME} || $ENV{LOGDIR} ||
+                   "$ENV{HOMEDRIVE}$ENV{HOMEPATH}" )}ex;
+        $file = File::Spec->rel2abs( $file ) unless !$file && $no_valid;
+
+        print "'$file' does not exist: $!\n" and redo GETFILE
+	    unless -f $file || $no_valid;
+
+        printf "Got[%s]\n", defined $file ? $file : 'undef';
+        return $file;
+    }
+}
+
+sub prompt_yn {
+    my( $arg ) = @_;
+
+    $opt{ $arg }{dft} ||= "0";
+    $opt{ $arg }{dft} =~ tr/01/ny/;
+    if ( exists $conf->{ $arg } ) {
+        $conf->{ $arg } ||= "0";
+        $conf->{ $arg } =~ tr/01/ny/;
+    }
+
+    my $yesno = lc prompt( $arg );
+    print "Got [$yesno]\n";
+    ( my $retval = $yesno ) =~ tr/ny/01/;
+    return $retval;
+}
+
+sub whereis {
+    my( $prog, $find_all ) = @_;
+    return '' unless $prog; # you shouldn't call it '0'!
+
+    my $p_sep = $Config::Config{path_sep};
+    my @path = split /\Q$p_sep\E/, $ENV{PATH};
+    my @pext = split /\Q$p_sep\E/, $ENV{PATHEXT} || '';
+    unshift @pext, '';
+
+    my @fnames;
+    foreach my $dir ( @path ) {
+        foreach my $ext ( @pext ) {
+            my $fname = File::Spec->catfile( $dir, "$prog$ext" );
+            if ( -x $fname ) {
+                return $fname unless $find_all;
+                push @fnames, $fname;
+            }
+        }
+    }
+    return @fnames ? wantarray ? @fnames : \@fnames : '';
+}
+
+sub renice {
+    my $rn_val = shift;
+
+    return $rn_val ? <<EORENICE : <<EOCOMMENT
+# Run renice:
+(renice -n $rn_val \$\$ >/dev/null 2>&1) || (renice $rn_val \$\$ >/dev/null 2>&1)
+EORENICE
+# Uncomment this to be as nice as possible. (Jarkko)
+# (renice -n 20 \$\$ >/dev/null 2>&1) || (renice 20 \$\$ >/dev/null 2>&1)
+EOCOMMENT
+
+}
+
+sub get_avail_sync {
+
+    my @synctype = qw( copy hardlink );
+    eval { local $^W; require Net::FTP };
+    unshift @synctype, 'snapshot' unless $@;
+    unshift @synctype, 'rsync' if whereis( 'rsync' );
+    return @synctype;
+}
+
+sub get_avail_tar {
+
+    my $use_modules = 0;
+    eval { require Archive::Tar };
+    unless ( $@ ) {
+        eval { require Compress::Zlib };
+        $use_modules = !$@;
+    }
+
+    my $fmt = tar_fmt();
+
+    return $fmt && $use_modules 
+        ? ( $fmt, 'Archive::Tar' )
+        : $fmt ? ( $fmt ) : $use_modules ? ( 'Archive::Tar' ) : ();
+    
+}
+
+sub tar_fmt {
+    my $tar  = whereis( 'tar' );
+    my $gzip = whereis( 'gzip' );
+
+    return $tar && $gzip 
+        ? "$gzip -cd %s | $tar -xf -"
+        : $tar ? "tar -xzf %s" : "";
+}
+
+sub check_locale {
+    # I only know one way...
+    my $locale = whereis( 'locale' );
+    return unless $locale;
+    return grep /utf-?8$/i => split /\n/, `$locale -a`;
+}
+
+sub get_avail_scheduler {
+    my( $scheduler, $crond );
+    if ( is_win32 ) { # We're looking for 'at.exe'
+        $scheduler = whereis( 'at' );
+    } else { # We're looking for 'crontab' or 'cron'
+        $scheduler = whereis( 'crontab' ) || whereis( 'cron' );
+        ( $crond ) = grep /\bcrond?\b/ => `ps -e`;
+    }
+    return ( $scheduler, $crond );
+}
+
+sub schedule_entry {
+    my( $script, $cron, $crontime ) = @_;
+
+    return '' unless $crontime;
+    my( $hour, $min ) = $crontime =~ /(\d+):(\d+)/;
+
+    my $entry;
+    if ( is_win32 ) {
+        $entry = sprintf qq[$cron %02d:%02d /EVERY:M,T,W,Th,F,S,Su "%s"],
+                 $hour, $min, $script;
+    } else {
+        $entry = sprintf qq[%02d %02d * * * '%s'], $min, $hour, $script;
+    }
+    return $entry;
+}
+
+sub get_avail_mailers {
+    my %map;
+    my $mailer = 'mail';
+    $map{ $mailer } = whereis( $mailer );
+    $mailer = 'mailx';
+    $map{ $mailer } = whereis( $mailer );
+    {
+        $mailer = 'sendmail';
+        local $ENV{PATH} = "$ENV{PATH}$Config{path_sep}/usr/sbin";
+        $map{ $mailer } = whereis( $mailer );
+    }
+
+    eval { require Mail::Sendmail; };
+    $map{ 'Mail::Sendmail' } = $@ ? '' : 'Mail::Sendmail';
+
+    return map { ( $_ => $map{ $_ }) } grep length $map{ $_ } => keys %map;
+}
+        
+sub get_avail_w32compilers {
+
+    my %map = (
+        MSVC => { ccname => 'cl',    maker => [ 'nmake' ] },
+        BCC  => { ccname => 'bcc32', maker => [ 'dmake' ] },
+        GCC  => { ccname => 'gcc',   maker => [ 'dmake' ] },
+    );
+
+    my $CC = 'MSVC';
+    if ( $map{ $CC }->{ccbin} = whereis( $map{ $CC }->{ccname} ) ) {
+        # No, cl doesn't support --version (One can but try)
+        my $output =`"$map{ $CC }->{ccbin}" --version 2>&1`;
+        my $ccvers = $output =~ /^.*Version\s+([\d.]+)/ ? $1 : '?';
+        $map{ $CC }->{ccversarg} = "ccversion=$ccvers";
+        my $mainvers = $ccvers =~ /^(\d+)/ ? $1 : 1;
+        $map{ $CC }->{CCTYPE} = $mainvers < 12 ? 'MSVC' : 'MSVC60';
+    }
+
+    $CC = 'BCC';
+    if ( $map{ $CC }->{ccbin} = whereis( $map{ $CC }->{ccname} ) ) {
+        # No, bcc32 doesn't support --version (One can but try)
+        my $output = `"$map{ $CC }->{ccbin}" --version 2>&1`;
+        my $ccvers = $output =~ /(\d+.*)/ ? $1 : '?';
+        $ccvers =~ s/\s+copyright.*//i;
+        $map{ $CC }->{ccversarg} = "ccversion=$ccvers";
+        $map{ $CC }->{CCTYPE} = 'BORLAND';
+    }
+
+    $CC = 'GCC';
+    if ( $map{ $CC }->{ccbin} = whereis( $map{ $CC }->{ccname} ) ) {
+        local *STDERR;
+        open STDERR, ">&STDOUT"; #do we need an error?
+        select( (select( STDERR ), $|++ )[0] );
+        my $output = `"$map{ $CC }->{ccbin}" --version`;
+        my $ccvers = $output =~ /(\d+.*)/ ? $1 : '?';
+        $ccvers =~ s/\s+copyright.*//i;
+        $map{ $CC }->{ccversarg} = "gccversion=$ccvers";
+        $map{ $CC }->{CCTYPE} = $CC
+    }
+
+    return map {
+       ( $map{ $_ }->{CCTYPE} => $map{ $_ } )
+    } grep length $map{ $_ }->{ccbin} => keys %map;
+}
+
+sub get_Win_version {
+    my @osversion = Win32::GetOSVersion();
+
+    my $win_version = join '.', @osversion[ 1, 2 ];
+    $win_version .= " $osversion[0]" if $osversion[0];
+
+    return $win_version;
+}
+
+=back
+
+=head1 TODO
+
+Schedule, logfile optional
+
+=head1 COPYRIGHT
+
+(c) 2002-2003, All rights reserved.
+
+  * Abe Timmerman <abeltje@cpan.org>
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+See:
+
+=over 4
+
+=item * http://www.perl.com/perl/misc/Artistic.html
+
+=item * http://www.gnu.org/copyleft/gpl.html
+
+=back
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=cut

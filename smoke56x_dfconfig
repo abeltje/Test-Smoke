@@ -1,0 +1,6 @@
+$conf = {
+          'cfg' => 'perl56x.cfg',
+          'source' => 'ftp.linux.activestate.com::perl-5.6.x',
+          'ddir' => '../perl-5.6.x',
+          'is56x' => '1'
+        };

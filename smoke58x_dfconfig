@@ -1,0 +1,5 @@
+$conf = {
+          'cfg' => 'perlcurrent.cfg',
+          'source' => 'ftp.linux.activestate.com::perl-5.8.x',
+          'ddir' => '../perl-5.8.x',
+        };
