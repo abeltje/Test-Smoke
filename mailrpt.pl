@@ -125,8 +125,35 @@ exists $valid_type{ $opt{type} } or do_pod2usage( verbose => 0 );
 
 $opt{ddir} && -d $opt{ddir} or do_pod2usage( verbose => 0 );
 
+check_for_report();
+
 my $mailer = Test::Smoke::Mailer->new( $opt{type} => \%opt );
 $mailer->mail;
+
+
+# Basically: call mkovz.pl unless -f <builddir>/mktest.rpt
+sub check_for_report {
+
+    my $report = File::Spec->catfile( $opt{ddir}, 'mktest.rpt' );
+
+    if ( -f $report ) {
+        $opt{v} and print "Found [$report]\n";
+        return;
+    }
+
+    local @ARGV = ( 'nomail', $conf->{ddir} );
+    push  @ARGV, $conf->{locale} if $conf->{locale};
+    my $mkovz = File::Spec->catfile( $FindBin::Bin, 'mkovz.pl' );
+    $opt{v} and print "No report found, will now start [$mkovz]\n";
+    {
+        local $0 = $mkovz;
+        do $mkovz or die "Error in mkovz.pl: $@";
+    }
+
+    unless ( -f $report ) {
+        die "Hmmm... cannot find [$report]";
+    }
+}
 
 sub do_pod2usage {
     eval { require Pod::Usage };
