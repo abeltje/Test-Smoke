@@ -10,6 +10,101 @@ The filelists have a short symbolic indicator:
 
 Enjoy!
 ___________________________________________________________________________
+[   610] By: abeltje                          on 2004-02-21 14:24:21 +0100
+        Log: * [FIX]
+	       * A thing I shouldn't have touched in 603
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Reporter.pm
+___________________________________________________________________________
+[   609] By: abeltje                          on 2004-02-21 13:48:13 +0100
+        Log: * [FIX]
+	       - remove the debug info from the test
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/t/reporter.t
+___________________________________________________________________________
+[   608] By: abeltje                          on 2004-02-21 13:45:55 +0100
+        Log: * [CHANGE]
+	       + prepare for the 1.18_62 snapshot
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   606] By: abeltje                          on 2004-02-21 13:41:22 +0100
+        Log: * [CHANGE]
+	       * Done some work on argument handling in W32Configure.pl
+	       * Changed the way the Win32 version is set
+	       * Documented these changes in ReleaseNotes
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/ReleaseNotes, /Test-Smoke/W32Configure.pl,
+	     /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[   605] By: abeltje                          on 2004-02-21 11:48:08 +0100
+        Log: * [CHANGE]
+	       * Some adjustments that go 1.19
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/FAQ
+___________________________________________________________________________
+[   603] By: abeltje                          on 2004-02-20 13:19:41 +0100
+        Log: * [FIX] thank to Merijn's cygwin machine
+	       * the ever m/inconsistent test ?results/ thing
+	       * a problem with the minitest TSTENV overwriting valid
+		 results for the stdio case
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           + /Test-Smoke/t/ftppub/bugtst02.out
+           ! /Test-Smoke/lib/Test/Smoke/Reporter.pm,
+	     /Test-Smoke/t/reporter.t
+___________________________________________________________________________
+[   602] By: abeltje                          on 2004-02-20 13:15:54 +0100
+        Log: * [CHANGE]
+	       ! replace File::Spec with File::Spec::Functions (cleaner
+		 code IMO)
+	       * look more poratble with renameing tests while extending
+		 with harness
+	       * more info in the extending with harness log message
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm
+___________________________________________________________________________
+[   601] By: abeltje                          on 2004-02-12 08:21:22 +0100
+        Log: * [CHANGE]
+	       * Win9[58] (with -DIS_WIN95/dmake) rewrites the makefile,
+		 but that needs to be "smoke.mk" and not "makefile.mk".
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Util.pm,
+	     /Test-Smoke/t/for_dmake.t, /Test-Smoke/t/win32/makefile.mk
+___________________________________________________________________________
+[   598] By: abeltje                          on 2004-02-07 19:55:06 +0100
+        Log: * [CHANGE] as suggested by Greg Matheson
+	       * Test::Smoke::Syncer::Hardlink now also supports systems
+		 without hardlinks by using File::Copy::copy.
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Syncer.pm,
+	     /Test-Smoke/t/syncer_link.t
+___________________________________________________________________________
+[   595] By: abeltje                          on 2004-02-06 01:13:04 +0100
+        Log: * [ADD] as suggested by Greg Matheson
+	       + support IS_WIN95 for Configure_win32() as -DIS_WIN95
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Util.pm,
+	     /Test-Smoke/t/for_dmake.t, /Test-Smoke/t/win32/makefile.mk
+___________________________________________________________________________
+[   592] By: abeltje                          on 2004-01-20 15:47:39 +0100
+        Log: * [FIX] again found by Merijn
+	       * --killtime option wasn't being progated from the
+		   commandline
+	       * report generation on timed-out smokes wasn't called
+		 correctly
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/smokeperl.pl
+___________________________________________________________________________
+[   589] By: abeltje                          on 2004-01-17 16:50:00 +0100
+        Log: * regen SIGNATURE for 1.18_61
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/SIGNATURE
+___________________________________________________________________________
+[   588] By: abeltje                          on 2004-01-17 16:49:24 +0100
+        Log: * regen Changes for 1.18_61
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Changes
+___________________________________________________________________________
 [   586] By: abeltje                          on 2004-01-17 16:22:03 +0100
         Log: * bump the version for snapshot
         Url: http://www.Test-Smoke.org/svn/Test-Smoke
@@ -2282,4 +2377,4 @@ ___________________________________________________________________________
 	     /Test-Smoke/t/win32/makefile.mk, /Test-Smoke/test_compile.pl,
 	     /Test-Smoke/test_pod.pl
 
--- Generated by 'svnchanges' (0.011) --
+-- Generated by 'svnchanges' (0.012) --
