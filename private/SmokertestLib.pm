@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT );
-$VERSION = '0.002';
+$VERSION = '0.003';
 
 use base 'Exporter';
 @EXPORT = qw( &clean_mktest_stuff &make_report &get_report );
@@ -18,16 +18,20 @@ sub clean_mktest_stuff {
 }
 
 sub make_report {
+    use Test::Smoke::Reporter;
     my( $ddir ) = @_;
-    local @ARGV = ( 'nomail', $ddir );
-    my $mkovz = catfile( $ddir, updir, updir, 'mkovz.pl' );
-
-    # Calling mkovz.pl more than once gives redefine warnings:
-    local $^W = 0;
-    do $mkovz or do {
-        warn "# Error '$mkovz': $@ [$!]";
-        return undef;
-    };
+    my $reporter = Test::Smoke::Reporter->new( ddir => $ddir );
+    my $report = $reporter->report;
+    local *RPT;
+    my $rptname = File::Spec->catfile( $ddir, 'mktest.rpt' );
+    if ( open RPT, "> $rptname" ) {
+        print RPT $report;
+        close RPT or warn "Error writing '$rptname': $!\n";
+    } else {
+#        warn "Error creating '$rptname': $!\n$report\n";
+         return undef
+    }
+    return 1;
 }
 
 sub get_report {

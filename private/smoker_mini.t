@@ -5,6 +5,8 @@ $| = 1;
 
 # $Id$
 
+my $verbose = exists $ENV{SMOKE_VERBOSE} ? $ENV{SMOKE_VERBOSE} : 0;
+
 use Cwd;
 use FindBin;
 use File::Spec::Functions;
@@ -13,7 +15,7 @@ use File::Spec::Functions;
 use lib $FindBin::Bin;
 
 use SmokertestLib;
-use Test::More 'no_plan';
+use Test::More tests => 16;
 pass( $0 );
 
 use Test::Smoke::BuildCFG;
@@ -23,6 +25,9 @@ use_ok( 'Test::Smoke::Smoker' );
     local *DEVNULL;
     open DEVNULL, ">". File::Spec->devnull;
     my $stdout = select( DEVNULL ); $| = 1;
+    local *KEEPERR;
+    open KEEPERR, ">&STDERR" and open STDERR,  ">&DEVNULL"
+        unless $verbose;
 
     my $cfg    = "--mini\n=\n\n-DDEBUGGING";
     my $config = Test::Smoke::BuildCFG->new( \$cfg );
@@ -64,13 +69,12 @@ use_ok( 'Test::Smoke::Smoker' );
 
     $smoker->mark_out;
 
-    ok( make_report( $ddir ), "Call 'mkovz.pl'" ) or diag( $@ );
+    ok( make_report( $ddir ), "Call Reporter" ) or diag( $@ );
     ok( my $report = get_report( $ddir ), "Got a report" );
     like( $report, qr/^M - M -\s*$/m, "Got all M's for default config" );
     like( $report, qr/^Summary: FAIL\(M\)\s*$/m, "Summary: FAIL(M)" );
     like( $report, qr/^
-        $^O\s*
-        \[minitest\s*\]
+        \[minitest\s*\]\s*
         -DDEBUGGING\ --mini\s+
         t\/smoke\/minitest\.+FAILED\ at\ test\ 2
     /xm, "Failures report" );
@@ -81,6 +85,7 @@ use_ok( 'Test::Smoke::Smoker' );
     clean_mktest_stuff( $ddir );
     chdir $cwd;
 
+    close STDERR and open STDERR, ">&KEEPERR" unless $verbose;
     select $stdout;
 }
 
