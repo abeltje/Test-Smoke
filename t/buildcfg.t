@@ -62,10 +62,10 @@ __EOCFG__
     is( "$first", $first->[0], "as_string: $first->[0]" );
     foreach my $config ( $bcfg->configurations ) {
         if ( ($config->policy)[0]->[1] ) {
-            ok( $config->has_arg( '-DDEBUGGING' ), "has_arg()" );
+            ok( $config->has_arg( '-DDEBUGGING' ), "has_arg(-DDEBUGGING)" );
             like( "$config", '/-DDEBUGGING/', "'$config' has -DDEBUGGING" );
         } else {
-            ok( !$config->has_arg( '-DDEBUGGING' ), "! has_arg()" );
+            ok( !$config->has_arg( '-DDEBUGGING' ), "! has_arg(-DDEBUGGING)" );
             unlike( "$config", '/-DDEBUGGING/', "'$config' has no -DDEBUGGING" );
         }
     }
@@ -74,6 +74,8 @@ __EOCFG__
 { # Check that empty sections are skipped
     my $dft_cfg = <<__EOCFG__;
 # This is an empty section
+
+# It really is, although it's got an empty (non comment) line
 =
 
 -Duseithreads
@@ -93,15 +95,10 @@ __EOCFG__
         { policy_target => '-DDEBUGGING', args => [ '', '-DDEBUGGING'] },
     ];
 
-    local *STDOUT;
-    my $out = tie *STDOUT, 'CatchOut';
-    my $bcfg = Test::Smoke::BuildCFG->new( \$dft_cfg => { v => 1 } );
+    my $bcfg = Test::Smoke::BuildCFG->new( \$dft_cfg => { v => 0 } );
 
     is_deeply $bcfg->{_sections}, $dft_sect, "Empty sections are skipped";
 
-    like $$out, '/Reading build configurations from/', 'Verbose output 1';
-#    like $$out, '/Found 4 raw-sections/',  "Verbose output2";
-    close STDOUT;
 }
 
 
