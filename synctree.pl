@@ -4,7 +4,7 @@ $| = 1;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.010';
+$VERSION = '0.011';
 
 use File::Spec;
 use FindBin;
@@ -27,7 +27,7 @@ my %opt = (
 
 my $defaults = Test::Smoke::Syncer->config( 'all_defaults' );
 
-my %valid_type = map { $_ => 1 } qw( rsync snapshot copy hardlink forest );
+my %valid_type = map { $_ => 1 } qw( rsync snapshot copy hardlink forest ftp );
 
 =head1 NAME
 
