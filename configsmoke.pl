@@ -63,7 +63,7 @@ Current options:
 
 sub is_win32() { $^O eq 'MSWin32' }
 
-my %config = ( perl_version => '5.9.x' );
+my %config = ( perl_version => $conf->{perl_version} || '5.9.x' );
 
 my %mailers = get_avail_mailers();
 my @mailers = sort keys %mailers;
@@ -74,6 +74,8 @@ my $syncmsg = join "\n", @{
       hardlink => "\thardlink - Copy from a local directory using link()",
       snapshot => "\tsnapshot - Get a snapshot using Net::FTP", }
 }{ @syncers };
+my @untars = get_avail_tar();
+my $untarmsg = join "", map "\n\t$_" => @untars;
 
 my %versions = (
     '5.6.x' => { source => 'ftp.linux.activestate.com::perl-5.6.x',
@@ -91,9 +93,9 @@ my %versions = (
                  ddir   => File::Spec->rel2abs( 
                                File::Spec->catdir( File::Spec->updir,
                                                    'perl-5.8.x' ) ),
-                 cfg    => $^O eq 'MSWin32' 
-                        ? 'w32current.cfg' :'perlcurrent.cfg',
                  text   => 'Perl 5.8.1-to-be',
+                 cfg    => ( $^O eq 'MSWin32' 
+                        ? 'w32current.cfg' :'perlcurrent.cfg' ),
                  is56x  => 0 },
     '5.9.x' => { source => 'ftp.linux.activestate.com::perl-current',
                  server => 'ftp.funet.fi',
@@ -103,22 +105,21 @@ my %versions = (
                  ddir   => File::Spec->rel2abs( 
                                File::Spec->catdir( File::Spec->updir,
                                                    'perl-current' ) ),
-                 cfg    => $^O eq 'MSWin32' 
-                        ? 'w32current.cfg' :'perlcurrent.cfg',
                  text   => 'Perl 5.10.0-to-be',
+                 cfg    => ( $^O eq 'MSWin32' 
+                        ? 'w32current.cfg' :'perlcurrent.cfg' ),
                  is56x  => 0 },
 );
-
+my @pversions = sort keys %versions;
 my $smoke_version = join "\n", map {
-    "\t$_ - $versions{$_}->{text}"
-} sort keys %versions;
-
+    "\t$_ - $versions{ $_ }->{text}"
+} @pversions;
 
 my %opt = (
     perl_version => {
         msg => "Which version are you going to smoke?\n$smoke_version",
-        alt => [ sort keys %versions ],
-        dft => ( sort keys %versions )[-1],
+        alt => [ @pversions ],
+        dft => $pversions[-1],
     },
 
     # is this a perl-5.6.x smoke?
@@ -228,10 +229,8 @@ my %opt = (
     },
 
     tar => {
-        msg => <<EOMSG,
-How should the snapshots be extracted?
-Examples:@{[ map "\n\t$_" => get_avail_tar() ] }
-EOMSG
+        msg => "How should the snapshots be extracted?
+Examples:$untarmsg",
         alt => [ ],
         dft => (get_avail_tar())[0],
     },
@@ -288,7 +287,7 @@ EOMSG
     patch => {
         msg => undef,
         alt => [ ],
-        dft => whereis( 'patch' ),
+        dft => whereis( 'gpatch') || whereis( 'patch' ),
     },
 
     popts => {
@@ -339,7 +338,7 @@ EOMSG
         dft => '',
     },
     force_c_locale => {
-        msg => "Should $ENV{LC_ALL} be forced to 'C'?",
+        msg => "Should \$ENV{LC_ALL} be forced to 'C'?",
         alt => [qw( N y )],
         dft => 'n',
     },
@@ -1220,8 +1219,8 @@ sub get_avail_sync {
 
     my @synctype = qw( copy hardlink );
     eval { local $^W; require Net::FTP };
-    unshift @synctype, 'snapshot' unless $@ || 
-                                         ( $config{perl_version} ne '5.9.x' );
+    my $pversion = $config{perl_version} || '5.9.x';
+    unshift @synctype, 'snapshot' unless $@ || ( $pversion ne '5.9.x' );
     unshift @synctype, 'rsync' if whereis( 'rsync' );
     return @synctype;
 }
