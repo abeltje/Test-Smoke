@@ -3,9 +3,14 @@ use strict;
 
 use File::Spec;
 
-use Test::More tests => 53;
+use Test::More tests => 61;
 
 BEGIN { use_ok( 'Test::Smoke::Util' ); }
+END { 
+    1 while unlink 'win32/smoke.mk';
+    chdir File::Spec->updir
+        if -d File::Spec->catdir( File::Spec->updir, 't' );
+}
 
 chdir 't' or die "chdir: $!" if -d 't';
 
@@ -215,8 +220,38 @@ SKIP: {
     /mx', "CFG_VARS macro for Config.pm" );
 }
 
-END { 
-    1 while unlink 'win32/smoke.mk';
-    chdir File::Spec->updir
-        if -d File::Spec->catdir( File::Spec->updir, 't' );
+ok( unlink( $smoke_mk ), "Remove makefile" );
+
+$config = $dft_args . " -Accflags='-DPERL_COPY_ON_WRITE'";
+Configure_win32( './Configure '. $config, 'nmake' );
+ok( -f $smoke_mk, "New makefile ($config)" );
+SKIP: {
+    local *MF;
+    ok open(MF, "< $smoke_mk"), "Opening makefile" or
+        skip "Cannot read from '$smoke_mk': $!", 1;
+    my $makefile = do { local $/; <MF> };
+    close MF;
+
+    like( $makefile, '/^BUILDOPT\t=\s\$\(BUILDOPT\)\ -DPERL_COPY_ON_WRITE\n
+                       #+\ CHANGE THESE ONLY IF YOU MUST\ #+
+    /mx', "-Accflags= is translated to BUILDOPT = \$(BUILDOPT)" );
+}
+
+ok( unlink( $smoke_mk ), "Remove makefile" );
+
+$config = $dft_args . " -Accflags='-DPERL_COPY_ON_WRITE'".
+                      " -Accflags='-DPERL_POLLUTE'";
+Configure_win32( './Configure '. $config, 'nmake' );
+ok( -f $smoke_mk, "New makefile ($config)" );
+SKIP: {
+    local *MF;
+    ok open(MF, "< $smoke_mk"), "Opening makefile" or
+        skip "Cannot read from '$smoke_mk': $!", 1;
+    my $makefile = do { local $/; <MF> };
+    close MF;
+
+    like( $makefile, '/^BUILDOPT\t=\s\$\(BUILDOPT\)\ -DPERL_COPY_ON_WRITE\n
+                        BUILDOPT\t=\s\$\(BUILDOPT\)\ -DPERL_POLLUTE\n
+                        #+\ CHANGE THESE ONLY IF YOU MUST\ #+
+    /mx', "-Accflags= is translated to BUILDOPT = \$(BUILDOPT)" );
 }
