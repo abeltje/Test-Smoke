@@ -24,6 +24,7 @@ my %CONFIG = (
     df_ftp     => 'Net::FTP',
     df_server  => 'ftp.funet.fi',
     df_sdir    => '/pub/languages/perl/snap',
+    df_sfile   => '',
     df_snapext => 'tgz',
 
     df_tar     => ( $^O eq 'MSWin32' ?
@@ -35,7 +36,7 @@ my %CONFIG = (
     df_unzip   => $^O eq 'MSWin32' ? 'Compress::Zlib' : 'gzip -dc',
     df_patch   => 'patch',
     df_cleanup => 1,
-    snapshot   => [qw( ftp server sdir snapext tar 
+    snapshot   => [qw( ftp server sdir sfile snapext tar 
                        patchup pserver pdir unzip patch cleanup )],
 
 # these settings have to do with synctype==copy
@@ -520,14 +521,8 @@ sub _fetch_snapshot {
         return undef;
     };
 
-    my @list = $ftp->ls();
-
-    my $snap_name = ( map $_->[0], sort { $a->[1] <=> $b->[1] } map {
-        [ $_, /^perl\@(\d+)/ ]
-    } grep {
-    	/^perl\@\d+/ &&
-    	/$self->{snapext}$/ 
-    } @list )[-1];
+    my $snap_name = $self->{sfile} ||
+                    __find_snap_name( $ftp, $self->{snapext} );
 
     unless ( $snap_name ) {
         require Carp;
@@ -555,6 +550,31 @@ sub _fetch_snapshot {
     $ftp->quit;
 
     return $local_snap;
+}
+
+=item __find_snap_name( $ftp, $snapext )
+
+[Not a method!]
+
+Get a list with all the B<perl@\d+> files, use an ST to sort these and
+return the one with the highes number.
+
+=cut
+
+sub __find_snap_name {
+    my( $ftp, $snapext ) = @_;
+    $snapext ||= 'tgz';
+
+    my @list = $ftp->ls();
+
+    my $snap_name = ( map $_->[0], sort { $a->[1] <=> $b->[1] } map {
+        [ $_, /^perl\@(\d+)/ ]
+    } grep {
+    	/^perl\@\d+/ &&
+    	/$snapext$/ 
+    } @list )[-1];
+
+    return $snap_name;
 }
 
 =item $syncer->_extract_snapshot( )
