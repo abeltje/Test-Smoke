@@ -243,6 +243,7 @@ sub _parse {
             $cfgarg = $_ || "";
 
             push @{ $rpt{cfglist} }, $_ unless $rpt{config}->{ $cfgarg }++;
+            $tstenv = "";
             next;
         }
 

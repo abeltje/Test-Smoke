@@ -62,6 +62,7 @@ t/ts_config.t
 t/util_times.t
 t/win32/Makefile
 t/win32/makefile.mk
+t/ftppub/bugtest01.out
 t/ftppub/perl-current-diffs/20000.gz
 t/ftppub/perl-current-diffs/20001.gz
 t/ftppub/perl-current-diffs/20003.gz
