@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.023';
+$VERSION = '0.024';
 
 use base 'Exporter';
 @EXPORT_OK = qw( &sysinfo &tsuname );
@@ -575,26 +575,29 @@ sub Windows {
 
 =head2 VMS()
 
-Use some VMS specific stuff to get system information.
+Use some VMS specific stuff to get system information. These were
+suggested by Craig Berry.
 
 =cut
 
 sub VMS {
     my $vms = Generic();
 
-    my $myname = $vms->{_host};
-    my @cpu_brief = `SHOW CPU/BRIEF`;
-    
-    print "$myname: '@cpu_brief'\n";
-    
-    my( $sysline ) = grep /$myname,(?:\s+a)?\s+/i => @cpu_brief;
-    my( $cpu ) = $sysline =~ /$myname,(?:\s+a)?\s+(.+)/i;
+#    my $myname = $vms->{_host};
+#    my @cpu_brief = `SHOW CPU/BRIEF`;
+#    my( $sysline ) = grep /$myname,(?:\s+a)?\s+/i => @cpu_brief;
+#    my( $cpu ) = $sysline =~ /$myname,(?:\s+a)?\s+(.+)/i;
+#    my $ncpu = grep /^CPU \d+/ && /\bstate\b/i && /\bRUN\b/i => @cpu_brief;
 
-        
-    my $ncpu = grep /^CPU \d+/ && /\bstate\b/i && /\bRUN\b/i => @cpu_brief;
-
-    $vms->{_cpu}  = $cpu;
-    $vms->{_ncpu} = $ncpu;
+    my %map = ( 
+        cpu      => 'HW_NAME',
+        cpu_type => 'ARCH_NAME',
+        ncpu     => 'ACTIVECPU_CNT'
+    );
+    for my $key ( keys %map ) {
+        my $cmd_out = `write sys\$output f\$getsyi("$map{$key}")`;
+        chomp( $vms->{ "_$key" } = $cmd_out );
+    }
 
     return $vms;
 }
