@@ -39,6 +39,20 @@ cycle. It basically replaces the inner works of F<mktest.pl>.
 Merijn was in dire need of a C<--continue> option and it was on
 Abiagil's wishlist as well as on mine. So I hacked it.
 
+=item 5
+
+I wanted support for Jarkko's 5.8.x snapshots. These are only
+available via HTTP without a directory listing. There was already
+support for a specific snapshot file but not for HTTP. If  you have
+B<LWP> installed, Test:Smoke will use C<LWP::Simple::mirror()> to
+fetch the snapshot. (You should create a separate configuration for
+this.) Use this feature together with the new C<--snapshot=i> switch
+for F<smokeperl.pl>:
+
+    $ ./snap58x.sh --snapshot 19876
+
+(these changes were integrated from 1.17.07 MAINT)
+
 =back
 
 =head1 COPYRIGHT
