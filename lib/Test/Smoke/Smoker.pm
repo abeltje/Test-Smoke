@@ -27,6 +27,12 @@ my %CONFIG = (
     df_w32args        => [ ],
 );
 
+# Define some constants that we can use for
+# specifying how far "make" got.
+sub BUILD_MINIPERL() { -1 } # but no perl
+sub BUILD_PERL    () {  1 } # ok
+sub BUILD_NOTHING () {  0 } # not ok
+
 =head1 NAME
 
 Test::Smoke::Smoker - OO interface to do one smoke cycle.
@@ -192,20 +198,20 @@ sub smoke {
     $self->Configure( $config ) or do {
         $self->ttylog( "Unable to configure perl in this configuration\n" );
         return 0;
-     };
+    };
 
-    MAKE_STEP: {
-        local $_ = $self->make_;
+    my $build_stat = $self->make_;
   
-        /^-1$/ && do {
-            $self->ttylog( "Unable to make miniperl in this configuration\n" );
-            return 0;
-        };
-	/^0$/ && do {
-            $self->ttylog( "Unable to make perl in this configuration\n" );
-            return 0;
-        };
-    }
+    $build_stat == BUILD_MINIPERL and do {
+        $self->ttylog( "Unable to make anything but miniperl",
+                       " in this configuration\n" );
+        return $self->make_minitest( "$config" );
+    };
+       
+    $build_stat == BUILD_NOTHING and do {
+        $self->ttylog( "Unable to make perl in this configuration\n" );
+        return 0;
+    };
 
     $self->make_test( "$config" );
 
@@ -298,11 +304,11 @@ sub make_ {
     $self->tty( "\nmake ..." );
     $self->_make( "" );
 
-    my $exe_ext = $Config{_exe} || $Config{exe_ext};
-    my $perl = "perl$exe_ext";
+    my $exe_ext  = $Config{_exe} || $Config{exe_ext};
     my $miniperl = "miniperl$exe_ext";
-    -x $miniperl or return 0;
-    return -x $perl ? 1 : -1;
+    my $perl     = "perl$exe_ext";
+    -x $miniperl or return BUILD_NOTHING;
+    return -x $perl ? BUILD_PERL : BUILD_MINIPERL;
 }
 
 =item make_test_prep( )
@@ -433,6 +439,62 @@ sub make_test {
         $self->tty( "\n" );
         !$had_LC_ALL && exists $ENV{LC_ALL} and delete $ENV{LC_ALL};
     }
+
+    return 1;
+}
+
+=item $self->make_minitest( $cfgargs )
+
+C<make> was unable to build a I<perl> executable, but managed to build
+I<miniperl>, so we do C<< S<make minitest> >>.
+
+=cut
+
+sub make_minitest {
+    my $self = shift;
+
+    $self->ttylog( "PERLIO = minitest\t" );
+    local *TST;
+    # MSWin32 builds from its own directory
+    if ( $self->{is_win32} ) {
+        chdir "win32" or die "unable to chdir () into 'win32'";
+        # Same as in make ()
+        open TST, "$self->{w32make} -f smoke.mk minitest |";
+        chdir ".." or die "unable to chdir () out of 'win32'";
+    } else {
+        local $ENV{PERL} = "./perl";
+        open TST, "make minitest |" or do {
+            use Carp;
+            Carp::carp "Cannot fork 'make _test': $!";
+            return 0;
+        };
+    }
+
+    my @nok = ();
+    select ((select (TST), $| = 1)[0]);
+    while (<TST>) {
+        $self->{v} >= 2 and $self->tty( $_ );
+        skip_filter( $_ ) and next;
+        # make mkovz.pl's life easier
+        s/(.)(PERLIO\s+=\s+\w+)/$1\n$2/;
+
+        if (m/^u=.*tests=/) {
+            s/(\d\.\d*) /sprintf "%.2f ", $1/ge;
+            $self->log( $_ );
+        } else {
+            push @nok, $_;
+        }
+        $self->tty( $_ );
+    }
+    close TST or do {
+        require Carp;
+        Carp::carp "Error while reading pipe: $!";
+    };
+    $self->ttylog( map { "    $_" } @nok );
+
+    $self->tty( "\nOK, archive results ..." );
+    $self->tty( "\n" );
+    return 1;
 }
 
 =item $self->_run( $command[, $sub[, @args]] )
