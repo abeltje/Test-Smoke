@@ -14,9 +14,9 @@ $VERSION = '0.005';
 
 my %opt = (
     type    => 'multi',
-    ddir    => '',
-    pfile   => '',
-    v       => 0,
+    ddir    => undef,
+    pfile   => undef,
+    v       => undef,
 
     config  => undef,
     help    => 0,
@@ -37,7 +37,7 @@ patchtree.pl - Patch the sourcetree
 
 or
 
-    $ ./mailrpt.pl -c smokecurrent_config
+    $ ./mailrpt.pl -c [smokecurrent_config]
 
 =head1 OPTIONS
 
@@ -61,7 +61,7 @@ Other options can override the settings from the configuration file.
 =cut
 
 GetOptions( \%opt,
-    'pfile|f=s', 'ddir|d=s', 'v|verbose+',
+    'pfile|f=s', 'ddir|d=s', 'v|verbose:i',
 
     'popts=s',
 
@@ -82,6 +82,7 @@ if ( defined $opt{config} ) {
 
     unless ( Test::Smoke->config_error ) {
         foreach my $option ( keys %opt ) {
+            next if defined $opt{ $option };
             if ( $option eq 'type' ) {
                 $opt{type} ||= $conf->{patch_type};
             } elsif ( exists $conf->{ $option } ) {
@@ -94,7 +95,10 @@ if ( defined $opt{config} ) {
     }
 }
 
-$opt{ $_ } ||= $conf->{ $_ } || $defaults->{ $_ } foreach keys %$defaults;
+foreach( keys %$defaults ) {
+    next if defined $opt{ $_ };
+    $opt{ $_ } = defined $conf->{ $_ } ? $conf->{ $_ } : $defaults->{ $_ };
+}
 
 exists $valid_type{ $opt{type} } or do_pod2usage( verbose => 0 );
 

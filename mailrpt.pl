@@ -14,12 +14,12 @@ $VERSION = '0.007';
 
 my %opt = (
     type    => undef,
-    ddir    => '',
-    to      => '', #'smokers-reports@perl.org',
-    cc      => '',
-    from    => '',
-    mserver => '',
-    v       => 0,
+    ddir    => undef,
+    to      => undef, #'smokers-reports@perl.org',
+    cc      => undef,
+    from    => undef,
+    mserver => undef,
+    v       => undef,
 
     config  => undef,
     help    => 0,
@@ -40,7 +40,7 @@ mailrpt.pl - Send the smoke report by mail
 
 or
 
-    $ ./mailrpt.pl -c smokecurrent_config
+    $ ./mailrpt.pl -c [smokecurrent_config]
 
 =head1 OPTIONS
 
@@ -82,7 +82,7 @@ no extra options
 =cut
 
 GetOptions( \%opt,
-    'type|t=s', 'ddir|d=s', 'to=s', 'cc=s', 'v|verbose+',
+    'type|t=s', 'ddir|d=s', 'to=s', 'cc=s', 'v|verbose:i',
 
     'from=s', 'mserver=s',
 
@@ -103,6 +103,7 @@ if ( defined $opt{config} ) {
 
     unless ( Test::Smoke->config_error ) {
         foreach my $option ( keys %opt ) {
+            next if defined $opt{ $option };
             if ( $option eq 'type' ) {
                 $opt{type} ||= $conf->{mail_type};
             } elsif ( exists $conf->{ $option } ) {
@@ -113,6 +114,11 @@ if ( defined $opt{config} ) {
         warn "WARNING: Could not process '$opt{config}': " . 
              Test::Smoke->config_error . "\n";
     }
+}
+
+foreach( keys %$defaults ) {
+    next if defined $opt{ $_ };
+    $opt{ $_ } = defined $conf->{ $_ } ? $conf->{ $_ } : $defaults->{ $_ };
 }
 
 exists $valid_type{ $opt{type} } or do_pod2usage( verbose => 0 );

@@ -8,13 +8,13 @@ use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
 use Test::Smoke::Syncer;
 
 use Test::Smoke;
-use vars qw( $VERSION $conf );
-$VERSION = '0.007';
+use vars qw( $VERSION );
+$VERSION = '0.008';
 
 my %opt = (
-    type   => '',
-    ddir   => '',
-    v      => 0,
+    type   => undef,
+    ddir   => undef,
+    v      => undef,
 
     config => undef,
     help   => 0,
@@ -35,7 +35,7 @@ synctree.pl - Cleanup and sync the perl-current source-tree
 
 or
 
-   $ ./synctree.pl -c smokecurrent_config
+   $ ./synctree.pl -c [smokecurrent_config]
 
 =head1 OPTIONS
 
@@ -67,6 +67,7 @@ Other options can override the settings from the configuration file.
 
     --server <ftp-server>    (ftp.funet.fi)
     --sdir <directory>       (/pub/languages/perl/snap)
+    --sfile <file>           ('')
     --snapext <ext>          (tgz)
     --tar <un-tar-gz>        (gzip -dc %s | tar -xf -)
 
@@ -97,11 +98,11 @@ Other options can override the settings from the configuration file.
 =cut
 
 GetOptions( \%opt,
-    'type|t=s', 'ddir|d=s', 'v|verbose+',
+    'type|t=s', 'ddir|d=s', 'v|verbose:i',
 
     'source=s', 'rsync=s', 'opts',
 
-    'server=s', 'sdir=s', 'snapext=s', 'tar=s',
+    'server=s', 'sdir=s', 'sfile=s', 'snapext=s', 'tar=s',
     'patchup!',  'pserver=s', 'pdir=s', 'unzip=s', 'patch=s', 'cleanup=i',
 
     'cdir=s',
@@ -125,6 +126,7 @@ if ( defined $opt{config} ) {
 
     unless ( Test::Smoke->config_error ) {
         foreach my $option ( keys %opt ) {
+            next if defined $opt{ $option };
             if ( $option eq 'type' ) {
                 $opt{type} ||= $conf->{sync_type};
             } elsif ( exists $conf->{ $option } ) {
@@ -137,7 +139,10 @@ if ( defined $opt{config} ) {
     }
 }
 
-$opt{ $_ } ||= $conf->{ $_ } || $defaults->{ $_ } foreach keys %$defaults;
+foreach ( keys %$defaults ) {
+    next if defined $opt{ $_ };
+    $opt{ $_ } = exists $conf->{ $_ } ? $conf->{ $_ } : $defaults->{ $_ };
+}
 
 exists $valid_type{ $opt{type} } or do_pod2usage( verbose => 0 );
 $opt{ddir} or do_pod2usage( verbose => 0 );
