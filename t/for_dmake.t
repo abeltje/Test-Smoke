@@ -3,11 +3,11 @@ use strict;
 
 use File::Spec;
 
-use Test::More tests => 74;
+use Test::More tests => 82;
 
 BEGIN { use_ok( 'Test::Smoke::Util' ); }
 END { 
-    1 while unlink 'win32/smoke.mk'; 
+#    1 while unlink 'win32/smoke.mk'; 
     chdir File::Spec->updir
         if -d File::Spec->catdir( File::Spec->updir, 't' );
 }
@@ -314,4 +314,40 @@ SKIP: {
                        \s*config_args=-Dusedevel\t+~\t+\\\\
                        \s*INST_DRV=
     /mx', "CFG_VARS macro for Config.pm skips emtpy arguments" );
+}
+
+ok( unlink( $smoke_mk ), "Remove makefile" );
+
+$config = $dft_args . " -Accflags='-DPERL_COPY_ON_WRITE'";
+Configure_win32( './Configure '. $config, 'dmake' );
+ok( -f $smoke_mk, "New makefile ($config)" );
+SKIP: {
+    local *MF;
+    ok open(MF, "< $smoke_mk"), "Opening makefile" or
+        skip "Cannot read from '$smoke_mk': $!", 1;
+    my $makefile = do { local $/; <MF> };
+    close MF;
+
+    like( $makefile, '/^BUILDOPT\t\+=\s-DPERL_COPY_ON_WRITE\n
+                       #+\ CHANGE THESE ONLY IF YOU MUST\ #+
+    /mx', "-Accflags= is translated to BUILDOPT +=" );
+}
+
+ok( unlink( $smoke_mk ), "Remove makefile" );
+
+$config = $dft_args . " -Accflags='-DPERL_COPY_ON_WRITE'".
+                      " -Accflags='-DPERL_POLLUTE'";
+Configure_win32( './Configure '. $config, 'dmake' );
+ok( -f $smoke_mk, "New makefile ($config)" );
+SKIP: {
+    local *MF;
+    ok open(MF, "< $smoke_mk"), "Opening makefile" or
+        skip "Cannot read from '$smoke_mk': $!", 1;
+    my $makefile = do { local $/; <MF> };
+    close MF;
+
+    like( $makefile, '/^BUILDOPT\t\+=\s-DPERL_COPY_ON_WRITE\n
+                        BUILDOPT\t\+=\s-DPERL_POLLUTE\n
+                        #+\ CHANGE THESE ONLY IF YOU MUST\ #+
+    /mx', "-Accflags= is translated to BUILDOPT +=" );
 }
