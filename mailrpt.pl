@@ -17,20 +17,21 @@ use Test::Smoke::Util qw( do_pod2usage );
 
 use Getopt::Long;
 my %opt = (
-    type       => undef,
-    ddir       => undef,
-    to         => undef, #'smokers-reports@perl.org',
-    cc         => undef,
-    from       => undef,
-    mserver    => undef,
-    v          => undef,
+    type         => undef,
+    ddir         => undef,
+    to           => undef, #'smokers-reports@perl.org',
+    cc           => undef,
+    ccp5p_onfail => undef,
+    from         => undef,
+    mserver      => undef,
+    v            => undef,
 
-    mail       => 1,
-    report     => undef,
-    defaultenv => undef,
-    config     => undef,
-    help       => 0,
-    man        => 0,
+    mail         => 1,
+    report       => undef,
+    defaultenv   => undef,
+    config       => undef,
+    help         => 0,
+    man          => 0,
 );
 
 my $defaults = Test::Smoke::Mailer->config( 'all_defaults' );
@@ -74,6 +75,7 @@ Other options can override the settings from the configuration file.
     --nomail                 Don't send the message
     --report                 Create a report anyway
     --defaultenv             It was a PERLIO-less smoke
+    --[no]ccp5p_onfail       Do (not) send failure reports to perl5-porters
 
     -v | --verbose <0..2>    Set verbose level
     -h | --help              Show help message (needs Pod::Usage)
@@ -103,7 +105,8 @@ This is a small front-end for L<Test::Smoke::Mailer>.
 
 my $my_usage = "Usage: $0 -t <type> -d <directory> [options]";
 GetOptions( \%opt,
-    'type|t=s', 'ddir|d=s', 'to=s', 'cc=s', 'v|verbose=i',
+    'type|t=s', 'ddir|d=s', 'to=s', 'cc=s', 'ccp5p_onfail!',
+    'v|verbose=i',
 
     'from=s', 'mserver=s',
 

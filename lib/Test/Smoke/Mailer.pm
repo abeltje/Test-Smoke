@@ -2,19 +2,21 @@ package Test::Smoke::Mailer;
 use strict;
 
 # $Id$
-use vars qw( $VERSION );
-$VERSION = '0.006';
+use vars qw( $VERSION $P5P);
+$VERSION = '0.007';
 
 use Test::Smoke::Util qw( parse_report_Config );
 
+$P5P = 'perl5-porters@perl.org';
 my %CONFIG = (
-    df_mailer  => 'Mail::Sendmail',
-    df_ddir    => undef,
-    df_v       => 0,
-    df_to      => 'daily-build-reports@perl.org',
-    df_from    => '',
-    df_cc      => '',
-    df_mserver => 'localhost',
+    df_mailer        => 'Mail::Sendmail',
+    df_ddir          => undef,
+    df_v             => 0,
+    df_to            => 'daily-build-reports@perl.org',
+    df_from          => '',
+    df_cc            => '',
+    df_ccp5p_onfail  => 0,
+    df_mserver       => 'localhost',
 
     df_mailbin       => 'mail',
     mail             => [qw( cc mailbin )],
@@ -86,7 +88,7 @@ sub  new {
     my %fields = map {
         my $value = exists $args{$_} ? $args{ $_ } : $CONFIG{ "df_$_" };
         ( $_ => $value )
-    } ( v => ddir => to => @{ $CONFIG{ $mailer } } );
+    } ( v => ddir => to => ccp5p_onfail => @{ $CONFIG{ $mailer } } );
     $fields{ddir} = File::Spec->rel2abs( $fields{ddir} );
 
     DO_NEW: {
@@ -139,6 +141,32 @@ sub error {
 
     return $self->{error} || '';
 }
+
+=item $self->_get_cc( $subject )
+
+C<_get_cc()> implements the C<--ccp5p_onfail> option. It looks at the
+subject to see if the smoke FAILed and then adds the I<perl5-porters>
+mailing-list to the C<Cc:> field, unless it is already in C<To:> or
+C<Cc:>.
+
+=cut
+
+sub _get_cc {
+    my( $self, $subject ) = @_;
+    return $self->{cc} || "" unless $self->{ccp5p_onfail};
+
+    # State all cases for which p5p should be added
+    return $self->{cc} || "" unless $subject !~ / PASS\b/;
+
+    my $p5p = $Test::Smoke::Mailer::P5P or return $self->{cc};
+    my @cc = $self->{cc} ? $self->{cc} : ();
+
+    push @cc, $p5p unless $self->{to} =~ /\Q$p5p\E/ || 
+                          $self->{cc} =~ /\Q$p5p\E/;
+    return join ", ", @cc;
+}
+
+=cut
 
 =item Test::Smoke::Mailer->config( $key[, $value] )
 
@@ -217,11 +245,11 @@ sub mail {
     my $self = shift;
 
     my $subject   = $self->fetch_report();
+    my $cc = $self->_get_cc( $subject );
     my $header = "To: $self->{to}\n";
     $header   .= "From: $self->{from}\n" 
         if exists $self->{from} && $self->{from};
-    $header   .= "Cc: $self->{cc}\n" 
-        if exists $self->{cc} && $self->{cc};
+    $header   .= "Cc: $cc\n" if $cc;
     $header   .= "Subject: $subject\n\n";
 
     $self->{v} > 1 and print "[$self->{sendmailbin} -i -t]\n";
@@ -285,9 +313,10 @@ sub mail {
     my $mailer = $self->{mailbin} || $self->{mailxbin};
 
     my $subject = $self->fetch_report();
+    my $cc = $self->_get_cc( $subject );
 
     my $cmdline = qq|$mailer -s '$subject'|;
-    $cmdline   .= qq| -c '$self->{cc}'| if $self->{cc};
+    $cmdline   .= qq| -c '$cc'| if $cc;
     $cmdline   .= qq| $self->{to}|;
 
     $self->{v} > 1 and print "[$cmdline]\n";
@@ -353,13 +382,14 @@ sub mail {
     $self->{error} = $@ and return undef;
 
     my $subject = $self->fetch_report();
+    my $cc = $self->_get_cc( $subject );
 
     my %message = (
         To      => $self->{to},
         Subject => $subject,
         Body    => $self->{body},
     );
-    $message{cc}   = $self->{cc} if $self->{cc};
+    $message{cc}   = $cc if $cc;
     $message{from} = $self->{from} if $self->{from};
     $message{smtp} = $self->{mserver} if $self->{mserver};
 
@@ -422,6 +452,7 @@ sub mail {
     $self->{error} = $@ and return undef;
 
     my $subject = $self->fetch_report();
+    my $cc = $self->_get_cc( $subject );
 
     my %message = (
         To      => $self->{to},
@@ -429,7 +460,7 @@ sub mail {
         Type    => "TEXT",
         Data    => $self->{body},
     );
-    $message{Cc}   = $self->{cc} if $self->{cc};
+    $message{Cc}   = $cc  if $cc;
     $message{From} = $self->{from} if $self->{from};
     MIME::Lite->send( smtp => $self->{mserver} ) if $self->{mserver};
 

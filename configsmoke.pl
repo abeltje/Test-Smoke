@@ -13,7 +13,7 @@ use Test::Smoke::Util qw( do_pod2usage );
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.034';
+$VERSION = '0.035';
 
 use Getopt::Long;
 my %options = ( 
@@ -385,17 +385,29 @@ EOT
     },
 
     to => {
-       msg => "To which address(es) should the report be send " .
-              "(comma separated list)?",
+       msg => <<EOMSG,
+To which address(es) should the report be send?
+\t(comma separated list, *please* do not include perl5-porters!)
+EOMSG
        alt => [ ],
        dft => 'smokers-reports@perl.org',
     },
 
     cc => {
-       msg => "To which address(es) should the report be CC'ed " .
-              "(comma separated list)?",
+       msg => <<EOMSG,
+To which address(es) should the report be CCed?
+\t(comma separated list, *please* do not include perl5-porters!)
+EOMSG
        alt => [ ],
        dft => '',
+    },
+
+    ccp5p_onfail => {
+        msg => <<EOMSG,
+Would you like your failed smoke reports CCed to perl5-porters?
+EOMSG
+        alt => [qw( y N )],
+        dft => 'n',
     },
 
     from => {
@@ -955,6 +967,9 @@ MAIL: {
             $config{ $arg } = prompt( $arg );
         };
     }
+    $arg = 'ccp5p_onfail';
+    $config{ $arg } = prompt_yn( $arg );
+
     $arg = 'cc';
     $config{ $arg } = prompt( $arg );
 }
@@ -1274,7 +1289,7 @@ sub sort_configkeys {
         qw( force_c_locale locale defaultenv ),
 
         # Report related
-        qw( mail mail_type mserver from to cc ),
+        qw( mail mail_type mserver from to ccp5p_onfail cc ),
 
         # Archive report and logfile
         qw( adir lfile ),

@@ -8,13 +8,93 @@ use FindBin;
 use lib File::Spec->catdir( $FindBin::Bin );
 use TestLib;
 
-use Test::More tests => 16;
+use Test::More tests => 32;
 
 my $eg_config = { plevel => 19000, os => 'linux', osvers => '2.4.18-4g',
                   arch => 'i686/1 cpu', sum => 'PASS', version => '5.9.0' };
+my $fail_cfg  = { plevel => 19000, os => 'linux', osvers => '2.4.18-4g',
+                  arch => 'i686/1 cpu', sum => 'FAIL(F)', version => '5.9.0' };
 
 use_ok( 'Test::Smoke::Mailer' );
 use Test::Smoke::Util 'parse_report_Config';
+
+SKIP: {
+    my $mhowto = 'Mail::Sendmail';
+    eval "require $mhowto";
+    $@ and skip "Cannot load 'Mail::Sendmail' ($@)", 5;
+    write_report( $eg_config ) or skip "Cannot write report", 5;
+
+    my $mailer = Test::Smoke::Mailer->new( $mhowto => {
+        ddir => 't',
+    } );
+
+    isa_ok( $mailer, 'Test::Smoke::Mailer' );
+    isa_ok( $mailer, 'Test::Smoke::Mailer::Mail_Sendmail' );
+
+    my $report = create_report( $eg_config );
+    my $subject = $mailer->fetch_report();
+
+    my @config = parse_report_Config( $mailer->{body} );
+    my @conf = @{ $eg_config }{qw( version plevel os osvers arch sum )};
+    
+    is_deeply( \@config, \@conf, "Config..." );
+    my $subj = sprintf "Smoke [%s] %s %s %s %s (%s)", @conf[0, 1, 5, 2, 3, 4];
+
+    is( $subject, $subj, "Read the report: $subject" );
+    is( $mailer->{body}, $report, "Report read back ok" );
+
+    # Now we try to test the new ccp5p_onfail stuff
+    is( $mailer->_get_cc( $subject ), '', 
+        "p5p not added to cc-list [--noccp5p_onfail]" );
+    $mailer->{ccp5p_onfail} = 1;
+    is( $mailer->_get_cc( $subject ), '',
+        "p5p not added to cc-list [PASS]" );
+    1 while unlink File::Spec->catfile( 't', 'mktest.rpt' );
+}
+
+SKIP: {
+    my $mhowto = 'Mail::Sendmail';
+    eval "require $mhowto";
+    $@ and skip "Cannot load 'Mail::Sendmail' ($@)", 5;
+    write_report( $fail_cfg ) or skip "Cannot write report", 5;
+
+    my $mailer = Test::Smoke::Mailer->new( $mhowto => {
+        ddir => 't',
+        to   => 'abeltje@cpan.org',
+        from => 'abeltje@cpan.org',
+    } );
+
+    isa_ok( $mailer, 'Test::Smoke::Mailer' );
+    isa_ok( $mailer, 'Test::Smoke::Mailer::Mail_Sendmail' );
+
+    my $report = create_report( $fail_cfg );
+    my $subject = $mailer->fetch_report();
+
+    my @config = parse_report_Config( $mailer->{body} );
+    my @conf = @{ $fail_cfg }{qw( version plevel os osvers arch sum )};
+    
+    is_deeply( \@config, \@conf, "Config..." );
+    my $subj = sprintf "Smoke [%s] %s %s %s %s (%s)", @conf[0, 1, 5, 2, 3, 4];
+
+    is( $subject, $subj, "Read the report: $subject" );
+    is( $mailer->{body}, $report, "Report read back ok" );
+
+    # Now we try to test the new ccp5p_onfail stuff
+    is( $mailer->_get_cc( $subject ), '', 
+        "p5p not added to cc-list [--noccp5p_onfail]" );
+    $mailer->{ccp5p_onfail} = 1;
+    is( $mailer->_get_cc( $subject ), $Test::Smoke::Mailer::P5P,
+        "p5p got added to cc-list [--ccp5p_onfail]" );
+    my $old_to = $mailer->{to};
+    $mailer->{to} .= ", $Test::Smoke::Mailer::P5P";
+    is( $mailer->_get_cc( $subject ), '', 
+        "p5p not added to cc-list [already in To:]" );
+    $mailer->{to} = $old_to;
+    $mailer->{cc} = $Test::Smoke::Mailer::P5P;
+    is( $mailer->_get_cc( $subject ), $Test::Smoke::Mailer::P5P, 
+        "p5p not added to cc-list [already in Cc:]" );
+    1 while unlink File::Spec->catfile( 't', 'mktest.rpt' );
+}
 
 SKIP: {
     my $mhowto = 'mail';
