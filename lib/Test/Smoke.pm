@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION $conf @EXPORT );
-$VERSION = '1.17_55';
+$VERSION = '1.17_60';
 
 use base 'Exporter';
 @EXPORT  = qw( $conf &read_config &run_smoke );
@@ -112,6 +112,9 @@ sub run_smoke {
 
     my $smoker   = Test::Smoke::Smoker->new( \*LOG, $conf );
     $smoker->mark_in;
+
+    $conf->{v} && $conf->{defaultenv} and
+        $smoker->tty( "Running smoke tests without \$ENV{PERLIO}\n" );
 
     unless ( $continue ) {
         $smoker->ttylog( "Smoking patch $patch\n" ); 
