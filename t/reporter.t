@@ -263,5 +263,4 @@ EORESULTS
     like $report, "/^Summary: PASS\n/m", 
          "Report PASS for -Uuseperlio";
 
-diag $report;
 }
