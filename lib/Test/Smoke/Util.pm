@@ -594,14 +594,14 @@ sub get_smoked_Config {
         while (<CONF>) {
             if (m/^(our|my) \$[cC]onfig_[sS][hH](.*) = <<'!END!';/..m/^!END!/){
                 m/!END!(?:';)?$/      and next;
-                m/^([^=]+)='([^']*)'$/ or next;
+                m/^([^=]+)='([^']*)'/ or next;
                 exists $Config{lc $1} and $Config{lc $1} = $2;
             }
         }
         close CONF;
     } elsif ( open CONF, "< $perl_config_sh" ) {
         while ( <CONF> ) {
-            m/^([^=]+)='(.*)'$/ or next;
+            m/^([^=]+)='([^']*)'/ or next; # '
             exists $Config{ lc $1} and $Config{ lc $1 } = $2;
         }
         close CONF;
