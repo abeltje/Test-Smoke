@@ -181,9 +181,11 @@ sub parse_out {
     $rpt{rtime} = time() - $rpt{started};
     $rpt{fail} = 0; $rpt{stat} = { };
 
+    my $fcnt = 0;
     foreach my $config ( keys %{ $rpt{statcfg} } ) {
 
         if ( $rpt{statcfg}{ $config } ) {
+            $fcnt = $rpt{statcfg}{ $config };
             $rpt{statcfg}{ $config } = "F" 
                 if $rpt{statcfg}{ $config } =~ /^\d+$/;
 
@@ -193,7 +195,7 @@ sub parse_out {
     }
     $rpt{stat} = join "", sort keys %{ $rpt{stat} };
 
-    $rpt{running} = $rpt{ccount} 
+    $rpt{running} = $fcnt
         unless exists $rpt{statcfg}->{ $rpt{last_cfg} };
 
     $rpt{reporter} = $reporter;
