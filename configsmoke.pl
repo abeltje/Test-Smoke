@@ -739,9 +739,9 @@ my $want_forest = prompt_yn( $arg );
 FOREST: {
     last FOREST unless $want_forest;
 
-    $config{mdir} = prompt_dir( 'forest_mdir' );
+    $config{mdir} = prompt_dir( 'forest_mdir', 'mdir' );
 
-    $config{fdir} = prompt_dir( 'forest_hdir' );
+    $config{fdir} = prompt_dir( 'forest_hdir', 'fdir' );
 
     $config{sync_type} = 'forest';
 }
@@ -1488,6 +1488,7 @@ sub prompt {
         @{ $opt{ $_[0] } }{qw( msg alt dft chk nck )};
 
     $df_val = $conf->{ $_[0] } if exists $conf->{ $_[0] };
+    $df_val = $conf->{ $_[1] } if $_[1] && exists $conf->{ $_[1] };
     unless ( defined $message ) {
         my $retval = defined $df_val ? $df_val : "undef";
         (caller 1)[3] or print "Got [$retval]\n";
