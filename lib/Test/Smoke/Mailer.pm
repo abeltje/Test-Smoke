@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION $P5P $NOCC_RE);
-$VERSION = '0.008';
+$VERSION = '0.009';
 
 use Test::Smoke::Util qw( parse_report_Config );
 
@@ -16,17 +16,18 @@ my %CONFIG = (
     df_to            => 'daily-build-reports@perl.org',
     df_from          => '',
     df_cc            => '',
+    df_bcc           => '',
     df_ccp5p_onfail  => 0,
     df_mserver       => 'localhost',
 
     df_mailbin       => 'mail',
-    mail             => [qw( cc mailbin )],
+    mail             => [qw( bcc cc mailbin )],
     df_mailxbin      => 'mailx',
-    mailx            => [qw( cc mailxbin )],
+    mailx            => [qw( bcc cc mailxbin )],
     df_sendmailbin   => 'sendmail',
-    sendmail         => [qw( from cc sendmailbin )],
-    'Mail::Sendmail' => [qw( from cc mserver )],
-    'MIME::Lite'     => [qw( from cc mserver )],
+    sendmail         => [qw( from bcc cc sendmailbin )],
+    'Mail::Sendmail' => [qw( from bcc cc mserver )],
+    'MIME::Lite'     => [qw( from bcc cc mserver )],
 
     valid_mailer => { sendmail => 1, mail => 1, mailx => 1,
                       'Mail::Sendmail' => 1, 'MIME::Lite' => 1, },
@@ -251,6 +252,7 @@ sub mail {
     $header   .= "From: $self->{from}\n" 
         if exists $self->{from} && $self->{from};
     $header   .= "Cc: $cc\n" if $cc;
+    $header   .= "Bcc: $self->{bcc}\n" if $self->{bcc};
     $header   .= "Subject: $subject\n\n";
 
     $self->{v} > 1 and print "[$self->{sendmailbin} -i -t]\n";
@@ -318,6 +320,7 @@ sub mail {
 
     my $cmdline = qq|$mailer -s '$subject'|;
     $cmdline   .= qq| -c '$cc'| if $cc;
+    $cmdline   .= qq| -b '$self->{bcc}'| if $self->{bcc};
     $cmdline   .= qq| $self->{to}|;
 
     $self->{v} > 1 and print "[$cmdline]\n";
@@ -391,6 +394,7 @@ sub mail {
         Body    => $self->{body},
     );
     $message{cc}   = $cc if $cc;
+    $message{bcc}   = $self->{bcc} if $self->{bcc};
     $message{from} = $self->{from} if $self->{from};
     $message{smtp} = $self->{mserver} if $self->{mserver};
 
@@ -462,6 +466,7 @@ sub mail {
         Data    => $self->{body},
     );
     $message{Cc}   = $cc  if $cc;
+    $message{Bcc}   = $self->{bcc} if $self->{bcc};
     $message{From} = $self->{from} if $self->{from};
     MIME::Lite->send( smtp => $self->{mserver} ) if $self->{mserver};
 

@@ -336,7 +336,7 @@ __EOM__
 __EOCFG__
     ), "new()" );
     isa_ok $reporter, 'Test::Smoke::Reporter';
-    is $reporter->ccinfo, "? unknow cc version ", "ccinfo(bugstst01)";
+    is $reporter->ccinfo, "? unknown cc version ", "ccinfo(bugstst01)";
 
     my @r_lines = split /\n/, $reporter->smoke_matrix;
     my $r = is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";

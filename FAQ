@@ -83,6 +83,12 @@ specified and !-Uuseperlio)
 
 =back
 
+If a section consists of only one single line, like I<section 1> in
+the example, the options on this line are used in B<every>
+configuration. This can be useful to set an alternate compiler
+(-Dcc=gcc) or to disable features that would fail anyway
+(-Uusefaststdio). [Thank you Merijn for contributing that insight!]
+
 =back
 
 =head2 How do I create different smoke-configurations?

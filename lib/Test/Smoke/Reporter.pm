@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.014';
+$VERSION = '0.017';
 
 use Cwd;
 use File::Spec::Functions;
@@ -258,7 +258,6 @@ sub _parse {
 
         if ( m/^\s*All tests successful/ ) {
             $rpt{$cfgarg}->{$debug}{$tstenv} = "O";
-            $fcnt = 0;
             next;
         }
 
@@ -282,6 +281,7 @@ sub _parse {
             # $tstenv is only set *after* this
             $tstenv = $mini ? 'minitest' : 'stdio' unless $tstenv;
             $rpt{$cfgarg}->{$debug}{$tstenv} = $status;
+            $fcnt++;
             next;
         }
 
@@ -301,7 +301,7 @@ sub _parse {
     }
 
     $rpt{last_cfg} = $statarg;
-    $rpt{finished} or $rpt{statcfg}{ $statarg } = $fnct;
+    exists $rpt{statcfg}{ $statarg } or $rpt{running} = $fcnt;
     $rpt{avg} = $rpt{secs} / $rpt{count};
     $self->{_rpt} = \%rpt;
     $self->_post_process;
@@ -491,7 +491,7 @@ sub ccinfo {
         ));
         $cinfo = "? ";
         my $ccvers = $Config{gccversion} || $Config{ccversion} || '';
-        $cinfo .= ( $Config{cc} || 'unknow cc' ) . " version $ccvers";
+        $cinfo .= ( $Config{cc} || 'unknown cc' ) . " version $ccvers";
     }
     return $cinfo;
 }
@@ -677,10 +677,11 @@ __EOL__
 
 sub signature {
     my $this_pver = $^V ? sprintf "%vd", $^V : $];
+    my $build_info = "$Test::Smoke::VERSION build $Test::Smoke::REVISION";
     return <<__EOS__
 
 -- 
-Report by Test::Smoke v$Test::Smoke::VERSION\#$Test::Smoke::REVISION running on perl $this_pver
+Report by Test::Smoke v$build_info running on perl $this_pver
 (Reporter v$VERSION / Smoker v$Test::Smoke::Smoker::VERSION)
 __EOS__
 }

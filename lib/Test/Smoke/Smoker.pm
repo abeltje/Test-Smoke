@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.014';
+$VERSION = '0.016';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -500,6 +500,7 @@ sub extend_with_harness {
         chdir 't' and $changed_dir = 1;
         my $harness_all_ok = 0;
         my $tst_perl = catfile( curdir(), 'perl' );
+        my $verbose = $self->{v} > 1 ? "-v" : "";
         my $harness_out = join "", map {
             my( $name, $fail ) = 
                 m/(\S+\.t)\s+.+%\s+([\d?]+(?:[-\s]+\d+)*)/;
@@ -514,9 +515,9 @@ sub extend_with_harness {
         } grep m/^\s+\d+(?:[-\s]+\d+)*/ ||
                m/\S+\.t\s+.+%\s+[\d?]+(?:[-\s+]\d+)*/ => map {
             /All tests successful/ && $harness_all_ok++;
-            $self->{v} > 1 and $self->tty( $_ );
+            $self->{v} and $self->tty( $_ );
             $_;
-        } $self->_run( "$tst_perl harness $harness" );
+        } $self->_run( "$tst_perl harness $verbose $harness" );
         # safeguard against empty results
         $inconsistent{ $_ } ||= 'FAILED' for keys %inconsistent;
         $harness_out =~ s/^\s*$//;
@@ -609,7 +610,7 @@ sub _transform_testnames {
     my( $self, @notok ) = @_;
     my %inconsistent;
     for my $nok ( @notok ) {
-        $nok =~ m!^(?:\.\.[\\/])?(\w+/[-\w/\\]+)\.*(.*)! or next;
+        $nok =~ m!^(?:\.\.[\\/])?(\w+[\\/][-\w/\\]+)\.*(.*)! or next;
         my( $test_name, $status ) = ( $1, $2 );
         $test_name .= '.t';
 

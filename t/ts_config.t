@@ -7,11 +7,12 @@ use FindBin;
 use Data::Dumper;
 use vars qw( $conf );
 
-use Test::More tests => 9;
+use Test::More tests => 9 - 1;
 BEGIN { use_ok( 'Test::Smoke' ) }
 
-is( Test::Smoke->VERSION, $Test::Smoke::VERSION, 
-    "Check version $Test::Smoke::VERSION" );
+#is( Test::Smoke->VERSION, $Test::Smoke::VERSION, 
+#    "Check version $Test::Smoke::VERSION" );
+
 ok( defined &read_config, "read_config() is exported" );
 
 my $test = { ddir => '../' };

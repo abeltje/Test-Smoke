@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.25';
+$VERSION = '0.27';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -220,7 +220,7 @@ sub Configure_win32 {
     foreach ( quotewords( '\s+', 1, $1) ) {
 	m/^-[des]{1,3}$/ and next;
 	m/^-Dusedevel$/  and next;
-        if ( /^-Accflags=(['"])?(.+)\1/ ) { #emacs' syntaxhighlite
+        if ( /^-Accflags=(['"]?)(.+)\1/ ) { #emacs' syntaxhighlite
            push @buildopt, $2;
            next;
         }
@@ -608,8 +608,8 @@ fallback information from C<POSIX::uname()> and F<patchlevel.h>.
 =cut
 
 sub get_smoked_Config {
-    my $dir = shift;
-    my %Config = map { ( lc $_ => "" ) } @_;
+    my( $dir, @fields ) = @_;
+    my %Config = map { ( lc $_ => undef ) } @fields;
 
     my $perl_Config_pm = File::Spec->catfile ($dir, "lib", "Config.pm");
     my $perl_config_sh = File::Spec->catfile( $dir, 'config.sh' );
@@ -617,28 +617,40 @@ sub get_smoked_Config {
     if ( open CONF, "< $perl_Config_pm" ) {
 
         while (<CONF>) {
-            if (m/^(our|my) \$[cC]onfig_[sS][hH](.*) = <<'!END!';/..m/^!END!/){
+            if ( m/^(?:
+                       (?:our|my)\ \$[cC]onfig_[sS][hH].*
+                    |
+                       \$_
+                    )\ =\ <<'!END!';/x..m/^!END!/){
                 m/!END!(?:';)?$/      and next;
                 m/^([^=]+)='([^']*)'/ or next;
                 exists $Config{lc $1} and $Config{lc $1} = $2;
             }
         }
         close CONF;
-    } elsif ( open CONF, "< $perl_config_sh" ) {
+    }
+    my %conf2 = map {
+        ( $_ => undef )
+    } grep !defined $Config{ $_ } => keys %Config;
+    if ( open CONF, "< $perl_config_sh" ) {
         while ( <CONF> ) {
             m/^([^=]+)='([^']*)'/ or next; # '
-            exists $Config{ lc $1} and $Config{ lc $1 } = $2;
+            exists $conf2{ $1} and $Config{ lc $1 } = $2;
         }
         close CONF;
-    } else { 
+    }
+    %conf2 = map {
+        ( $_ => undef )
+    } grep !defined $Config{ $_ } => keys %Config;
+    if ( keys %conf2 ) { 
         # Fall-back values from POSIX::uname() (not reliable)
         require POSIX;
         my( $osname, undef, $osvers, undef, $arch) = POSIX::uname();
-        $Config{osname} = lc $osname if exists $Config{osname};
-        $Config{osvers} = lc $osvers if exists $Config{osvers};
-        $Config{archname} = lc $arch if exists $Config{archname};
-        $Config{version} = version_from_patchlevel_h( $dir )
-            if exists $Config{version};
+        $Config{osname}   = lc $osname if exists $conf2{osname};
+        $Config{osvers}   = lc $osvers if exists $conf2{osvers};
+        $Config{archname} = lc $arch   if exists $conf2{archname};
+        $Config{version}  = version_from_patchlevel_h( $dir )
+            if exists $conf2{version};
     }
 
     return %Config;
@@ -724,7 +736,7 @@ sub run_regen_headers {
     return 1;
 }
 
-=item calc_timeout( $killtime )
+=item calc_timeout( $killtime[, $from] )
 
 C<calc_timeout()> calculates the timeout in seconds. 
 C<$killtime> can be one of two formats:
@@ -738,25 +750,28 @@ to translate that to seconds.
 
 =item B<hh:mm>
 
-This format represents a clock time (localtime).
-Calculate minutes from midnight for both C<$killtime> and C<localtime()>,
-and get the difference.
+This format represents a clock time (localtime).  Calculate minutes
+from midnight for both C<$killtime> and C<localtime($from)>, and get
+the difference. If C<$from> is omitted, C<time()> is used.
+
+If C<$killtime> is the actual time, the timeout will be 24 hours!
 
 =back
 
 =cut
 
 sub calc_timeout {
-    my( $killtime ) = @_;
+    my( $killtime, $from ) = @_;
     my $timeout = 0;
     if ( $killtime =~ /^\+(\d+):([0-5]?[0-9])$/ ) {
         $timeout = 60 * (60 * $1 + $2 );
     } elsif ( $killtime =~ /^((?:[0-1]?[0-9])|(?:2[0-3])):([0-5]?[0-9])$/ ) {
+        defined $from or $from = time;
         my $time_min = 60 * $1 + $2;
-        my( $now_m, $now_h ) = (localtime)[1, 2];
+        my( $now_m, $now_h ) = (localtime $from)[1, 2];
         my $now_min = 60 * $now_h + $now_m;
         my $kill_min = $time_min - $now_min;
-        $kill_min += 60 * 24 if $kill_min < 0;
+        $kill_min += 60 * 24 if $kill_min <= 0;
         $timeout = 60 * $kill_min;
     }
     return $timeout;

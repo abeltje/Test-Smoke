@@ -36,6 +36,7 @@ ok defined &sysinfo, "sysinfo() imported";
     ok $si->os, $si->os;
     ok $si->host, $si->host;
 
-    is join( " ", map $si->$_ => qw( host os cpu_type ) ), sysinfo(),
+    is join( " ", @{ $si }{map "_$_" => qw( host os cpu_type )} ),
+       sysinfo(),
        "test sysinfo() " . sysinfo();
 }

@@ -106,7 +106,7 @@ This is a small front-end for L<Test::Smoke::Mailer>.
 
 my $my_usage = "Usage: $0 -t <type> -d <directory> [options]";
 GetOptions( \%opt,
-    'type|t=s', 'ddir|d=s', 'to=s', 'cc=s', 'ccp5p_onfail!',
+    'type|t=s', 'ddir|d=s', 'to=s', 'cc=s', 'bcc=s', 'ccp5p_onfail!',
     'v|verbose=i',
 
     'from=s', 'mserver=s',

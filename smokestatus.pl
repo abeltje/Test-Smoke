@@ -4,9 +4,10 @@ $| = 1;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.012';
+$VERSION = '0.014';
 
 use Cwd;
+use Time::Local;
 use File::Spec::Functions;
 use File::Path;
 use File::Copy;
@@ -16,7 +17,7 @@ use lib $FindBin::Bin;
 use Test::Smoke;
 use Test::Smoke::Reporter;
 use Test::Smoke::Util qw( 
-    do_pod2usage time_in_hhmm
+    do_pod2usage time_in_hhmm calc_timeout
     get_patch parse_report_Config );
 
 my $myusage = "Usage: $0 -c [smokeconfig]";
@@ -131,10 +132,17 @@ foreach my $config ( @configs ) {
     my $est_todo = $todo > 0 && $rpt->{avg} > 0
         ? ( (($todo - 1) * $rpt->{avg}) + $est_curr ) : 0;
     $est_todo > $todo * $rpt->{avg} and $est_todo = $todo * $rpt->{avg};
+    my $killtime = calc_timeout( $conf->{killtime}, $rpt->{started} )
+        ? timeout_msg( $conf->{killtime}, $rpt->{started } )
+        : "";
+    
     my $todo_time = $rpt->{avg} <= 0  ? '.' : 
         $est_todo <= 0 
-            ? ", smoke looks aborted delay " . time_in_hhmm( -$est_todo )
+            ? has_lck( $config )
+                ? ", smoke looks hanging delay " . time_in_hhmm( -$est_todo )
+                : ", smoke looks terminated${killtime}."
             : ", estimated completion in " . time_in_hhmm( $est_todo );
+
     printf "    $todo configuration%s to finish$todo_time\n",
            $todo == 1 ? "" : "s"
         if $todo;
@@ -205,9 +213,6 @@ sub parse_out {
     }
     $rpt{stat} = join "", sort keys %{ $rpt{stat} };
 
-    $rpt{running} = $fcnt
-        unless exists $rpt{statcfg}->{ $rpt{last_cfg} };
-
     $rpt{reporter} = $reporter;
     return \%rpt    
 }
@@ -228,6 +233,11 @@ sub get_lcks {
     return sort @list;
 }
 
+sub has_lck {
+    ( my $lck = shift ) =~ s/_config\z/.lck/;
+    return -f File::Spec->catfile( $opt{dir}, $lck );
+}
+
 sub process_args {
     return unless defined $opt{config};
 
@@ -246,6 +256,32 @@ sub process_args {
     } else {
         warn "WARNING: Could not process '$opt{config}': " . 
              Test::Smoke->config_error . "\n";
+    }
+}
+
+sub timeout_msg {
+    my( $killtime, $from ) = @_;
+
+    defined $from or $from = time;
+    if ( $killtime =~ /^\+(\d+):(\d+)/ ) {
+        my( $hh, $mm ) = ( $1, $2 );
+        $from += 60 * $mm;
+        $from += 60 * 60 * $hh;
+        return " from " . localtime $from;
+    } else {
+        my @lt = localtime $from;
+        my( $hh, $mm ) = $killtime =~ /(\d+):(\d+)/;
+        my $time_min = 60 * $hh + $mm;
+        my( $now_m, $now_h ) = @lt[1, 2];
+        my $now_min = 60 * $now_h + $now_m;
+        my $kill_min = $time_min - $now_min;
+        $kill_min += 60 * 24 if $kill_min < 0;
+
+        $hh = int( $kill_min / 60 );
+        $mm = $kill_min % 60;
+        @lt[ 1, 2] = ( $mm, $hh );
+
+        return " at " . localtime timelocal @lt;
     }
 }
 

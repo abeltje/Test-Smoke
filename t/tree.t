@@ -87,9 +87,10 @@ SKIP: { # Check that we can pass extra files to check_MANIFEST()
 SKIP: { # Check that check_MANIFEST() finds dubious files
     my $missing = File::Spec->catfile( 't', 'missing' );
     $missing = File::Spec->rel2abs( $missing );
+    local *FH;
     {
-        open my $fh, "> $missing" or skip "Cannot create '$missing': $!", 3;
-        close $fh;
+        open FH, "> $missing" or skip "Cannot create '$missing': $!", 3;
+        close FH;
     }
     eval { MANIFEST_from_dir 't' };
     $@ and skip $@, 3;
@@ -97,16 +98,16 @@ SKIP: { # Check that check_MANIFEST() finds dubious files
     my $undeclared = File::Spec->catfile( 't', 'undeclared' );
     $undeclared = File::Spec->rel2abs( $undeclared );
     {
-        open my $fh, "> $undeclared" or 
+        open FH, "> $undeclared" or 
             skip "Cannot create '$undeclared': $!", 3;
-        close $fh;
+        close FH;
     }
     my $skipit = File::Spec->catfile( 't', 'skip_it' );
     $skipit = File::Spec->rel2abs( $skipit );
     {
-        open my $fh, "> $skipit" or 
+        open FH, "> $skipit" or 
             skip "Cannot create '$skipit': $!", 3;
-        close $fh;
+        close FH;
     }
 
     my $tree = Test::Smoke::SourceTree->new( 't' );
@@ -134,9 +135,10 @@ SKIP: { # Check that check_MANIFEST() finds dubious files
 SKIP: { # Check that check_MANIFEST() finds dubious files with MANIFEST.SKIP
     my $missing = File::Spec->catfile( 't', 'missing' );
     $missing = File::Spec->rel2abs( $missing );
+    local *FH;
     {
-        open my $fh, "> $missing" or skip "Cannot create '$missing': $!", 3;
-        close $fh;
+        open FH, "> $missing" or skip "Cannot create '$missing': $!", 3;
+        close FH;
     }
     eval { MANIFEST_from_dir 't' };
     $@ and skip $@, 3;
@@ -145,16 +147,16 @@ SKIP: { # Check that check_MANIFEST() finds dubious files with MANIFEST.SKIP
     my $undeclared = File::Spec->catfile( 't', 'undeclared' );
     $undeclared = File::Spec->rel2abs( $undeclared );
     {
-        open my $fh, "> $undeclared" or 
+        open FH, "> $undeclared" or 
             skip "Cannot create '$undeclared': $!", 3;
-        close $fh;
+        close FH;
     }
     my $skipit = File::Spec->catfile( 't', 'skip_it' );
     $skipit = File::Spec->rel2abs( $skipit );
     {
-        open my $fh, "> $skipit" or 
+        open FH, "> $skipit" or 
             skip "Cannot create '$skipit': $!", 3;
-        close $fh;
+        close FH;
     }
     my $mani_skip = File::Spec->catfile( 't', 'MANIFEST.SKIP' );
     mani_file_from_list( $mani_skip, 'skip_it' );

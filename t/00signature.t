@@ -5,9 +5,9 @@ use strict;
 # $Id$
 
 use Test::More;
-plan exists $ENV{SMOKE_SKIP_SIGTEST} && $ENV{SMOKE_SKIP_SIGTEST}
-    ? ( skip_all => "Cannot test signature before it's created" )
-    : ( tests => 1 ); 
+plan exists $ENV{SMOKE_DO_SIGTEST} && $ENV{SMOKE_DO_SIGTEST}
+    ? ( tests => 1 )
+    :( skip_all => "Set SMOKE_DO_SIGTEST=1 to run this test." );
 
 my $key_server = 'pgp.mit.edu';
 

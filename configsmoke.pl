@@ -5,6 +5,7 @@ use Config;
 use Cwd;
 use File::Spec;
 use File::Path;
+use File::Copy;
 use Data::Dumper;
 use FindBin;
 use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
@@ -13,7 +14,7 @@ use Test::Smoke::Util qw( do_pod2usage );
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.038';
+$VERSION = '0.042';
 
 use Getopt::Long;
 my %options = ( 
@@ -23,11 +24,12 @@ my %options = (
     default => undef,
     prefix  => undef,
     oldcfg  => 0,
+    usedft  => undef,
 );
 my $myusage = "Usage: $0 -p <prefix>[ -d <defaultsprefix>]";
 GetOptions( \%options, 
     'config|c=s', 'jcl|j=s', 'log|l=s', 
-    'prefix|p=s', 'default|d=s',
+    'prefix|p=s', 'default|d:s', 'usedft|des',
 
     'help|h', 'man',
 ) or do_pod2usage( verbose => 1, myusage => $myusage );
@@ -57,13 +59,27 @@ if ( $@ || $options{default} ) {
         unless $@;
 } 
 
+# -des will only work fully when $options{oldcfg}
+unless ( $options{oldcfg} ) {
+    defined $options{usedft}
+        and print "Option '-des' not fully functional!\n";
+} else {
+    # -d like in ./Configure, works for oldcfg only!
+    $options{usedft} ||= defined $options{default} &&
+                         $options{default} eq "";
+}
+
 =head1 NAME
 
 configsmoke.pl - Create a configuration for B<smokeperl.pl>
 
 =head1 SYNOPSIS
 
-   $ perl configsmoke.pl -p <prefix>[ -d <defaultsprefix>]
+    $ perl configsmoke.pl -p <prefix>[ -d <defaultsprefix>]
+
+or regenerate from previous _config:
+
+    $ perl configsmoke.pl -p <prefix> -des 
 
 =head1 OPTIONS
 
@@ -74,6 +90,8 @@ Current options:
   -j jclprefix      When ommited 'perlcurrent' is used
   -l logprefix      When ommited 'perlcurrent' is used
   -p prefix         Set -c and -j and -l at once
+
+  -des              confirm all answers (needs previous _config)
 
 =cut
 
@@ -103,7 +121,7 @@ my %versions = (
                  ddir   => File::Spec->rel2abs( 
                                File::Spec->catdir( File::Spec->updir,
                                                    'perl-5.5.x' ) ),
-                 text   => 'Perl 5.00504-to-be',
+                 text   => 'Perl 5.005 MAINT',
                  is56x  => 1},
     '5.6.2' => { source => 'ftp.linux.activestate.com::perl-5.6.2',
                  server => 'http://rgarciasuarez.free.fr',
@@ -124,7 +142,7 @@ my %versions = (
                  ddir   => File::Spec->rel2abs( 
                                File::Spec->catdir( File::Spec->updir,
                                                    'perl-5.8.x' ) ),
-                 text   => 'Perl 5.8.2-to-be',
+                 text   => 'Perl 5.8 MAINT',
                  cfg    => ( $^O eq 'MSWin32' 
                         ? 'w32current.cfg' :'perl58x.cfg' ),
                  is56x  => 0 },
@@ -136,7 +154,7 @@ my %versions = (
                  ddir   => File::Spec->rel2abs( 
                                File::Spec->catdir( File::Spec->updir,
                                                    'perl-current' ) ),
-                 text   => 'Perl 5.10.0-to-be',
+                 text   => 'Perl 5.10 to-be',
                  cfg    => ( $^O eq 'MSWin32' 
                         ? 'w32current.cfg' :'perlcurrent.cfg' ),
                  is56x  => 0 },
@@ -351,7 +369,7 @@ Examples:$untarmsg",
     # make fine-tuning
     makeopt => {
         msg => <<EOT,
-Specify extra arguments for "make".
+Specify extra arguments for "$Config{make}".
 \t(for the build step and test-prep step)
 EOT
         alt => [ ],
@@ -362,14 +380,14 @@ EOT
 Specify a different make program for "make _test".
 EOT
         alt => [ ],
-        dft => 'make',
+        dft => $Config{make},
     },
 
     # mail stuff
     mail => {
         msg => "Would you like your reports send by e-mail?",
-        alt => [qw( Y n )],
-        dft => 'y',
+        alt => [qw( N y )],
+        dft => 'n',
     },
     mail_type => {
         msg => 'Which mail facility should be used?',
@@ -391,6 +409,17 @@ To which address(es) should the report *always* be send?
 EOMSG
        alt => [ ],
        dft => 'smokers-reports@perl.org',
+       nck => '\bperl5-porters@perl.org\b',
+    },
+
+    bcc => {
+       msg => <<EOMSG,
+To which address(es) should the report *always* be BCCed?
+\t(comma separated list, *please* do not include perl5-porters!)
+EOMSG
+       alt => [ ],
+       dft => '',
+       nck => '\bperl5-porters@perl.org\b',
     },
 
     cc => {
@@ -401,6 +430,7 @@ To which address(es) should the report be CCed *on fail*?
 EOMSG
        alt => [ ],
        dft => '',
+       nck => '\bperl5-porters@perl.org\b',
     },
 
     ccp5p_onfail => {
@@ -594,30 +624,35 @@ you will need to confirm your choice.
 
 =cut
 
-BUILDDIR: {
-    $arg = 'ddir';
-    $config{ $arg } = prompt_dir( $arg );
-    my $cwd = cwd;
-    unless ( chdir $config{ $arg } ) {
-        warn "Can't chdir($config{ $arg }): $!\n";
-        redo BUILDDIR;
-    }
-    my $bdir = $config{ $arg } = cwd;
-    chdir $cwd or die "Can't chdir($cwd) back: $!\n";
-    if ( $cwd eq $bdir ) {
-        print "The current directory *cannot* be used for smoke testing\n";
-        redo BUILDDIR;
-    }
-
-    $config{ $arg } = File::Spec->canonpath( $config{ $arg } );
-    my $manifest  = File::Spec->catfile( $config{ $arg }, 'MANIFEST' );
-    my $dot_patch = File::Spec->catfile( $config{ $arg }, '.patch' );
-    if ( -e $manifest && -e $dot_patch ) {
-        $opt{use_old}->{dft} = $options{oldcfg} && 
-                               ($conf->{ddir}||"") eq $config{ddir}
-            ? 'y' : $opt{use_old}->{dft};
-        my $use_old = prompt_yn( 'use_old' );
-        redo BUILDDIR unless $use_old;
+{
+    # Hack -des to keep the safeguards
+    local $options{usedft} = $options{usedft};
+    BUILDDIR: {
+        $arg = 'ddir';
+        $config{ $arg } = prompt_dir( $arg );
+        $options{usedft} = $options{oldcfg};
+        my $cwd = cwd;
+        unless ( chdir $config{ $arg } ) {
+            warn "Can't chdir($config{ $arg }): $!\n";
+            redo BUILDDIR;
+        }
+        my $bdir = $config{ $arg } = cwd;
+        chdir $cwd or die "Can't chdir($cwd) back: $!\n";
+        if ( $cwd eq $bdir ) {
+            print "The current directory *cannot* be used for smoke testing\n";
+            redo BUILDDIR;
+        }
+    
+        $config{ $arg } = File::Spec->canonpath( $config{ $arg } );
+        my $manifest  = File::Spec->catfile( $config{ $arg }, 'MANIFEST' );
+        my $dot_patch = File::Spec->catfile( $config{ $arg }, '.patch' );
+        if ( -e $manifest && -e $dot_patch ) {
+            $opt{use_old}->{dft} = $options{oldcfg} && 
+                                   ($conf->{ddir}||"") eq $config{ddir}
+                ? 'y' : $opt{use_old}->{dft};
+            my $use_old = prompt_yn( 'use_old' );
+            redo BUILDDIR unless $use_old;
+        }
     }
 }
 
@@ -628,11 +663,15 @@ There are several build-cfg files provided with the distribution:
 
 =over 4
 
-=item F<perlcurrent.cfg> for 5.8.x+ on unixy systems
+=item F<perlcurrent.cfg> for 5.9.x+ on unixy systems
 
-=item F<w32current.cfg> for 5.8.x+ on MSWin32
+=item F<perl58x.cfg> for 5.8.x (MAINT) on unixy systems
 
 =item F<perl562.cfg> for 5.6.2 (MAINT) on unixy systems
+
+=item F<perl55x.cfg> for 5.005_04 (MAINT) on unixy systems
+
+=item F<w32current.cfg> for 5.8.x+ on MSWin32
 
 =back
 
@@ -642,6 +681,7 @@ B<-Duselargefiles> section from F<w32current.cfg> should be enough.
 =cut
 
 $arg = 'cfg';
+default_buildcfg( $config{cfg} || $opt{cfg}{dft}, $config{perl_version} );
 $config{ $arg } = prompt_file( $arg );
 check_buildcfg( $config{ $arg } );
 
@@ -941,6 +981,7 @@ See L<Test::Smoke::Mailer> and L<mailrpt.pl>
 =cut
 
 $arg = 'mail';
+$opt{ $arg }{dft} = ! $options{usedft};
 $config{ $arg } = prompt_yn( $arg );
 MAIL: {
     last MAIL unless $config{mail};
@@ -949,6 +990,9 @@ MAIL: {
 
     $arg = 'to';
     while ( !$config{ $arg } ) { $config{ $arg } = prompt( $arg ) }
+
+    $arg = 'bcc';
+    $config{ $arg } = prompt( $arg );
 
     MAILER: {
         local $_ = $config{ 'mail_type' };
@@ -1098,8 +1142,8 @@ $config{ $arg } = prompt_yn( $arg );
 When C<< $Config{d_alarm} >> is found we can use C<alarm()> to abort 
 long running smokes. Leave this value empty to keep the old behaviour.
 
-    07:30 => F<mktest.pl> is aborted on 7:30 localtime
-   +23:45 => F<mktest.pl> is aborted after 23 hours and 45 minutes
+    07:30 => F<smokeperl.pl> is aborted on 7:30 localtime
+   +23:45 => F<smokeperl.pl> is aborted after 23 hours and 45 minutes
 
 Thank you Jarkko for donating this suggestion.
 
@@ -1290,9 +1334,9 @@ sub sort_configkeys {
         qw( force_c_locale locale defaultenv ),
 
         # Report related
-        qw( mail mail_type mserver from to ccp5p_onfail cc ),
+        qw( mail mail_type mserver from to ccp5p_onfail cc bcc ),
 
-        # Archive report and logfile
+        # Archive reports and logfile
         qw( adir lfile ),
 
         # make fine-tuning
@@ -1440,8 +1484,8 @@ EO_BAT
 }
 
 sub prompt {
-    my( $message, $alt, $df_val, $chk ) = 
-        @{ $opt{ $_[0] } }{qw( msg alt dft chk )};
+    my( $message, $alt, $df_val, $chk, $nck ) = 
+        @{ $opt{ $_[0] } }{qw( msg alt dft chk nck )};
 
     $df_val = $conf->{ $_[0] } if exists $conf->{ $_[0] };
     unless ( defined $message ) {
@@ -1449,8 +1493,9 @@ sub prompt {
         (caller 1)[3] or print "Got [$retval]\n";
         return $df_val;
     }
-    $message =~ s/\s+$//;
 
+    $message =~ s/\s+$//;
+        
     my %ok_val;
     %ok_val = map { (lc $_ => 1) } @$alt if @$alt;
     $chk ||= '.*';
@@ -1464,8 +1509,12 @@ sub prompt {
 
     my( $input, $clear );
     INPUT: {
-        print "$alts\[$default] \$ ";
-        chomp( $input = <STDIN> );
+        if ( $options{usedft} ) {
+            $input = defined $df_val ? $df_val : " ";
+        } else {
+            print "$alts\[$default] \$ ";
+            chomp( $input = <STDIN> );
+        }
         if ( $input eq " " ) {
             $input = "";
             $clear = 1;
@@ -1475,7 +1524,10 @@ sub prompt {
             $input = $df_val unless length $input;
         }
 
-        printf "Input does not match $chk\n" and redo INPUT
+        print "Input should not match: '/$nck/i'\n" and redo INPUT
+            if $nck && $input =~ m/$nck/i;
+        
+        print "Input does not match: 'm/$chk/'\n" and redo INPUT
             unless $input =~ m/$chk/i;
 
         last INPUT unless %ok_val;
@@ -1655,7 +1707,14 @@ sub tar_fmt {
 }
 
 sub check_locale {
-    # I only know one way...
+    # I only know one way... and one for Darwin (perhaps FreeBSD)
+    if ( $^O =~ /darwin|bsd/i ) {
+        local *USL;
+        opendir USL, '/usr/share/locale' or return;
+        my @list = grep /utf-?8$/i => readdir USL;
+        closedir USL;
+        return @list;
+    } 
     my $locale = whereis( 'locale' );
     return unless $locale;
     return grep /utf-?8$/i => split /\n/, `$locale -a`;
@@ -1760,6 +1819,30 @@ sub get_Win_version {
     return $win_version;
 }
 
+=item default_buildcfg( $file_name, $pversion )
+
+Check to see if C<$file_name> exists. If not, copy the default config
+for C<$pversion> to C<$file_name>.
+
+=cut
+
+sub default_buildcfg {
+    my( $file_name, $pversion ) = @_;
+    -f $file_name and return 1;
+
+    $pversion =~ tr/.//d;
+    $pversion eq '59x' and $pversion = 'current';
+    my $basename = $^O eq 'MSWin32'
+        ? "w32current.cfg" : "perl${pversion}.cfg";
+
+    my $dftbcfg = File::Spec->catfile( $FindBin::Bin, $basename );
+    -f $dftbcfg 
+        or die "You seem to have an incomplete Test::Smoke installation" . 
+               "($dftbcfg is missing)!\n";
+    copy $dftbcfg, $file_name
+        and print "\nCreated buildconfig '$file_name'";
+}
+
 =item check_buildcfg
 
 We will try to check the build configurations file to see if we should
@@ -1780,7 +1863,10 @@ sub check_buildcfg {
     close BCFG;
     my $oldcfg = join "", grep !/^#/ => @bcfg;
 
-    my @no_option = ( );
+    my ($rev, @vparts ) = $config{perl_version} =~ /^(\d)(?:\.(\d+))+/;
+    my $pversion = sprintf "%d.%03d%02d", $rev, @vparts, 0;
+    print "Checking '$file_name' ($pversion/$^O)\n";
+    my @no_option = $pversion >= 5.009 ? ( '-Uuseperlio' ) : ( );
     OSCHECK: {
         local $_ = $^O;
         /darwin|bsd/i && do { 
@@ -1833,6 +1919,7 @@ write the new one in its place.
 sub finish_cfgcheck {
     my( $overwrite, $fname, $bcfg ) = @_;
 
+    my $msg = "";
     if ( $overwrite ) {
         my $backup = "$fname.bak";
         -f $backup and chmod( 0775, $backup ) and unlink $backup;
@@ -1840,6 +1927,7 @@ sub finish_cfgcheck {
             warn "Cannot rename '$fname' to '$backup': $!";
     } else {
         $fname = "$options{prefix}.cfg";
+        $msg = " (in case you want it later)";
     }
     # change the filemode (make install used to make perlcurrent.cfg readonly)
     -f $fname and chmod 0775, $fname;
@@ -1852,7 +1940,7 @@ sub finish_cfgcheck {
         warn "Error on close '$fname': $!";
         return;
     };
-    print "Wrote '$fname'\n";
+    print "Wrote '$fname'$msg\n";
 }
 
 =back

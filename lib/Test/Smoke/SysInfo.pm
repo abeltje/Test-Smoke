@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.008';
+$VERSION = '0.016';
 
 use base 'Exporter';
 @EXPORT_OK = qw( &sysinfo );
@@ -124,10 +124,11 @@ sub __get_os {
             last MOREOS;
         };
         /linux/i           && do {
-            my( $distro ) = grep /-release\b/ => glob( '/etc/*' );
+            my $dist_re = '[-_](?:release|version)\b';
+            my( $distro ) = grep /$dist_re/ => glob( '/etc/*' );
             last MOREOS unless $distro;
             $distro =~ s|^/etc/||;
-            $distro =~ s/-release//i;
+            $distro =~ s/$dist_re//i;
             $os .= " [$distro]" if $distro;
             last MOREOS;
         };
@@ -212,8 +213,8 @@ sub AIX {
     my( $info ) = grep /^\S+/ => @lsdev;
     ( $info ) = $info =~ /^(\S+)/;
     $info .= " -a 'state type'";
-    my( $cpu ) = grep /^enable:[^:\s]+/ => `lsattr -E -O -l $info`;
-    ( $cpu ) = $cpu =~ /^enable:([^:\s]+)/;
+    my( $cpu ) = grep /\benable:[^:\s]+/ => `lsattr -E -O -l $info`;
+    ( $cpu ) = $cpu =~ /\benable:([^:\s]+)/;
     $cpu =~ s/\bPowerPC(?=\b|_)/PPC/i;
 
     ( my $cpu_type = $cpu ) =~ s/_.*//;
@@ -243,6 +244,7 @@ Use the L<ioscan> program to find information.
 
 sub HPUX {
     my $hpux = Generic();
+    local $ENV{PATH} = "/etc:$ENV{PATH}";
     my $ncpu = grep /^processor/ => `ioscan -fnkC processor`;
     unless ( $ncpu ) {	# not root?
         local *SYSLOG;
@@ -298,14 +300,27 @@ Use the L<sysctl> program to find information.
 
 sub BSD {
     my %sysctl;
-    foreach my $name ( qw( model machine ncpu ) ) {
-        chomp( $sysctl{ $name } = `sysctl hw.$name` );
+
+    my $sysctl_cmd = -x '/sbin/sysctl' ? '/sbin/sysctl' : 'sysctl';
+
+    my %extra = ( cpufrequency => undef );
+    my @e_args = map {
+        /^hw\.(\w+)\s*[:=]/; $1
+    } grep /^hw\.(\w+)/ && exists $extra{ $1 } => `$sysctl_cmd -a hw`; 
+
+    foreach my $name ( qw( model machine ncpu ), @e_args ) {
+        chomp( $sysctl{ $name } = `$sysctl_cmd hw.$name` );
         $sysctl{ $name } =~ s/^hw\.$name\s*[:=]\s*//;
     }
+    $sysctl{machine} and $sysctl{machine} =~ s/Power Macintosh/ppc/;
+
+    my $cpu = $sysctl{model};
+    exists $sysctl{cpufrequency}
+        and $cpu .= sprintf " (%.0f MHz)", $sysctl{cpufrequency}/1_000_000;
 
     return {
-        _cpu_type => $sysctl{machine},
-        _cpu      => $sysctl{model},
+        _cpu_type => $sysctl{machine} || __get_cpu_type(),
+        _cpu      => $cpu || __get_cpu,
         _ncpu     => $sysctl{ncpu},
         _host     => __get_hostname(),
         _os       => __get_os(),
@@ -346,6 +361,7 @@ Helper function to get information from F</proc/cpuinfo>
 sub __from_proc_cpuinfo {
     my( $key, $lines ) = @_;
     my( $value ) = grep /^\s*$key\s*[:=]\s*/i => @$lines;
+    defined $value or $value = "";
     $value =~ s/^\s*$key\s*[:=]\s*//i;
     return $value;
 }
@@ -357,29 +373,98 @@ Use the C</proc/cpuinfo> preudofile to get the system information.
 =cut
 
 sub Linux {
-    local *CPUINFO;
     my( $type, $cpu, $ncpu ) = ( __get_cpu_type() );
+    ARCH: {
 
+        $type =~ /sparc/ and return Linux_sparc( $type );
+        $type =~ /ppc/i  and return Linux_ppc(   $type );
+
+    }
+
+    local *CPUINFO;
     if ( open CPUINFO, "< /proc/cpuinfo" ) {
         chomp( my @cpu_info = <CPUINFO> );
         close CPUINFO;
-        # every Intel processor has its own 'block', so count the blocks
-        $ncpu = $type =~ /sparc/
-            ? __from_proc_cpuinfo( 'ncpus active', \@cpu_info )
-            : scalar grep /^processor\s+:\s+/ => @cpu_info;
-        my %info;
-        my @parts = $type =~ /sparc/
-            ? ('cpu')
-            : ('model name', 'vendor_id', 'cpu mhz' );
-        foreach my $part ( @parts ) {
-            $info{ $part } = __from_proc_cpuinfo( $part, \@cpu_info );
-        }
-        $cpu = $type =~ /sparc/
-            ? $info{cpu}
-            : sprintf "%s (%s %.0fMHz)", map $info{ $_ } => @parts;
-        $cpu =~ s/\s+/ /g;
+
+        $ncpu = grep /^processor\s+:\s+/ => @cpu_info;
+
+        my @parts = ( 'model name', 'vendor_id', 'cpu mhz' );
+        my %info = map {
+            ( $_ => __from_proc_cpuinfo( $_, \@cpu_info ) );
+        } @parts;
+        $cpu = sprintf "%s (%s %.0fMHz)", map $info{ $_ } => @parts;
     } else {
+        $cpu = __get_cpu();
     }
+    $cpu =~ s/\s+/ /g;
+    return {
+        _cpu_type => $type,
+        _cpu      => $cpu,
+        _ncpu     => $ncpu,
+        _host     => __get_hostname(),
+        _os       => __get_os(),
+    };
+}
+
+=item Linux_sparc( )
+
+Linux on sparc architecture seems too different from intel
+
+=cut
+
+sub Linux_sparc {
+    my( $type, $cpu, $ncpu ) = @_;
+    local *CPUINFO;
+    if ( open CPUINFO, "< /proc/cpuinfo" ) {
+        chomp( my @cpu_info = <CPUINFO> );
+        close CPUINFO;
+
+        $ncpu = __from_proc_cpuinfo( 'ncpus active', \@cpu_info );
+
+        my @parts = qw( cpu Cpu0ClkTck );
+        my %info = map {
+            ( $_ => __from_proc_cpuinfo( $_, \@cpu_info ) );
+        } @parts;
+        $cpu = $info{cpu};
+        $info{Cpu0ClkTck} and 
+            $cpu .=  sprintf " (%.0fMHz)", hex( $info{Cpu0ClkTck} )/1_000_000;
+    } else {
+        $cpu = __get_cpu();
+    }
+    $cpu =~ s/\s+/ /g;
+    return {
+        _cpu_type => $type,
+        _cpu      => $cpu,
+        _ncpu     => $ncpu,
+        _host     => __get_hostname(),
+        _os       => __get_os(),
+    };
+}
+
+=item Linux_ppc( )
+
+Linux on ppc architecture seems too different from intel
+
+=cut
+
+sub Linux_ppc {
+    my( $type, $cpu, $ncpu ) = @_;
+    local *CPUINFO;
+    if ( open CPUINFO, "< /proc/cpuinfo" ) {
+        chomp( my @cpu_info = <CPUINFO> );
+        close CPUINFO;
+
+        $ncpu =  grep /^processor\s+:\s+/ => @cpu_info;
+
+        my @parts = qw( cpu machine clock );
+        my %info = map {
+            ( $_ => __from_proc_cpuinfo( $_, \@cpu_info ) );
+        } @parts;
+        $cpu = sprintf "%s %s (%s)", map $info{ $_ } => @parts;
+    } else {
+        $cpu = __get_cpu();
+    }
+    $cpu =~ s/\s+/ /g;
     return {
         _cpu_type => $type,
         _cpu      => $cpu,
@@ -396,6 +481,8 @@ Use the L<psrinfo> program to get the system information.
 =cut
 
 sub Solaris {
+
+    local $ENV{PATH} = "/usr/sbin:$ENV{PATH}";
 
     my( $psrinfo ) = grep /the .* operates .* mhz/ix => `psrinfo -v`;
     my( $type, $speed ) = $psrinfo =~ /the (\w+) processor.*at (\d+) mhz/i;
@@ -436,13 +523,14 @@ sub Windows {
             qw( LMachine HARDWARE DESCRIPTION System CentralProcessor );
         my $pnskey = "$basekey\\0\\ProcessorNameString";
         my $cpustr = $Win32::TieRegistry::Registry->{ $pnskey };
+        my $idkey = "$basekey\\0\\Identifier";
+        $cpustr ||= $Win32::TieRegistry::Registry->{ $idkey };
         $cpustr =~ tr/ / /sd;
         my $mhzkey = "$basekey\\0\\~MHz";
         $cpustr .= sprintf "(~%d MHz)",
             hex $Win32::TieRegistry::Registry->{ $mhzkey };
         $cpu = $cpustr;
         $ncpu = keys %{ $Win32::TieRegistry::Registry->{ $basekey } };
-        my $idkey = "$basekey\\0\\Identifier";
         ($cpu_type) = $Win32::TieRegistry::Registry->{ $idkey } =~ /^(\S+)/;
     }
 
@@ -463,7 +551,10 @@ C<sysinfo()> returns a string with C<host>, C<os> and C<cpu_type>.
 
 sub sysinfo {
     my $si = Test::Smoke::SysInfo->new;
-    return join " ", map $si->$_ => qw( host os cpu_type );
+    my @fields = $_[0]
+        ? qw( host os cpu ncpu cpu_type )
+        : qw( host os cpu_type );
+    return join " ", @{ $si }{ map "_$_" => @fields };
 }
 
 1;
@@ -472,14 +563,14 @@ sub sysinfo {
 
 =head1 SEE ALSO
 
-L<Test::Smoke::Smoker>
+L<Test::Smoke::Smoker>, L<Test::Smoke::Reporter>
 
 =head1 COPYRIGHT
 
 (c) 2002-2003, Abe Timmerman <abeltje@cpan.org> All rights reserved.
 
 With contributions from Jarkko Hietaniemi, Merijn Brand, Campo
-Weijerman, Alan Burlison, Allen Smith.
+Weijerman, Alan Burlison, Allen Smith, Alain Barbet.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
