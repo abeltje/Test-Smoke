@@ -339,7 +339,6 @@ F F M -     -Duseithreads -Duse64bitint
 __EOM__
 
     $r or diag $reporter->smoke_matrix, $reporter->bldenv_legend;
-    diag $reporter->report;
 }
 sub create_config_sh {
     my( $file, %cfg ) = @_;
