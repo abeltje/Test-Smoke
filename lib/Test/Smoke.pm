@@ -109,6 +109,10 @@ sub run_smoke {
     defined $continue or $continue = $conf->{continue};
     my $patch = shift || Test::Smoke::Util::get_patch( $conf->{ddir} );
 
+    exists $Config{ldlibpthname} && $Config{ldlibpthname} and
+        $ENV{ $Config{ldlibpthname} } ||= '',
+        substr( $ENV{ $Config{ldlibpthname} }, 0, 0)  =
+            "$conf->{ddir}$Config{path_sep}";
 
     my $logfile = File::Spec->catfile( $conf->{ddir}, 'mktest.out' );
     my $BuildCFG = $continue 

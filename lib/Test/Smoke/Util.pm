@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.22';
+$VERSION = '0.23';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -544,7 +544,7 @@ sub get_ncpu {
             last OS_CHECK;
         };
 
-        /hp-ux/i && do {
+        /hp-?ux/i && do {
             my @output = grep /^processor/ => `ioscan -fnkC processor`;
             $cpus = scalar @output;
             last OS_CHECK;

@@ -13,7 +13,8 @@ BEGIN {
 }
 
 my $ddir = File::Spec->catdir( $FindBin::Bin, 'perl-current' );
-mkpath( $ddir, 0, 0755 ) or die "Cannot mkpath($ddir): $!";
+-d $ddir or mkpath( $ddir, 0, 0755 ) or die "Cannot mkpath($ddir): $!";
+END { -d $ddir and rmtree( $ddir ); }
 
 {
     my $regen = get_regen_headers( $ddir );
@@ -102,5 +103,3 @@ SKIP: { # as of 18852: 'regen_headers.pl' is now 'regen.pl'
         skip "Could not run regen_headers", $to_skip--;
     }
 }
-    
-END { -d $ddir and rmtree( $ddir ); }
