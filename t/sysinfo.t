@@ -13,20 +13,20 @@ use TestLib;
 use_ok "Test::Smoke::SysInfo";
 
 {
-    local $^O = 'unsupported';
+    local $^O = 'Generic';
     my $si = Test::Smoke::SysInfo->new;
 
-    isa_ok $si => 'Test::Smoke::SysInfo::Generic';
-    ok $si->cpu, $si->cpu;
+    isa_ok $si => 'Test::Smoke::SysInfo';
     ok $si->cpu_type, $si->cpu_type;
-    is $si->ncpu, '?', "no ncpu";
+    ok $si->cpu, $si->cpu;
+    is $si->ncpu, '', "no ncpu";
 }
 
 {
     my $si = Test::Smoke::SysInfo->new;
 
     isa_ok $si => 'Test::Smoke::SysInfo';
-    ok $si->cpu, $si->cpu;
-    ok $si->cpu_type, $si->cpu_type;
-    ok $si->ncpu, "number of cpus: " . $si->ncpu;
+    ok $si->cpu_type, "cpu_type: " . $si->cpu_type;
+    ok $si->cpu,      "cpu: " . $si->cpu;
+    ok $si->ncpu,     "number of cpus: " . $si->ncpu;
 }

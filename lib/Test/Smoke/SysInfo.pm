@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.001';
+$VERSION = '0.002';
 
 =head1 NAME
 
@@ -27,8 +27,6 @@ Sometimes one wants a more eleborate description of the system one is smoking.
 
 =over 4
 
-=cut
-
 =item Test::Smoke::SysInfo->new( )
 
 Dispatch to one of the OS-specific packages.
@@ -42,22 +40,26 @@ sub new {
     CASE: {
         local $_ = $^O;
 
-        /darwin|bsd/i && return Test::Smoke::SysInfo::BSD->new;
+        /aix/i        && return bless AIX(),     $class;
 
-        /linux/i      && return Test::Smoke::SysInfo::Linux->new;
+        /darwin|bsd/i && return bless BSD(),     $class;
 
-        /irix/i       && return Test::Smoke::SysInfo::IRIX->new;
+        /hp-?ux/i     && return bless HPUX(),    $class;
+
+        /linux/i      && return bless Linux(),   $class;
+
+        /irix/i       && return bless IRIX(),    $class;
 
         /solaris|sunos|osf/i 
-                      && return Test::Smoke::SysInfo::Solaris->new;
+                      && return bless Solaris(), $class;
 
         /cygwin|mswin32|windows/i
-                      && return Test::Smoke::SysInfo::Windows->new;
+                      && return bless Windows(), $class;
     }
-    return Test::Smoke::SysInfo::Generic->new;
+    return bless Generic(), $class;
 }
 
-my %info = map { ($_ => undef ) } qw( ncpu cpu cpu_type );
+my %info = map { ($_ => undef ) } qw( ncpu cpu cpu_type host );
 
 sub AUTOLOAD {
     my $self = shift;
@@ -68,47 +70,10 @@ sub AUTOLOAD {
     return $self->{ "_$method" } if exists $info{ "$method" };
 }
 
-1;
-
-=back
-
-=head1 PACKAGE
-
-Test::Smoke::SysInfo::Generic - For systems that cannot fetch the info
-
-=head1 METHODS
-
-=over 4
-
-=cut
-
-package Test::Smoke::SysInfo::Generic;
-
-@Test::Smoke::SysInfo::Generic::ISA = qw( Test::Smoke::SysInfo );
-
-=item Test::Smoke::SysInfo::Generic->new( )
-
-Try to get the information from C<POSIX::uname()>.
-
-=cut
-
-sub new {
-    my $proto = shift;
-    my $class = ref $proto ? ref $proto : $proto;
-
-    my $self = {
-        _cpu_type => __get_cpu_type(),
-        _cpu      => __get_cpu(),
-        _ncpu     => __get_ncpu(),
-    };
-
-    return bless $self, $class;
-}
-
 =item __get_cpu_type( )
 
 This is the short info string about the cpu-type. The L<POSIX> module
-should provide one with C<POSIX::uname()>.
+should provide one (portably) with C<POSIX::uname()>.
 
 =cut
 
@@ -119,211 +84,194 @@ sub __get_cpu_type {
 
 =item __get_cpu( )
 
-We do not have a specific way to get this information, so assign
+We do not have a portable way to get this information, so assign
 C<_cpu_type> to it.
 
 =cut
 
 sub __get_cpu { return __get_cpu_type() }
 
-sub __get_ncpu { return '?' }
+=item __get_hostname( )
 
-
-=back
-
-=head1 PACKAGE
-
-Test::Smoke::SysInfo::BSD - SysInfo for BSD-type os
-
-=head1 METHODS
-
-=over 4
+Get the hostname from C<POSIX::uname()).
 
 =cut
 
-package Test::Smoke::SysInfo::BSD;
+sub __get_hostname {
+    require POSIX;
+    return (POSIX::uname())[1];
+}
 
-@Test::Smoke::SysInfo::BSD::ISA = qw( Test::Smoke::SysInfo );
+sub __get_ncpu { return '' }
 
-=item Test::Smoke::SysInfo::BSD->new( )
+=item Generic( )
+
+Get the information from C<POSIX::uname()>
+
+=cut
+
+sub Generic {
+
+    return {
+        _cpu_type => __get_cpu_type(),
+        _cpu      => __get_cpu(),
+        _ncpu     => __get_ncpu(),
+        _host     => __get_hostname(),
+    };
+
+}
+
+=item AIX( )
+
+Use the L<lsdev> program to find information.
+
+=cut
+
+sub AIX {
+    my @lsdev = grep /Available/ => `lsdev -C -c processor -S Available`;
+    my( $info ) = grep /^\S+/ => @lsdev;
+    ( $info ) = $info =~ /^(\S+)/;
+    my( $cpu ) = grep /^enable:[^:\s]+/ => `lsattr -E -O -l $info`;
+    ( $cpu ) = $cpu =~ /^enable:([^:\s]+)/;
+
+    return {
+        _cpu_type => $cpu,
+        _cpu      => $cpu
+        _ncpu     => scalar @lsdev,
+        _host     => __get_hostname(),
+    };
+}
+
+=item HPUX( )
+
+Use the L<ioscan> program to find information.
+
+=cut
+
+sub HPUX {
+    # here we need something with 'ioscan' ?
+    my $hpux = Generic();
+    $hpux->{_ncpu} = grep /^processor/ => `ioscan -fnkC processor`;
+    return $hpux;
+}
+
+=item BSD( )
 
 Use the L<sysctl> program to find information.
 
 =cut
 
-sub new {
-    my $proto = shift;
-    my $class = ref $proto ? ref $proto : $proto;
-
+sub BSD {
     my %sysctl;
     foreach my $name ( qw( model machine ncpu ) ) {
         chomp( $sysctl{ $name } = `sysctl hw.$name` );
-        $sysctl{ $name } =~ s/^hw.$name = //;
+        $sysctl{ $name } =~ s/^hw\.$name\s*[:=]\s*//;
     }
 
-    my $self = {
-        _cpu_type => $sysctl{model},
-        _cpu      => $sysctl{machine},
+    return {
+        _cpu_type => $sysctl{machine},
+        _cpu      => $sysctl{model},
         _ncpu     => $sysctl{ncpu},
+        _host     => __get_hostname(),
     };
-    return bless $self, $class;
 }
 
-=back
-
-=head1 PACKAGE
-
-Test::Smoke::SysInfo::IRIX - SysInfo for IRIX type os
-
-=head1 METHODS
-
-=over 4
-
-=cut
-
-package Test::Smoke::SysInfo::IRIX;
-
-@Test::Smoke::SysInfo::IRIX::ISA = qw( Test::Smoke::SysInfo );
-
-=item Test::Smoke::SysInfo::IRIX->new( )
+=item IRIX( )
 
 Use the L<hinv> program to get the system information.
 
 =cut
 
-sub new {
-    my $proto = shift;
-    my $class = ref $proto ? ref $proto : $proto;
-
-    chomp( my $cpu = `hinv -t cpu` );
+sub IRIX {
+    chomp( my( $cpu ) = `hinv -t cpu` );
     $cpu =~ s/^CPU:\s+//;
     chomp( my @processor = `hinv -c processor` );
-    my $cpu_cnt = (grep /^\d+\s+.+processors?$/ => @processor)[0];
+    my( $cpu_cnt) = grep /\d+.+processors?$/i => @processor;
     my $ncpu = (split " ", $cpu_cnt)[0];
     my $type = (split " ", $cpu_cnt)[-2];
 
-    my $self = {
+    return {
         _cpu_type => $type,
         _cpu      => $cpu,
         _ncpu     => $ncpu,
+        _host     => __get_hostname(),
     };
-    return bless $self, $class;
+
 }
 
-=back
+=item __from_proc_cpuinfo( $key, $lines )
 
-=head1 PACKAGE
-
-Test::Smoke::SysInfo::Linux - SysInfo for Linux type os
-
-=head1 METHODS
-
-=over 4
+Helper function to get information from F</proc/cpuinfo>
 
 =cut
 
-package Test::Smoke::SysInfo::Linux;
+sub __from_proc_cpuinfo {
+    my( $key, $lines ) = @_;
+    my( $value ) = grep /^\s*$key\s*[:=]\s*/i => @$lines;
+    $value =~ s/^\s*$key\s*[:=]\s*//i;
+    return $value;
+}
 
-@Test::Smoke::SysInfo::Linux::ISA = qw( Test::Smoke::SysInfo );
-
-=item Test::Smoke::SysInfo::Linux->new( )
+=item Linux( )
 
 Use the C</proc/cpuinfo> preudofile to get the system information.
 
 =cut
 
-sub new {
-    my $proto = shift;
-    my $class = ref $proto ? ref $proto : $proto;
-
+sub Linux {
     local *CPUINFO;
-    my( $type, $cpu, $ncpu ) = 
-        ( Test::Smoke::SysInfo::Generic::__get_cpu_type() );
+    my( $type, $cpu, $ncpu ) = ( __get_cpu_type() );
 
     if ( open CPUINFO, "< /proc/cpuinfo" ) {
         chomp( my @cpu_info = <CPUINFO> );
         close CPUINFO;
         # every processor has its own 'block', so count the blocks
-        $ncpu = grep /^processor\s+:\s+/ => @cpu_info;
+        $ncpu = $type =~ /sparc/
+            ? __from_proc_cpuinfo( 'ncpus active', \@cpu_info )
+            : scalar grep /^processor\s+:\s+/ => @cpu_info;
         my %info;
         my @parts = $type =~ /sparc/
             ? ('cpu')
             : ('model name', 'vendor_id', 'cpu mhz' );
         foreach my $part ( @parts ) {
-
-            ($info{ $part } = (grep /^$part\s+:/i => @cpu_info)[0]) 
-                =~ s/^$part\s+:\s+//i;
+            $info{ $part } = __from_proc_cpuinfo( $part, \@cpu_info );
         }
         $cpu = $type =~ /sparc/
             ? $info{cpu}
-            : sprintf "%s (%s %sMHz)", map $info{ $_ } => @parts
+            : sprintf "%s (%s %.0fMHz)", map $info{ $_ } => @parts
     } else {
     }
-    my $self = {
+    return {
         _cpu_type => $type,
         _cpu      => $cpu,
         _ncpu     => $ncpu,
+        _host     => __get_hostname(),
     };
-    return bless $self, $class;
 }
 
-=back
-
-=head1 PACKAGE
-
-Test::Smoke::SysInfo::Solaris - SysInfo for Solaris type os
-
-=head1 METHODS
-
-=over 4
-
-=cut
-
-package Test::Smoke::SysInfo::Solaris;
-
-@Test::Smoke::SysInfo::Solaris::ISA = qw( Test::Smoke::SysInfo );
-
-=item Test::Smoke::SysInfo::Solaris->new( )
+=item Solaris( )
 
 Use the L<psrinfo> program to get the system information.
 
 =cut
 
-sub new {
-    my $proto = shift;
-    my $class = ref $proto ? ref $proto : $proto;
+sub Solaris {
 
     my( $psrinfo ) = grep /the .* operates .* mhz/ix => `psrinfo -v`;
-    my $type = Test::Smoke::SysInfo::Generic::__get_cpu_type();
-    my( $cpu, $speed ) = $psrinfo =~ /the (\w+) processor.*(\d+) mhz/i;
+    my $type = __get_cpu_type();
+    my( $cpu, $speed ) = $psrinfo =~ /the (\w+) processor.*at (\d+) mhz/i;
     $cpu .= " (${speed}MHz)";
     my $ncpu = grep /on-line/ => `psrinfo`;
 
-    my $self = {
+    return {
         _cpu_type => $type,
         _cpu      => $cpu,
         _ncpu     => $ncpu,
+        _host     => __get_hostname(),
     };
-    return bless $self, $class;
 }
 
-=back
-
-=head1 PACKAGE
-
-Test::Smoke::SysInfo::Windows - SysInfo for Windows and CygWin
-
-=head1 METHODS
-
-=over 4
-
-=cut
-
-package Test::Smoke::SysInfo::Windows;
-
-@Test::Smoke::SysInfo::Windows::ISA = qw( Test::Smoke::SysInfo );
-
-=item Test::Smoke::SysInfo::Windows->new( )
+=item Windows( )
 
 Use the C<%ENV> hash to find information. Fall back on the *::Generic
 values if these values have been unset or are unavailable (sorry I do
@@ -331,20 +279,17 @@ not have Win9[58]).
 
 =cut
 
-sub new {
-    my $proto = shift;
-    my $class = ref $proto ? ref $proto : $proto;
+sub Windows {
 
-    my $self = {
-        _cpu_type => $ENV{PROCESSOR_ARCHITECTURE} ||
-                     Test::Smoke::SysInfo::Generic::__get_cpu_type(),
-        _cpu      => $ENV{PROCESSOR_IDENTIFIER} ||
-                     Test::Smoke::SysInfo::Generic::__get_cpu(),
-        _ncpu     => $ENV{NUMBER_OF_PROCESSORS} ||
-                     Test::Smoke::SysInfo::Generic::__get_ncpu(),
+    return {
+        _cpu_type => $ENV{PROCESSOR_ARCHITECTURE},
+        _cpu      => $ENV{PROCESSOR_IDENTIFIER},
+        _ncpu     => $ENV{NUMBER_OF_PROCESSORS},
+        _host     => __get_hostname(),
     };
-    return bless $self, $class;
 }
+
+1;
 
 =back
 
@@ -354,9 +299,10 @@ L<Test::Smoke::Smoker>
 
 =head1 COPYRIGHT
 
-(c) 2002-2003, All rights reserved.
+(c) 2002-2003, Abe Timmerman <abeltje@cpan.org> All rights reserved.
 
-  * Abe Timmerman <abeltje@cpan.org>
+With contributions from Jarkko Hietaniemi, Merijn Brand, Campo
+Weijerman.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

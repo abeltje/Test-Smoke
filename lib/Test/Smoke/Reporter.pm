@@ -9,6 +9,9 @@ use Cwd;
 use File::Spec;
 require File::Path;
 use Text::ParseWords;
+require Test::Smoke;
+require Test::Smoke::SysInfo;
+use Test::Smoke::Util qw( get_smoked_Config time_in_hhmm );
 
 my %CONFIG = (
     df_ddir       => File::Spec->curdir,
@@ -29,7 +32,7 @@ Test::Smoke::Reporter - OO interface for handling the testresults (mktest.out)
     use Test::Smoke;
     use Test::Smoke::Reporter;
 
-    my $reporter = Test::Smoke::BuildCFG->new( $conf );
+    my $reporter = Test::Smoke::Reporter->new( %args );
 
 
 =head1 DESCRIPTION
@@ -42,7 +45,7 @@ Handle the parsing of the F<mktest.out> file.
 
 =cut
 
-=item Test::Smoke::BuildCFG->new( %args )
+=item Test::Smoke::Reporter->new( %args )
 
 [ Constructor | Public ]
 
@@ -70,7 +73,7 @@ sub new {
     $self->read_parse(  );
 }
 
-=item Test::Smoke::BuildCFG->config( $key[, $value] )
+=item Test::Smoke::Reporter->config( $key[, $value] )
 
 [ Accessor | Public ]
 
@@ -104,7 +107,7 @@ sub config {
 
 =item $self->read_parse( [$result_file] )
 
-C<read_parse()> reads the build configurations file and parses it.
+C<read_parse()> reads the smokeresults file and parses it.
 
 =cut
 
@@ -125,7 +128,7 @@ sub read_parse {
 
 C<_read()> is a private method that handles the reading.
 
-=over 4
+=over 8
 
 =item B<Reference to a SCALAR> smokeresults are in C<$$nameorref>
 
@@ -347,6 +350,56 @@ sub _post_process {
     $self->{_failures} = \@failures;
 }
 
+=item $reporter->report( )
+
+Return a string with the full report
+
+=cut
+
+sub report {
+    my $self = shift;
+    my $report = $self->preamble;
+
+    $report .= $self->letter_legend . "\n";
+    $report .= $self->smoke_matrix . $self->bldenv_legend . "\n";
+
+    $report .= "Failures:\n" . $self->failures
+        if @{ $self->{_failures} };
+
+    return $report;
+}
+
+=item $reporter->preamble( )
+
+=cut
+
+sub preamble {
+    my $self = shift;
+
+    my %Config = get_smoked_Config( $self->{ddir} => qw( 
+        version osname osvers
+        cc ccversion gccversion glibc
+    ));
+    my $si = Test::Smoke::SysInfo->new;
+    my $archname  = $si->cpu_type;
+    $archname .= sprintf "/%s cpu", $si->ncpu if $si->ncpu;
+    my $cpu = $si->cpu;
+    my $this_pver = $^V ? sprintf "%vd", $^V : $];
+    my $this_host = $si->host;
+    my $time_msg  = time_in_hhmm( $self->{_rpt}{secs} );
+    $time_msg = " [$time_msg]" if $time_msg;
+    my $ccvers = $Config{gccversion} || $Config{ccversion} || '';
+
+    return <<__EOH__;
+Automated smoke report for $Config{version} patch $self->{_rpt}{patch}
+($this_host) $cpu
+  on $Config{osname} - $Config{osvers} ($archname)
+  using $Config{cc} version $ccvers
+Report by Test::Smoke v$Test::Smoke::VERSION (perl $this_pver)$time_msg
+
+__EOH__
+}
+
 =item $reporter->smoke_matrix( )
 
 C<smoke_matrix()> returns a string with the result-letters and their
@@ -374,10 +427,67 @@ sub smoke_matrix {
         }
         my $cfg = join " ", grep ! exists $rpt->{_common_args}{ $_ }
             => quotewords( '\s+', 1, $config );
-        $report .= sprintf "%-12s %s\n", $letters, $cfg;
+        $report .= sprintf "%-12s%s\n", $letters, $cfg;
     }
 
     return $report;
+}
+
+=item $reporter->failures( )
+
+report the failures (grouped by configurations).
+
+=cut
+
+sub failures {
+    my $self = shift;
+
+    return join "\n", map {
+         join "\n", @{ $_->{cfgs} }, $_->{tests}
+    } @{ $self->{_failures} };
+}
+
+=item $reporter->bldenv_legend( )
+
+Returns a string with the legend for build-environments
+
+=cut
+
+sub bldenv_legend {
+    my $self = shift;
+
+    return "";
+}
+
+=item $reporter->letter_legend( )
+
+Returns a string with the legend for the letters in the matrix.
+
+=cut
+
+sub letter_legend {
+    return <<__EOL__
+O = OK  F = Failure(s), extended report at the bottom
+X = test(s) failed under TEST but not under harness
+? = still running or test results not (yet) available
+Build failures during:       - = unknown or N/A
+c = Configure, m = make, M = make (after miniperl), t = make test-prep
+__EOL__
+}
+
+sub _process_Config {
+    my $self = shift;
+    my %Config = get_smoked_Config( $self->{ddir} => qw(
+        version osname osvers archname
+        cc ccversion gccversion 
+    ));
+    # clean up $Config{archname}:
+    $Config{archname} =~ s/-$_//
+        for qw( multi thread 64int 64all ld perlio ), $Config{osname};
+    $Config{archname} =~ s/^$Config{osname}(?:[.-])//i;
+    my $cpus = get_ncpu( $Config{osname} ) || '';
+    $Config{archname} .= "/$cpus" if $cpus;
+
 }
 
 1;

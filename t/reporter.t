@@ -47,7 +47,14 @@ EORESULTS
     is( $reporter->{_rpt}{$cfgarg}{D}{stdio}, "O",
         "'$cfgarg -DDEBUGGING' reports ok" );
 
-diag $reporter->smoke_matrix;
+    my @r_lines = split /\n/, $reporter->smoke_matrix;
+    is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";
+   20000     Configuration (common) -Dcc='ccache gcc'
+----------- ---------------------------------------------------------
+O O         -Uuseperlio
+__EOM__
+
+    diag $reporter->report;
 }
 
 {
@@ -115,7 +122,19 @@ EORESULTS
     is( $reporter->{_rpt}{$cfgarg}{N}{perlio}, 'O',
         "'$cfgarg' (perlio) reports OK" );
     is( $reporter->{_rpt}{$cfgarg}{D}{perlio}, 'O',
-        "'$cfgarg -DDEBUGGING' reports OK" );
+        "'$cfgarg -DDEBUGGING' (perlio) reports OK" );
 
-diag $reporter->smoke_matrix;
+    is( $reporter->{_rpt}{$cfgarg}{N}{'locale:nl_NL.utf8'}, 'F',
+        "'$cfgarg' (utf8) reports failure" );
+    is( $reporter->{_rpt}{$cfgarg}{D}{'locale:nl_NL.utf8'}, 'F',
+        "'$cfgarg -DDEBUGGING' (utf8) reports Failure" );
+
+    my @r_lines = split /\n/, $reporter->smoke_matrix;
+    is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";
+   21000     Configuration (common) -Dcc='ccache gcc'
+----------- ---------------------------------------------------------
+F O F F O F 
+__EOM__
+
+    diag $reporter->report;
 }
