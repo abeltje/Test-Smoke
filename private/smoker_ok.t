@@ -29,7 +29,8 @@ use_ok( 'Test::Smoke::Smoker' );
     open KEEPERR, ">&STDERR" and open STDERR, ">&DEVNULL"
         unless $verbose;
 
-    my $cfg    = "\n=\n\n-DDEBUGGING";
+    my $w32_cc = $^O eq 'MSWin32' ? "-DCCTYPE=GCC" : "";
+    my $cfg    = "$w32_cc\n=\n\n-DDEBUGGING";
     my $config = Test::Smoke::BuildCFG->new( \$cfg );
 
     my $ddir   = catdir( $FindBin::Bin, 'perl' );
