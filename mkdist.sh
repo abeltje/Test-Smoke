@@ -62,11 +62,17 @@ fi
 # Clean up before we start
 make -i veryclean > /dev/null 2>&1
 
+SMOKE_VERSION=`perl -Ilib -MTest::Smoke -e 'print Test::Smoke->VERSION'`
+if [ "$SMOKE_VERSION" == "" ] ; then
+    echo "No SMOKE_VERSION"
+    exit
+else
+    echo "Create distribution for Test::Smoke $SMOKE_VERSION"
+fi
 if [ "$SMOKE_CI_FILES" == "1" ] ; then
     # I keep forgetting about Changes, so automate:
     svnchanges > Changes
-    perl -Ilib -MTest::Smoke -wle \
-    'system qq/svn ci Changes -m "* regen Changes for $Test::Smoke::VERSION"/'
+    svn ci Changes -m "* regen Changes for $SMOKE_VERSION"
 else
     echo "Skipping commit of 'Changes'"
 fi
@@ -90,8 +96,12 @@ rm -f */*/*/*~
 
 if [ "$SMOKE_CI_FILES" == "1" ] ; then
     # Also commit the newly generated SIGNATURE
-    perl -Ilib -MTest::Smoke -wle \
-    'system qq/svn ci SIGNATURE -m "* regen SIGNATURE for $Test::Smoke::VERSION"/'
+    svn ci SIGNATURE -m "* regen SIGNATURE for $SMOKE_VERSION"
+    # Create a snapshot in the repository
+    SMOKE_SOURCE=`svn info | perl -nae 's/^Url: // and print'`
+    svn cp $SMOKE_SOURCE \
+        http://source.Test-Smoke.org/svn/snapshots/Test-Smoke-$SMOKE_VERSION \
+        -m "* [SVN] Create a snapshot in the repository"
 else
     echo "Skipping commit of 'SIGNATURE'"
 fi
