@@ -17,9 +17,11 @@ Test::Smoke - Centralise $VERSION and handle reading the config
 
     use Test::Smoke;
 
-    $VERSION = Test::Smoke->version;
+    use vars qw( $VERSION );
+    $VERSION = Test::Smoke->VERSION;
 
-    read_config( $config_name ); # $conf is exported
+    read_config( $config_name ) or warn Test::Smoke->config_error; 
+    
 
 =head1 DESCRIPTION
 
