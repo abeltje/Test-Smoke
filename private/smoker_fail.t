@@ -70,6 +70,7 @@ use_ok( 'Test::Smoke::Smoker' );
     my $cfgopt = $w32args{w32cct} ? " $w32args{w32cct}" : "";
     $cfgopt = "\Q$cfgopt\E";
     like( $report, qq@/^
+        Failures: \\s+ \\(common-args\\) \\s+ none \\s+
         \\[stdio\\/perlio\\]\\s+
         -DDEBUGGING$cfgopt\\s+
         .*smoke\\/die\\.t\\.+FAILED\\ \\?+\\s+

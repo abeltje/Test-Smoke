@@ -79,8 +79,9 @@ use_ok( 'Test::Smoke::Smoker' );
     my $cfgopt = $w32args{w32cct} ? "$w32args{w32cct} $ccopt" : $ccopt;
     $cfgopt = "\Q$cfgopt\E";
     like( $report, qq@/^
+        Failures:\\s+ \\(common-args\\)\\s+ $cfgopt \\s+
         \\[minitest\\s*\\]\\s*
-        -DDEBUGGING\\ $cfgopt \\s+
+        -DDEBUGGING \\s+
         t[\\\\/]smoke[\\\\/]minitest\\.+FAILED\\ at\\ test\\ 2
     /xm@, "Failures report" );
           
