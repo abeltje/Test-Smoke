@@ -9,6 +9,6 @@ perl Makefile.PL
 make
 (make test) || exit
 make dist
-mv *.tar.gz ../
-make veryclean
+mv -v *.tar.gz ../
+make veryclean > /dev/null
 rm -f */*/*/*~
