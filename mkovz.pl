@@ -123,7 +123,7 @@ $rpt_stat, $rpt_config
 
 open RPT, "> " . File::Spec->catfile ($testd, "mktest.rpt")
     or die "mktest.rpt: $!";
-select RPT;
+my $fh_selected = select RPT;
 
 my $perlio = "";
 my $conf   = "";
@@ -310,7 +310,7 @@ for my $conf (@confs) {
     }
     $rpt_config = join " ", grep defined $_ && !exists $common_args{ $_ }, 
                             quotewords( '\s+', 1, $conf );
-    write;
+    write RPT;
     # special casing the '-' should change PASS-so-far
     # to PASS if the report only has 'O' and '-'
     $count{ $_ }++ for map { 
@@ -367,7 +367,7 @@ $^O,         $rpt_pio,    $rpt_config
     for my $i (0 .. $#fail) {
         my $ref = $fail[$i];
         ( $rpt_pio, $rpt_config ) = @{ $ref }[0, 1];
-        write;
+        write RPT;
         if ($i < $#fail) { # More squeezing
 	    my $nref = $fail[$i + 1];
             $ref->[0] =~  /\Q$nref->[0]\E/ and
@@ -380,7 +380,7 @@ $^O,         $rpt_pio,    $rpt_config
 @manifest and print RPT "\n\n", @manifest;
 
 close RPT;
-select STDOUT;
+select $fh_selected;
 
 send_mail () unless $email =~ /^no\-?e?mail$/i;
 
