@@ -62,6 +62,11 @@ SKIP: { # Check for Release Candidates
     local *PL;
     open PL, '> patchlevel.h' or skip "Couldn't crate patchlevel.h: $!", 1;
     printf PL <<'EO_PATCHLEVEL', $rc;
+/* Some C comments go here */
+#define PERL_REVISION   5               /* age */
+#define PERL_VERSION    9               /* epoch */
+#define PERL_SUBVERSION 0               /* generation */
+
 #if !defined(PERL_PATCHLEVEL_H_IMPLICIT) && !defined(LOCAL_PATCH_COUNT)
 static  char    *local_patches[] = {
         NULL
@@ -73,7 +78,7 @@ EO_PATCHLEVEL
 
     my $get_patch = get_patch();
 
-    is( $get_patch, "RC$rc", "Found Release Candidate: $get_patch" );
+    is( $get_patch, "5.9.0-RC$rc", "Found Release Candidate: $get_patch" );
 }
 
 END { 

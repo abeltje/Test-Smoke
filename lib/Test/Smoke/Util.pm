@@ -459,7 +459,12 @@ sub get_patch {
             $declaration_seen ||= /local_patches\[\]/;
             $declaration_seen && /^\s+,"(?:DEVEL|MAINT)(\d+)|(RC\d+)"/ or next;
             $patch_level = $1 || $2 || '?????';
-            $patch_level .= '(+)' unless $patch_level =~ /^RC/;
+            if ( $patch_level =~ /^RC/ ) {
+                $patch_level = version_from_patchlevel_h( $ddir ) .
+                               "-$patch_level";
+            } else {
+                $patch_level .= '(+)';
+            }
         }
     }
     return $patch_level;
@@ -474,10 +479,8 @@ from the F<patchlevel.h> file in the distribution.
 
 sub version_from_patchlevel_h {
     my( $ddir ) = @_;
-
-    my $file = defined $ddir 
-             ? File::Spec->catfile( $ddir, 'patchlevel.h' )
-             : 'patchlevel.h';
+    $ddir ||= File::Spec->curdir;
+    my $file = File::Spec->catfile( $ddir, 'patchlevel.h' );
 
     my( $revision, $version, $subversion ) = qw( 5 ? ? );
     local *PATCHLEVEL;

@@ -304,7 +304,12 @@ sub check_dot_patch {
             $declaration_seen ||= /local_patches\[\]/;
             $declaration_seen && /^\s+,"(?:DEVEL|MAINT)(\d+)|(RC\d+)"/ or next;
             $patch_level = $1 || $2 || '?????';
-            $patch_level++ unless $patch_level =~ /^RC/;
+            if ( $patch_level =~ /^RC/ ) {
+                $patch_level = $self->version_from_patchlevel_h .
+                               "-$patch_level";
+            } else {
+                $patch_level++;
+            }
         }
         # save 'patchlevel.h' mtime, so you can set it on '.patch'
         my $mtime = ( stat PATCHLEVEL_H )[9];
@@ -324,6 +329,33 @@ sub check_dot_patch {
     return undef;
 }
 
+=item version_from_patchlevel_h( $ddir )
+
+C<version_from_patchlevel_h()> returns a "dotted" version as derived 
+from the F<patchlevel.h> file in the distribution.
+
+=cut
+
+sub version_from_patchlevel_h {
+    my $self = shift;
+
+    my $file = File::Spec->catfile( $self->{ddir}, 'patchlevel.h' );
+
+    my( $revision, $version, $subversion ) = qw( 5 ? ? );
+    local *PATCHLEVEL;
+    if ( open PATCHLEVEL, "< $file" ) {
+        my $patchlevel = do { local $/; <PATCHLEVEL> };
+        close PATCHLEVEL;
+        $revision   = $patchlevel =~ /^#define PERL_REVISION\s+(\d+)/m 
+                    ? $1 : '?';
+        $version    = $patchlevel =~ /^#define PERL_VERSION\s+(\d+)/m
+                    ? $1 : '?';
+        $subversion = $patchlevel =~ /^#define PERL_SUBVERSION\s+(\d+)/m 
+                    ? $1 : '?';
+    }
+    return "$revision.$version.$subversion";
+}
+ 
 =item $syncer->clean_from_directory( $source_dir[, @leave_these] )
 
 C<clean_from_directory()> uses File::Find to get the contents of
