@@ -35,7 +35,7 @@ EO_REGEN
 
     my $regen = get_regen_headers( $ddir );
 
-    is( $regen, "$^X $regen_headers_pl", "Found '$regen'" )
+    is( $regen, qq[$^X "$regen_headers_pl"], "Found '$regen'" )
         or skip "Not found [$regen_headers_pl]", --$to_skip;
 
     local *REGENRUN;
@@ -65,7 +65,7 @@ EO_REGEN
 
     my $regen = get_regen_headers( $ddir );
 
-    is( $regen, "$^X $regen_headers_pl", "Found '$regen'" )
+    is( $regen, qq[$^X "$regen_headers_pl"], "Found '$regen'" )
         or skip "Not found [$regen_headers_pl]", $to_skip--;
 
     local *REGENRUN;
@@ -89,7 +89,7 @@ SKIP: { # as of 18852: 'regen_headers.pl' is now 'regen.pl'
 
     my $regen = get_regen_headers( $ddir );
 
-    is( $regen, "$^X $regen_pl", "Found '$regen'" )
+    is( $regen, qq[$^X "$regen_pl"], "Found '$regen'" )
         or skip "Not found [$regen_pl]", $to_skip--;
 
     local *REGENRUN;

@@ -118,7 +118,7 @@ SKIP: { # Here we try for gzip/tar
     my $gzip = whereis( 'gzip' );
     # lets try something...
 
-    my $unpack = $gzip ? "$gzip -dc %s | $tar -xf -" : "$tar -xzf %s";
+    my $unpack = $gzip ? qq[$gzip -dc "%s" | $tar -xf -] : qq[$tar -xzf "%s"];
 
     $gzip .= " -dc" if $gzip;
     $gzip = whereis( 'gunzip' ) unless $gzip;

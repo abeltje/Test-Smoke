@@ -663,7 +663,7 @@ sub parse_report_Config {
 C<get_regen_headers()> looks in C<$ddir> to find either 
 F<regen_headers.pl> or F<regen.pl> (change 18851).
 
-Returns undef if not found or a string like C<< "$^X $regen_headers_pl" >>
+Returns undef if not found or a string like C<< $^X "$regen_headers_pl" >>
 
 =cut
 
@@ -673,10 +673,11 @@ sub get_regen_headers {
     $ddir ||= File::Spec->curdir; # Don't smoke in a dir "0"!
 
     my $regen_headers_pl = File::Spec->catfile( $ddir, "regen_headers.pl" );
-    -f $regen_headers_pl and return "$^X $regen_headers_pl";
+
+    -f $regen_headers_pl and return qq[$^X "$regen_headers_pl"];
 
     $regen_headers_pl = File::Spec->catfile( $ddir, "regen.pl" );
-    -f $regen_headers_pl and return "$^X $regen_headers_pl";
+    -f $regen_headers_pl and return qq[$^X "$regen_headers_pl"];
 
     return; # Should this be "make regen_headers"?
 }
