@@ -22,7 +22,7 @@ use base 'Exporter';
 );
 
 use Text::ParseWords;
-use File::Spec;
+use File::Spec::Functions;
 use File::Find;
 use Cwd;
 
@@ -620,10 +620,11 @@ sub get_smoked_Config {
     my( $dir, @fields ) = @_;
     my %Config = map { ( lc $_ => undef ) } @fields;
 
-    my $perl_Config_pm = File::Spec->catfile ($dir, "lib", "Config.pm");
-    my $perl_config_sh = File::Spec->catfile( $dir, 'config.sh' );
+    my $perl_Config_heavy = catfile ($dir, "lib", "Config_heavy.pl");
+    my $perl_Config_pm    = catfile ($dir, "lib", "Config.pm");
+    my $perl_config_sh    = catfile( $dir, 'config.sh' );
     local *CONF;
-    if ( open CONF, "< $perl_Config_pm" ) {
+    if ( open CONF, "< $perl_Config_heavy" ) {
 
         while (<CONF>) {
             if ( m/^(?:
@@ -639,6 +640,24 @@ sub get_smoked_Config {
         close CONF;
     }
     my %conf2 = map {
+        ( $_ => undef )
+    } grep !defined $Config{ $_ } => keys %Config;
+    if ( open CONF, "< $perl_Config_pm" ) {
+
+        while (<CONF>) {
+            if ( m/^(?:
+                       (?:our|my)\ \$[cC]onfig_[sS][hH].*
+                    |
+                       \$_
+                    )\ =\ <<'!END!';/x..m/^!END!/){
+                m/!END!(?:';)?$/      and next;
+                m/^([^=]+)='([^']*)'/ or next;
+                exists $conf2{lc $1} and $Config{lc $1} = $2;
+            }
+        }
+        close CONF;
+    }
+    %conf2 = map {
         ( $_ => undef )
     } grep !defined $Config{ $_ } => keys %Config;
     if ( open CONF, "< $perl_config_sh" ) {
