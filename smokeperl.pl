@@ -17,6 +17,7 @@ use Config;
 use Test::Smoke::Syncer;
 use Test::Smoke::Patcher;
 use Test::Smoke;
+use Test::Smoke::Reporter;
 use Test::Smoke::Mailer;
 use Test::Smoke::Util qw( get_patch calc_timeout do_pod2usage );
 
@@ -113,7 +114,7 @@ if ( $options{continue} ) {
 my $cwd = cwd();
 chdir $conf->{ddir} or die "Cannot chdir($conf->{ddir}): $!";
 call_mktest();
-call_mkovz();
+genrpt();
 mailrpt();
 chdir $cwd;
 archiverpt();
@@ -188,14 +189,18 @@ sub call_mktest {
     run_smoke( $conf->{continue}, @ARGV );
 }
 
-sub call_mkovz {
+sub genrpt {
     return unless $options{run};
-    local @ARGV = ( 'nomail', $conf->{ddir} );
-    push  @ARGV, $conf->{locale} ? $conf->{locale} : "";
-    push  @ARGV, $conf->{defaultenv} if $conf->{defaultenv};
-    my $mkovz = File::Spec->catfile( $FindBin::Bin, 'mkovz.pl' );
-    local $0 = $mkovz;
-    do $mkovz or die "Error in mkovz.pl: $@";
+    my $reporter = Test::Smoke::Reporter->new( $conf );
+    my $report = $reporter->report;
+    local *RPT;
+    my $rptname = File::Spec->catfile( $conf->{ddir}, 'mktest.rpt' );
+    if ( open RPT, "> $rptname" ) {
+        print RPT $report;
+        close RPT or warn "Error writing '$rptname': $!\n";
+    } else {
+        warn "Error creating '$rptname': $!\n$report\n";
+    }
 }
 
 sub mailrpt {
