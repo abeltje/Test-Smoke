@@ -1553,7 +1553,7 @@ sub check_buildcfg {
     return if $oldcfg eq $newcfg;
 
     my $options = join "|", map "\Q$_\E" => sort {
-        lenght( $b||"" ) <=> length( $a||"" )
+        length( $b||"" ) <=> length( $a||"" )
     } @no_option;
 
     my $display = join "", map "\t$_" 
