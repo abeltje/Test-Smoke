@@ -4,7 +4,7 @@ $| = 1;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.008';
+$VERSION = '0.010';
 
 use Cwd;
 use File::Spec::Functions;
@@ -21,6 +21,7 @@ use Test::Smoke::Util qw(
 
 my $myusage = "Usage: $0 -c [smokeconfig]";
 use Getopt::Long;
+Getopt::Long::Configure( 'bundling' );
 my %opt = (
     dir     => undef,
     config  => undef,
@@ -99,7 +100,9 @@ foreach my $config ( @configs ) {
     %opt = %save_opt;
     $opt{config} = $config;
     process_args();
-    print "Checking status for configuration '$opt{config}'\n";
+    print "\n" unless $config eq $configs[0];
+    my $pver = $opt{perl_version} ? " ($opt{perl_version})" : "";
+    print "Checking status for configuration '$opt{config}'$pver\n";
     my $rpt  = parse_out( { ddir => $opt{ddir} } ) or do {
         guess_status( $opt{ddir}, $opt{adir}, $opt{config} );
         next;
@@ -138,7 +141,7 @@ foreach my $config ( @configs ) {
         if $rpt->{ccount};
 
     if ( $rpt->{ccount} > 0 && $opt{matrix} ) {
-        print "\n" . join "", map "    $_\n" 
+        print "    Matrix:\n" . join "", map "    $_\n" 
             => split /\n/, $rpt->{reporter}->smoke_matrix;
         print join "", map "    $_\n" 
             => split /\n/, $rpt->{reporter}->bldenv_legend;
