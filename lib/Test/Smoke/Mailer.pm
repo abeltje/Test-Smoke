@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION $P5P $NOCC_RE);
-$VERSION = '0.009';
+$VERSION = '0.010';
 
 use Test::Smoke::Util qw( parse_report_Config );
 
@@ -13,6 +13,7 @@ my %CONFIG = (
     df_mailer        => 'Mail::Sendmail',
     df_ddir          => undef,
     df_v             => 0,
+    df_rptfile       => 'mktest.rpt',
     df_to            => 'daily-build-reports@perl.org',
     df_from          => '',
     df_cc            => '',
@@ -90,7 +91,7 @@ sub  new {
     my %fields = map {
         my $value = exists $args{$_} ? $args{ $_ } : $CONFIG{ "df_$_" };
         ( $_ => $value )
-    } ( v => ddir => to => ccp5p_onfail => @{ $CONFIG{ $mailer } } );
+    } ( rptfile => v => ddir => to => ccp5p_onfail => @{ $CONFIG{ $mailer } } );
     $fields{ddir} = File::Spec->rel2abs( $fields{ddir} );
 
     DO_NEW: {
@@ -116,7 +117,7 @@ subject line for the mail-message.
 sub fetch_report {
     my $self = shift;
 
-    my $report_file = File::Spec->catfile( $self->{ddir}, 'mktest.rpt' );
+    my $report_file = File::Spec->catfile( $self->{ddir}, $self->{rptfile} );
 
     local *REPORT;
     if ( open REPORT, "< $report_file" ) {
