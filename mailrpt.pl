@@ -4,13 +4,14 @@ $| = 1;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.012';
+$VERSION = '0.013';
 
 use Cwd;
 use File::Spec;
 use FindBin;
 use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
 use lib $FindBin::Bin;
+use Test::Smoke::Reporter;
 use Test::Smoke::Mailer;
 use Test::Smoke;
 use Test::Smoke::Util qw( do_pod2usage );
@@ -170,15 +171,8 @@ sub check_for_report {
         $opt{v} and print "No report found in [$opt{ddir}].\n";
     }
 
-    local @ARGV = ( 'nomail', $conf->{ddir} );
-    push  @ARGV, $conf->{locale} ? $conf->{locale} : "";
-    push  @ARGV, $opt{defaultenv} if $opt{defaultenv};
-    my $mkovz = File::Spec->catfile( $FindBin::Bin, 'mkovz.pl' );
-    $opt{v} and print "Will now start [$mkovz]\n";
-    {
-        local $0 = $mkovz;
-        do $mkovz or die "Error in mkovz.pl: $@";
-    }
+    my $reporter = Test::Smoke::Reporter->new( $conf );
+    $reporter->write_to_file;
 
     unless ( -f $report ) {
         die "Hmmm... cannot find [$report]";
@@ -187,7 +181,7 @@ sub check_for_report {
 
 =head1 SEE ALSO
 
-L<Test::Smoke::Mailer>, L<mkovz.pl>
+L<Test::Smoke::Mailer>, L<Test::Smoke::Reporter>
 
 =head1 COPYRIGHT
 

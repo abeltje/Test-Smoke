@@ -194,15 +194,7 @@ sub call_mktest {
 sub genrpt {
     return unless $options{run};
     my $reporter = Test::Smoke::Reporter->new( $conf );
-    my $report = $reporter->report;
-    local *RPT;
-    my $rptname = File::Spec->catfile( $conf->{ddir}, 'mktest.rpt' );
-    if ( open RPT, "> $rptname" ) {
-        print RPT $report;
-        close RPT or warn "Error writing '$rptname': $!\n";
-    } else {
-        warn "Error creating '$rptname': $!\n$report\n";
-    }
+    $reporter->write_to_file;
 }
 
 sub mailrpt {
