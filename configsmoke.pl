@@ -31,7 +31,7 @@ foreach my $opt (qw( config jcl log )) {
 }
 
 use vars qw( $VERSION $conf );
-$VERSION = '0.018'; # $Id$
+$VERSION = '0.019'; # $Id$
 
 eval { require $options{config} };
 $options{oldcfg} = 1, print "Using '$options{config}' for defaults.\n" 
@@ -365,7 +365,7 @@ Examples:$untarmsg",
     killtime => {
         msg => "Should this smoke be aborted on/after a specific time?
 \tuse HH:MM to specify a point in time (24 hour notation)
-\tuse +HH::MM to specify a duration
+\tuse +HH:MM to specify a duration
 \tleave empty to finish the smoke without aborting",
         dft => "",
         alt => [ ],
@@ -812,7 +812,8 @@ MAIL: {
             $config{ $arg } = prompt( $arg );
 	};
 
-        /^Mail::Sendmail$/ && do {
+        /^Mail::Sendmail$/ ||
+        /^MIME::Lite$/     && do {
             $arg = 'from';
             $config{ $arg } = prompt( $arg );
 
@@ -1157,18 +1158,23 @@ sub prompt {
 
     my $default = defined $df_val ? $df_val : 'undef';
     if ( @$alt && defined $df_val ) {
-        $default = $alt->[0] unless exists $ok_val{ $df_val };
+        $default = $df_val = $alt->[0] unless exists $ok_val{ $df_val };
     }
     my $alts    = @$alt ? "<" . join( "|", @$alt ) . "> " : "";
     print "\n$message\n";
 
-    my $input;
+    my( $input, $clear );
     INPUT: {
         print "$alts\[$default] \$ ";
         chomp( $input = <STDIN> );
-        $input =~ s/^\s+//;
-        $input =~ s/\s+$//;
-        $input = $df_val unless length $input;
+        if ( $input eq " " ) {
+            $input = "";
+            $clear = 1;
+        } else {
+            $input =~ s/^\s+//;
+            $input =~ s/\s+$//;
+            $input = $df_val unless length $input;
+        }
 
         printf "Input does not match $chk\n" and redo INPUT
             unless $input =~ m/$chk/i;
@@ -1179,7 +1185,7 @@ sub prompt {
 
     }
 
-    my $retval = length $input ? $input : $df_val;
+    my $retval = length $input ? $input : $clear ? "" : $df_val;
     (caller 1)[3] or print "Got [$retval]\n";
     return $retval;
 }
@@ -1368,8 +1374,11 @@ sub get_avail_mailers {
         $map{ $mailer } = whereis( $mailer );
     }
 
-    eval { require Mail::Sendmail; };
+    eval { require Mail::Sendmail };
     $map{ 'Mail::Sendmail' } = $@ ? '' : 'Mail::Sendmail';
+
+    eval { require MIME::Lite };
+    $map{ 'MIME::Lite' } = $@ ? '' : 'MIME::Lite';
 
     return map { ( $_ => $map{ $_ }) } grep length $map{ $_ } => keys %map;
 }
@@ -1433,6 +1442,12 @@ sub get_Win_version {
 =head1 TODO
 
 Schedule, logfile optional
+
+=head1 REVISION
+
+In case I forget to update the C<$VERSION>:
+
+    $Id$
 
 =head1 COPYRIGHT
 
