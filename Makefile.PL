@@ -56,7 +56,7 @@ WriteMakefile(
 
 sub MY::libscan {
     my( $self, $path ) = @_;
-    return m:\.svn\b|\bt\b|\bprivate\b: ? "" : $path;
+    return $path =~ m:\.svn\b|\bt\b|\bprivate\b: ? "" : $path;
 }
 
 sub dir_prompt {
