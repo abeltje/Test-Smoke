@@ -70,6 +70,17 @@ sub AUTOLOAD {
     return $self->{ "_$method" } if exists $info{ "$method" };
 }
 
+=item __get_os( )
+
+This is the short info string about the Operating System.
+
+=cut
+
+sub __get_os {
+    require POSIX;
+    return "@{[(POSIX::uname())[0,2]]}";
+}
+
 =item __get_cpu_type( )
 
 This is the short info string about the cpu-type. The L<POSIX> module
@@ -113,6 +124,7 @@ Get the information from C<POSIX::uname()>
 sub Generic {
 
     return {
+        _os       => __get_os(),
         _cpu_type => __get_cpu_type(),
         _cpu      => __get_cpu(),
         _ncpu     => __get_ncpu(),
@@ -128,15 +140,47 @@ Use the L<lsdev> program to find information.
 =cut
 
 sub AIX {
+    local $ENV{PATH} = "$ENV{PATH}:/usr/sbin";
+
     my @lsdev = grep /Available/ => `lsdev -C -c processor -S Available`;
     my( $info ) = grep /^\S+/ => @lsdev;
     ( $info ) = $info =~ /^(\S+)/;
     my( $cpu ) = grep /^enable:[^:\s]+/ => `lsattr -E -O -l $info`;
     ( $cpu ) = $cpu =~ /^enable:([^:\s]+)/;
+    $cpu =~ s/\bPowerPC(?=\b|_)/PPC/i;
+    (my $cpu_type = $cpu) =~ s/_.*//;
+
+    chomp (my $os = `oslevel -r`);
+    if ($os =~ m/^(\d+)-(\d+)$/) {
+	$os = (join ".", split //, $1) . "/ML$2";
+	}
+    else {
+	chomp ($os = `oslevel`);
+	# And try figuring out at what maintainance level we are
+	my $ml = "00";
+	print STDERR "l";
+	for (grep m/ML\b/, `instfix -i`) {
+	    if (m/All filesets for (\S+) were found/) {
+		$ml = $1;
+		$ml =~ m/^\d+-(\d+)_AIX_ML/ and $ml = "ML$1";
+		next;
+		}
+	    $ml =~ s/\+*$/+/;
+	    }
+	$os .= "/$ml";
+	}
+    $os =~ s/^/AIX /;
+    if ($> == 0) {
+	chomp (my $k64 = `bootinfo -K 2>/dev/null`);
+	$k64 and $os       .= "/$k64";
+	chomp (my $a64 = `bootinfo -y 2>/dev/null`);
+	$a64 and $cpu_type .= "/$a64";
+	}
 
     return {
-        _cpu_type => $cpu,
-        _cpu      => $cpu
+        _os       => $os,
+        _cpu_type => $cpu_type,
+        _cpu      => $cpu,
         _ncpu     => scalar @lsdev,
         _host     => __get_hostname(),
     };
@@ -149,11 +193,41 @@ Use the L<ioscan> program to find information.
 =cut
 
 sub HPUX {
-    # here we need something with 'ioscan' ?
     my $hpux = Generic();
-    $hpux->{_ncpu} = grep /^processor/ => `ioscan -fnkC processor`;
+    my $ncpu = grep /^processor/ => `ioscan -fnkC processor`;
+    unless ($ncpu) {	# not root?
+	if (open my $lst, "< /var/adm/syslog/syslog.log") {
+	    while (<$lst>) {
+		m/\bprocessor$/ and $ncpu++;
+		}
+	    }
+	}
+    $hpux->{_ncpu} = $ncpu;
+    # http://wtec.cup.hp.com/~cpuhw/hppa/hversions.html
+    my (@cpu, $lst);
+    chomp (my $model = `model`);
+    (my $m = $model) =~ s:.*/::;
+    open $lst, "</usr/sam/lib/mo/sched.models" and
+	@cpu = grep m/$m/i, <$lst>;
+    @cpu == 0 && open $lst, "</opt/langtools/lib/sched.models" and
+	@cpu = grep m/$m/i, <$lst>;
+    if (@cpu == 0 && open my $lst, "echo 'sc product cpu;il' | /usr/sbin/cstm |") {
+	while (<$lst>) {
+	    s/^\s*(PA)\s*(\d+)\s+CPU Module.*/$m 1.1 $1$2/ or next;
+	    $2 =~ m/^8/ and s/ 1.1 / 2.0 /;
+	    push @cpu, $_;
+	    }
+	}
+    $hpux->{_os} =~ s/ B\./ /;
+    chomp (my $k64 = `getconf KERNEL_BITS`);
+    $k64 and $hpux->{_os} .= "/$k64";
+    if ($cpu[0] =~ m/^\S+\s+(\d+\.\d+)\s+(\S+)/) {
+	my ($arch, $cpu) = ("PA-$1", $2);
+	$hpux->{_cpu} = $cpu;
+	$hpux->{_cpu_type} = `getconf HW_32_64_CAPABLE` =~ m/^1/ ? "$arch/64" : "$arch/32";
+	}
     return $hpux;
-}
+    }
 
 =item BSD( )
 
@@ -173,6 +247,7 @@ sub BSD {
         _cpu      => $sysctl{model},
         _ncpu     => $sysctl{ncpu},
         _host     => __get_hostname(),
+        _os       => __get_os(),
     };
 }
 
@@ -195,6 +270,7 @@ sub IRIX {
         _cpu      => $cpu,
         _ncpu     => $ncpu,
         _host     => __get_hostname(),
+        _os       => __get_os(),
     };
 
 }
@@ -238,7 +314,8 @@ sub Linux {
         }
         $cpu = $type =~ /sparc/
             ? $info{cpu}
-            : sprintf "%s (%s %.0fMHz)", map $info{ $_ } => @parts
+            : sprintf "%s (%s %.0fMHz)", map $info{ $_ } => @parts;
+        $cpu =~ s/\s+/ /g;
     } else {
     }
     return {
@@ -246,6 +323,7 @@ sub Linux {
         _cpu      => $cpu,
         _ncpu     => $ncpu,
         _host     => __get_hostname(),
+        _os       => __get_os(),
     };
 }
 
@@ -268,6 +346,7 @@ sub Solaris {
         _cpu      => $cpu,
         _ncpu     => $ncpu,
         _host     => __get_hostname(),
+        _os       => __get_os(),
     };
 }
 
@@ -286,6 +365,7 @@ sub Windows {
         _cpu      => $ENV{PROCESSOR_IDENTIFIER},
         _ncpu     => $ENV{NUMBER_OF_PROCESSORS},
         _host     => __get_hostname(),
+        _os       => __get_os(),
     };
 }
 
