@@ -111,19 +111,20 @@ sub __get_os {
             chomp( my $osvers = `uname -R` );
             my( $osn, $osv ) = split ' ', $os;
             $osvers =~ s/^$osv\s+(?=$osv)//;
-            $os = "$osn $osvers";
+            $os = "$osn - $osvers";
             last MOREOS;
         };
         /linux/i           && do {
-            my( $distro ) = grep /\brelease\b/ => glob( '/etc/*' );
+            my( $distro ) = grep /-release\b/ => glob( '/etc/*' );
             last MOREOS unless $distro;
             $distro =~ s|^/etc/||;
-            $distro =~ s/-?release//i;
+            $distro =~ s/-release//i;
             $os .= " [$distro]" if $distro;
             last MOREOS;
         };
         /solaris|sunos/i   && do {
             require Config;
+            local $" = " - ";
             # Used once warning :-(
             %Config::Config and 
                 $os = "@Config::Config{qw( osname osvers )}";
