@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.014';
+$VERSION = '0.015';
 
 use Config;
 use Cwd;
@@ -270,6 +270,11 @@ sub _relocate_tree {
 
     # Failing that: Copy-By-File :-(
     if ( ! $ok && -d $source_dir ) {
+        my $cwd = cwd();
+        chdir $source_dir or do {
+            print "Cannot chdir($source_dir): $!\n";
+            return 0;
+        };
         require File::Find;
 	File::Find::finddepth( sub {
 
@@ -279,7 +284,8 @@ sub _relocate_tree {
 
             $self->{v} > 1 and print "move $_ $dest\n";
 	    File::Copy::move( $_, $dest );
-        }, $source_dir );
+        }, "./" );
+        chdir $cwd or print "Cannot chdir($cwd) back: $!\n";
 	File::Path::rmtree( $source_dir, $self->{v} > 1 );
         $ok = ! -d $source_dir;
     }
