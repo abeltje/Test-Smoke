@@ -7,7 +7,7 @@ use FindBin;
 use Data::Dumper;
 use vars qw( $conf );
 
-use Test::More tests => 6;
+use Test::More tests => 9;
 BEGIN { use_ok( 'Test::Smoke' ) }
 
 is( Test::Smoke->VERSION, $Test::Smoke::VERSION, 
