@@ -3,10 +3,10 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.002';
+$VERSION = '0.003';
 
 use Cwd;
-use File::Spec;
+use File::Spec::Functions;
 require File::Path;
 use Text::ParseWords;
 require Test::Smoke;
@@ -14,8 +14,9 @@ use Test::Smoke::SysInfo;
 use Test::Smoke::Util qw( get_smoked_Config time_in_hhmm );
 
 my %CONFIG = (
-    df_ddir       => File::Spec->curdir,
+    df_ddir       => curdir(),
     df_outfile    => 'mktest.out',
+    df_rptfile    => 'mktest.rpt',
 
     df_locale     => undef,
     df_defaultenv => undef,
@@ -33,7 +34,7 @@ Test::Smoke::Reporter - OO interface for handling the testresults (mktest.out)
     use Test::Smoke::Reporter;
 
     my $reporter = Test::Smoke::Reporter->new( %args );
-
+    $reporter->write_to_file;
 
 =head1 DESCRIPTION
 
@@ -115,7 +116,7 @@ sub read_parse {
     my $self = shift;
 
     my $result_file = @_ ? $_[0] : $self->{outfile} 
-        ? File::Spec->catfile( $self->{ddir}, $self->{outfile} )
+        ? catfile( $self->{ddir}, $self->{outfile} )
         : "";
     if ( $result_file ) {
         $self->_read( $result_file );
@@ -211,6 +212,11 @@ sub _parse {
             next;
         }
 
+        if ( my( $cinfo ) = /^Compiler info: (.+)$/ ) {
+            $rpt{cinfo} = $cinfo unless $rpt{cinfo};
+            next;
+        }
+
         if ( /^MANIFEST / ) {
             push @{ $self->{_mani} }, $_;
             next;
@@ -283,7 +289,7 @@ sub _parse {
 =item $self->_post_process( )
 
 C<_post_process()> sets up the report for easy printing. It needs to
-sort the buildenvironments.
+sort the buildenvironments, statusletters and test failures.
 
 =cut
 
@@ -318,6 +324,7 @@ sub _post_process {
             my $cfg = $config;
             ( $cfg =  $cfg ? "-DDEBUGGING $cfg" : "-DDEBUGGING" )
                 if $dbinfo eq "D";
+            $self->{v} and print "Processing [$cfg]\n";
             my $status = $self->{_rpt}{ $config }{ $dbinfo };
             foreach my $tstenv ( reverse sort keys %bldenv ) {
                 ( my $showenv = $tstenv ) =~ s/^locale://;
@@ -341,7 +348,7 @@ sub _post_process {
                     $status->{stdio} = "M";
                     delete $status->{minitest};
                 }
-                $self->{v} and print "$cfg: $status->{$tstenv}\n";
+                $self->{v} > 1 and print "[$tstenv]: $status->{$tstenv}\n";
             } 
             exists $status->{perlio} or 
                 $status->{perlio} = '-' unless $self->{defaultenv};
@@ -379,6 +386,34 @@ sub _post_process {
     $self->{_tstenv} = [ reverse sort keys %bldenv2 ];
 }
 
+=item $reporter->write_to_file( [$name] )
+
+Write the C<< $self->report >> to file. If name is ommitted it will
+use C<< catfile( $self->{ddir}, $self->{rptfile} ) >>.
+
+=cut
+
+sub write_to_file {
+    my $self = shift;
+    my( $name ) = @_ || ( catfile $self->{ddir}, $self->{rptfile} );
+
+    $self->{v} and print "Writing report to '$name':";
+    local *RPT;
+    open RPT, "> $name" or do {
+        require Carp;
+        Carp::carp "Error creating '$name': $!";
+        return;
+    };
+    print RPT $self->report;
+    close RPT or do {
+        require Carp;
+        Carp::carp "Error writing to '$name': $!";
+        return;
+    };
+    $self->{v} and print " OK\n";
+    return 1;
+}
+
 =item $reporter->report( )
 
 Return a string with the full report
@@ -389,9 +424,9 @@ sub report {
     my $self = shift;
     my $report = $self->preamble;
 
+    $report .= $self->summary . "\n";
     $report .= $self->letter_legend . "\n";
     $report .= $self->smoke_matrix . $self->bldenv_legend . "\n";
-    $report .= $self->summary . "\n";
 
     $report .= "Failures:\n" . $self->failures . "\n"
         if @{ $self->{_failures} };
@@ -410,8 +445,7 @@ sub preamble {
     my $self = shift;
 
     my %Config = get_smoked_Config( $self->{ddir} => qw( 
-        version osname osvers
-        cc ccversion gccversion glibc
+        version cc ccversion gccversion glibc
     ));
     my $si = Test::Smoke::SysInfo->new;
     my $archname  = $si->cpu_type;
@@ -420,16 +454,21 @@ sub preamble {
 
     my $this_host = $si->host;
     my $time_msg  = time_in_hhmm( $self->{_rpt}{secs} );
-#    $time_msg = " [$time_msg]" if $time_msg;
-    my $ccvers = $Config{gccversion} || $Config{ccversion} || '';
+
+    my $cinfo = $self->{_rpt}{cinfo};
+    unless ( $cinfo ) { # Old .out file?
+        $cinfo = "? ";
+        my $ccvers = $Config{gccversion} || $Config{ccversion} || '';
+        $cinfo .= ( $Config{cc} || 'unknow cc' ) . " version $ccvers";
+    }
     my $os = $si->os;
 
     return <<__EOH__;
 Automated smoke report for $Config{version} patch $self->{_rpt}{patch}
 $this_host: $cpu ($archname)
-    on $Config{osname} - $Config{osvers} ($os)
-    using $Config{cc} version $ccvers
-    total smoketime: $time_msg
+    on        $os
+    using     $cinfo
+    smoketime $time_msg
 
 __EOH__
 }
@@ -532,18 +571,15 @@ sub bldenv_legend {
 | +--------- PERLIO = perlio
 +----------- PERLIO = stdio
 
-
 EOL
 | +--------- -DDEBUGGING
 +----------- no debugging
-
 
 EOS
 | | | +----- PERLIO = perlio -DDEBUGGING
 | | +------- PERLIO = stdio  -DDEBUGGING
 | +--------- PERLIO = perlio
 +----------- PERLIO = stdio
-
 
 EOE
 }
@@ -557,7 +593,7 @@ Returns a string with the legend for the letters in the matrix.
 sub letter_legend {
     return <<__EOL__
 O = OK  F = Failure(s), extended report at the bottom
-X = test(s) failed under TEST but not under harness
+X = Failure(s) under TEST but not under harness
 ? = still running or test results not (yet) available
 Build failures during:       - = unknown or N/A
 c = Configure, m = make, M = make (after miniperl), t = make test-prep
@@ -571,21 +607,6 @@ sub signature {
 -- 
 Report by Test::Smoke v$Test::Smoke::VERSION (Reporter v$VERSION) running on perl $this_pver
 __EOS__
-}
-
-sub _process_Config {
-    my $self = shift;
-    my %Config = get_smoked_Config( $self->{ddir} => qw(
-        version osname osvers archname
-        cc ccversion gccversion 
-    ));
-    # clean up $Config{archname}:
-    $Config{archname} =~ s/-$_//
-        for qw( multi thread 64int 64all ld perlio ), $Config{osname};
-    $Config{archname} =~ s/^$Config{osname}(?:[.-])//i;
-    my $cpus = get_ncpu( $Config{osname} ) || '';
-    $Config{archname} .= "/$cpus" if $cpus;
-
 }
 
 1;
