@@ -130,7 +130,7 @@ sub abs2mani {
     return join '/', @dirs;
 }
 
-=item $tree->check_MANIFEST( )
+=item $tree->check_MANIFEST( @ignore )
 
 C<check_MANIFEST()> reads the B<MANIFEST> file from C<< $$self >> and
 compares it with the actual contents of C<< $$self >>.
@@ -144,20 +144,16 @@ value of either B<ST_MISSING> (not in directory) or B<ST_UNDECLARED>
 sub check_MANIFEST {
     my $self = shift;
 
-    my $manifile = File::Spec->rel2abs( 
-        File::Spec->catfile($$self, 'MANIFEST' ) );
-    local *MANIFEST;
-    open MANIFEST, "< $manifile" or 
-        croak( "Can't open '$manifile': $!" );
+    my %manifest = %{ $self->_read_mani_file( 'MANIFEST' ) };
 
-    my %manifest = map { 
-        m|(\S+)|;
-        ( $1 => ST_MISSING );
-    } <MANIFEST>, ".patch", @_;
-    close MANIFEST;
+    my %ignore = map { 
+        $_ => undef 
+    } ( ".patch", "MANIFEST.SKIP", @_ ), 
+      keys %{ $self->_read_mani_file( 'MANIFEST.SKIP', 1 ) };
 
     # Walk the tree, remove all found files from %manifest
-    # and add other files to %manifest
+    # and add other files to %manifest 
+    # unless they are in the ignore list
     require File::Find;
     File::Find::find( sub {
         -f or return;
@@ -165,12 +161,41 @@ sub check_MANIFEST {
         if ( exists $manifest{ $mani_name } ) {
             delete $manifest{ $mani_name };
         } else {
-            $manifest{ $mani_name } = ST_UNDECLARED;
+            $manifest{ $mani_name } = ST_UNDECLARED
+                unless exists $ignore{ $mani_name };
         }
     }, $$self );
 
     return \%manifest;
 } 
+
+=item $self->_read_mani_file( $path[, $no_croak] )
+
+C<_read_mani_file()> reads the contents of C<$path> like it is a
+MANIFEST typeof file and returns a ref to hash with all values set
+C<ST_MISSING>.
+
+=cut
+
+sub _read_mani_file {
+    my $self = shift;
+    my( $path, $no_croak ) = @_;
+
+    my $manifile = $self->mani2abs( $path );
+    local *MANIFEST;
+    open MANIFEST, "< $manifile" or do {
+        $no_croak and return { };
+        croak( "Can't open '$manifile': $!" );
+    };
+
+    my %manifest = map { 
+        m|(\S+)|;
+        ( $1 => ST_MISSING );
+    } <MANIFEST>;
+    close MANIFEST;
+
+    return \%manifest;
+}
 
 =item $tree->clean_from_MANIFEST( )
 

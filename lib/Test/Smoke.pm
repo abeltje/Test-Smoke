@@ -86,7 +86,7 @@ sub do_manifest_check {
     my( $ddir, $smoker ) = @_;
 
     my $tree = Test::Smoke::SourceTree->new( $ddir );
-    my $mani_check = $tree->check_MANIFEST( 'mktest.out' );
+    my $mani_check = $tree->check_MANIFEST( 'mktest.out', 'mktest.rpt' );
     foreach my $file ( sort keys %$mani_check ) {
         if ( $mani_check->{ $file } == ST_MISSING ) {
             $smoker->log( "MANIFEST declared '$file' but it is missing\n" );
