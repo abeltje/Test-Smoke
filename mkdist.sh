@@ -29,6 +29,9 @@ if [ "$SMOKE_TEST_ONLY" == "1" ] ; then
     exit
 fi
 
+# Clean up before we start
+make -i veryclean > /dev/null
+
 # Now create the Makefile and and run the public test-suite
 PERL_MM_USE_DEFAULT=y
 export PERL_MM_USE_DEFAULT
