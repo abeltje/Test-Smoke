@@ -10,6 +10,61 @@ The filelists have a short symbolic indicator:
 
 Enjoy!
 ___________________________________________________________________________
+[   834] By: abeltje                          on 2005-02-13 09:36:25 +0100
+        Log: * Prepare for snapshot of 1.19_66
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   833] By: abeltje                          on 2005-02-12 23:24:20 +0100
+        Log: * [CHANGE]
+	       * relocate the source-tree from within the source-dir
+		 (File::Find doesn't like VMS paths)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Syncer.pm
+___________________________________________________________________________
+[   832] By: abeltje                          on 2005-02-12 20:52:03 +0100
+        Log: * [FIX]
+	       * the DCL in vms_untargz()
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Syncer.pm,
+	     /Test-Smoke/t/TestLib.pm
+___________________________________________________________________________
+[   830] By: abeltje                          on 2005-02-12 19:59:37 +0100
+        Log: * [ADD]
+	       + chkbcfg.pl -  Check the buildconfigfile specified
+	       * configsmoke.pl now shows the output of chkbcfg.pl at the
+		 end
+	       * configsmoke.pl new also sets {testmake} on VMS/MSWin32
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           + /Test-Smoke/chkbcfg.pl
+           ! /Test-Smoke/MANIFEST, /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[   829] By: abeltje                          on 2005-02-12 19:55:26 +0100
+        Log: * [FIX]
+	       * tests were failing now that vms_whereis() finds programs
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Syncer.pm,
+	     /Test-Smoke/t/TestLib.pm, /Test-Smoke/t/syncer_ftp.t,
+	     /Test-Smoke/t/syncer_link.t
+___________________________________________________________________________
+[   828] By: abeltje                          on 2005-02-12 19:48:37 +0100
+        Log: * [FIX]
+	       * {testmaker} wasn't set properly (VMS/MSWin32)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm, /Test-Smoke/t/smoker.t
+___________________________________________________________________________
+[   826] By: abeltje                          on 2005-02-11 11:10:41 +0100
+        Log: * [AUTOCOMMIT]
+	       * Regenerate 'SIGNATURES', 'META.yml'
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/META.yml, /Test-Smoke/SIGNATURE
+___________________________________________________________________________
+[   825] By: abeltje                          on 2005-02-11 11:09:21 +0100
+        Log: * [AUTOCOMMIT]
+	       * Regenerate 'Changes'
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Changes
+___________________________________________________________________________
 [   824] By: abeltje                          on 2005-02-11 11:03:46 +0100
         Log: * Prepare for 1.19_65 snapshot
         Url: http://source.Test-Smoke.org/svn/Test-Smoke
