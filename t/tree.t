@@ -45,7 +45,7 @@ BEGIN { use_ok( 'Test::Smoke::SourceTree', ':const' ); }
 
 my $cwd = cwd();
 chdir 't' or die "Cannot chdir(t): $!";
-my $path = cwd();
+my $path = File::Spec->canonpath( cwd() );
 chdir $cwd;
 {
     my $tree = Test::Smoke::SourceTree->new( 't' );
