@@ -378,7 +378,7 @@ sub make_test {
         $self->ttylog( "PERLIO = $perlio_logmsg\t" );
 
         unless ( $self->{run} ) {
-            $self->ttylog( "bailing out ...\n" );
+            $self->ttylog( "bailing out (--norun)...\n" );
             next;
 	}
 

@@ -12,6 +12,7 @@ use FindBin;
 use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
 use lib $FindBin::Bin;
 use Config;
+use Test::Smoke::Smoker;
 use Test::Smoke;
 use Test::Smoke::Util qw( calc_timeout do_pod2usage );
 
@@ -32,6 +33,8 @@ my %opt = (
     w32cc          => undef,
     v              => undef,
 );
+
+my $defaults = Test::Smoke::Smoker->config( 'all_defaults' );
 
 =head1 NAME
 
@@ -143,6 +146,12 @@ if ( defined $opt{config} ) {
 }
 
 $opt{cfg} = shift @ARGV if ! $opt{cfg} && @ARGV && -f $ARGV[0];
+$opt{run} = 0 if $opt{dry_run};
+foreach ( keys %$defaults ) {
+    next if defined $opt{ $_ };
+    $opt{ $_ } = exists $conf->{ $_ } ? $conf->{ $_ } : $defaults->{ $_ };
+}
+
 # transfer %opt to %$conf
 $conf->{ $_ } = $opt{ $_ } for keys %opt;
 @ARGV and push @{ $conf->{w32args} }, @ARGV;
@@ -163,7 +172,7 @@ $timeout and local $SIG{ALRM} = sub {
 };
 $Config{d_alarm} and alarm $timeout;
 
-run_smoke( $conf->{config} );
+run_smoke( $conf->{continue} );
 
 =head1 SEE ALSO
 
