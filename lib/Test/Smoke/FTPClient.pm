@@ -2,9 +2,13 @@ package Test::Smoke::FTPClient;
 use strict;
 
 use Net::FTP;
+use Cwd;
+use File::Path;
+use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
 
+# $Id$
 use vars qw( $VERSION );
-$VERSION = '0.001';
+$VERSION = '0.002';
 
 my %CONFIG = (
     df_fserver  => undef,
@@ -31,13 +35,14 @@ Test::Smoke::FTPClient - Implement a mirror like object
     my $ddir = '~/perlsmoke/perl-current';
     my $cleanup = 1; # like --delete for rsync
 
+    $fc->connect;
     $fc->mirror( $sdir, $ddir, $cleanup );
 
     $fc->bye;
 
 =head1 DESCRIPTION
 
-This module was written specifically to fetch the perl source-tree
+This module was written specifically to fetch a perl source-tree
 from the APC. It will not suffice as a general purpose mirror module!
 It only distinguishes between files and directories and relies on the 
 output of the C<< Net::FTP->dir >> method.
@@ -46,10 +51,14 @@ This solution is B<slow>, you'd better use B<rsync>!
 
 =head1 METHODS
 
-=over 4
+=head2 Test::Smoke::FTPClient->new( $server[, %options] )
 
-=item Test::Smoke::FTPClient->new( $server[, %options] )
+Create a new object with option checking:
 
+    * fuser
+    * fpasswd
+    * v
+    * fpassive
 
 =cut
 
@@ -113,9 +122,10 @@ sub connect {
     return 1;
 }
 
-=item $client->mirror( $sdir, $ddir )
+=head2 $client->mirror( $sdir, $ddir )
 
 Set-up the environment and call C<__do_mirror()>
+
 =cut
 
 sub mirror {
@@ -130,11 +140,26 @@ sub mirror {
         $self->{error} = "Cannot chdir($ddir): $!";
         return;
     }
-    __do_mirror( $self->{client}, $fdir, $ddir, $self->{v}, $cleanup );
+    my $lroot = catdir( $ddir, updir );
+    chdir $lroot and $lroot = cwd() and chdir $cwd;
+
+    __do_mirror( $self->{client}, $fdir, $ddir, $lroot, $self->{v}, $cleanup );
+
     chdir $cwd;
 }
 
-=item Test::Smoke::FTPClient->config( $key[, $value] )
+=head2 $client->bye
+
+Disconnect from the FTP-server and cleanup the Net::FTP client;
+
+=cut
+
+sub bye {
+    my $self = shift;
+    $self->{client}->quit;
+}
+
+=head2 Test::Smoke::FTPClient->config( $key[, $value] )
 
 C<config()> is an interface to the package lexical C<%CONFIG>, 
 which holds all the default values for the C<new()> arguments.
@@ -164,19 +189,19 @@ sub config {
     return $CONFIG{ "df_$key" };
 }
 
-=item __do_mirror( $ftp, $ftpdir, $localdir, $verbose, $cleanup )
+=head2 __do_mirror( $ftp, $ftpdir, $localdir, $lroot, $verbose, $cleanup )
 
 Recursive sub to mirror a tree from an FTP server.
 
 =cut
 
 sub __do_mirror {
-    my( $ftp, $ftpdir, $localdir, $verbose, $cleanup ) = @_;
+    my( $ftp, $ftpdir, $localdir, $lroot, $verbose, $cleanup ) = @_;
 
     $ftp->cwd( $ftpdir );
-    $verbose and printf "Entering %s\n", $ftp->pwd;
+    $verbose > 1 and printf "Entering %s\n", $ftp->pwd;
 
-    my @list = map parse_dir_line( $_ ) => $ftp->dir;
+    my @list = dirlist( $ftp );
 
     foreach my $entry ( sort { $a->{type} cmp $b->{type} ||
                                $a->{name} cmp $b->{name} } @list ) {
@@ -187,12 +212,13 @@ sub __do_mirror {
                 mkpath( $new_locald, $verbose, $entry->{mode} );
             }
             chdir $new_locald;
-            __do_mirror( $ftp,$entry->{name},$new_locald,$verbose,$cleanup );
+            __do_mirror( $ftp, $entry->{name}, $new_locald, $lroot,
+                         $verbose, $cleanup );
             $entry->{time} ||= $entry->{date};
             utime $entry->{time}, $entry->{time}, $new_locald;
             $ftp->cwd( '..' );
             chdir File::Spec->updir;
-            $verbose and print "Leaving '$entry->{name}' [$new_locald]\n";
+            $verbose > 1 and print "Leaving '$entry->{name}' [$new_locald]\n";
         } else {
             $entry->{time}  = $ftp->mdtm( $entry->{name} ); #slow down
             my $destname = File::Spec->catfile( $localdir, $entry->{name} );
@@ -207,29 +233,32 @@ sub __do_mirror {
             }
             unless ( $skip ) {
                 unlink $destname;
-                $verbose and print "Now trying to fetch $entry->{name}\n";
+                $verbose and printf "%s: ", abs2rel( $destname, $lroot );
                 my $dest = $ftp->get( $entry->{name}, $destname );
                 chmod $entry->{mode}, $dest;
                 utime $entry->{time}, $entry->{time}, $dest;
+                $verbose and print "($entry->{size})\n";
             } else { 
-                $verbose && print "Skipping '$entry->{name}'\n";
+                $verbose > 1 and
+                    printf "Skip '%s'\n", abs2rel( $destname, $lroot);
             }
         }
     }
     if ( $cleanup ) {
-        $verbose and print "Cleanup '$localdir'\n";
+        $verbose > 1 and print "Cleanup '$localdir'\n";
         my %ok_file = map { ( $_->{name} => $_->{type} ) } @list;
         local *DIR;
         if ( opendir DIR, '.' ) {
             foreach ( readdir DIR ) {
                 if( -f ) {
                     unless (exists $ok_file{ $_ } && $ok_file{ $_ } eq 'f') {
-                        print "Delete $_\n";
+                        $verbose and printf "Delete %s\n",
+                                             abs2rel( rel2abs( $_ ), $lroot );
                         unlink $_;
                     }
                 } elsif ( -d && ! /^..?\z/ ) {
                      unless (exists $ok_file{ $_ } && $ok_file{ $_ } eq 'd') {
-                        rmtree( $_, 1 );
+                        rmtree( $_, $verbose );
                     }
                 }
             }
@@ -238,14 +267,33 @@ sub __do_mirror {
     }
 }
 
-=item __parse_line_from_dir( $line )
+=head2 dirlist( $ftp )
+
+Return a list of entries (hashrefs) with these properties:
+
+    * name:    Filename
+    * type     f/d/l
+    * mode     unix file mode
+    * size     filessize in bytes
+    * date     file date
+
+=cut
+
+sub dirlist {
+    my $ftp = shift;
+    map __parse_line_from_dir( $_ ) => $ftp->dir;
+}
+
+=head2 __parse_line_from_dir( $line )
 
 The C<dir> command in FTP gives a sort of C<ls -la> output,
 parts of this output are used as remote file-info.
 
+=cut
+
 sub __parse_line_from_dir {
-    local $_ = shift || $_;
-    my @field = split;
+    my $entry = shift;
+    my @field = split " ", $entry;
 
     ( my $type = substr $field[0], 0, 1 ) =~ tr/-/f/;
     return {
@@ -258,7 +306,7 @@ sub __parse_line_from_dir {
     };
 }
 
-=item __get_mode_from_text( $tmode )
+=head2 __get_mode_from_text( $tmode )
 
 This takes the text representation of a file-mode (like 'rwxr--r--')
 and return the numeric value.
@@ -305,4 +353,24 @@ sub __time_from_ls {
 
 1;
 
-=back
+=head1 SEE ALSO
+
+L<Test::Smoke::Syncer>
+
+=head1 COPYRIGHT
+
+(c) 2003-2004, Abe Timmerman <abeltje@cpan.org> All rights reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+See:
+
+  * <http://www.perl.com/perl/misc/Artistic.html>,
+  * <http://www.gnu.org/copyleft/gpl.html>
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=cut

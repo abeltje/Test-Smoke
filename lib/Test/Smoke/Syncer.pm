@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.010';
+$VERSION = '0.011';
 
 use Config;
 use Cwd;
@@ -52,13 +52,25 @@ my %CONFIG = (
 
     hardlink   => [qw( hdir haslink )],
 
+# these have to do 'forest'
     df_fsync   => 'rsync',
     df_mdir    => undef,
     df_fdir    => undef,
+
     forest     => [qw( fsync mdir fdir )],
 
+# these settings have to do with synctype==ftp
+    df_ftphost => 'ftp.linux.activestate.co',
+    df_ftpusr  => 'anonymous',
+    df_ftppwd  => 'smokers@perl.org',
+    df_ftpsdir => '/pub/staff/gsar/APC/perl-current',
+    df_ftpcdir => '/pub/staff/gsar/APC/perl-current-diffs',
+
+    ftp        => [qw( ftphost ftpusr ftppwd ftpsdir ftpcdir )],
+
 # misc.
-    valid_type => { rsync => 1, snapshot => 1, copy => 1, hardlink => 1 },
+    valid_type => { rsync => 1, snapshot => 1,
+                    copy  => 1, hardlink => 1, ftp => 1 },
 );
 
 {
@@ -162,12 +174,13 @@ sub new {
     $fields{ddir} = File::Spec->rel2abs( $fields{ddir} );
 
     DO_NEW: {
-        local $_ = $sync_type;
+        local *_; $_ = $sync_type;
 
         /^rsync$/    && return Test::Smoke::Syncer::Rsync->new( %fields );
         /^snapshot$/ && return Test::Smoke::Syncer::Snapshot->new( %fields );
         /^copy$/     && return Test::Smoke::Syncer::Copy->new( %fields );
         /^hardlink$/ && return Test::Smoke::Syncer::Hardlink->new( %fields );
+        /^ftp$/      && return Test::Smoke::Syncer::FTP->new( %fields );
         /^forest$/   && return Test::Smoke::Syncer::Forest->new( %fields );
 
         require Carp;
@@ -1150,6 +1163,103 @@ sub sync {
 }
 
 =back
+
+=head1 Test::Smoke::Syncer::FTP
+
+This handles syncing by getting the source-tree from ActiveState's APC
+repository. It uses the C<Test::Smoke::FTPClient> that implements a
+mirror function.
+
+=cut
+
+package Test::Smoke::Syncer::FTP;
+
+@Test::Smoke::Syncer::FTP::ISA = qw( Test::Smoke::Syncer );
+
+use File::Spec::Functions;
+
+=head2 Test::Smoke::Syncer::FTP->new( %args )
+
+Known args for this class:
+
+    * ftphost (ftp.linux.activestate.com)
+    * ftpusr  (anonymous)
+    * ftppwd  (smokers@perl.org)
+    * ftpsdir (/pub/staff/gsar/APC/perl-????)
+    * ftpcdir (/pub/staff/gsar/APC/perl-????-diffs)
+
+    * ddir
+    * v
+
+=cut
+
+sub new {
+    my $class = shift;
+
+    return bless { @_ }, $class;
+}
+
+=head2 $syncer->sync()
+
+This does the actual syncing:
+
+    * Check {ftpcdir} for the latest changenumber
+    * Mirror 
+
+=cut
+
+sub sync {
+    my $self = shift;
+
+    require Test::Smoke::FTPClient;
+
+    my $fc = Test::Smoke::FTPClient->new( $self->{ftphost}, {
+        v       => $self->{v},
+        passive => $self->{ftppassive},
+        fuser   => $self->{ftpusr},
+        fpwd    => $self->{ftppwd},
+    } );
+
+    $fc->connect;
+
+    $fc->mirror( @{ $self }{qw( ftpsdir ddir )}, 1 );
+
+    $self->{client} = $fc;
+    $self->create_dot_patch;
+}
+
+=head2 $syncer->create_dat_patch
+
+This needs to go to the *-diffs directory on APC and find the patch
+whith the highest number, that should be our current patchlevel.
+
+=cut
+
+sub create_dot_patch {
+    my $self = shift;
+    my $ftp = $self->{client}->{client};
+
+    $ftp->cwd( $self->{ftpcdir} );
+    my $plevel = (sort { $b <=> $a } map {
+        s/\.gz$//; $_
+    } grep /\d+\.gz/ => $ftp->ls)[0];
+
+    my $dotpatch = catfile( $self->{ddir}, '.patch' );
+    local *DOTPATH;
+    if ( open DOTPATCH, "> $dotpatch" ) {
+        print DOTPATCH $plevel;
+        close DOTPATCH or do {
+            require Carp;
+            Carp::carp( "Error writing '$dotpatch': $!" );
+        };
+    } else {
+        require Carp;
+        Carp::carp( "Error creating '$dotpatch': $!" );
+    }
+    return $plevel;
+}
+
+1;
 
 =head1 Test::Smoke::Syncer::Forest
 

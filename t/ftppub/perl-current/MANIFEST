@@ -1,0 +1,5 @@
+patchlevel.h
+win32/
+win32/Makefile
+win32/makefile.mk
+MANIFEST
