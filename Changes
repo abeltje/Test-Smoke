@@ -9,6 +9,34 @@ The filelists have a short symbolic indicator:
 
 Enjoy!
 ___________________________________________________________________________
+[   291] By: abeltje                          on 2003-07-30 20:20:32 +0200
+        Log: * Reorganize the private tests and make-dist tool
+        Url: http://ati2/svn/Test-Smoke
+           - /Test-Smoke/test_compile.pl, /Test-Smoke/test_pod.pl
+           ! /Test-Smoke/mkdist.sh
+          !> /Test-Smoke/private/test_compile.pl =
+            (/Test-Smoke/test_compile.pl:280),
+             /Test-Smoke/private/test_pod.pl =
+            (/Test-Smoke/test_pod.pl:280)
+___________________________________________________________________________
+[   290] By: abeltje                          on 2003-07-30 20:17:27 +0200
+        Log: * [CHANGE] Set the defaults for the new 5.6.2 branch
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl, /Test-Smoke/smoke56x_dfconfig
+___________________________________________________________________________
+[   289] By: abeltje                          on 2003-07-30 20:11:33 +0200
+        Log: * [CHANGE]
+	       * check for 56x to set the test-target for make
+	       * do not log the output make _test unless there is no
+	     output fom harness
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm
+___________________________________________________________________________
+[   288] By: abeltje                          on 2003-07-30 17:00:53 +0200
+        Log: * This is a 1.17_61 candidate
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/Changes
+___________________________________________________________________________
 [   287] By: abeltje                          on 2003-07-30 16:54:47 +0200
         Log: * Explain the new status-letter "M" and the [minitest]
 	     failure reports
