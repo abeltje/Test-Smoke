@@ -118,7 +118,7 @@ foreach my $config ( @configs ) {
     my $todo = $ccnt - $rpt->{count};
     my $est_curr = $rpt->{avg} - ( $rpt->{rtime} - $rpt->{count}*$rpt->{avg} );
     my $est_todo = $todo > 0
-        ? ( ($todo * $rpt->{avg}) + $est_curr ) : 0;
+        ? ( (($todo - 1) * $rpt->{avg}) + $est_curr ) : 0;
     $est_todo > $todo * $rpt->{avg} and $est_todo = $todo * $rpt->{avg};
     my $todo_time = $rpt->{avg} eq 'unknown' ? '.' :
         ", estimated completion in " . time_in_hhmm( $est_todo );
