@@ -8,7 +8,7 @@ use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
 
 # $Id$
 use vars qw( $VERSION $NOCASE );
-$VERSION = '0.003';
+$VERSION = '0.004';
 
 my %CONFIG = (
     df_fserver  => undef,
@@ -65,8 +65,7 @@ Create a new object with option checking:
 =cut
 
 sub  new {
-    my $proto = shift;
-    my $class = ref $proto || $proto;
+    my $class = shift;
 
     my $server = shift;
 
@@ -145,9 +144,11 @@ sub mirror {
     my $lroot = catdir( $ddir, updir );
     chdir $lroot and $lroot = cwd() and chdir $cwd;
 
-    __do_mirror( $self->{client}, $fdir, $ddir, $lroot, $self->{v}, $cleanup );
+    my $ret = __do_mirror( $self->{client}, $fdir, $ddir, $lroot,
+                           $self->{v}, $cleanup );
 
     chdir $cwd;
+    return $ret;
 }
 
 =head2 $client->bye
@@ -197,6 +198,8 @@ Recursive sub to mirror a tree from an FTP server.
 
 =cut
 
+{
+my $mirror_ok = 1;
 sub __do_mirror {
     my( $ftp, $ftpdir, $localdir, $lroot, $verbose, $cleanup ) = @_;
     $verbose ||= 0;
@@ -212,11 +215,14 @@ sub __do_mirror {
         if ( $entry->{type} eq 'd' ) {
             my $new_locald = File::Spec->catdir( $localdir, $entry->{name} );
             unless ( -d $new_locald ) {
-                mkpath( $new_locald, $verbose, $entry->{mode} );
+                eval { mkpath( $new_locald, $verbose, $entry->{mode} ) } or
+                    return;
+                $@ and return;
             }
             chdir $new_locald;
-            __do_mirror( $ftp, $entry->{name}, $new_locald, $lroot,
-                         $verbose, $cleanup );
+            $mirror_ok &&= __do_mirror( $ftp, $entry->{name}, 
+                                        $new_locald, $lroot,
+                                        $verbose, $cleanup );
             $entry->{time} ||= $entry->{date};
             utime $entry->{time}, $entry->{time}, $new_locald;
             $ftp->cwd( '..' );
@@ -237,9 +243,10 @@ sub __do_mirror {
 		        ($l_time == $entry->{time});
             }
             unless ( $skip ) {
-                unlink $destname;
+                1 while unlink $destname;
                 $verbose and printf "%s: ", abs2rel( $destname, $lroot );
                 my $dest = $ftp->get( $entry->{name}, $destname );
+                $dest or $mirror_ok = 0, return;
                 chmod $entry->{mode}, $dest;
                 utime $entry->{time}, $entry->{time}, $dest;
                 $verbose and print "($entry->{size})\n";
@@ -265,7 +272,7 @@ sub __do_mirror {
                         $verbose and printf "Delete %s\n",
                                              abs2rel( rel2abs( $cmpname ),
                                                       $lroot );
-                        unlink $_;
+                        1 while unlink $_;
                     }
                 } elsif ( -d && ! /^..?\z/ ) {
                      $^O eq 'VMS' and $cmpname =~ s/\.DIR$//i;
@@ -278,6 +285,8 @@ sub __do_mirror {
             closedir DIR;
         }
     }
+    return $mirror_ok;
+}
 }
 
 sub __clean_name {
