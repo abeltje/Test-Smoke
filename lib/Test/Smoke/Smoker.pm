@@ -12,14 +12,14 @@ use Test::Smoke::Util;
 BEGIN { eval q{ use Time::HiRes qw( time ) } }
 
 my %CONFIG = (
+    df_ddir           => File::Spec->curdir(),
     df_v              => 0,
     df_run            => 1,
     df_fdir           => undef,
     df_is56x          => 0,
     df_locale         => '',
     df_force_c_locale => 0,
-    df_default_env    => 0,
-    df_ddir           => File::Spec->curdir(),
+    df_defaultenv     => 0,
 
     df_is_win32       => $^O eq 'MSWin32',
     df_w32cc          => 'MSVC60',
