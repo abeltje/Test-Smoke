@@ -10,9 +10,11 @@ use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
 use Getopt::Long;
 my %options = ( config => 'smokecurrent_config', run => 1,
                 fetch => 1, patch => 1, mail => undef, 
+                continue => 0,
                 is56x => undef, smartsmoke => undef );
 GetOptions( \%options, 
     'config|c=s', 
+    'continue'
     'fetch!', 
     'patch!', 
     'mail!',
@@ -24,7 +26,7 @@ GetOptions( \%options,
 use Config;
 use Test::Smoke;
 use vars qw( $VERSION );
-$VERSION = Test::Smoke->VERSION; # $Id$
+$VERSION = Test::Smoke->VERSION;
 
 =head1 NAME
 
@@ -47,6 +49,7 @@ It can take these options
   --nopatch                Skip the patch step
   --nomail                 Skip the mail step
 
+  --continue               Try to continue an interrupted smoke
   --is56x                  This is a perl-5.6.x smoke
   --[no]smartsmoke         Don't smoke unless patchlevel changed
 
@@ -74,47 +77,68 @@ use Test::Smoke::Mailer;
 use Test::Smoke::Util qw( get_patch );
 use Cwd;
 
-my $was_patchlevel = get_patch( $conf->{ddir} ) || -1;
-my $now_patchlevel = $was_patchlevel;
-FETCHTREE: {
-    unless ( $options{fetch} && $options{run} ) {
-        $conf->{v} and print "Skipping synctree\n";
-        last FETCHTREE;
+if ( $opt{continue} ) {
+    $opt{v} and print "Will try to continue current smoke\n";
+    my $cfg = Test::Smoke::BuildCFG->new( $conf->{cfg}, v => $conf->{v} );
+    my @found = configs_from_log( $conf->{ddir} );
+    my %found = map { ( $_ => 1 ) } @found;
+    my @pass;
+    foreach my $config ( $cfg->configurations ) {
+        push @pass, $config unless exists $found{ "$config" } ||
+                                   Test::Smoke::skip_config( $config );
     }
-    my $syncer = Test::Smoke::Syncer->new( $conf->{sync_type}, $conf );
-    $now_patchlevel = $syncer->sync;
-    $conf->{v} and 
-        print "$conf->{ddir} now up to patchlevel $now_patchlevel\n";
+    $conf->{cfg} = { _list => \@pass };
+} else {
+    synctree();
+    patchtree();
 }
-
-if ( $conf->{smartsmoke} && ($was_patchlevel eq $now_patchlevel) ) {
-    $conf->{v} and print "Skipping this smoke, patchlevel ($was_patchlevel)" .
-                         " did not change.\n";
-    exit(0);
-}
-
-PATCHAPERL: {
-    unless ( $options{patch} && $options{run} ) {
-        $conf->{v} && exists $conf->{patch_type} &&
-        $conf->{patch_type} eq 'multi' and
-            print "Skipping patching ($conf->{pfile})\n";
-        last PATCHAPERL;
-    }
-    last PATCHAPERL unless exists $conf->{patch_type} && 
-                           $conf->{patch_type} eq 'multi' && $conf->{pfile};
-    if ( $^O eq 'MSWin32' ) {
-        Test::Smoke::Patcher->config( flags => TRY_REGEN_HEADERS );
-    }
-    my $patcher = Test::Smoke::Patcher->new( $conf->{patch_type}, $conf );
-    eval { $patcher->patch };
-}
-
 my $cwd = cwd();
 chdir $conf->{ddir} or die "Cannot chdir($conf->{ddir}): $!";
 call_mktest();
 call_mkovz();
 mailrpt();
 chdir $cwd;
+
+sub synctree {
+    my $was_patchlevel = get_patch( $conf->{ddir} ) || -1;
+    my $now_patchlevel = $was_patchlevel;
+    FETCHTREE: {
+        unless ( $options{fetch} && $options{run} ) {
+            $conf->{v} and print "Skipping synctree\n";
+            last FETCHTREE;
+        }
+        my $syncer = Test::Smoke::Syncer->new( $conf->{sync_type}, $conf );
+        $now_patchlevel = $syncer->sync;
+        $conf->{v} and 
+            print "$conf->{ddir} now up to patchlevel $now_patchlevel\n";
+    }
+
+    if ( $conf->{smartsmoke} && ($was_patchlevel eq $now_patchlevel) ) {
+        $conf->{v} and 
+            print "Skipping this smoke, patchlevel ($was_patchlevel)" .
+                  " did not change.\n";
+        exit(0);
+    }
+}
+
+sub patchtree {
+    PATCHAPERL: {
+        unless ( $options{patch} && $options{run} ) {
+            $conf->{v} && exists $conf->{patch_type} &&
+            $conf->{patch_type} eq 'multi' and
+                print "Skipping patching ($conf->{pfile})\n";
+            last PATCHAPERL;
+        }
+        last PATCHAPERL unless exists $conf->{patch_type} && 
+                               $conf->{patch_type} eq 'multi' && 
+                               $conf->{pfile};
+        if ( $^O eq 'MSWin32' ) {
+            Test::Smoke::Patcher->config( flags => TRY_REGEN_HEADERS );
+        }
+        my $patcher = Test::Smoke::Patcher->new( $conf->{patch_type}, $conf );
+        eval { $patcher->patch };
+    }
+}
 
 sub call_mktest {
     my $timeout = 0;
@@ -168,9 +192,32 @@ sub calc_timeout {
     return $timeout;
 }
 
+sub configs_from_log {
+    my( $dir ) = @_;
+
+    my $log_name = File::Spec->catfile( $dir, "mktest.out" );
+    my @configs;
+    local *LOG;
+    open LOG, "< $log_name" or die "Cannot continue: $!";
+    my( $smoke, $finish ) = ( 0, undef );
+    while ( <LOG> ) {
+        /^Smoking patch (\d+)/ and $smoke = $1;
+        /^Finished smoking patch $smoke/ and $finish = 1;
+        /^Configuration:\s+(.*)/ or next;
+        push @configs, $1;
+    }
+    close LOG;
+    pop @configs unless $finish;
+    return @configs;
+}
+
 =head1 SEE ALSO
 
 L<configsmoke.pl>, L<mktest.pl>, L<mkovz.pl>
+
+=head1 REVISION
+
+$Id$
 
 =head1 COPYRIGHT
 

@@ -2,7 +2,7 @@ package Test::Smoke;
 use strict;
 
 use vars qw( $VERSION $conf @EXPORT );
-$VERSION = '1.17_51'; # $Id$
+$VERSION = '1.17_52';
 
 use base 'Exporter';
 @EXPORT  = qw( $conf &read_config &run_smoke );
@@ -89,7 +89,7 @@ sub do_manifest_check {
     }
 }
 
-=item run_smoke( $patch )
+=item run_smoke( $continue, $patch )
 
 C<run_smoke()> sets up de build environment and gets the private Policy
 file and build configurations and then runs the smoke stuff for all 
@@ -98,10 +98,12 @@ configurations.
 =cut
 
 sub run_smoke {
+    my $continue = shift;
     my $patch = shift || Test::Smoke::Util::get_patch( $conf->{ddir} );
 
     local *LOG;
-    open LOG, "> " . File::Spec->catfile( $conf->{ddir}, 'mktest.out' )  or
+    my $mode = $continue ? ">>" : ">";
+    open LOG, "$mode " . File::Spec->catfile( $conf->{ddir}, 'mktest.out' )  or
         die "Cannot create 'mktest.out': $!";
 
     my $Policy   = Test::Smoke::Policy->new( File::Spec->updir, $conf->{v} );
@@ -125,6 +127,12 @@ sub run_smoke {
         $smoker->smoke( $this_cfg, $Policy );
     }
 
+    $smoker->tty( "Finished smoking $patch\n" );
+
+    close LOG or do {
+        require Carp;
+        Carp::carp "Error on closing logfile: $!";
+   };
 }
 
 =item skip_config( $config ) 
@@ -144,6 +152,10 @@ sub skip_config {
 1;
 
 =back
+
+=head1 REVISION
+
+$Id$
 
 =head1 COPYRIGHT
 
