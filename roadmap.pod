@@ -1,0 +1,56 @@
+=head1 NAME
+
+Test::Smoke roadmap - Roadmap for Test::Smoke development
+
+=head1 SYNOPSIS
+
+This document states my intensions for the development of
+L<Test::Smoke>.
+
+=head1 DESCRIPTION
+
+When I took over the maintenance of the B<Test::Smoke> package it was
+at version 1.13. Shortly after that I released version 1.16 that fixed
+some stuff that was closely related to changes in the perl-sources.
+
+
+=head2 Test::Smoke 1.17
+
+The intention for version 1.17 is to pull development for all
+supported Operating Systems together and develop a more userfriendly
+suite.
+
+On release the source-tree for Test::Smoke will be split off to have a
+maintenance branch (1.17.xx) and the maintenance releases will be
+numbered accordingly.
+
+=head2 Test::Smoke 1.18
+
+The intention for version 1.18 is to untangle the build configurations
+mess and clean up F<mktest.pl>. Development (alpha) releases will start
+at version 1.17_50.
+
+=head2 Test::Smoke 1.19
+
+The intention for version 1.19 is to untangle the reports
+mess and clean up F<mkovz.pl>. Development (alpha) releases will
+start at version 1.18_50.
+
+=head1 Test::Smoke repository
+
+The Test::Smoke sources are kept in a publicly accessable
+Subversion repository from which anyone can check them out.
+
+=over 4
+
+=item The main trunk can be checked out
+
+    svn co http://145.81.96.100/svn/Test-Smoke
+
+=item The 1.17 MAINT branch can be checked out
+
+    svn co http://145.81.96.100/svn/Test-Smoke-1.17.xx
+
+=back
+
+=cut
