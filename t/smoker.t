@@ -3,7 +3,7 @@ use strict;
 use Data::Dumper;
 
 # $Id$
-use File::Spec::Functions qw( :DEFAULT devnull );
+use File::Spec::Functions qw( :DEFAULT devnull abs2rel rel2abs );
 use Cwd;
 
 use Test::More tests => 4;
@@ -48,13 +48,22 @@ use_ok( 'Test::Smoke::Smoker' );
     );
 
     my %tests = $smoker->_transform_testnames( @nok );
-
-    is_deeply \%tests, {
+    my %raw = (
         '../ext/Cwd/t/Cwd.t'          => 'FAILED at test 10',
         '../t/op/magic.t'             => 'FAILED at test 37',
         '../t/op/die.t'               => 'FAILED at test 22',
         '../ext/IPC/SysV/t/ipcsysv.t' => 'FAILED at test 1',
-    }, "transform testnames" or diag Dumper \%tests;
+    );
+    my %expect;
+    my $test_base = catdir( cwd, 't' );
+    foreach my $test ( keys %raw ) {
+        my $test_name = rel2abs( $test, $test_base );
+
+        my $test_path = abs2rel( $test_name, $test_base );
+        $test_path =~ tr!\\!/! if $^O eq 'MSWin32';
+        $expect{ $test_path } = $raw{ $test };
+    }
+    is_deeply \%tests, \%expect, "transform testnames" or diag Dumper \%tests;
 
     close LOG;
 }

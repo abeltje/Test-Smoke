@@ -580,8 +580,9 @@ sub _transform_testnames {
     my( $self, @notok ) = @_;
     my %inconsistent;
     for my $nok ( @notok ) {
+        $nok =~ m!^(?:\.\.[\\/])?(\w+/[-\w/\\]+)\.*(.*)! or next;
         my( $test_name, $status ) = split /\.{3,}/, $nok;
-        next unless $test_name;
+        $test_name or next;
         $test_name .= '.t';
 
         $nok =~ /^\w/ and $test_name = $nok =~ /^(?:ext|lib|t)\b/
