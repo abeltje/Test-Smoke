@@ -82,6 +82,11 @@ should run C<< S<make minitest> >> in this case. The new status B<M>
 will appear in the reports and if there are test failures they are
 marked with B<[minitest]>.
 
+=item 10
+
+Now that we have a new Champion for 5.6.2 (thank you Rafael) there are
+some extra defaults to help configuring Test::Smoke for this release.
+
 =back
 
 =head1 REVISION

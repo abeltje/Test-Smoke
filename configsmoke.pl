@@ -87,7 +87,7 @@ my %versions = (
                  ddir   => File::Spec->rel2abs( 
                                File::Spec->catdir( File::Spec->updir,
                                                    'perl-5.6.2' ) ),
-                 cfg    => 'perl56x.cfg',
+                 cfg    => 'perl562.cfg',
                  text   => 'Perl 5.6.2-to-be',
                  is56x  => 1 },
     '5.8.x' => { source =>  'ftp.linux.activestate.com::perl-5.8.x',

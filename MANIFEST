@@ -15,7 +15,7 @@ patchtree.pl
 runsmoke.pl
 smoke.sh
 smokew32.bat
-perl56x.cfg
+perl562.cfg
 perlcurrent.cfg
 smoke.cfg
 w32current.cfg
