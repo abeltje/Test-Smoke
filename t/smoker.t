@@ -4,7 +4,7 @@ use strict;
 # $Id$
 use File::Spec;
 
-use Test::More 'no_plan';
+use Test::More tests => 3;
 use_ok( 'Test::Smoke::Smoker' );
 
 {
