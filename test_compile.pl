@@ -8,24 +8,22 @@ my @scripts;
 BEGIN {
     @scripts = qw( mktest.pl mkovz.pl smokeperl.pl
                    synctree.pl patchtree.pl mailrpt.pl W32Configure.pl
-                   Util.pm Policy.pm SourceTree.pm
-                   Syncer.pm Patcher.pm Mailer.pm
                    Makefile.PL Configure.pl configsmoke.pl );
+
+    push @scripts, map File::Spec->catfile(qw( lib Test Smoke ), $_ )
+        => qw ( Util.pm Policy.pm SourceTree.pm
+                Syncer.pm Patcher.pm Mailer.pm
+                BuildCFG.pm Smoker.pm );
+
+    push @scripts, map File::Spec->catfile(qw( lib Test ), $_ )
+        => qw ( Smoke.pm );
 }
 
-use Test::Simple tests => 1 + scalar @scripts;
+use Test::Simple tests => scalar @scripts;
 
 my $dev_null = File::Spec->devnull;
 
-my @libpath = qw( lib Test Smoke );
-
 foreach my $script ( @scripts ) {
-    my $s_name = File::Spec->catfile( ($script =~ /\.pm$/ ? @libpath : () ),
-                                      $script );
-
-    ok( system( qq{$^X  "-Ilib" "-c" "$s_name" > $dev_null 2>&1} ) == 0,
-        "perl -c '$s_name' okay" );
+    ok( system( qq{$^X  "-Ilib" "-c" "$script" > $dev_null 2>&1} ) == 0,
+        "perl -c '$script' okay" );
 }
-    
-ok( system( qq{$^X "-Ilib" "-c" "lib/Test/Smoke.pm" > $dev_null 2>&1} ) == 0,
-    "perl -c lib/Test/Smoke.pm okay" );

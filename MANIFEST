@@ -24,13 +24,16 @@ synctree.pl
 W32Configure.pl
 lib/Mail/Sendmail.pm
 lib/Test/Smoke.pm
+lib/Test/Smoke/BuildCFG.pm
 lib/Test/Smoke/Mailer.pm
 lib/Test/Smoke/Patcher.pm
 lib/Test/Smoke/Policy.pm
+lib/Test/Smoke/Smoker.pm
 lib/Test/Smoke/Syncer.pm
 lib/Test/Smoke/SourceTree.pm
 lib/Test/Smoke/Util.pm
 t/TestLib.pm
+t/buildcfg.t
 t/cfgstuff.t
 t/for_dmake.t
 t/for_nmake.t
