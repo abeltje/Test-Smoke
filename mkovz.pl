@@ -216,7 +216,7 @@ for (<OUT>) {
     }
 }
 
-$Config{ccvers}	||= $Config{ccversion} || $Config{gccversion};
+$Config{ccvers}	||= $Config{gccversion} || $Config{ccversion};
 require Sys::Hostname;
 my $this_host = Sys::Hostname::hostname() || "nohost";
 
