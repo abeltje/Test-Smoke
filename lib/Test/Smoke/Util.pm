@@ -155,7 +155,9 @@ my %win32_makefile_map = (
 
 sub Configure_win32 {
     my($command, $win32_maker, @args ) = @_;
-    $win32_maker ||= 'nmake';
+    $win32_maker ||= 'nmake'; $win32_maker = lc $win32_maker;
+    my $is_dmake = $win32_maker eq 'dmake';
+    my $is_nmake = $win32_maker eq 'nmake';
 
     local $_;
     my %opt_map = (
@@ -248,8 +250,10 @@ sub Configure_win32 {
     my $donot_change = 0;
     while (<ORG>) {
         if ( $donot_change ) {
+            # need to help the Win95 build
+            $is_dmake and s/\b$win32_makefile_map{ $win32_maker }\b/smoke.mk/;
             if (m/^\s*CFG_VARS\s*=/) {
-                my( $extra_char, $quote ) = $win32_maker =~ /\bnmake\b/ 
+                my( $extra_char, $quote ) = $is_nmake
                     ? ( "\t", '"' ) : ("~", "" );
                 $_ .= join "", map "\t\t$quote$_$quote\t${extra_char}\t\\\n", 
                                    grep /\w+=/, @args;

@@ -72,3 +72,17 @@ CFG_VARS	=				\
 
 some_target : will break arguments up like this \
 		CCTYPE=$(CCTYPE) > somewhere
+
+# This target is used to generate the new makefile (.\makefile.95) for Win95
+
+.\makefile.95: .\makefile.mk
+        $(MINIPERL) genmk95.pl makefile.mk $(MK2)
+
+#--------------------- END Win95 SPECIFIC ---------------------
+
+# a blank target for when builds don't need to do certain things
+# this target added for Win95 port but used to keep the WinNT port able to
+# use this file
+__not_needed:
+        $(NOOP)
+

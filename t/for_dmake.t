@@ -24,17 +24,27 @@ my $config   = $dft_args .
 Configure_win32( './Configure ' . $config, 'dmake' );
 
 ok( -f $smoke_mk, "New makefile ($config)" );
+
 my $extra_len = length( "\t\tconfig_args=$dft_args\t~\t\\\n" );
+# To help the Win9[58] build, we must "genmk95.pl smoke.mk makefile.95"
+# We know about 2 times: s/\bmakefile.mk\b/smoke.mk/ (in testfile!)
+$extra_len -= 2 * (length( 'makefile.mk') - length( 'smoke.mk' ));
 is( -s 'win32/makefile.mk', ( -s $smoke_mk ) - $extra_len,
     "Sizes are equal for standard options (-Duseithreads)" );
 
 SKIP: {
     local *MKFILE;
     open MKFILE, '< win32/makefile.mk' or skip "Can't read makefile.mk", 1;
-    my @orig = <MKFILE>;
+    my $donot_change = 0;
+    my @orig = map { 
+        $donot_change ||= /^#+ CHANGE THESE ONLY IF YOU MUST #+$/;
+        $donot_change and s/\bmakefile.mk\b/smoke.mk/; 
+        $_
+    } <MKFILE>;
     close MKFILE;
     open MKFILE, "< $smoke_mk" or skip "Can't read smoke.mk", 1;
     my @dest = grep ! /^\s+config_args=-Duseithreads/ => <MKFILE>;
+    
     close MKFILE;
 
     is_deeply( \@dest, \@orig, "Content compares" );
