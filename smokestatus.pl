@@ -4,7 +4,7 @@ $| = 1;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.011';
+$VERSION = '0.012';
 
 use Cwd;
 use File::Spec::Functions;
@@ -132,8 +132,9 @@ foreach my $config ( @configs ) {
         ? ( (($todo - 1) * $rpt->{avg}) + $est_curr ) : 0;
     $est_todo > $todo * $rpt->{avg} and $est_todo = $todo * $rpt->{avg};
     my $todo_time = $rpt->{avg} <= 0  ? '.' : 
-        $est_todo <= 0 ? ', smoke looks aborted.' :
-        ", estimated completion in " . time_in_hhmm( $est_todo );
+        $est_todo <= 0 
+            ? ", smoke looks aborted delay " . time_in_hhmm( -$est_todo )
+            : ", estimated completion in " . time_in_hhmm( $est_todo );
     printf "    $todo configuration%s to finish$todo_time\n",
            $todo == 1 ? "" : "s"
         if $todo;
@@ -142,7 +143,7 @@ foreach my $config ( @configs ) {
         if $rpt->{ccount};
 
     if ( $rpt->{ccount} > 0 && $opt{matrix} ) {
-        printf "    Matrix:%s\n", $rpt->{reporter}->ccinfo;
+        printf "    Matrix, using %s:\n", $rpt->{reporter}->ccinfo;
         print join "", map "    $_\n" 
             => split /\n/, $rpt->{reporter}->smoke_matrix;
         print join "", map "    $_\n" 
