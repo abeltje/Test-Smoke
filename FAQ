@@ -210,6 +210,80 @@ a unixy way.
 
 =back
 
+=head2 How can I skip a step in smokeperl.pl?
+
+F<smokeperl.pl> takes arguments to skip some of the steps it takes:
+
+=over 4
+
+=item B<--nofetch> Do not sync the source-tree before smoking
+
+=item B<--nopatch> Do not patch the source-tree (if applicable)
+
+=item B<--nomail> Do not send the report out by mail
+
+=item B<--noarchive> Do not archive the report and logfile
+
+=back
+
+F<smokeperl.pl> will always do the equivalent of F<runsmoke.pl> and
+generate the report.
+
+After running F<configsmoke.pl> you should have a small
+wrapper-script, that sets up the environment and calls
+F<smokeperl.pl>. All arguments passed to this script will be passed to
+F<smokeperl.pl>! Please see L<smokeperl.pl> for details.
+
+=head2 How do I smoke my patch?
+
+When preparing a patch for admission to perl5-porters it is always a
+good idea to test it. B<Test::Smoke> has a mechanism to smoke-test the
+effects of that patch. Here is a way to set it up:
+
+=over 4
+
+=item Set up Test::Smoke
+
+Install Test::Smoke and create a separate directory to keep all your
+configurations in.
+
+=item Create a build-configurations file
+
+In this configs directory you then create a build-configurations
+file. This is usually done from one of default F<*.cfg> files in the
+Test::Smoke distribution.
+
+=item Configure Test::Smoke with F<configsmoke.pl>
+
+Now you need to configure Test::Smoke by running F<configsmoke.pl> in
+your configs directory (optionally specifying a prefix).
+
+    $ ../smoke/configsmoke.pl -p testpatch
+
+You should be careful with the e-mail options and make sure you
+do not send the results to either <smokers-reports@perl.org> or
+<perl5-porters@perl.org>.
+
+=item Create a patches-to-apply-file
+
+The patches-to-apply-file has a simple format. It has each patch to
+apply on a single line and each line is semicolon separated with the
+full path to the patchfile in the first column and optionally the
+options to pass to L<patch(1)> in the second column. By default B<-p1>
+is passed if no B<-pN> option was specified.
+
+    $ cat mypatch.inc
+    ~/p5p/patches/mypatch.diff;-p0
+
+=item Start the smoke with the --pfile option
+
+    $ ./testpatch.sh --pfile mypatch.inc
+ 
+You can also configure Test::Smoke to always use a
+patches-to-apply-file during F<configsmoke.pl>.
+
+=back
+
 =head2 Can I interrupt a smoke run?
 
 Yes, you can kill all the smoke related processes. Each stage is
