@@ -30,6 +30,7 @@ Test::Smoke::BuildCFG - OO interface for handling build configurations
 
 =head1 DESCRIPTION
 
+Handle the build configurations
 
 =head1 METHODS
 
@@ -185,6 +186,8 @@ that should be in the ccflags variable in the F<Policy.sh> file
 (see also L<Test::Smoke::Policy>) and starts with a (forward) slash ('/').
 
 A B<policy-section> can have only one (1) target-option.
+
+=back
 
 =cut
 

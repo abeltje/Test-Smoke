@@ -209,7 +209,7 @@ sub make_distclean {
             v    => 0,
         );
         my $distclean = Test::Smoke::Syncer->new( hardlink => %options );
-        $disclean->clean_from_directory( $self->{fdir}, 'mktest.out' );
+        $distclean->clean_from_directory( $self->{fdir}, 'mktest.out' );
     } else {
         $self->_make( "-i distclean 2>/dev/null" );
     }
