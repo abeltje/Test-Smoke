@@ -1230,7 +1230,7 @@ sub sync {
 
     $fc->connect;
 
-    $fc->mirror( @{ $self }{qw( ftpsdir ddir )}, 1 );
+    $fc->mirror( @{ $self }{qw( ftpsdir ddir )}, 1 ) or return;
 
     $self->{client} = $fc;
     $self->create_dot_patch;
