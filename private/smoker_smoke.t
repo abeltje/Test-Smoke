@@ -3,6 +3,10 @@ use strict;
 use Data::Dumper;
 $| = 1;
 
+# $Id$
+
+my $verbose = 0;
+
 use Cwd;
 use FindBin;
 use File::Spec::Functions;
@@ -11,6 +15,7 @@ use lib catdir( $FindBin::Bin, updir );
 
 use SmokertestLib;
 use Test::More 'no_plan';
+pass( $0 );
 
 use Test::Smoke::BuildCFG;
 use_ok( 'Test::Smoke::Smoker' );
