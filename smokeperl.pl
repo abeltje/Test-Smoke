@@ -21,6 +21,7 @@ GetOptions( \%options,
     'run!',
     'is56x',
     'smartsmoke!',
+    'snapshot|s=i',
 );
 
 use Config;
@@ -93,6 +94,7 @@ if ( $options{continue} ) {
     synctree();
     patchtree();
 }
+
 my $cwd = cwd();
 chdir $conf->{ddir} or die "Cannot chdir($conf->{ddir}): $!";
 call_mktest();
@@ -107,6 +109,17 @@ sub synctree {
         unless ( $options{fetch} && $options{run} ) {
             $conf->{v} and print "Skipping synctree\n";
             last FETCHTREE;
+        }
+        if ( $options{snapshot} ) {
+            if ( $conf->{sync_type} eq 'snapshot' ||
+               ( $conf->{sync_type} eq 'forest'   && 
+                 $conf->{fsync} eq 'snapshot' ) ) {
+
+                $conf->{sfile} = snapshot_name();
+            } else {
+                die "<--snapshot> is not valid now, please reconfigure!";
+            }
+            $conf->{sfile} = snapshot_name();
         }
         my $syncer = Test::Smoke::Syncer->new( $conf->{sync_type}, $conf );
         $now_patchlevel = $syncer->sync;
@@ -210,6 +223,17 @@ sub configs_from_log {
     close LOG;
     pop @configs unless $finish;
     return @configs;
+}
+
+sub snapshot_name {
+    my( $plevel ) = $options{snapshot} =~ /(\d+)/;
+    my $sfile = $conf->{sfile};
+    if ( $sfile ) {
+        $sfile =~ s/\d+/$plevel/;
+    } else {
+        $sfile = "perl\@$plevel.$conf->{snapext}";
+    }
+    return $sfile;
 }
 
 =head1 SEE ALSO

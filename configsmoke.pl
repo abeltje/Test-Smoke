@@ -31,7 +31,7 @@ foreach my $opt (qw( config jcl log )) {
 }
 
 use vars qw( $VERSION $conf );
-$VERSION = '0.020'; # $Id$
+$VERSION = '0.021'; # $Id$
 
 eval { require $options{config} };
 $options{oldcfg} = 1, print "Using '$options{config}' for defaults.\n" 
@@ -41,7 +41,7 @@ if ( $@ || $options{default} ) {
     my $df_config = "$options{ $df_key }_dfconfig";
     local $@;
     eval { require $df_config };
-    $options{oldcfg} = 1, print "Using '$df_config' for more defaults.\n"
+    $options{oldcfg} = 0, print "Using '$df_config' for more defaults.\n"
         unless $@;
 } 
 
@@ -71,12 +71,12 @@ my %config = ( perl_version => $conf->{perl_version} || '5.9.x' );
 my %mailers = get_avail_mailers();
 my @mailers = sort keys %mailers;
 my @syncers = get_avail_sync();
-my $syncmsg = join "\n", @{ 
-    { rsync    => "\trsync - Use the rsync(1) program [preferred]",
-      copy     => "\tcopy - Use File::Copy to copy from a local directory",
-      hardlink => "\thardlink - Copy from a local directory using link()",
-      snapshot => "\tsnapshot - Get a snapshot using Net::FTP", }
-}{ @syncers };
+my $syncmsg = join "\n", @{ { 
+    rsync    => "\trsync - Use the rsync(1) program [preferred]",
+    copy     => "\tcopy - Use File::Copy to copy from a local directory",
+    hardlink => "\thardlink - Copy from a local directory using link()",
+    snapshot => "\tsnapshot - Get a snapshot using Net::FTP (or LWP::Simple)",
+} }{ @syncers };
 my @untars = get_avail_tar();
 my $untarmsg = join "", map "\n\t$_" => @untars;
 
@@ -89,9 +89,9 @@ my %versions = (
                  text   => 'Perl 5.6.2-to-be',
                  is56x  => 1 },
     '5.8.x' => { source =>  'ftp.linux.activestate.com::perl-5.8.x',
-                 server => 'ftp.perl.org',
-                 sdir   => '/CPAN/src/',
-                 sfile  => 'perl-5.8.0.tar.gz',
+                 server => 'http://www.iki.fi',
+                 sdir   => '/jhi',
+                 sfile  => 'perl@19856.tgz',
                  pdir   => '/pub/staff/gsar/APC/perl-5.8.x-diffs',
                  ddir   => File::Spec->rel2abs( 
                                File::Spec->catdir( File::Spec->updir,
@@ -215,7 +215,9 @@ my %opt = (
     },
 
     server => {
-        msg => 'Where would you like to FTP the snapshots from?',
+        msg => "Where would you like to FTP the snapshots from?
+\tsnapshots on a webserver can be downloaded with the use
+\tof LWP::Simple. Just have the server-name start with http://",
         alt => [ ],
         dft => 'ftp.funet.fi',
     },
@@ -226,7 +228,8 @@ my %opt = (
     },
     sfile => {
         msg => "Which file should be FTPed?
-\tLeave empty to automatically find newest.",
+\tLeave empty to automatically find newest.
+\tMandatory for HTTP! (see also --snapshot switch in perlsmoke.pl)",
         alt => [ ],
         dft => '',
     },
@@ -652,6 +655,10 @@ SYNCER: {
 
     /^snapshot$/ && do {
         for $arg ( qw( server sdir sfile ) ) {
+            if ( $arg ne 'server' && $config{server} =~ m|^https?://|i ) {
+                $opt{ $arg }->{msg} =~ s/\bFTPed/HTTPed/;
+                $opt{ $arg }->{msg} =~ s/^\tLeave.+\n//m;
+            }
             $config{ $arg } = prompt( $arg );
         }
         unless ( $config{sfile} ) {
@@ -1295,8 +1302,17 @@ sub get_avail_sync {
 
     my @synctype = qw( copy hardlink );
     eval { local $^W; require Net::FTP };
+    my $has_ftp = !$@;
+
+    eval { local $^W; require LWP::Simple };
+    my $has_lwp = !$@;
+
     my $pversion = $config{perl_version} || '5.9.x';
-    unshift @synctype, 'snapshot' unless $@ || ( $pversion ne '5.9.x' );
+
+    # (has_ftp && 5.9.x) || (has_lwp && !5.6.x)
+    unshift @synctype, 'snapshot' 
+        if ( $has_ftp && $pversion eq '5.9.x' ) ||
+           ( $has_lwp && $pversion ne '5.6.x' );
     unshift @synctype, 'rsync' if whereis( 'rsync' );
     return @synctype;
 }

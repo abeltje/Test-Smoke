@@ -2,7 +2,7 @@ package Test::Smoke::Syncer;
 use strict;
 
 use vars qw( $VERSION );
-$VERSION = '0.007'; # $Id$
+$VERSION = '0.008'; # $Id$
 
 use File::Spec;
 use Cwd;
@@ -296,7 +296,7 @@ sub check_dot_patch {
     my $patchlevel_h = File::Spec->catfile( $self->{ddir}, 'patchlevel.h' );
     if ( open PATCHLEVEL_H, "< $patchlevel_h" ) {
         while ( <PATCHLEVEL_H> ) {
-            /"DEVEL(\d+)"/ or next;
+            /"(?:DEVEL|MAINT)(\d+)"/ or next;
             $patch_level = $1;
         }
         # save 'patchlevel.h' mtime, so you can set it on '.patch'
@@ -493,12 +493,16 @@ sub sync {
 
 =item $syncer->_fetch_snapshot( )
 
-This does the actual ftpsession.
+C<_fetch_snapshot()> checks to see if 
+C<< S<< $self->{server} =~ m|^https?://| >> && $self->{sfile} >>.
+If so let B<LWP::Simple> do the fetching else do the FTP thing.
 
 =cut
 
 sub _fetch_snapshot {
     my $self = shift;
+
+    return $self->_fetch_snapshot_HTTP if $self->{server} =~ m|^https?://|i;
 
     require Net::FTP;
     my $ftp = Net::FTP->new( $self->{server}, Debug => 0 ) or do {
@@ -550,6 +554,44 @@ sub _fetch_snapshot {
     $ftp->quit;
 
     return $local_snap;
+}
+
+=item $syncer->_fetch_snapshot_HTTP( )
+
+C<_fetch_snapshot_HTTP()> simply invokes C<< LWP::Simple::mirror() >>.
+
+=cut
+
+sub _fetch_snapshot_HTTP {
+    my $self = shift;
+
+    require LWP::Simple;
+    my $snap_name = $self->{sfile};
+
+    unless ( $snap_name ) {
+        require Carp;
+        Carp::carp "No snapshot specified for $self->{server}$self->{sdir}";
+        return undef;
+    }
+
+    my $local_snap = File::Spec->catfile( $self->{ddir},
+                                          File::Spec->updir, $snap_name );
+    $local_snap = File::Spec->canonpath( $local_snap );
+
+    my $remote_snap = "$self->{server}$self->{sdir}/$self->{sfile}";
+
+    $self->{v} and print "LWP::Simple::mirror($remote_snap)";
+    my $result = LWP::Simple::mirror( $remote_snap, $local_snap );
+    if ( LWP::Simple::is_success( $result ) ) {
+        $self->{v} and print " OK\n";
+        return $local_snap;
+    } elsif ( LWP::Simple::is_error( $result ) ) {
+        $self->{v} and print " not OK\n";
+        return undef;
+    } else {
+        $self->{v} and print " skipped\n";
+        return $local_snap;
+    }
 }
 
 =item __find_snap_name( $ftp, $snapext )
