@@ -204,6 +204,10 @@ disagree (it was all before my time).
 The case is now that the official name for the mailinglist is
 B<daily-build-reports> and there is an alias to B<smokers-reports>.
 
+=head1 REVISION
+
+$Id$
+
 =head1 COPYRIGHT
 
 (c) 2002-2003, All rights reserved.
