@@ -7,8 +7,9 @@ use FindBin;
 use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
 use Test::Smoke::Util qw( Configure_win32 );
 
-use vars qw( $VERSION $conf );
-$VERSION = '0.001';
+use Test::Smoke;
+use vars qw( $VERSION );
+$VERSION = '0.004';
 
 =head1 NAME
 
@@ -38,7 +39,7 @@ my %opt = (
     maker  => '',
     v      => 0,
 
-    config => '',
+    config => undef,
     help   => 0,
     man    => 0,
 );
@@ -49,21 +50,30 @@ GetOptions( \%opt,
 
     'man', 'help|h',
 
-    'config|c=s',
+    'config|c:s',
 ) or do_pod2usage( verbose => 1 );
 
 $opt{man}  and do_pod2usage( verbose => 2, exitval => 0 );
 $opt{help} and do_pod2usage( verbose => 1, exitval => 0 );
 
-if ( $opt{config} && -f $opt{config} ) {
-    require $opt{config};
+if ( defined $opt{config} ) {
+    $opt{config} eq "" and $opt{config} = 'smokecurrent_config';
+    read_config( $opt{config} ) or do {
+        my $config_name = File::Spec->catfile( $FindBin::Bin, $opt{config} );
+        read_config( $config_name );
+    };
 
-    foreach my $option ( keys %opt ) {
-        if ( $option eq 'maker' ) {
-            $opt{type} ||= $conf->{w32args}[3];
-        } elsif ( exists $conf->{ $option } ) {
-            $opt{ $option } ||= $conf->{ $option }
+    unless ( Test::Smoke->config_error ) {
+        foreach my $option ( keys %opt ) {
+            if ( $option eq 'maker' ) {
+                $opt{maker} ||= $conf->{w32args}[3];
+            } elsif ( exists $conf->{ $option } ) {
+                $opt{ $option } ||= $conf->{ $option }
+            }
         }
+    } else {
+        warn "WARNING: Could not process '$opt{config}': " . 
+             Test::Smoke->config_error . "\n";
     }
 }
 
