@@ -7,7 +7,7 @@ use File::Spec;
 use Test::More 'no_plan';
 use_ok( 'Test::Smoke::Smoker' );
 
-SKIP: {
+{
     my %config = (
         v => 0,
         ddir => 'perl-current',
@@ -15,7 +15,7 @@ SKIP: {
     );
 
     local *LOG;
-    open LOG, ">&" . File::Spec->devnull or skip "No devnull()", 2;
+    open LOG, "> " . File::Spec->devnull;
 
     my $smoker = Test::Smoke::Smoker->new( \*LOG, %config );
     isa_ok( $smoker, 'Test::Smoke::Smoker' );
