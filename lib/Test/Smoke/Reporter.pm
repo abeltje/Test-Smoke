@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.018';
+$VERSION = '0.019';
 
 use Cwd;
 use File::Spec::Functions;
@@ -240,6 +240,7 @@ sub _parse {
             s/\s*-des//;
             $statarg = $_;
             $debug = s/-D(DEBUGGING|usevmsdebug)\s*// ? "D" : "N";
+            $debug eq 'D' and $rpt{dbughow} = "-D$1";
             s/\s+$//;
 
             $cfgarg = $_ || "";
@@ -348,7 +349,7 @@ sub _post_process {
     my %count = ( O => 0, F => 0, X => 0, M => 0, 
                   m => 0, c => 0, o => 0, t => 0 );
     my( %failures, %order ); my $ord = 1;
-    my $debugging = $^O eq 'VMS' ? '-Dusevmsdebug' : '-DDEBUGGING';
+    my $debugging = $rpt->{dbughow} || '-DDEBUGGING';
     foreach my $config ( @{ $rpt->{cfglist} } ) {
         foreach my $dbinfo (qw( N D )) {
             my $cfg = $config;
@@ -655,7 +656,7 @@ sub bldenv_legend {
     my $locale = $self->{_locale};
     $self->{defaultenv} = ( @{ $self->{_tstenv} } == 1 )
         unless defined $self->{defaultenv};
-    my $debugging = $^O eq 'VMS' ? '-Dusevmsdebug' : '-DDEBUGGING';
+    my $debugging = $self->{_rpt}{dbughow} || '-DDEBUGGING';
 
     return  $locale ? <<EOL : $self->{defaultenv} ? <<EOS : <<EOE;
 | | | | | +- LC_ALL = $locale $debugging
