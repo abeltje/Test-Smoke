@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.020';
+$VERSION = '0.021';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -647,11 +647,17 @@ sub make_minitest {
         # Same as in make ()
         open TST, "$self->{w32make} -f smoke.mk minitest |";
         chdir ".." or die "unable to chdir () out of 'win32'";
+    } elsif ( $self->{is_vms} ) {
+        open TST, "$self->{vmsmaker} minitest |" or do {
+            use Carp;
+            Carp::carp "Cannot fork '$self->{vmsmaker} minitest': $!";
+            return 0;
+        };
     } else {
         local $ENV{PERL} = "./perl";
         open TST, "make minitest |" or do {
             use Carp;
-            Carp::carp "Cannot fork 'make _test': $!";
+            Carp::carp "Cannot fork 'make minitest': $!";
             return 0;
         };
     }
