@@ -131,7 +131,7 @@ foreach my $config ( @configs ) {
     my $est_todo = $todo > 0 && $rpt->{avg} ne 'unknown'
         ? ( (($todo - 1) * $rpt->{avg}) + $est_curr ) : 0;
     $est_todo > $todo * $rpt->{avg} and $est_todo = $todo * $rpt->{avg};
-    my $todo_time = $rpt->{avg} eq 'unknown' ? '.' :
+    my $todo_time = ! $rpt->{avg} ? '.' :
         ", estimated completion in " . time_in_hhmm( $est_todo );
     printf "    $todo configuration%s to finish$todo_time\n",
            $todo == 1 ? "" : "s"
