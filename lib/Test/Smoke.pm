@@ -2,7 +2,7 @@ package Test::Smoke;
 use strict;
 
 use vars qw( $VERSION $conf @EXPORT );
-$VERSION = '1.17_52';
+$VERSION = '1.17_53'; # $Id$
 
 use base 'Exporter';
 @EXPORT  = qw( $conf &read_config &run_smoke );
@@ -111,8 +111,10 @@ sub run_smoke {
 
     my $smoker   = Test::Smoke::Smoker->new( \*LOG, $conf );
 
-    $smoker->ttylog( "Smoking patch $patch\n" ); 
-    do_manifest_check( $conf->{ddir}, $smoker );
+    unless ( $continue ) {
+        $smoker->ttylog( "Smoking patch $patch\n" ); 
+        do_manifest_check( $conf->{ddir}, $smoker );
+    }
 
     chdir $conf->{ddir} or die "Cannot chdir($conf->{ddir}): $!";
     foreach my $this_cfg ( $BuildCFG->configurations ) {
@@ -127,7 +129,7 @@ sub run_smoke {
         $smoker->smoke( $this_cfg, $Policy );
     }
 
-    $smoker->tty( "Finished smoking $patch\n" );
+    $smoker->ttylog( "Finished smoking $patch\n" );
 
     close LOG or do {
         require Carp;
