@@ -1083,7 +1083,7 @@ set CFGNAME=$options{config}
 set LOCKFILE=$options{prefix}.lck
 if NOT EXIST \%LOCKFILE\% goto START_SMOKE
     FIND "\%LOCKFILE\%" \%LOCKFILE\% > NUL:
-    if NOT ERRORLEVEL 1 (echo We seem to be running (or remove \$LOCKFILE)>&2) && exit /B 200
+    if NOT ERRORLEVEL 1 (echo We seem to be running [or remove \%LOCKFILE\%]>&2) && exit /B 200
 
 :START_SMOKE
     echo \%LOCKFILE\% > \%LOCKFILE\%
