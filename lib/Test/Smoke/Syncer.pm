@@ -890,10 +890,10 @@ sub _get_patches {
     }
     $ftp->quit;
 
-    @patches = map $_->[0] => sort { $a->[1] <=> $b->[1] } map {
-        /^(\d+).gz/;
-        [$_, $1 ];
-    } @patches;
+    @patch_list = map $_->[0] => sort { $a->[1] <=> $b->[1] } map {
+        my( $patch_num ) = /(\d+).gz$/;
+        [ $_, $patch_num ];
+    } @patch_list;
 
     return @patch_list;
 }
