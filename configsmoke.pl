@@ -1148,22 +1148,31 @@ sub save_config {
 
 C<sort_configkeys()> is the hook for B<Data::Dumper>
 
+Order and grouping by Merijn, thanks!
+
 =cut
 
 sub sort_configkeys {
-    my @order = qw( 
-        perl_version is56x defaultenv
-        cfg ddir sync_type fsync 
-        rsync opts source 
-        tar server sdir sfile patchup pserver pdir unzip patch cleanup
-        cdir hdir
-        patch pfile
-        force_c_locale locale
-        mail mail_type mserver to from cc
-        w32args w32cc w32make
-        umask renice
-        smartsmoke v
-        killtime );
+    my @order = ( 
+        # Test::Smoke (startup) related
+        qw( cfg v smartsmoke renice killtime umask ),
+
+        # Perl dist related
+        qw( perl_version is56x ddir ),
+
+        # Sync related
+        qw( sync_type fsync rsync opts source tar server sdir sfile
+            patchup pserver pdir unzip patch cleanup cdir hdir patch pfile ),
+
+        # OS specific make related
+        qw( w32args w32cc w32make ),
+
+        # Test environment related
+        qw( force_c_locale locale defaultenv ),
+
+        # Report related
+        qw( mail mail_type mserver from to cc ),
+    );
 
     my $i = 0;
     my %keyorder = map { $_ => $i++ } @order;
