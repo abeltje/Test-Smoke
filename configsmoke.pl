@@ -11,6 +11,10 @@ use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
 use lib $FindBin::Bin;
 use Test::Smoke::Util qw( do_pod2usage );
 
+# $Id$
+use vars qw( $VERSION $conf );
+$VERSION = '0.025';
+
 use Getopt::Long;
 my %options = ( 
     config  => undef, 
@@ -40,10 +44,6 @@ foreach my $opt (qw( config jcl log )) {
     my $key = defined $options{$opt} ? $opt : 'prefix';
     $options{$opt} = "$options{ $key }$suffix{ $opt }";
 }
-
-# $Id$
-use vars qw( $VERSION $conf );
-$VERSION = '0.024';
 
 eval { require $options{config} };
 $options{oldcfg} = 1, print "Using '$options{config}' for defaults.\n" 
@@ -1660,18 +1660,19 @@ sub check_buildcfg {
     OSCHECK: {
         local $_ = $^O;
         /darwin|bsd/i && do { 
-            # No -Duselongdouble, -Dusemorebits, -Duse64bitall
-            @no_option = qw( -Duselongdouble -Dusemorebits -Duse64bitall );
+            push @no_option, qw( -Duselongdouble -Dusemorebits -Duse64bitall );
         };
 
 	/linux/i && do {
-            # No -Duse64bitall
-            @no_option = qw( -Duse64bitall );
+            push @no_option, qw( -Duse64bitall );
         };
 
         /mswin32/i && do {
-            # No -Duselargefiles for 5.6.2 branche
-            @no_option = qw( -Duselargefiles ) if $config{is56x};
+            push @no_option, qw( -Duselargefiles ) if $config{is56x};
+        };
+
+        /cygwin/i && do {
+            push @no_option, qw( -Duse64bitall -Duselongdouble -Dusemorebits );
         };
 
         foreach my $option ( @no_option ) {
