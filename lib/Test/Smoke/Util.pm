@@ -2,7 +2,7 @@ package Test::Smoke::Util;
 use strict;
 
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.15';
+$VERSION = '0.16';
 use base 'Exporter';
 @EXPORT = qw( 
     &Configure_win32 
@@ -127,6 +127,11 @@ The library to use for des_fcrypt()
 
 Set the cf_email option (Config.pm)
 
+=item * <-Accflags=...>
+
+Adds the option to BUILDOPT. This is implemented differently for 
+B<nmake> and B<dmake>.
+
 =back
 
 =cut
@@ -194,10 +199,15 @@ sub Configure_win32 {
         grep /^-D[a-z_]+/, quotewords( '\s+', 1, $command );
     push @args, "config_args=$config_args";
 
+    my @buildopt;
     $command =~ m{^\s*\./Configure\s+(.*)} or die "unable to parse command";
-    foreach (split " ", $1) {
+    foreach ( quotewords( '\s+', 1, $1) ) {
 	m/^-[des]{1,3}$/ and next;
 	m/^-Dusedevel$/  and next;
+        if ( /^-Accflags=(['"])?(.+)\1/ ) { #emacs' syntaxhighlite
+           push @buildopt, $2;
+           next;
+        }
         my( $option, $value ) = /^(-D\w+)(?:=(.+))?$/;
 	die "invalid option '$_'" unless exists $opt_map{$option};
 	$opts{$opt_map{$option}} = $value ? $value : 1;
@@ -233,7 +243,14 @@ sub Configure_win32 {
             print NEW $_;
             next;
         } else {
-            $donot_change = /^#+ CHANGE THESE ONLY IF YOU MUST #+$/;
+            if ( $donot_change = /^#+ CHANGE THESE ONLY IF YOU MUST #+$/ ) {
+                # We will now insert the BULDOPT lines
+                my $bo_tmpl = $win32_maker eq 'nmake'
+                    ? "BUILDOPT\t= \$(BUILDOPT) %s" : "BUILDOPT\t+= %s";
+                my $buildopt = join "\n", 
+                                    map sprintf( $bo_tmpl, $_ ) => @buildopt;
+                $buildopt and $_ = "$buildopt\n$_\n"
+            };
         }
 
         # Only change config stuff _above_ that line!
