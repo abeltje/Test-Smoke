@@ -18,7 +18,7 @@ use Test::Smoke::Util qw( calc_timeout );
 use Getopt::Long;
 my %opt = (
     config         => undef,
-    ddir           => File::Spec->curdir(),
+    ddir           => undef,
     fdir           => undef,
     run            => 1,
     dry_run        => undef,
@@ -26,6 +26,7 @@ my %opt = (
     force_c_locale => undef,
     is56x          => undef,
     defaultenv     => undef,
+    continue       => undef,
     w32make        => 'nmake',
     w32cc          => 'MSVC60',
     v              => undef,
@@ -80,6 +81,7 @@ These options will also override the values in the configfile
 
 =item General options
 
+    --continue                Try to continue an aborted smoke
     --[no]run
     --dry-run|-n              dry run...
     --help|-h                 This message
@@ -143,6 +145,10 @@ $opt{cfg} = shift @ARGV if ! $opt{cfg} && @ARGV && -f $ARGV[0];
 $conf->{ $_ } = $opt{ $_ } for keys %opt;
 @ARGV and push @{ $conf->{w32args} }, @ARGV;
 
+$conf->{ddir} and do {
+    $conf->{v} and print "[$0] chdir($conf->{ddir})\n";
+    chdir $conf->{ddir} or die "Cannot chdir($conf->{ddir}): $!";
+};
 my $timeout = 0;
 if ( $Config{d_alarm} && $conf->{killtime} ) {
     $timeout = calc_timeout( $conf->{killtime} );
