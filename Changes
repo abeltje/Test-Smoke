@@ -10,6 +10,270 @@ The filelists have a short symbolic indicator:
 
 Enjoy!
 ___________________________________________________________________________
+[   653] By: abeltje                          on 2004-03-14 16:11:37 +0100
+        Log: * [ADD]
+	       * added two more questions:
+		 + How can I skip a step in smokeperl.pl?
+		 + How do I smoke my patch?
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/FAQ
+___________________________________________________________________________
+[   652] By: abeltje                          on 2004-03-14 16:07:55 +0100
+        Log: * [FIX]
+	       * added the --pfile argument the help smoking with a
+		 patches file
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/smokeperl.pl
+___________________________________________________________________________
+[   651] By: abeltje                          on 2004-03-12 19:43:13 +0100
+        Log: * [ADD]
+	       * Better information about Win32/Cygwin hardware if
+		 Win32::TieRegistry is available
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[   650] By: abeltje                          on 2004-03-12 15:20:29 +0100
+        Log: * [CHANGE]
+	       * Cleanup the new $REVISION code (always return the highest
+		 of $Rev$ and .patch)
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Reporter.pm,
+	     /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   649] By: abeltje                          on 2004-03-12 15:06:58 +0100
+        Log: * [CHANGE] asked for by Steve Hay
+	       * We now keep track of the return status ($?>>8) from the
+		 qx// in _run()
+	       * The first place this is used: make_() will return
+		 BUILD_MINIPERL instead of BUILD_PERL if the make exits
+		 non-zero
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm
+___________________________________________________________________________
+[   648] By: abeltje                          on 2004-03-12 09:43:35 +0100
+        Log: * [ADD]
+	       * Many requests for the inclusion of the latest change
+		 number, I hope this does the trick.
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Makefile.PL,
+	     /Test-Smoke/lib/Test/Smoke/Reporter.pm,
+	     /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   647] By: abeltje                          on 2004-03-11 11:06:20 +0100
+        Log: * [FIX]
+	       * More problems with _transform_testnames() (reported by
+		 Steve Hay), I've now sort of gone back to the original
+		 code
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm, /Test-Smoke/t/smoker.t
+___________________________________________________________________________
+[   646] By: abeltje                          on 2004-03-10 12:47:59 +0100
+        Log: * [CHANGE]
+	       * Steve Hay reported problems with file permissions within
+		 the fake snapshots for the testsuite. They're now set to
+		 644 for all files
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/t/ftppub/snap/perl@19000.tgz,
+	     /Test-Smoke/t/ftppub/snap/perl@20000.tgz
+___________________________________________________________________________
+[   645] By: abeltje                          on 2004-03-10 10:15:13 +0100
+        Log: * [FIX] spotted by Steve Hay
+	       * MY::libscan() had a bug, it matched agians $_ and not
+		 against $path
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Makefile.PL
+___________________________________________________________________________
+[   644] By: abeltje                          on 2004-03-10 10:10:38 +0100
+        Log: * [FIX]
+	       * change 639 weeded out too much, we must be stricter wrt/
+		 the contents of @nok
+	       * Steve Hay reported the new smoker.t tests failing on
+		 Win32
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm, /Test-Smoke/t/smoker.t
+___________________________________________________________________________
+[   642] By: abeltje                          on 2004-03-07 18:45:39 +0100
+        Log: * [CHANGE]
+	       * add a check for $ENV{SMOKE_INSTDIR} to set the default
+		 install directory, can be ysed together with
+		 $ENV{PERL_MM_USE_DEFAULT}
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Makefile.PL, /Test-Smoke/README
+___________________________________________________________________________
+[   641] By: abeltje                          on 2004-03-07 18:22:36 +0100
+        Log: * [CHANGE]
+	       * Rafael asked for removal of '-Uuseperlio' in
+		 perlcurrent.cfg, so we split it of and add 'perl58x.cfg'
+	       * adjust configsmoke.pl
+	       * Add $Id$ to all the *.cfg files
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           + /Test-Smoke/perl58x.cfg
+           ! /Test-Smoke/MANIFEST, /Test-Smoke/configsmoke.pl,
+	     /Test-Smoke/perl55x.cfg, /Test-Smoke/perl562.cfg,
+	     /Test-Smoke/perlcurrent.cfg, /Test-Smoke/w32current.cfg
+___________________________________________________________________________
+[   639] By: abeltje                          on 2004-03-07 12:13:06 +0100
+        Log: * [CHANGE] (I hope this doesn't break Win32)
+	       * factor out _transform_testnames()
+	       * change it as 631 broke unixy (bsd) extend_with_harness()
+	       * add a test for _transform_testnames()
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm, /Test-Smoke/t/smoker.t
+___________________________________________________________________________
+[   638] By: abeltje                          on 2004-03-03 22:44:59 +0100
+        Log: * [FIX] (More thanks to Steve Hay for his hard work on this!)
+	       * There are still problems on Windows with the
+		 interpretation of the 'harness' output. I have now added
+		 some more safeguards. Hope that helps.
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm
+___________________________________________________________________________
+[   637] By: abeltje                          on 2004-03-03 18:52:55 +0100
+        Log: * [FIX]
+	       * The archive function didn't work properly:
+		 * on win32
+		 * when log was in a differnt directory
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/archiverpt.pl, /Test-Smoke/configsmoke.pl,
+	     /Test-Smoke/smokeperl.pl
+___________________________________________________________________________
+[   636] By: abeltje                          on 2004-03-03 18:20:06 +0100
+        Log: * [FIX] by Steve Hay
+	       * The pattern matches at the end of the catfile() line have
+		 clobbered $2 from a previous pattern match which isn't
+		 picked up until the next line. The patch just picks up $2
+		 sooner, before it gets clobbered.
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm
+___________________________________________________________________________
+[   635] By: abeltje                          on 2004-03-03 13:37:03 +0100
+        Log: * [ADD] (forgot it in change 632)
+	       * t/ftppub/bugtst03.out
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/MANIFEST
+___________________________________________________________________________
+[   634] By: abeltje                          on 2004-03-03 11:58:51 +0100
+        Log: * Prepare for a snapshot of 1.18_65 (still alpha)
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   633] By: abeltje                          on 2004-03-03 11:56:49 +0100
+        Log: * [FIX] (found by the private testsuite)
+	       * do not prepend 't/' if it is already there when
+		 recreating filenames for extend_with_harness()
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm
+___________________________________________________________________________
+[   632] By: abeltje                          on 2004-03-03 11:35:50 +0100
+        Log: * [FIX] another bug found by Steve Hay (thanks again for the
+	       work!)
+	       * Win32 does not use TEST but harness for its _test target.
+		 This gives output that the parser was not anticipating.
+		 'dubious' is now also regarded as a valid FAIL indicator.
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           + /Test-Smoke/t/ftppub/bugtst03.out
+           ! /Test-Smoke/lib/Test/Smoke/Reporter.pm,
+	     /Test-Smoke/t/reporter.t
+___________________________________________________________________________
+[   631] By: abeltje                          on 2004-03-01 21:09:33 +0100
+        Log: * [FIX] thanks to Steve Hay for finding this
+	       * a thinko in the new paths-code for extend_with_harness()
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm
+___________________________________________________________________________
+[   630] By: abeltje                          on 2004-02-29 14:34:45 +0100
+        Log: * [CHANGE]
+	       * forgot to take the "Matrix" text two spaces back with the
+		 actual matrix
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/smokestatus.pl
+___________________________________________________________________________
+[   629] By: abeltje                          on 2004-02-29 14:28:38 +0100
+        Log: * [CHANGE]
+	       * more output tweaks...
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/smokestatus.pl
+___________________________________________________________________________
+[   628] By: abeltje                          on 2004-02-29 14:27:44 +0100
+        Log: * [CHANGE]
+	       + added a new sub sysinfo() that can be imported
+	       * adjust the tests accordingly
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm,
+	     /Test-Smoke/t/sysinfo.t
+___________________________________________________________________________
+[   627] By: abeltje                          on 2004-02-28 15:03:54 +0100
+        Log: * [CHANGE]
+	       * some minor nits in the output
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/smokestatus.pl
+___________________________________________________________________________
+[   623] By: abeltje                          on 2004-02-27 20:12:40 +0100
+        Log: * [CHANGE]
+	       * change the way testnames are constructed before passing
+		 them to harness
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm
+___________________________________________________________________________
+[   622] By: abeltje                          on 2004-02-27 14:19:02 +0100
+        Log: * [ADD]
+	       + forgot to add this, needed by t/reporter.t
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/MANIFEST
+___________________________________________________________________________
+[   621] By: abeltje                          on 2004-02-27 13:42:49 +0100
+        Log: * [CHANGE]
+	       + prepare for a feature-request from David Landgren:
+		 It would be helpful if the config that was used for the
+		 smoke (sans comments) was tacked onto the end of the
+		 report. 
+	       + implement a feature request from Merijn Brand:
+		 Can you also display C-compiler info with the --matrix
+		 option in smokestatus.pl?
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Reporter.pm,
+	     /Test-Smoke/smokestatus.pl, /Test-Smoke/t/reporter.t
+___________________________________________________________________________
+[   620] By: abeltje                          on 2004-02-26 23:38:06 +0100
+        Log: * [FIX] some Win32 stuff with te help of Steve Hay
+	       * some tests were doubled for extending with harness
+		 (test==testharness on Win32)
+	       * on Win32 config.sh is only created during make, so we
+		 need later logging of ccinfo
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm
+___________________________________________________________________________
+[   619] By: abeltje                          on 2004-02-24 00:03:38 +0100
+        Log: * [ADD]
+	       + added a new instance-method:
+		 Test::Smoke::BuildCFG->as_string()
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/BuildCFG.pm,
+	     /Test-Smoke/t/buildcfg.t
+___________________________________________________________________________
+[   618] By: abeltje                          on 2004-02-22 16:33:30 +0100
+        Log: * [CHANGE] (sort of suggested by Allen Smith)
+	       * Cc: will now only be send on failure!
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/ReleaseNotes, /Test-Smoke/configsmoke.pl,
+	     /Test-Smoke/lib/Test/Smoke/Mailer.pm, /Test-Smoke/t/mailer.t
+___________________________________________________________________________
+[   617] By: abeltje                          on 2004-02-21 15:16:53 +0100
+        Log: * [CHANGE]
+	       * forgot to bump the $VERSION after a fix (change 610)
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Reporter.pm
+___________________________________________________________________________
+[   614] By: abeltje                          on 2004-02-21 14:35:39 +0100
+        Log: * regen SIGNATURE for 1.18_62
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/SIGNATURE
+___________________________________________________________________________
+[   613] By: abeltje                          on 2004-02-21 14:34:56 +0100
+        Log: * regen Changes for 1.18_62
+        Url: http://www.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Changes
+___________________________________________________________________________
 [   610] By: abeltje                          on 2004-02-21 14:24:21 +0100
         Log: * [FIX]
 	       * A thing I shouldn't have touched in 603
@@ -2377,4 +2641,4 @@ ___________________________________________________________________________
 	     /Test-Smoke/t/win32/makefile.mk, /Test-Smoke/test_compile.pl,
 	     /Test-Smoke/test_pod.pl
 
--- Generated by 'svnchanges' (0.012) --
+-- Generated by 'svnchanges' (0.013) --
