@@ -125,6 +125,10 @@ This is the main script that runs I<Configure>, I<make> and S<< I<make
 test> >> for all configurations and log the results in F<<
 <builddir>/mktest.out >>.
 
+As of 1.17_53 (1.18-to-be) the use of F<mktest.pl> is deprecated in
+favour of the new F<runsmoke.pl> frontend to B<Test::Smoke::Smoker>. This
+script will not be maintained!
+
 =item B<mkovz.pl>
 
 This script generates the report as F<< <builddir>/mktest.rpt >> from
@@ -152,7 +156,7 @@ a unixy way.
 
 Yes, you can kill all the smoke related processes. Each stage is
 directly logged in F<< <builddir>/mktest.out >>.
-(Can somebody provide some more insight here?)
+
 
 As of version 1.17.02 you can specify a timeout (if you have alarm())
 
