@@ -129,6 +129,7 @@ my $perlio = "";
 my $conf   = "";
 my $debug  = "";
 my %times  = ( start => undef, total => 0 );
+
 $rpt{patch} = "?";
 my ($out, @out) = (File::Spec->catfile ($testd, "mktest.out"), 1 .. 5);
 open OUT, "<$out" or die "Can't open $out: $!";
@@ -174,14 +175,16 @@ for (<OUT>) {
     }
     if (m/PERLIO\s*=\s*(\w+)/) {
         $perlio = $1;
-        if ( $^O =~  /MSWin32/ ) {
-            s/^PERLIO\s*=\s+\w+io(?: :crlf)?\s*//;
-        } else {
-            next;
+        if ( $perlio eq 'minitest' ) {
+            $rpt{$conf}{$debug}{$_} = "-" for @layers;
+            $rpt{$conf}{$debug}{minitest} = "M";
+            $perlio = 'stdio';
         }
+        # Deal with harness output
+        s/^PERLIO\s*=\s+\w+(?: :crlf)?\s*// and $out[0] = $_;
     }
     if (m/^\s*All tests successful/) {
-        $rpt{$conf}{$debug}{$perlio} = "O";
+        $rpt{$conf}{$debug}{$perlio} = $rpt{$conf}{$debug}{minitest} || "O";
         next;
     }
     if (m/^\s*Skipped this configuration/) {
@@ -210,7 +213,9 @@ for (<OUT>) {
         }
         next;
     }
-    if (m/^\s*Unable to (?=([cbmt]))(?:build|configure|make|test) (mini)?perl/) {
+    if (m/^\s*Unable\ to\
+          (?=([cbmt]))(?:build|configure|make|test)\
+          (anything\ but\ mini)?perl/x) {
         $2 and $1 = uc $1; # M for no perl but miniperl
         foreach my $layer ( @layers ) {
             $rpt{$conf}{$debug}{ $layer }  = $1;
@@ -221,6 +226,8 @@ for (<OUT>) {
     if (m/^\s*FAILED/ || m/^\s*DIED/) {
         foreach my $out (@out) {
             $out =~ m/\.\./ or next;
+            ref $rpt{$conf}{$debug}{$perlio} or
+                $rpt{$conf}{$debug}{$perlio} = []; # Clean up sparse garbage
             push @{$rpt{$conf}{$debug}{$perlio}}, $out . substr $_, 3;
             last;                
         }
@@ -249,7 +256,7 @@ Report by Test::Smoke v$VERSION (perl $this_pver)$time_msg
 O = OK  F = Failure(s), extended report at the bottom
 ? = still running or test results not (yet) available
 Build failures during:       - = unknown or N/A
-c = Configure, M = fail after miniperl, m = make, t = make test-prep
+c = Configure, m = make, M = make (after miniperl), t = make test-prep
 
 EOH
 
@@ -266,15 +273,19 @@ $common_cfg = join " ", sort keys %common_args;
 
 $common_cfg ||= 'none';
 
-my %count = ( O => 0, F => 0, m => 0, c => 0, o => 0, t => 0);
+my %count = ( O => 0, F => 0, M => 0, m => 0, c => 0, o => 0, t => 0);
 my @fail;
 for my $conf (@confs) {
     ( $rpt_stat, $rpt_config ) = ( "", $conf );
     for my $debug ("", "D") {
 	for my $perlio ( @layers ) {
+            my $bldenv = $perlio eq 'stdio' && 
+                         $rpt{$conf}{$debug}{minitest}
+                ? 'minitest' : $perlio;
+
 	    my $res = $rpt{$conf}{$debug}{$perlio};
 	    if (ref $res) {
-                $rpt_stat .= "F ";
+                $rpt_stat .= $bldenv eq 'minitest' ? "M " : "F ";
 		my $s_conf = $conf;
 		$debug and substr ($s_conf, 0, 0) = "-DDEBUGGING ";
 		if ( $perlio eq "stdio" && ref $rpt{$conf}{$debug}{perlio} 
@@ -283,15 +294,15 @@ for my $conf (@confs) {
 		    # Squeeze stdio/perlio errors together
 		    push @fail, [ "stdio/perlio", $s_conf, $res ];
 		    next;
-		} elsif ( $perlio eq "perlio" && ref $rpt{$conf}{$debug}{stdio}
+		} elsif ( $bldenv eq "perlio" && ref $rpt{$conf}{$debug}{stdio}
                           && "@{ $rpt{$conf}{$debug}{stdio} }"
                           eq "@{ $rpt{$conf}{$debug}{perlio} }" ) {
                     next;
-                } elsif ( $perlio eq "locale" ) {
+                } elsif ( $bldenv eq "locale" ) {
                     push @fail, [ "locale:$locale", $s_conf, $res ];
                     next;
                 }
-		push @fail, [ $perlio, $s_conf, $res ];
+		push @fail, [ $bldenv, $s_conf, $res ];
 		next;
 	    }
             $rpt_stat .= ( $res ? $res : "?" ) . " ";
@@ -350,6 +361,7 @@ $^O,         $rpt_pio,    $rpt_config
                      $rpt_config
 .
 
+    $^ = 'STDOUT_TOP';
     $~ = 'RPT_Fail_Config';
     print "\nFailures:\n\n";
     for my $i (0 .. $#fail) {
