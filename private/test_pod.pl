@@ -11,6 +11,7 @@ BEGIN {
     @test_files = qw(
         synctree.pl patchtree.pl mktest.pl mkovz.pl mailrpt.pl
         smokeperl.pl configsmoke.pl README ReleaseNotes FAQ runsmoke.pl
+        archiverpt.pl smokestatus.pl W32Configure.pl
     );
     push @test_files, map File::Spec->catfile( 'lib', 'Test', 'Smoke', $_ )
         => qw( Syncer.pm SourceTree.pm Policy.pm Util.pm 
