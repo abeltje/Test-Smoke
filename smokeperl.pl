@@ -21,6 +21,7 @@ GetOptions( \%options,
     'smartsmoke!',
 );
 
+use Config;
 use Test::Smoke;
 use vars qw( $VERSION );
 $VERSION = Test::Smoke->VERSION;
@@ -70,15 +71,17 @@ use Test::Smoke::Util qw( get_patch );
 use Cwd;
 
 my $was_patchlevel = get_patch( $conf->{ddir} ) || -1;
+my $now_patchlevel = $was_patchlevel;
 FETCHTREE: {
     unless ( $options{fetch} && $options{run} ) {
         $conf->{v} and print "Skipping synctree\n";
         last FETCHTREE;
     }
     my $syncer = Test::Smoke::Syncer->new( $conf->{sync_type}, $conf );
-    $syncer->sync;
+    $now_patchlevel = $syncer->sync;
+    $conf->{v} and 
+        print "$conf->{ddir} now up to patchlevel $now_patchlevel\n";
 }
-my $now_patchlevel = get_patch( $conf->{ddir} );
 
 if ( $conf->{smartsmoke} && ($was_patchlevel eq $now_patchlevel) ) {
     $conf->{v} and print "Skipping this smoke, patchlevel ($was_patchlevel)" .
@@ -104,24 +107,31 @@ PATCHAPERL: {
 
 my $cwd = cwd();
 chdir $conf->{ddir} or die "Cannot chdir($conf->{ddir}): $!";
-MKTEST: {
-    local @ARGV = ( $conf->{cfg} );
-    push  @ARGV, ( "--locale", $conf->{locale} ) if $conf->{locale};
-    push  @ARGV, "--forest",  $conf->{fdir}
-       if $conf->{sync_type} eq 'forest' && $conf->{fdir};
-    push  @ARGV, "-v", $conf->{v} if $conf->{v};
-    push  @ARGV, "--norun" unless $options{run};
-    push  @ARGV, "--is56x" if $conf->{is56x};
-    push  @ARGV, "--force-c-locale" if $conf->{force_c_locale};
-    push  @ARGV, @{ $conf->{w32args} } if exists $conf->{w32args};
-    my $mktest = File::Spec->catfile( $FindBin::Bin, 'mktest.pl' );
-    $conf->{v} > 1 and print "$mktest @ARGV\n";
-    local $0 = $mktest;
-    do $mktest or die "Error 'mktest': $@";
+call_mktest();
+call_mkovz();
+mailrpt();
+chdir $cwd;
+
+sub call_mktest {
+    my $timeout = 0;
+    if ( $Config{d_alarm} && $conf->{killtime} ) {
+        $timeout = calc_timeout( $conf->{killtime} );
+        $conf->{v} and printf "Setup alarm: %s\n",
+                              scalar localtime( time() + $timeout );
+    }
+    $timeout and local $SIG{ALRM} = sub {
+        warn "This smoke is aborted ($conf->{killtime})\n";
+        call_mkovz();
+        mailrpt();
+        exit;
+    };
+    $Config{d_alarm} and alarm $timeout;
+
+    run_smoke();
 }
 
-MKOVZ: {
-    last MKOVZ unless $options{run};
+sub call_mkovz {
+    return unless $options{run};
     local @ARGV = ( 'nomail', $conf->{ddir} );
     push  @ARGV, $conf->{locale} if $conf->{locale};
     my $mkovz = File::Spec->catfile( $FindBin::Bin, 'mkovz.pl' );
@@ -129,15 +139,30 @@ MKOVZ: {
     do $mkovz or die "Error in mkovz.pl: $@";
 }
 
-MAILRPT: {
+sub mailrpt {
     unless ( $options{mail} && $options{run} ) {
         $conf->{v} and print "Skipping mailrpt\n";
-        last MAILRPT;
+        return;
     }
     my $mailer = Test::Smoke::Mailer->new( $conf->{mail_type}, $conf );
     $mailer->mail;
 }
-chdir $cwd;
+
+sub calc_timeout {
+    my( $killtime ) = @_;
+    my $timeout = 0;
+    if ( $killtime =~ /^\+(\d+):([0-5]?[0-9])$/ ) {
+        $timeout = 60 * (60 * $1 + $2 );
+    } elsif ( $killtime =~ /^((?:[0-1]?[0-9])|(?:2[0-3])):([0-5]?[0-9])$/ ) {
+        my $time_min = 60 * $1 + $2;
+        my( $now_m, $now_h ) = (localtime)[1, 2];
+        my $now_min = 60 * $now_h + $now_m;
+        my $kill_min = $time_min - $now_min;
+        $kill_min += 60 * 24 if $kill_min < 0;
+        $timeout = 60 * $kill_min;
+    }
+    return $timeout;
+}
 
 =head1 SEE ALSO
 

@@ -31,7 +31,7 @@ foreach my $opt (qw( config jcl log )) {
 }
 
 use vars qw( $VERSION $conf );
-$VERSION = '0.016';
+$VERSION = '0.017';
 
 eval { require $options{config} };
 $options{oldcfg} = 1, print "Using '$options{config}' for defaults.\n" 
@@ -356,6 +356,15 @@ Examples:$untarmsg",
         msg => 'Skip smoke unless patchlevel changed?',
         alt => [qw( Y n )],
         dft => 'y',
+    },
+    killtime => {
+        msg => "Should this smoke be aborted on/after a specific time?
+\tuse HH:MM to specify a point in time (24 hour notation)
+\tuse +HH::MM to specify a duration
+\tleave empty to finish the smoke without aborting",
+        dft => "",
+        alt => [ ],
+        chk => '^(?:(?:\+\d+)|(?:(?:[0-1]?[0-9])|(?:2[0-3])):[0-5]?[0-9])|$',
     },
     # Schedule stuff
     docron => {
@@ -818,9 +827,9 @@ WIN32: {
     my $osvers = get_Win_version();
     my %compilers = get_avail_w32compilers();
 
-    my $dft_compiler = exists $conf->{w32args} ? $conf->{w32args}[1] : '';
+    my $dft_compiler = $conf->{w32cc} ? $conf->{w32cc} : "";
     $dft_compiler ||= ( sort keys %compilers )[-1];
-    $opt{w32compiler} = {
+    $opt{w32cc} = {
         msg => 'What compiler should be used?',
         alt => [ keys %compilers ],
         dft => $dft_compiler,
@@ -832,22 +841,20 @@ I see you are on $^O ($osvers).
 No problem, but we need extra information.
 EO_MSG
 
-    my $w32compiler = uc prompt( 'w32compiler' );
+    $config{w32cc} = uc prompt( 'w32cc' );
 
-    $opt{w32maker} = {
-        alt => $compilers{ $w32compiler }->{maker},
-        dft => ( sort @{ $compilers{ $w32compiler }->{maker} } )[-1],
+    $opt{w32make} = {
+        alt => $compilers{ $config{w32cc} }->{maker},
+        dft => ( sort @{ $compilers{ $config{w32cc} }->{maker} } )[-1],
     };
-    $opt{w32maker}->{msg} = @{ $compilers{ $w32compiler }->{maker} } > 1 
+    $opt{w32make}->{msg} = @{ $compilers{ $config{w32cc} }->{maker} } > 1 
         ? "Which make should be used" : undef;
 
-    my $w32maker = prompt( 'w32maker' );
+    $config{w32make} = prompt( 'w32make' );
 
     $config{w32args} = [ 
-        "--win32-cctype", $w32compiler,
-        "--win32-maker",  $w32maker,
         "osvers=$osvers", 
-        $compilers{ $w32compiler }->{ccversarg},
+        $compilers{ $config{w32cc} }->{ccversarg},
     ];
 }
 
@@ -887,6 +894,23 @@ is the same after syncing the source-tree.
 
 $arg = 'smartsmoke';
 $config{ $arg } = prompt_yn( $arg );
+
+=item killtime
+
+When C<< $Config{d_alarm} >> is found we can use C<alarm()> to abort 
+long running smokes. Leave this value empty to keep the old behaviour.
+
+    07:30 => F<mktest.pl> is aborted on 7:30 localtime
+   +23:45 => F<mktest.pl> is aborted after 23 hours and 45 minutes
+
+Thank you Jarkko for donating this suggestion.
+
+=cut
+
+if ( $Config{d_alarm} ) {
+    $arg = 'killtime';
+    $config{ $arg } = prompt( $arg );
+}
 
 =item schedule stuff
 
