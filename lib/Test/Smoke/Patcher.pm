@@ -8,6 +8,8 @@ use base 'Exporter';
 use File::Spec;
 use Cwd;
 
+use Test::Smoke::Util qw( get_regen_headers );
+
 @EXPORT = qw( &TRY_REGEN_HEADERS );
 
 sub TRY_REGEN_HEADERS() { 1 }
@@ -211,23 +213,22 @@ sub perl_regen_headers {
     my $self = shift;
     return unless $self->{flags} & TRY_REGEN_HEADERS;
 
-    my $regen_headers_pl = File::Spec->catfile( $self->{ddir},
-                                                'regen_headers.pl' );
-    SKIP: if ( -f $regen_headers_pl ) {
+    my $regen_headers = get_regen_headers( $self->{ddir} );
+    SKIP: if ( $regen_headers ) {
         my $cwd = cwd;
         chdir $self->{ddir} or last SKIP;
         local *RUN_REGEN;
-        if ( open RUN_REGEN, "$^X $regen_headers_pl |" ) {
+        if ( open RUN_REGEN, "$regen_headers |" ) {
             while ( <RUN_REGEN> ) {
                 $self->{v} and print;
             }
             close RUN_REGEN or do {
                 require Carp;
-                Carp::carp "Error while running '$regen_headers_pl'";
+                Carp::carp "Error while running [$regen_headers]";
             };
         } else {
             require Carp;
-            Carp::carp "Could not fork '$regen_headers_pl'";
+            Carp::carp "Could not fork [$regen_headers]";
         }
         chdir $cwd;
     }
