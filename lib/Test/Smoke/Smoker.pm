@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.002';
+$VERSION = '0.003';
 
 use Cwd;
 use File::Spec;
@@ -213,6 +213,11 @@ sub smoke {
         return 0;
     };
 
+    $self->make_test_prep or do {
+        $self->ttylog( "Unable to test perl in this configuration\n" );
+        return 0;
+    };
+
     $self->make_test( "$config" );
 
     return 1;
@@ -408,39 +413,61 @@ sub make_test {
             $self->tty( $_ );
         }
         close TST or do {
+            my $error = $! || ( $? >> 8);
             require Carp;
-            Carp::carp "Error while reading pipe: $!";
+            Carp::carp "\nError while reading test-results: $error";
         };
-        $self->ttylog( map { "    $_" } @nok );
+#        $self->log( map { "    $_" } @nok );
         if (grep m/^All tests successful/, @nok) {
+            $self->log( "All tests successful\n" );
             $self->tty( "\nOK, archive results ..." );
             $self->{patch} and $nok[0] =~ s/\./ for .patch = $self->{patch}./;
         } else {
-            my @harness;
-            for (@nok) {
-                m|^(?:\.\.[\\/])?(\w+/[-\w/]+).*| or next;
-                # Remeber, we chdir into t, so -f is false for op/*.t etc
-                push @harness, (-f "$1.t") ? "../$1.t" : "$1.t";
-            }
-            if (@harness) {
-                local $ENV{PERL_SKIP_TTY_TEST} = 1;
-       	        $self->tty( "\nExtending failures with Harness\n" );
-                my $harness = $self->{is_win32} ?
-                join " ", map { 
-                    s{^\.\.[/\\]}{};
-       	            m/^(?:lib|ext)/ and $_ = "../$_";
-                    $_;
-                } @harness : "@harness";
-                $self->ttylog( "\n",
-			grep !m:\bFAILED tests\b: && !m:% okay$: 
-                          => $self->_run( "./perl t/harness $harness" ) );
-            }
+            $self->extend_with_harness( @nok );
         }
         $self->tty( "\n" );
         !$had_LC_ALL && exists $ENV{LC_ALL} and delete $ENV{LC_ALL};
     }
 
     return 1;
+}
+
+=item $self->extend_with_harness( @nok )
+
+=cut
+
+sub extend_with_harness {
+    my( $self, @nok ) = @_;
+    my @harness;
+    for ( @nok ) {
+        m!^(?:\.\.[\\/])?(\w+/[-\w/]+).*! or next;
+        # Remeber, we chdir into t, so -f is false for op/*.t etc
+        my $test_name = "$1.t";
+        push @harness, (-f $test_name) 
+            ? File::Spec->catdir( File::Spec->updir, $test_name )
+            : $test_name;
+    }
+    if ( @harness ) {
+        local $ENV{PERL_SKIP_TTY_TEST} = 1;
+	        $self->tty( "\nExtending failures with Harness\n" );
+        my $harness = $self->{is_win32} ?
+        join " ", map { 
+            s{^\.\.[/\\]}{};
+	            m/^(?:lib|ext)/ and $_ = "../$_";
+            $_;
+        } @harness : "@harness";
+        my $changed_dir;
+        chdir 't' and $changed_dir = 1;
+        $self->ttylog("\n",
+               map {
+                   my( $name, $fail ) = 
+                       m/(\S+\.t)\s+.+[?%]\s+(\d+(?:[-\s]+\d+)*)/;
+                   my $dots = '.' x (40 - length $name );
+                   "$name${dots}FAILED $fail\n";
+               } grep m/\S+\.t\s+.+?\d+(?:[-\s+]\d+)*/ =>
+                  $self->_run( "./perl harness $harness" ) );
+        $changed_dir and chdir File::Spec->updir;
+    }
 }
 
 =item $self->make_minitest( $cfgargs )
