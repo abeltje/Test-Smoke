@@ -16,13 +16,15 @@ use Test::Smoke::Syncer;
 use Test::Smoke::Patcher;
 use Test::Smoke;
 use Test::Smoke::Mailer;
-use Test::Smoke::Util qw( get_patch calc_timeout );
+use Test::Smoke::Util qw( get_patch calc_timeout do_pod2usage );
 
 use Getopt::Long;
 my %options = ( config => 'smokecurrent_config', run => 1,
                 fetch => 1, patch => 1, mail => undef, 
                 continue => 0,
                 is56x => undef, defaultenv => undef, smartsmoke => undef );
+
+my $myusage = "Usage: $0 [-c configname]";
 GetOptions( \%options, 
     'config|c=s', 
     'fetch!', 
@@ -34,7 +36,14 @@ GetOptions( \%options,
     'continue',
     'smartsmoke!',
     'snapshot|s=i',
-);
+
+    'help|h', 'man',
+) or do_pod2usage(  verbose => 1, myusage => $myusage );
+
+$options{ man} 
+    and do_pod2usage( verbose => 2, exitval => 0, myusage => $myusage );
+$options{help} 
+    and do_pod2usage( verbose => 1, exitval => 0, myusage => $myusage );
 
 =head1 NAME
 
