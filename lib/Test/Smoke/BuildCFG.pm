@@ -194,7 +194,7 @@ A B<policy-section> can have only one (1) target-option.
 sub _parse {
     my $self = shift;
 
-    return unless defined $self->{_buildcfg} || $self->{_list};
+    return unless defined $self->{_buildcfg}; # || $self->{_list};
 
     $self->{_sections} = [ ];
     my @sections = split m/^=.*\n/m, $self->{_buildcfg};
