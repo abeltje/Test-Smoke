@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.29';
+$VERSION = '0.30';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -662,6 +662,8 @@ sub get_smoked_Config {
             if exists $conf2{version};
     }
 
+    # There should be no under-bars in perl versions!
+    exists $Config{version} and $Config{version} =~ s/_/./g;
     return %Config;
 }
 
