@@ -3,13 +3,12 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.27';
+$VERSION = '0.28';
 
 use base 'Exporter';
 @EXPORT = qw( 
-    &Configure_win32 
+    &Configure_win32
     &get_cfg_filename &get_config
-    &check_MANIFEST
     &get_patch
     &skip_config &skip_filter
 );
@@ -19,11 +18,13 @@ use base 'Exporter';
     &get_regen_headers &run_regen_headers
     &calc_timeout &time_in_hhmm
     &do_pod2usage
+    &set_vms_rooted_logical
 );
 
 use Text::ParseWords;
 use File::Spec;
 use File::Find;
+use Cwd;
 
 =head1 NAME
 
@@ -293,6 +294,42 @@ sub Configure_win32 {
     return $out;
 } # Configure_win32
 
+=item set_vms_rooted_logical( $logical, $dir )
+
+This will set a VMS rooted logical like:
+
+    define/translation=concealed $logical $dir
+
+=cut
+
+sub set_vms_rooted_logical {
+    my( $logical, $dir ) = @_;
+    return unless $^O eq 'VMS';
+
+    my $cwd = cwd();
+    $dir ||= $cwd;
+
+    chdir $dir or die "Cannot chdir($dir): $!";
+
+    # On older systems we might exceed the 8-level directory depth limit
+    # imposed by RMS.  We get around this with a rooted logical, but we
+    # can't create logical names with attributes in Perl, so we do it
+    # in a DCL subprocess and put it in the job table so the parent sees it.
+
+    open TSBRL, '> tsbuildrl.com' or die "Error creating DCL-file; $!";
+
+    print TSBRL <<COMMAND;
+\$ $logical = F\$PARSE("SYS\$DISK:[]",,,,"NO_CONCEAL")-".][000000"-"]["-"].;"+".]"
+\$ DEFINE/JOB/NOLOG/TRANSLATION=CONCEALED $logical '$logical'
+COMMAND
+    close TSBRL;
+
+    my $result = system '@tsbuildrl.com';
+    1 while unlink 'tsbuildrl.com';
+    chdir $cwd;
+    return $result == 0;
+}
+
 =item get_cfg_filename( )
 
 C<get_cfg_filename()> tries to find a B<cfg file> and returns it.
@@ -403,40 +440,6 @@ sub get_config {
     }
     close CONF;
     return @cnf_stack;
-}
-
-=item check_MANIFEST( $path )
-
-Read C<MANIFEST> from C<$path> and check against the actual directory
-contents.
-
-C<check_MANIFEST()> returns a hashref all keys are suspicious files, 
-their value tells wether it should not be there (false) or is missing (true).
-
-=cut
-
-sub check_MANIFEST {
-    my( $path ) = @_;
-    my $mani_name = File::Spec->catfile( $path, 'MANIFEST' );
-    my %MANIFEST;
-    if (open MANIFEST, "< $mani_name") {
-        # We've done no tests yet, and we've started after the rsync --delete
-        # Now check if I'm in sync
-        %MANIFEST = ( ".patch" => 1, map { s/\s.*//s; $_ => 1 } <MANIFEST>);
-        find (sub {
-            -d and return;
-            m/^mktest\.(log|out)$/ and return;
-            my $f = $File::Find::name;
-            $f =~ s:^\Q$path\E/?::;
-            if (exists $MANIFEST{$f}) {
-                delete $MANIFEST{$f};
-                return;
-            }
-            $MANIFEST{$f} = 0;
-        }, $path);
-    }
-    close MANIFEST;
-    return \%MANIFEST;
 }
 
 =item get_patch( [$ddir] )
