@@ -13,7 +13,7 @@ use Test::Smoke::Util qw( do_pod2usage );
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.027';
+$VERSION = '0.029';
 
 use Getopt::Long;
 my %options = ( 
@@ -428,7 +428,7 @@ Which directory should be used for the archives?
 \tLeave empty for no archiving.
 EOT
         alt => [ ],
-        dft => undef,
+        dft => "",
     },
     # Schedule stuff
     docron => {
@@ -932,6 +932,7 @@ MAIL: {
 
         /^(?:Mail::Sendmail|MIME::Lite)$/ && do {
             $arg = 'from';
+            $opt{ $arg }{chk} = '\S+';
             $config{ $arg } = prompt( $arg );
 
             $arg = 'mserver';
@@ -1286,6 +1287,7 @@ C<write_sh()> creates the shell-script.
 sub write_sh {
     my $cwd = cwd();
     my $jcl = "$options{jcl}.sh";
+    my $smokeperl = File::Spec->catfile( $FindBin::Bin, 'smokeperl.pl' );
     my $cronline = schedule_entry( File::Spec->catfile( $cwd, $jcl ), 
                                    $cron, $crontime );
     my $handle_lock = $config{killtime} ? <<EO_CONT : <<EO_DIE;
@@ -1321,10 +1323,10 @@ $handle_lock
 fi
 echo "\$CFGNAME" > "\$LOCKFILE"
 
-PATH=$cwd:$ENV{PATH}
+PATH=$FindBin::Bin:$ENV{PATH}
 export PATH
 umask $config{umask}
-$^X smokeperl.pl -c "\$CFGNAME" \$continue \$\* > $options{log} 2>&1
+$^X $smokeperl -c "\$CFGNAME" \$continue \$\* > $options{log} 2>&1
 
 rm "\$LOCKFILE"
 EO_SH
@@ -1346,6 +1348,7 @@ because it uses commands that are not supported by B<COMMAND.COM>
 sub write_bat {
     my $cwd = File::Spec->canonpath( cwd() );
 
+    my $smokeperl = File::Spec->catfile( $FindBin::Bin, 'smokeperl.pl' );
     my $copycmd = $config{w32args}->[1] ne "BORLAND" ? "" : <<EOCOPYCMD;
 
 REM I found hanging XCOPY while smoking with BORLAND
@@ -1385,8 +1388,8 @@ if NOT EXIST \%LOCKFILE\% goto START_SMOKE
 :START_SMOKE
     echo \%CFGNAME\% > \%LOCKFILE\%
     set OLD_PATH=\%PATH\%
-    set PATH=$cwd;\%PATH\%
-    $^X smokeperl.pl -c "\%CFGNAME\%" \%* > "\%WD\%\\$options{log}" 2>&1
+    set PATH=$FindBin::Bin;\%PATH\%
+    $^X $smokeperl -c "\%CFGNAME\%" \%* > "\%WD\%\\$options{log}" 2>&1
 
     set PATH=\%OLD_PATH\%
 
@@ -1451,7 +1454,7 @@ sub prompt {
 
 sub prompt_dir {
 
-    if ( exists $conf->{ $_[0] } )  {
+    if ( exists $conf->{ $_[0] } && $conf->{ $_[0] } )  {
         $conf->{ $_[0] } = File::Spec->rel2abs( $conf->{ $_[0] } )
             unless File::Spec->file_name_is_absolute( $conf->{ $_[0] } );
     }
