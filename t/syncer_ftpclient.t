@@ -27,7 +27,7 @@ BEGIN {
     $@ and plan( skip_all => "No 'Net::FTP' found!\n" . 
                              "!!!You will not be able to smoke from " .
                              "FTP-archive without it!!!" );
-    plan tests => 4;
+    plan tests => 5;
 }
 
 # Can we get away with redefining the Net::FTP stuff?
@@ -146,4 +146,6 @@ use_ok( 'Test::Smoke::Syncer' );
     my $plevel = $sync->sync;
 
     is $plevel, '20004', "Patchlevel ok";
+
+    ok rmtree( 't/perl-59x' ), "Clean-up";
 }
