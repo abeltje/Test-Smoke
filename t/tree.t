@@ -5,9 +5,9 @@ use Data::Dumper;
 require File::Spec;
 use File::Find;
 
-use Test::More tests => 12;
+use Test::More tests => 14;
 
-# We need to test SmokeTree.pm
+# We need to test SourceTree.pm
 sub MANIFEST_from_dir($) {
     my( $path ) = @_;
     my @files;
@@ -61,6 +61,21 @@ SKIP: {
     my $mani_file = File::Spec->catfile( $tree->canonpath, 'MANIFEST' );
 
     is( $tree->abs2mani( $mani_file ), 'MANIFEST', "abs2mani" );
+    1 while unlink $mani_file;
+}
+
+SKIP: { # Check that we can pass extra files to check_MANIFEST()
+    eval { MANIFEST_from_dir 't' };
+    $@ and skip $@, 4;
+
+    my $tree = Test::Smoke::SourceTree->new( 't' );
+
+    my $mani_check = $tree->check_MANIFEST( 'does_not_exist' );
+
+    is( keys %$mani_check, 2, "Two dubious file" );
+    ok( exists $mani_check->{does_not_exist}, "It is the extra file" );
+
+    my $mani_file = File::Spec->catfile( $tree->canonpath, 'MANIFEST' );
     1 while unlink $mani_file;
 }
 
