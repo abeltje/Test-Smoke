@@ -16,6 +16,8 @@ use Data::Dumper;
 #
 #####
 
+use vars qw( $FTP_FAIL );
+$FTP_FAIL = 0;
 use File::Spec::Functions;
 use File::Basename;
 use Cwd;
@@ -34,7 +36,7 @@ BEGIN {
     $@ and plan( skip_all => "No 'Net::FTP' found!\n" . 
                              "!!!You will not be able to smoke from " .
                              "FTP-archive without it!!!" );
-    plan tests => 7;
+    plan tests => 12;
 }
 
 # Can we get away with redefining the Net::FTP stuff?
@@ -118,6 +120,7 @@ sub Net::FTP::mdtm {
 }
 sub Net::FTP::get {
     my $self = shift;
+    return if $FTP_FAIL;
     my $source = shift;
     my $file = File::Spec->catfile( $self->{cwd}, $source );
     my $dest = shift || $source;
@@ -160,12 +163,37 @@ require_ok 'Test::Smoke::SourceTree';
 
     is $plevel, '20004', "Patchlevel ok";
 
-#    system "dir/size $stree";
-    my $tree = Test::Smoke::SourceTree->new( $stree );
-    my $mc = $tree->check_MANIFEST;
+    {
+        my $tree = Test::Smoke::SourceTree->new( $stree );
+        my $mc = $tree->check_MANIFEST;
+    
+        is scalar keys %$mc, 0, "No files in manicheck" or
+            diag Dumper $mc;
+    }
 
-    is scalar keys %$mc, 0, "No files in manicheck" or
-        diag Dumper $mc;
+    local *NEWFILE;
+    my $newfile = catfile $stree, 'newfile.txt';
+    open NEWFILE, "> $newfile";
+    print NEWFILE "This will be removed on resync\n";
+    close NEWFILE;
 
+    ok -f $newfile, "extra file($newfile)";
+    $plevel = $sync->sync;
+    is $plevel, '20004', "Patchlevel ok (resync)";
+
+    {
+        my $tree = Test::Smoke::SourceTree->new( $stree );
+        my $mc = $tree->check_MANIFEST;
+    
+        is scalar keys %$mc, 0, "No files in manicheck (resync)" or
+            diag Dumper $mc;
+    }
+
+    ok rmtree( $stree ), "Clean-up";
+
+    $FTP_FAIL = 1;
+    $plevel = $sync->sync;
+    is $plevel, undef, "no sync on failing FTP";
+    
     ok rmtree( $stree ), "Clean-up";
 }
