@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.009';
+$VERSION = '0.010';
 
 use Cwd;
 use File::Spec::Functions;
@@ -17,6 +17,8 @@ my %CONFIG = (
     df_ddir       => curdir(),
     df_outfile    => 'mktest.out',
     df_rptfile    => 'mktest.rpt',
+    df_cfg        => undef,
+    df_showcfg    => 0,
 
     df_locale     => undef,
     df_defaultenv => undef,
@@ -454,18 +456,44 @@ sub report {
 
     $report .= $self->summary . "\n";
     $report .= $self->letter_legend . "\n";
-    $report .= $self->smoke_matrix . $self->bldenv_legend . "\n";
+    $report .= $self->smoke_matrix . $self->bldenv_legend;
 
-    $report .= "Failures:\n" . $self->failures . "\n"
-        if @{ $self->{_failures} };
-    $report .= "\n" . $self->mani_fail . "\n"
-        if @{ $self->{_mani} };
+    $report .= "\nFailures:\n" . $self->failures if $self->has_test_failures;
+    $report .= "\n" . $self->mani_fail           if $self->has_mani_failures;
+
+    if ( $self->{showcfg} && $self->{cfg} && $self->has_test_failures ) {
+        require Test::Smoke::BuildCFG;
+        my $bcfg = Test::Smoke::BuildCFG->new( $self->{cfg} );
+        $report .= "\nBuild configurations:\n" . $bcfg->as_string ."=\n";
+    }
 
     $report .= $self->signature;
     return $report;
 }
 
+=item $reporter->ccinfo( )
+
+Return the string containing the C-compiler info.
+
+=cut
+
+sub ccinfo {
+    my $self = shift;
+    my $cinfo = $self->{_rpt}{cinfo};
+    unless ( $cinfo ) { # Old .out file?
+        my %Config = get_smoked_Config( $self->{ddir} => qw( 
+            cc ccversion gccversion
+        ));
+        $cinfo = "? ";
+        my $ccvers = $Config{gccversion} || $Config{ccversion} || '';
+        $cinfo .= ( $Config{cc} || 'unknow cc' ) . " version $ccvers";
+    }
+    return $cinfo;
+}
+
 =item $reporter->preamble( )
+
+Returns the header of the report.
 
 =cut
 
@@ -473,7 +501,7 @@ sub preamble {
     my $self = shift;
 
     my %Config = get_smoked_Config( $self->{ddir} => qw( 
-        version cc ccversion gccversion glibc
+        version libc gnulibc_version
     ));
     my $si = Test::Smoke::SysInfo->new;
     my $archname  = $si->cpu_type;
@@ -484,12 +512,8 @@ sub preamble {
     my $time_msg  = time_in_hhmm( $self->{_rpt}{secs} );
     my $savg_msg  = time_in_hhmm( $self->{_rpt}{avg}  );
 
-    my $cinfo = $self->{_rpt}{cinfo};
-    unless ( $cinfo ) { # Old .out file?
-        $cinfo = "? ";
-        my $ccvers = $Config{gccversion} || $Config{ccversion} || '';
-        $cinfo .= ( $Config{cc} || 'unknow cc' ) . " version $ccvers";
-    }
+    my $cinfo = $self->ccinfo;
+
     my $os = $si->os;
 
     return <<__EOH__;
@@ -555,6 +579,14 @@ sub summary {
     return "Summary: $rpt_summary\n";
 }
 
+=item $repoarter->has_test_failures( )
+
+Returns true if C<< @{ $reporter->{_failures} >>.
+
+=cut
+
+sub has_test_failures { exists $_[0]->{_failures} && @{ $_[0]->{_failures} } }
+
 =item $reporter->failures( )
 
 report the failures (grouped by configurations).
@@ -565,9 +597,17 @@ sub failures {
     my $self = shift;
 
     return join "\n", map {
-         join "\n", @{ $_->{cfgs} }, $_->{tests}
+         join "\n", @{ $_->{cfgs} }, $_->{tests}, ""
     } @{ $self->{_failures} };
 }
+
+=item $repoarter->has_mani_failures( )
+
+Returns true if C<< @{ $reporter->{_mani} >>.
+
+=cut
+
+sub has_mani_failures { exists $_[0]->{_mani} && @{ $_[0]->{_mani} } }
 
 =item $reporter->mani_fail( )
 
@@ -578,7 +618,7 @@ report the MANIFEST failures.
 sub mani_fail {
     my $self = shift;
 
-    return join "\n", @{ $self->{_mani} };
+    return join "\n", @{ $self->{_mani} }, "";
 }
 
 =item $reporter->bldenv_legend( )

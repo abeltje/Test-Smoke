@@ -10,7 +10,9 @@ use lib $FindBin::Bin;
 use TestLib;
 
 my $verbose = 0;
-use Test::More tests => 40;
+my $showcfg = 0;
+
+use Test::More tests => 47;
 
 use_ok 'Test::Smoke::Reporter';
 
@@ -21,6 +23,12 @@ my $config_sh = catfile( $FindBin::Bin, 'config.sh' );
         ddir       => $FindBin::Bin,
         v          => $verbose, 
         outfile    => '',
+        showcfg    => $showcfg,
+        cfg        => \( my $bcfg = <<__EOCFG__ ),
+-Dcc='ccache gcc'
+=
+-Uuseperlio
+__EOCFG__
     );
     isa_ok( $reporter, 'Test::Smoke::Reporter' );
 
@@ -66,6 +74,9 @@ __EOM__
 
     chomp( my $summary = $reporter->summary );
     is $summary, 'Summary: PASS', $summary;
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+            "hasn't the configurations";
+
 #    diag Dumper $reporter->{_counters};
 #    diag $reporter->report;
 }
@@ -76,6 +87,10 @@ __EOM__
         ddir    => $FindBin::Bin,
         v       => $verbose, 
         outfile => '',
+        showcfg => $showcfg,
+        cfg     => \( my $bcfg = <<__EOCFG__ ),
+-Dcc='ccache gcc'
+__EOCFG__
     );
     isa_ok( $reporter, 'Test::Smoke::Reporter' );
 
@@ -156,6 +171,13 @@ __EOM__
 
     chomp( my $summary = $reporter->summary );
     is $summary, 'Summary: FAIL(F)', $summary;
+    if ( $showcfg ) {
+         like $reporter->report, "/Build configurations:\n$bcfg=/", 
+              "has the configurations";
+    } else {
+         unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+                "hasn't the configurations";
+    }
 
 #    diag Dumper $reporter->{_counters};
 #    diag $reporter->report;
@@ -283,6 +305,7 @@ EORESULTS
 
     chomp( my $summary = $reporter->summary );
     is $summary, 'Summary: PASS', $summary;
+    is $reporter->ccinfo, "ccache egcc version 3.2", "ccinfo()";
     like $reporter->report, "/^Summary: PASS\n/m", "Summary from report";
 
     my @r_lines = split /\n/, $reporter->smoke_matrix;
@@ -303,8 +326,17 @@ __EOM__
         locale     => 'EN_US.UTF-8',
         outfile    => 'bugtst01.out',
         v          => 0,
+        showcfg    => $showcfg,
+        cfg        => \( my $bcfg = <<__EOCFG__ ),
+-Dcc=gcc
+=
+
+-Duselongdouble
+-Duse564bitint
+__EOCFG__
     ), "new()" );
     isa_ok $reporter, 'Test::Smoke::Reporter';
+    is $reporter->ccinfo, "? unknow cc version ", "ccinfo(bugstst01)";
 
     my @r_lines = split /\n/, $reporter->smoke_matrix;
     my $r = is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";
@@ -316,6 +348,14 @@ F F F - - - -Duse64bitint
 __EOM__
 
     $r or diag $reporter->smoke_matrix, $reporter->bldenv_legend;
+
+    if ( $showcfg ) {
+         like $reporter->report, "/Build configurations:\n$bcfg=/", 
+              "has the configurations";
+    } else {
+         unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+                "hasn't the configurations";
+    }
 }
 
 { # report from cygwin
@@ -325,8 +365,18 @@ __EOM__
         defaultenv => 0,
         outfile    => 'bugtst02.out',
         v          => 0,
+        showcfg    => $showcfg,
+        cfg        => \( my $bcfg = <<__EOCFG__ ),
+
+-Duseithreads
+=
+
+-Duse64bitint
+__EOCFG__
     ), "new reporter for bugtst02.out" );
     isa_ok $reporter, 'Test::Smoke::Reporter';
+    is $reporter->ccinfo, "gcc version 3.3.1 (cygming special)", 
+       "ccinfo(bugstst02)";
 
     my @r_lines = split /\n/, $reporter->smoke_matrix;
     my $r = is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix 2";
@@ -339,6 +389,14 @@ F F M -     -Duseithreads -Duse64bitint
 __EOM__
 
     $r or diag $reporter->smoke_matrix, $reporter->bldenv_legend;
+
+    if ( $showcfg ) {
+         like $reporter->report, "/Build configurations:\n$bcfg=/", 
+              "has the configurations";
+    } else {
+         unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+                "hasn't the configurations";
+    }
 }
 sub create_config_sh {
     my( $file, %cfg ) = @_;
