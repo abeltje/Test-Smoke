@@ -208,7 +208,7 @@ my %opt = (
         alt => [ ],
         dft => whereis( 'rsync' ),
     },
-    opt => {
+    opts => {
         msg => 'Which arguments should be used for rsync?',
         alt => [ ],
         dft => '-az --delete',
@@ -644,7 +644,7 @@ SYNCER: {
         $arg = 'rsync';
         $config{ $arg } = prompt( $arg );
 
-        $arg = 'opt';
+        $arg = 'opts';
         $config{ $arg } = prompt( $arg );
 
         last SYNCER;
