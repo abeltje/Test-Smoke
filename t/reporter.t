@@ -5,7 +5,7 @@ use Data::Dumper;
 # $Id$
 
 my $verbose = 0;
-use Test::More tests => 27;
+use Test::More tests => 30;
 
 use_ok 'Test::Smoke::Reporter';
 
@@ -223,4 +223,45 @@ __EOM__
     like $reporter->report, 
          '/^Failures:\n\[stdio\/perlio\]\s* -DDEBUGGING/m',
          "Failures:";
+}
+
+{ # This test is just to test 'PASS' (and not PASS-so-far)
+    my $reporter = Test::Smoke::Reporter->new( 
+        v       => $verbose, 
+        outfile => '',
+    );
+    my $patchlevel = 22111;
+
+    isa_ok $reporter, 'Test::Smoke::Reporter';
+    $reporter->read_parse( \(my $result = <<EORESULTS) );
+Started smoke at 1073864611
+Smoking patch 22111
+Stopped smoke at 1073864615
+Started smoke at 1073864615
+
+Configuration: -Dusedevel -Dcc='ccache egcc' -Uuseperlio
+------------------------------------------------------------------------------
+
+Compiler info: ccache egcc version 3.2
+TSTENV = stdio  u=8.42  s=2.10  cu=476.05  cs=61.49  scripts=776  tests=78557
+All tests successful.
+Stopped smoke at 1073866466
+Started smoke at 1073866466
+
+Configuration: -Dusedevel -Dcc='ccache egcc' -Uuseperlio -DDEBUGGING
+------------------------------------------------------------------------------
+
+Compiler info: ccache egcc version 3.2
+TSTENV = stdio  u=9.84  s=2.03  cu=523.95  cs=61.85  scripts=776  tests=78557
+All tests successful.
+Finished smoking 22111
+Stopped smoke at 1073869001
+EORESULTS
+
+    my $report = $reporter->report;
+    is $reporter->{_rpt}{patch}, $patchlevel, "Patchlevel $patchlevel";
+    like $report, "/^Summary: PASS\n/m", 
+         "Report PASS for -Uuseperlio";
+
+diag $report;
 }

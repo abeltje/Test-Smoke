@@ -365,8 +365,8 @@ sub _post_process {
                 $status->{ "locale:$self->{locale}" } = '-' if $self->{locale};
 
             $count{ $_ }++ for map {
-                $status->{ $_ } =~ m/[OFXMmct]/ 
-                    ? $status->{ $_ } : m/-/ ? 'O' : 'o'
+                $status->{ $_ } =~ ( m/[cmMtFXO]/ 
+                    ? $status->{ $_ } :  ( m/-/ ? 'O' : 'o' ) )
             } keys %$status;
         }
     }
