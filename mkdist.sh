@@ -12,9 +12,9 @@ for argv
         -c)   SMOKE_CI_FILES=1;;
         -s)   SMOKE_CI_SNAP=1;;
         -d=*) SMOKE_DIST_DIR=`echo $argv | perl -pe 's/^-d=//'`;;
-        -58)  SMOKE_PERL=/opt/perl584/bin/perl5.8.4 
-              SMOKE_PROVE=/opt/perl584/bin/prove5.8.4
-              SMOKE_COVER=/opt/perl584/bin/cover;;
+        -58)  SMOKE_PERL=/opt/perl585/bin/perl5.8.5
+              SMOKE_PROVE=/opt/perl585/bin/prove5.8.5
+              SMOKE_COVER=/opt/perl585/bin/cover;;
         -59)  SMOKE_PERL=/opt/bleadperl/bin/perl5.9.2
               SMOKE_PROVE=/opt/bleadperl/bin/prove5.9.2
               SMOKE_COVER=/opt/bleadperl/bin/cover;;
@@ -45,7 +45,8 @@ fi
 
 # Set the directory where distributions are kept
 distdir=./
-if [ "`uname -n`" == "fikkie" ] ; then
+UNAME=`uname -n`
+if [ "$UNAME" == "fikkie" -o "$UNAME" == "snowy.local" ] ; then
     distdir=~/distro
 fi
 if [ "$SMOKE_DIST_DIR" != "" ] ; then
@@ -72,7 +73,7 @@ if [ "$SMOKE_TEST_ONLY" == "1" ] ; then
         $SMOKE_PROVE -Ilib private/*.t
         $SMOKE_COVER -delete
         HARNESS_PERL_SWITCHES=-MDevel::Cover \
-            $SMOKE_PROVE -Ilib t/*.t
+            $SMOKE_PROVE -Ilib t/*.t private/*.t
         PROVE_ERROR=$?
         $SMOKE_COVER
         if [ "$PROVE_ERROR" != "0" ] ; then exit $PROVE_ERROR ; fi
@@ -80,7 +81,7 @@ if [ "$SMOKE_TEST_ONLY" == "1" ] ; then
         $SMOKE_PROVE -I lib private/*.t t/*.t || exit
     fi
     echo "SMOKE_TEST_ONLY was set, quitting..."
-    trap '' 0
+    trap 0
     exit
 else
     $SMOKE_PROVE -I lib private/smoker_*.t || exit
@@ -96,9 +97,10 @@ if [ "$SMOKE_VERSION" == "" ] ; then
 else
     echo "Create distribution for Test::Smoke $SMOKE_VERSION"
 fi
+
+# I keep forgetting about Changes, so automate:
+svnchanges > Changes
 if [ "$SMOKE_CI_FILES" == "1" ] ; then
-    # I keep forgetting about Changes, so automate:
-    svnchanges > Changes
     svn ci Changes -m "* regen Changes for $SMOKE_VERSION"
 else
     echo "Skipping commit of 'Changes'"
@@ -110,6 +112,8 @@ PERL_MM_USE_DEFAULT=y $SMOKE_PERL Makefile.PL
 make
 
 make test || exit
+
+trap 0
 
 # Create the distribution and move it to the distribution directory
 perl -i -pe 's/^#?local-user abeltje/local-user abeltje/' ~/.gnupg/options
