@@ -94,7 +94,7 @@ By specifying a diffent prefix to F<configsmoke.pl>:
 This will create the smokeconfiguration F<mysmoke_config> and a small
 shellscript F<mysmoke.sh> (or F<mysmoke.cmd> if you are on Windows).
 
-There are two (2) special prefixes: B<smoke56x> and B<smoke58x>. These
+There are two (2) special prefixes: B<smoke562> and B<smoke58x>. These
 will set the default answers for F<configsmoke.pl> to be appropriate
 for smoking the maintenance branches for these versions of perl.
 
@@ -190,7 +190,8 @@ You do B<not> have to be subscribed to send reports!
 
 =item The WWW archive
 
-The mailinglist has an archive on the web:
+The mailinglist has an archive on the web (although this archive seems
+to be behind at the moment):
 L<http://archive.develooper.com/daily-build-reports@perl.org/>.
 
 =item The usenet mirror
