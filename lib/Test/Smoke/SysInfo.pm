@@ -501,8 +501,12 @@ sub Solaris {
     my( $psrinfo ) = grep /the .* operates .* mhz/ix => `psrinfo -v`;
     my( $type, $speed ) = $psrinfo =~ /the (\w+) processor.*at (\d+) mhz/i;
     $type =~ s/(v9)$/ $1 ? "64" : ""/e;
-    my( $cpu_line ) = grep /\s+on-?line\s+/i => `prtdiag`;
-    ( my $cpu = ( split " ", $cpu_line )[4] ) =~ s/.*,//;
+    my $prtdiag = `prtdiag`;
+    my( $cpu ) = $prtdiag =~ /^System .+\(([^\s\)]+)/;
+    unless ( $cpu ) {
+        my( $cpu_line ) = grep /\s+on-?line\s+/i => split /\n/, $prtdiag;
+        ( $cpu = ( split " ", $cpu_line )[4] ) =~ s/.*,//;
+    }
     $cpu .= " (${speed}MHz)";
     my $ncpu = grep /on-?line/ => `psrinfo`;
 
