@@ -125,9 +125,16 @@ This is the main script that runs I<Configure>, I<make> and S<< I<make
 test> >> for all configurations and log the results in F<<
 <builddir>/mktest.out >>.
 
-As of 1.17_53 (1.18-to-be) the use of F<mktest.pl> is deprecated in
+As of 1.17_55 (1.18-to-be) the use of F<mktest.pl> is deprecated in
 favour of the new F<runsmoke.pl> frontend to B<Test::Smoke::Smoker>. This
 script will not be maintained!
+
+=item B<runsmoke.pl>
+
+Small wrapper around B<Test::Smoke::run_smoke()> that can use the
+settings from the smoke-configuration file. It runs the smoke cycle
+for all configurations and is a replacement for the now unmaintained
+B<mktest.pl>.
 
 =item B<mkovz.pl>
 
@@ -200,7 +207,7 @@ L<http://nntp.x.perl.org/group/perl.daily-build.reports>
 
 =back
 
-=head2 What's with the B<daily-build> and <smokers> names?
+=head2 What's with the "daily-build" and "smokers" names?
 
 There has been enough discussion on the subject, so lets agree to
 disagree (it was all before my time).

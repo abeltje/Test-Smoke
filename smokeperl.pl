@@ -46,7 +46,7 @@ smokeperl.pl - The perl Test::Smoke suite
 
 or
 
-    C:\smoke\Test-Smoke-1.17>perl smokeperl.pl [-c configname]
+    C:\smoke>perl smokeperl.pl [-c configname]
 
 =head1 OPTIONS
 
@@ -62,6 +62,11 @@ It can take these options
   --defaultenv             Run a smoke in the default environment
   --[no]smartsmoke         Don't smoke unless patchlevel changed
   --snapshot <patchlevel>  Set a new patchlevel for snapshot smokes
+
+=head1 DESCRIPTION
+
+F<smokeperl.pl> is the main program in this suite. It combines all the
+front-ends internally and does some sanity checking.
 
 =cut
 
@@ -167,7 +172,7 @@ sub call_mktest {
         warn "This smoke is aborted ($conf->{killtime})\n";
         call_mkovz();
         mailrpt();
-        exit;
+        exit(42);
     };
     $Config{d_alarm} and alarm $timeout;
 

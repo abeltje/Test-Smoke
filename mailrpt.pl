@@ -94,6 +94,10 @@ no extra options
 
 =back
 
+=head1 DESCRIPTION
+
+This is a small front-end for L<Test::Smoke::Mailer>.
+
 =cut
 
 GetOptions( \%opt,

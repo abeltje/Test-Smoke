@@ -360,6 +360,11 @@ Examples:$untarmsg",
         alt => [qw( N y )],
         dft => 'n',
     },
+    defaultenv => {
+        msg => 'Run the test-suite without \$ENV{PERLIO}?',
+        alt => [qw( N y )],
+        dft => 'n',
+    },
     locale => {
         msg => 'What locale should be used for extra testing ' .
                '(leave empty for none)?',
@@ -641,10 +646,16 @@ The default switches passed to B<rsync> are: S<< B<-az --delete> >>
 This will use B<Net::FTP> to try to find the latest snapshot on
 <ftp://ftp.funet.fi/languages/perl/snap/>. 
 
-You can also get the perl-5.8.x snapshots (and others) from via HTTP
+You can also get the perl-5.8.x snapshots (and others) via HTTP
 if you have B<LWP> installed. There are two things you should remember:
-1) start the server-name B<http://> 2) the snapshot-file must be
-specified.
+
+=over 8
+
+=item 1. start the server-name B<http://> 
+
+=item 2. the snapshot-file must be specified.
+
+=back
 
 Snapshots are not in sync with the repository, so if you have a working
 B<patch> program, you can choose to "upgrade" your snapshot by fetching 
@@ -741,8 +752,13 @@ be applied before smoking. This can be used to run a smoke test on proposed
 patches that have not been applied (yet) or to see the effect of
 reversing an already applied patch. The file format is simple:
 
-  * one patchfile per line
-  * optionally followed by ';' and options to pass to patch
+=over 8
+
+=item * one patchfile per line
+
+=item * optionally followed by ';' and options to pass to patch
+
+=back
 
 If the file does not exist yet, a skeleton version will be created
 for you.
@@ -792,6 +808,16 @@ unless ( $config{is56x} ) {
     $config{ $arg } = prompt_yn( $arg );
 }
 
+=item defaultenv
+
+C<defaultenv>, when set will make Test::Smoke remove $ENV{PERLIO} and
+only do a single pass C<< S<make test> >>.
+
+=cut
+
+$arg = 'defaultenv';
+$config{ $arg } = prompt_yn( $arg );
+
 =item locale
 
 C<locale> and its value are passed to F<mktest.pl> and its value is passed
@@ -806,6 +832,7 @@ not coverd here, please let me know!>
 =cut
 
 UTF8_LOCALE: {
+    last if $config{defaultenv};
     my @locale_utf8 = $config{is56x} ? () : check_locale();
     last UTF8_LOCALE unless @locale_utf8;
 
@@ -865,7 +892,8 @@ MAIL: {
 =item w32args
 
 For MSWin32 we need some extra information that is passed to
-F<mktest.pl> in order to compensate for the lack of B<Configure>.
+L<Test::Smoke::Smoker> in order to compensate for the lack of
+B<Configure>.
 
 See L<Test::Smoke::Util/"Configure_win32( )"> and L<W32Configure.pl>
 
@@ -930,7 +958,20 @@ unless ( is_win32 ) {
 
 =item v
 
-The verbosity level: 0, 1 or 2
+The verbosity level: 
+
+=over 8
+
+=item 0: Be as quiet as possible
+
+=item 1: Give moderate information
+
+=item 2: Be as loud as possible
+
+=back
+
+Every module has its own verbosity control and these are not verry
+consistent at the moment.
 
 =cut
 
@@ -1077,6 +1118,19 @@ Have the appropriate amount of fun!
                                     The Test::Smoke team.
 EOMSG
 
+=back
+
+=head1 Supporting subs
+
+=over 4
+
+=item save_config()
+
+C<save_config()> writes the configuration data to disk.
+If C<< Data::Dumper->can('Sortkeys') >> it will order the keys.
+
+=cut
+
 sub save_config {
     my $dumper = Data::Dumper->new([ \%config ], [ 'conf' ]);
     Data::Dumper->can( 'Sortkeys' ) and 
@@ -1089,6 +1143,12 @@ sub save_config {
 
     print "Finished writing '$options{config}'\n";
 }
+
+=item sort_configkeys()
+
+C<sort_configkeys()> is the hook for B<Data::Dumper>
+
+=cut
 
 sub sort_configkeys {
     my @order = qw( 
@@ -1116,11 +1176,28 @@ sub sort_configkeys {
              sort grep !exists $keyorder{ $_ }, keys %{ $_[0] } ];
 }
 
+=item write_sh()
+
+C<write_sh()> creates the shell-script.
+
+=cut
+
 sub write_sh {
     my $cwd = cwd();
     my $jcl = "$options{jcl}.sh";
     my $cronline = schedule_entry( File::Spec->catfile( $cwd, $jcl ), 
                                    $cron, $crontime );
+    my $handle_lock = $config{killtime} ? <<EO_CONT : <<EO_DIE;
+    # Not sure about this, so I will keep the old behaviour 
+    # smokeperl.pl will exit(42) on timeout
+    # continue='--continue'
+    echo "We seem to be running (or remove \$LOCKFILE)" >& 2
+    exit 200
+EO_CONT
+    echo "We seem to be running (or remove \$LOCKFILE)" >& 2
+    exit 200
+EO_DIE
+
     local *MYSMOKESH;
     open MYSMOKESH, "> $jcl" or
         die "Cannot write '$jcl': $!";
@@ -1135,16 +1212,16 @@ sub write_sh {
 cd $cwd
 CFGNAME=$options{config}
 LOCKFILE=$options{prefix}.lck
+continue=''
 if test -f "\$LOCKFILE" && test -s "\$LOCKFILE" ; then
-    echo "We seem to be running (or remove \$LOCKFILE)" >& 2
-    exit 200
+$handle_lock
 fi
 echo "\$LOCKFILE" > "\$LOCKFILE"
 
 PATH=$cwd:$ENV{PATH}
 export PATH
 umask $config{umask}
-$^X smokeperl.pl -c "\$CFGNAME" \$\* > $options{log} 2>&1
+$^X smokeperl.pl -c "\$CFGNAME" \$continue \$\* > $options{log} 2>&1
 
 rm "\$LOCKFILE"
 EO_SH
@@ -1155,6 +1232,13 @@ EO_SH
 
     return File::Spec->canonpath( File::Spec->rel2abs( $jcl ) );
 }
+
+=item write_bat()
+
+C<write_bat()> writes the batch-file. It uses the C<.cmd> extension
+because it uses commands that are not supported by B<COMMAND.COM>
+
+=cut
 
 sub write_bat {
     my $cwd = File::Spec->canonpath( cwd() );
@@ -1577,6 +1661,8 @@ EOMSG
 
 =item finish_cfgcheck
 
+C<finish_cfgcheck()> will create a backup of the original file and
+write the new one in its place.
 
 =cut
 
@@ -1591,7 +1677,7 @@ sub finish_cfgcheck {
     } else {
         $fname = "$options{prefix}.cfg";
     }
-    # change the filemode (make install makes perlcurrent.cfg readonly)
+    # change the filemode (make install used to make perlcurrent.cfg readonly)
     -f $fname and chmod 0775, $fname;
     open BCFG, "> $fname" or do {
         warn "Cannot write '$fname': $!";

@@ -100,6 +100,10 @@ Other options can override the settings from the configuration file.
 
 =back
 
+=head1 DESCRIPTION
+
+This is a small front-end for L<Test::Smoke::Syncer>.
+
 =cut
 
 GetOptions( \%opt,
