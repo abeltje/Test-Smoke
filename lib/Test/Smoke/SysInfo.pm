@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.003';
+$VERSION = '0.004';
 
 =head1 NAME
 
@@ -104,7 +104,7 @@ sub __get_os {
                 }
                 $os .= "/$ml";
             }
-            $os =~ s/^/AIX /;
+            $os =~ s/^/AIX - /;
             last MOREOS;
         };
         /irix/i            && do {
