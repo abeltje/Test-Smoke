@@ -466,7 +466,7 @@ sub extend_with_harness {
         m!^(?:\.\.[\\/])?(\w+/[-\w/\\]+)\.*(.*)! or next;
         # t/harness chdir()s into t/, so -f is false for t/op/*.t etc
         my $test_name = "$1.t";
-        $test_name = catfile( 't', $test_name ) if /^\w/;
+        $test_name = catfile( 't', $test_name ) if /^\w/ && ! /^t\b/;
         my $status = $2;
         my $test_base = catdir( $self->{ddir}, 't' );
         my $test_path = abs2rel( rel2abs( $test_name, $self->{ddir} ), 
