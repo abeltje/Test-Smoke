@@ -446,6 +446,7 @@ sub get_patch {
     if ( open DOTPATCH, "< $dot_patch" ) {
         chomp( $patch_level = <DOTPATCH> );
         close DOTPATCH;
+        return $patch_level if $patch_level =~ /-RC\d+$/;
         $patch_level =~ tr/0-9//cd;
         return $1 if $patch_level =~/^([0-9]+)$/;
     }
