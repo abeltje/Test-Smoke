@@ -207,8 +207,8 @@ my %opt = (
         msg => "Where would you like the new source-tree?
 \tThis directory is also used as the build directory.",
         alt => [ ],
-        dft => File::Spec->rel2abs( File::Spec->catdir( File::Spec->updir,
-                                                        'perl-current' ) ),
+        dft => File::Spec->catdir( File::Spec->rel2abs( File::Spec->updir ),
+                                   'perl-current' ),
         chk => '.+',
     },
     use_old => {
@@ -263,8 +263,8 @@ my %opt = (
     forest_hdir => {
         msg => 'Where would you like the intermediate source-tree?',
         alt => [ ],
-        dft => File::Spec->rel2abs( File::Spec->catdir( File::Spec->updir,
-                                                        'perl-inter' ) ),
+        dft => File::Spec->catdir( File::Spec->rel2abs( File::Spec->updir ),
+                                   'perl-inter' ),
         chk => '.+',
     },
     fsync => { 
@@ -285,7 +285,7 @@ my %opt = (
     rsync => {
         msg => 'Which rsync program should be used?',
         alt => [ ],
-        dft => whereis( 'rsync' ),
+        dft => ( whereis( 'rsync' ) || '' ),
     },
     opts => {
         msg => 'Which arguments should be used for rsync?',
@@ -317,7 +317,7 @@ my %opt = (
         msg => "How should the snapshots be extracted?
 Examples:$untarmsg",
         alt => [ ],
-        dft => (get_avail_tar())[0],
+        dft => ( (get_avail_tar())[0] || '' ),
     },
 
     snapext => {
@@ -347,7 +347,7 @@ Examples:$untarmsg",
     unzip => {
         msg => 'How should the patches be unzipped?',
         alt => [ ],
-        dft => whereis( 'gzip' ) . " -cd",
+        dft => ( whereis( 'gzip' ) . " -cd" ),
     },
 
     cleanup => {
@@ -404,7 +404,7 @@ Examples:$untarmsg",
     patchbin => {
         msg => undef,
         alt => [ ],
-        dft => find_a_patch(),
+        dft => ( find_a_patch() || '' ),
     },
 
     popts => {
@@ -435,7 +435,7 @@ EOT
 Specify a different make program for "make _test".
 EOT
         alt => [ ],
-        dft => $Config{make} ? $Config{make} : 'make',
+        dft => ( $Config{make} ? $Config{make} : 'make' ),
     },
 
     # mail stuff
@@ -1580,7 +1580,7 @@ EO_COM
 
     print "Finished writing '$jcl'\n";
 
-    return File::Spec->canonpath( File::Spec->rel2abs( $jcl ) );
+    return '@' . File::Spec->canonpath( File::Spec->rel2abs( $jcl ) );
 }
 
 sub prompt {
