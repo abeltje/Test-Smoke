@@ -156,15 +156,21 @@ sub _read {
         $self->{_buildcfg} = do { local $/; <BUILDCFG> };
         $vmsg = "anonymous filehandle";
     } else {
-        unless ( open BUILDCFG, "< $nameorref" ) {
-            require Carp;
-            Carp::carp "Error opening buildconfigurations: $!";
-            my $dft = $self->default_buildcfg();
-            return $self->_read( \$dft );
-        }
-        $self->{_buildcfg} = do { local $/; <BUILDCFG> };
-        close BUILDCFG;
-        $vmsg = $nameorref;
+        if ( $nameorref ) {
+            if ( open BUILDCFG, "< $nameorref" ) {
+                $self->{_buildcfg} = do { local $/; <BUILDCFG> };
+                close BUILDCFG;
+                $vmsg = $nameorref;
+            } else {
+                require Carp;
+                Carp::carp "Cannot read buildconfigurations ($nameorref): $!";
+                $self->{_buildcfg} = $self->default_buildcfg();
+                $vmsg = "internal content";
+            }
+        } else { # Allow intentional default_buildcfg()
+            $self->{_buildcfg} = $self->default_buildcfg();
+            $vmsg = "internal content";
+        } 
     }
     $self->{v} and print "Reading build configurations from $vmsg\n";
 }
@@ -229,9 +235,10 @@ sub _parse {
 
         } else { # Buildopt section
             push @{ $self->{_sections} }, 
-                 [ sort {$opts{ $a } <=> $opts{ $b}} keys %opts ];
+                 [ sort {$opts{ $a } <=> $opts{ $b }} keys %opts ];
         }
     }
+    # Make sure we have at least *one* section
     push @{ $self->{_sections} }, [ "" ] unless @{ $self->{_sections} };
 
     $self->{v} > 1 and printf "Left with %d parsed sections\n", 
@@ -314,16 +321,16 @@ sub default_buildcfg() {
 
     return <<__EOCONFIG__;
 
-=
+== Build all configurations with and without ithreads
 
 -Duseithreads
-=
+== Build perl with these options
 -Uuseperlio
 
 -Duse64bitint
 -Duselongdouble
 -Dusemorebits
-=
+== All configurations with and without -DDEBUGGING
 /-DDEBUGGING/
 
 -DDEBUGGING
@@ -469,6 +476,38 @@ sub any_arg {
     my $ok = 0;
     $ok ||= exists $self->[2]{ $_ } foreach @_;
     return $ok;
+}
+
+=item $buildcfg->args_eq( $args )
+
+C<args_eq()> takes a string of config arguments and returns true if
+C<$self> has exactly the same args as the C<$args> has.
+
+There is the small matter of default_args (dfopts) kept as a Class
+variable in L<Test::Smoke::BuildCFG>!
+
+=cut
+
+sub args_eq {
+    my $self = shift;
+    my $args = shift;
+
+    my $default_args = join "|", sort { 
+        length($b) <=> length($a) 
+    } quotewords( '\s+', 1, Test::Smoke::BuildCFG->config( 'dfopts' ) );
+
+    my %copy = map { ( $_ => undef ) }
+        grep !/$default_args/ => keys %{ $self->[2] };
+    my @s_args = grep !/$default_args/ => quotewords( '\s+', 1, $args );
+    my @left;
+    while ( my $option = pop @s_args ) {
+        if ( exists $copy{ $option } ) {
+            delete $copy{ $option };
+        } else {
+            push @left, $option;
+        }
+    }
+    return (@left || keys %copy) ? 0 : 1;
 }
 
 1;

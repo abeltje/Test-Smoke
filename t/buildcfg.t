@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 
-use Test::More tests => 31;
+use Test::More tests => 44;
 my $verbose = 0;
 
 use_ok "Test::Smoke::BuildCFG";
@@ -64,11 +64,14 @@ __EOCFG__
     foreach my $config ( $bcfg->configurations ) {
         if ( ($config->policy)[0]->[1] ) {
             ok( $config->has_arg( '-DDEBUGGING' ), "has_arg(-DDEBUGGING)" );
-            like( "$config", '/-DDEBUGGING/', "'$config' has -DDEBUGGING" );
+            like( "$config", '/-DDEBUGGING/', 
+                  "'$config' has -DDEBUGGING" );
         } else {
             ok( !$config->has_arg( '-DDEBUGGING' ), "! has_arg(-DDEBUGGING)" );
-            unlike( "$config", '/-DDEBUGGING/', "'$config' has no -DDEBUGGING" );
+            unlike( "$config", '/-DDEBUGGING/', 
+                    "'$config' has no -DDEBUGGING" );
         }
+        ok( $config->args_eq( "$config" ), "Stringyfied: args_eq($config)" );
     }
 }
 
@@ -96,12 +99,23 @@ __EOCFG__
         { policy_target => '-DDEBUGGING', args => [ '', '-DDEBUGGING'] },
     ];
 
-    my $bcfg = Test::Smoke::BuildCFG->new( \$dft_cfg => { v => 0 } );
+    my $bcfg = Test::Smoke::BuildCFG->new( \$dft_cfg => { v => $verbose } );
 
     is_deeply $bcfg->{_sections}, $dft_sect, "Empty sections are skipped";
 
 }
 
+{ # This is to test the default configuration
+    my $dft_sect = [
+        [ '', '-Duseithreads'],
+        [ '-Uuseperlio', '', qw(-Duse64bitint -Duselongdouble -Dusemorebits) ],
+        { policy_target => '-DDEBUGGING', args => [ '', '-DDEBUGGING'] },
+    ];
+
+    my $bcfg = Test::Smoke::BuildCFG->new( undef,  { v => $verbose } );
+
+    is_deeply $bcfg->{_sections}, $dft_sect, "Default configuration";
+}
 
 package CatchOut;
 
