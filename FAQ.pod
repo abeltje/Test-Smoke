@@ -96,7 +96,7 @@ shellscript F<mysmoke.sh> (or F<mysmoke.cmd> if you are on Windows).
 
 There are two (2) special prefixes: B<smoke56x> and B<smoke58x>. These
 will set the default answers for F<configsmoke.pl> to be appropriate
-for smoking the maintenance releases for these versions of perl.
+for smoking the maintenance branches for these versions of perl.
 
 =head2 What are all the scripts in the smoke suite for?
 
@@ -153,6 +153,8 @@ a unixy way.
 Yes, you can kill all the smoke related processes. Each stage is
 directly logged in F<< <builddir>/mktest.out >>.
 (Can somebody provide some more insight here?)
+
+As of version 1.17.02 you can specify a timeout (if you have alarm())
 
 =head2 Can I still generate a report after an interrupted smoke?
 
