@@ -13,9 +13,11 @@ my %CONFIG = (
     df_is56x          => 0,
     df_locale         => '',
     df_force_c_locale => '0',
+
     df_is_win32       => $^O eq 'MSWin32',
     df_w32cc          => 'MSVC60',
     df_w32make        => 'nmake',
+    df_w32args        => [ ],
 );
 
 =head1 NAME
@@ -167,9 +169,20 @@ sub smoke {
 
     $self->handle_policy( $policy, $config->policy );
 
-    $self->Configure( $config ) or return 0;
+    $self->Configure( $config ) or do {
+        $self->ttylog( "Unable to configure perl in this configuration\n" );
+        return 0;
+     };
 
-    $self->make_ or return 0;
+    $self->make_ or do {
+        $self->ttylog( "Unable to make perl in this configuration\n" );
+        return 0;
+     };
+
+    $self->make_test_prep or do {
+        $self->ttylog( "Unable to test perl in this configuration\n" );
+        return 0;
+     };
 
     $self->make_test( "$config" );
 
@@ -225,9 +238,11 @@ sub Configure {
     $self->tty( "\nConfigure ..." );
     my $makefile = '';
     if ( $self->{is_win32} ) {
+        my @w32args = @{ $self->{w32args} };
+        @w32args = @w32args[ 4 .. $#w32args ];
         $makefile = $self->_run( "./Configure $config", 
                                  \&Test::Smoke::Util::Configure_win32,
-                                 $self->{w32make}, @{ $self->{w32args} } );
+                                 $self->{w32make}, @w32args  );
     } else {
         $self->_run( "./Configure -des $config" );
         $makefile = 'Makefile';
@@ -253,6 +268,23 @@ sub make_ {
     return -x $perl;
 }
 
+=item make_test_prep( )
+
+Run C<< I<make test-perp> >> and check if F<t/perl> exists.
+
+=cut
+
+sub make_test_prep {
+    my $self = shift;
+
+    my $perl = File::Spec->catfile( "t", "perl$Config{_exe}" );
+
+    $self->{run} and unlink $perl;
+    $self->_make( "test-prep" );
+
+    return $self->{is_win32} ? -f $perl : -l $perl;
+}
+
 =item $smoker->make_test( )
 
 =cut
@@ -261,9 +293,7 @@ sub make_test {
     my $self = shift;
     my( $config_args ) = @_;
 
-    my $test_prep = $self->_make( "test-prep" );
     $self->tty( "\n Tests start here:\n" );
-    $self->{v} > 1 and print map "# $_\n" => split /\n/, $test_prep;
 
     # No use testing different io layers without PerlIO
     # just output 'stdio' for mkovz.pl
