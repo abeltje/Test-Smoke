@@ -116,8 +116,9 @@ foreach my $config ( @configs ) {
         if exists $rpt->{running};
 
     my $todo = $ccnt - $rpt->{count};
-    my $est_curr = $rpt->{avg} - ( $rpt->{rtime} - $rpt->{count}*$rpt->{avg} );
-    my $est_todo = $todo > 0
+    my $est_curr = $rpt->{avg} ne "unknown"
+        ? $rpt->{avg} - ( $rpt->{rtime} - $rpt->{count}*$rpt->{avg} ) : 0;
+    my $est_todo = $todo > 0 && $rpt->{avg} ne 'unknown'
         ? ( (($todo - 1) * $rpt->{avg}) + $est_curr ) : 0;
     $est_todo > $todo * $rpt->{avg} and $est_todo = $todo * $rpt->{avg};
     my $todo_time = $rpt->{avg} eq 'unknown' ? '.' :
