@@ -33,14 +33,15 @@ my $verbose = exists $ENV{SMOKE_VERBOSE} ? $ENV{SMOKE_VERBOSE} : 0;
 }
 
 my $patch = find_a_patch();
+$verbose and diag( "Found patch: '$patch'" );
 my $testpatch = File::Spec->catfile( 't', 'test.patch' );
 
 SKIP: { # test Test::Smoke::Patcher->patch_single()
     my $to_skip = 13;
     skip "Cannot find a working 'patch' program.", $to_skip unless $patch;
     my $patcher = Test::Smoke::Patcher->new( single => { v => $verbose,
-        -ddir  => File::Spec->catdir( 't', 'perl' ),
-        -patch => $patch,
+        -ddir     => File::Spec->catdir( 't', 'perl' ),
+        -patchbin => $patch,
     });
 
     isa_ok( $patcher, 'Test::Smoke::Patcher' );
@@ -106,8 +107,8 @@ SKIP: { # Test multi mode
     my $pi_content = "$relpatch\n";
 
     my $patcher = Test::Smoke::Patcher->new( multi => { v => $verbose,
-        ddir  => File::Spec->catdir( 't', 'perl' ),
-        patch => $patch,
+        ddir     => File::Spec->catdir( 't', 'perl' ),
+        patchbin => $patch,
     });
     isa_ok( $patcher, 'Test::Smoke::Patcher' );
 
