@@ -12,6 +12,8 @@ BEGIN {
     push @test_files, map File::Spec->catfile( 'lib', 'Test', 'Smoke', $_ )
         => qw( Syncer.pm SourceTree.pm Policy.pm Util.pm 
                Patcher.pm Mailer.pm );
+    push @test_files, map File::Spec->catfile( 'lib', 'Test', $_ )
+        => qw( Smoke.pm );
 }
 use Test::Pod tests => scalar @test_files;
 

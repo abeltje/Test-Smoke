@@ -13,7 +13,7 @@ BEGIN {
                    Makefile.PL Configure.pl configsmoke.pl );
 }
 
-use Test::Simple tests => scalar @scripts;
+use Test::Simple tests => 1 + scalar @scripts;
 
 my $dev_null = File::Spec->devnull;
 
@@ -27,3 +27,5 @@ foreach my $script ( @scripts ) {
         "perl -c '$s_name' okay" );
 }
     
+ok( system( qq{$^X "-Ilib" "-c" "lib/Test/Smoke.pm" > $dev_null 2>&1} ) == 0,
+    "perl -c lib/Test/Smoke.pm okay" );
