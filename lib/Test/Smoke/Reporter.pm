@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.011';
+$VERSION = '0.012';
 
 use Cwd;
 use File::Spec::Functions;
@@ -660,6 +660,7 @@ Returns a string with the legend for the letters in the matrix.
 =cut
 
 sub letter_legend {
+    require Test::Smoke::Smoker;
     return <<__EOL__
 O = OK  F = Failure(s), extended report at the bottom
 X = Failure(s) under TEST but not under harness
@@ -674,7 +675,8 @@ sub signature {
     return <<__EOS__
 
 -- 
-Report by Test::Smoke v$Test::Smoke::VERSION\@$Test::Smoke::REVISION (Reporter v$VERSION) running on perl $this_pver
+Report by Test::Smoke v$Test::Smoke::VERSION\@$Test::Smoke::REVISION running on perl $this_pver
+(Reporter v$VERSION / Smoker v$Test::Smoke::Smoker::VERSION)
 __EOS__
 }
 
