@@ -1,5 +1,6 @@
 #! /usr/bin/perl -w
 use strict;
+$| = 1;
 # BEGIN { die "You must be on MSWin32 for this!\n" unless $^O eq 'MSWin32' }
 
 use File::Spec;
@@ -58,6 +59,17 @@ the configure options you passed worked into it.
 
 This could help debugging.
 
+=head1 OPTIONS
+
+    --config|-c [configfile]  Specify the configfile
+
+    --ddir|-d <directory>     Set the directory for the source-tree
+    --maker|-m <nmake|dmake>  Set the maker (needed for the makefile)
+
+    --verbose|-v <0..2>       Set verbose level
+    --help|-h                 Show help
+    --man                     Show the full perldoc
+
 =cut
 
 my %opt = (
@@ -72,7 +84,7 @@ my %opt = (
 
 use Getopt::Long;
 GetOptions( \%opt,
-    'ddir|d=s', 'maker|w32make|m=s', 'v|verbose+',
+    'ddir|d=s', 'maker|m=s', 'v|verbose=i',
 
     'man', 'help|h',
 
@@ -156,9 +168,9 @@ See:
 
 =over 4
 
-=item * http://www.perl.com/perl/misc/Artistic.html
+=item * L<http://www.perl.com/perl/misc/Artistic.html>
 
-=item * http://www.gnu.org/copyleft/gpl.html
+=item * L<http://www.gnu.org/copyleft/gpl.html>
 
 =back
 

@@ -1,5 +1,6 @@
 #! /usr/bin/perl -w
 use strict;
+$| = 1;
 
 use Getopt::Long;
 use File::Spec;
@@ -10,7 +11,7 @@ use Test::Smoke::Patcher;
 
 use Test::Smoke;
 use vars qw( $VERSION );
-$VERSION = '0.005'; # $Id$
+$VERSION = '0.006'; # $Id$
 
 my %opt = (
     type    => 'multi',
@@ -37,7 +38,7 @@ patchtree.pl - Patch the sourcetree
 
 or
 
-    $ ./mailrpt.pl -c [smokecurrent_config]
+    $ ./patchtree.pl -c [smokecurrent_config]
 
 =head1 OPTIONS
 
@@ -54,18 +55,21 @@ Other options can override the settings from the configuration file.
 
     -d | --ddir <directory>  Set the directory for the source-tree (cwd)
     -f | --pfile <patchfile> Set the resource containg patch info
-    -v | --verbose           Be verbose
+
+    -v | --verbose <0..2>    Set verbose level
+    -h | --help              Show help message (needs Pod::Usage)
+    --man                    Show the perldoc  (needs Pod::Usage)
 
 =back
 
 =cut
 
 GetOptions( \%opt,
-    'pfile|f=s', 'ddir|d=s', 'v|verbose:i',
+    'pfile|f=s', 'ddir|d=s', 'v|verbose=i',
 
     'popts=s',
 
-    'help|h', 'man|m',
+    'help|h', 'man',
 
     'config|c:s',
 ) or do_pod2usage( verbose => 1 );

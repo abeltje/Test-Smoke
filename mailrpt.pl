@@ -1,5 +1,6 @@
 #! /usr/bin/perl -w
 use strict;
+$| = 1;
 
 use Getopt::Long;
 use File::Spec;
@@ -10,7 +11,7 @@ use Test::Smoke::Mailer;
 
 use Test::Smoke;
 use vars qw( $VERSION );
-$VERSION = '0.008'; # $Id$
+$VERSION = '0.010'; # $Id$
 
 my %opt = (
     type    => undef,
@@ -62,12 +63,16 @@ Other options can override the settings from the configuration file.
     -d | --ddir <directory>  Set the directory for the source-tree (cwd)
     --to <emailaddresses>    Comma separated list (smokers-reports@perl.org)
     --cc <emailaddresses>    Comma separated list
-    -v | --verbose           Be verbose
 
     -t | --type <type>       mail mailx sendmail Mail::Sendmail [mandatory]
 
     --nomail                 Don't send the message
     --report                 Create a report anyway
+
+    -v | --verbose <0..2>    Set verbose level
+    -h | --help              Show help message (needs Pod::Usage)
+    --man                    Show the perldoc  (needs Pod::Usage)
+
 
 =item * B<options for> -t mail/mailx
 
@@ -87,11 +92,11 @@ no extra options
 =cut
 
 GetOptions( \%opt,
-    'type|t=s', 'ddir|d=s', 'to=s', 'cc=s', 'v|verbose:i',
+    'type|t=s', 'ddir|d=s', 'to=s', 'cc=s', 'v|verbose=i',
 
     'from=s', 'mserver=s',
 
-    'help|h', 'man|m',
+    'help|h', 'man',
 
     'config|c:s',
 
@@ -199,9 +204,9 @@ See:
 
 =over 4
 
-=item * http://www.perl.com/perl/misc/Artistic.html
+=item * L<http://www.perl.com/perl/misc/Artistic.html>
 
-=item * http://www.gnu.org/copyleft/gpl.html
+=item * L<http://www.gnu.org/copyleft/gpl.html>
 
 =back
 

@@ -1,5 +1,6 @@
 #! /usr/bin/perl -w
 use strict;
+$| = 1;
 
 use Getopt::Long;
 use File::Spec;
@@ -9,7 +10,7 @@ use Test::Smoke::Syncer;
 
 use Test::Smoke;
 use vars qw( $VERSION );
-$VERSION = '0.008'; # $Id$
+$VERSION = '0.009'; # $Id$
 
 my %opt = (
     type   => undef,
@@ -53,9 +54,11 @@ Other options can override the settings from the configuration file.
 =item * B<General options>
 
     -d | --ddir <directory>  Set the directory for the source-tree
-    -v | --verbose           Be verbose
-
     -t | --type <type>       'rsync', 'snapshot', 'copy' [mandatory]
+
+    -v | --verbose <0..2>    Set verbose level
+    -h | --help              Show help message (needs Pod::Usage)
+    --man                    Show the perldoc  (needs Pod::Usage)
 
 =item * B<options for> -t rsync
 
@@ -98,7 +101,7 @@ Other options can override the settings from the configuration file.
 =cut
 
 GetOptions( \%opt,
-    'type|t=s', 'ddir|d=s', 'v|verbose:i',
+    'type|t=s', 'ddir|d=s', 'v|verbose=i',
 
     'source=s', 'rsync=s', 'opts',
 
@@ -114,7 +117,7 @@ GetOptions( \%opt,
     'config|c:s',
 ) or do_pod2usage( verbose => 1 );
 
-$opt{man}  and do_pod2usage( verbose => 2, exitval => 0 );
+$opt{ man} and do_pod2usage( verbose => 2, exitval => 0 );
 $opt{help} and do_pod2usage( verbose => 1, exitval => 0 );
 
 if ( defined $opt{config} ) {
