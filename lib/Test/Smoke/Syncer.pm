@@ -316,7 +316,7 @@ sub check_dot_patch {
         close PATCHLEVEL_H;
         # Now create '.patch' and return if $patch_level
         # The patchlevel is off by one in snapshots
-        if ( $patch_level ) {
+        if ( $patch_level && $patch_level !~ /-RC\d+$/ ) {
             if ( open DOTPATCH, "> $dot_patch" ) {
                 print DOTPATCH "$patch_level\n";
                 close DOTPATCH; # no use generating the error

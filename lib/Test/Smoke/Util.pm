@@ -647,7 +647,8 @@ sub parse_report_Config {
     my( $report ) = @_;
 
     my $version  = $report =~ /^Automated.*for (.+) patch/ ? $1 : '';
-    my $plevel   = $report =~ /^Automated.*patch (\d+)/ ? $1 : '';
+    my $plevel   = $report =~ /^Automated.*patch (\d+(?:\.\d+\.\d+-RC\d+)?)/
+        ? $1 : '';
     my $osname   = $report =~ /\bon (.*) - / ? $1 : '';
     my $osvers   = $report =~ /\bon .* - (.*)/? $1 : '';
     $osvers =~ s/\s+\(.*//;
