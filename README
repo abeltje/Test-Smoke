@@ -44,6 +44,10 @@ The F<Makefile.PL> program will ask for a directory in which
 Test::Smoke should be installed (this will set I<PREFIX>,
 I<INSTALLSCRIPT> and I<LIB> all to that directory).
 
+I<If you want to automate the Makefile.PL step you need to set two
+environment variables: $ENV{SMOKE_INSTDIR}='../p5smoke' and
+$ENV{PERL_MM_USE_DEFAULT}='y'>
+
 You are now ready to run the F<configsmoke.pl> configuration program:
 
     $ perl configsmoke.pl

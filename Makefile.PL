@@ -16,7 +16,9 @@ system "$Config{make} -i distclean >$devnull 2>&1";
 
 my %install = ( );
 unless ( @ARGV ) {
-    my $dft_install = File::Spec->catdir( File::Spec->updir, 'smoke' );
+    my $dft_install = exists $ENV{SMOKE_INSTDIR} && $ENV{SMOKE_INSTDIR} ne ""
+        ? $ENV{SMOKE_INSTDIR}
+        : File::Spec->catdir( File::Spec->updir, 'smoke' );
     $dft_install = File::Spec->rel2abs( $dft_install );
 
     my $install_dir = dir_prompt( 
