@@ -1,4 +1,4 @@
-#! /usr/bin/perl
+#! /usr/bin/perl -w
 # $Id$
 use strict;
 use 5.004;
@@ -8,6 +8,11 @@ use Config;
 use File::Spec;
 use Cwd;
 use File::Path;
+
+# Some strange stuff happens when WriteMakefile() is called
+# on a non-clean distribution, cleanup before
+my $devnull = File::Spec->devnull;
+system "$Config{make} -i distclean >$devnull 2>&1";
 
 my %install = ( );
 unless ( @ARGV ) {
@@ -50,7 +55,7 @@ WriteMakefile(
 
 sub MY::libscan {
     my( $self, $path ) = @_;
-    return m:\.svn|\bt\b: ? "" : $path;
+    return m:\.svn\b|\bt\b|\bprivate\b: ? "" : $path;
 }
 
 sub dir_prompt {
@@ -69,8 +74,8 @@ sub dir_prompt {
         File::Path::mkpath( $dir, 1, 0755 ) unless $dir_existed;
         chdir $dir or warn "Cannot chdir($dir): $!\n" and redo GETDIR;
         $dir = File::Spec->canonpath( cwd() );
+        chdir $cwd or warn "Cannot chdir($cwd) back: $!\n";
         File::Path::rmtree( $dir ) unless $dir_existed;
-        chdir $cwd or die "Cannot chdir($cwd) back: $!";
 
         print "Got [$dir]\n";
         return $dir;
