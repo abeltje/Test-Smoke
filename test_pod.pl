@@ -17,4 +17,4 @@ BEGIN {
 }
 use Test::Pod tests => scalar @test_files;
 
-pod_ok( $_ ) for @test_files;
+pod_file_ok( $_ ) for @test_files;

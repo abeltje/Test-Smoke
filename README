@@ -113,7 +113,7 @@ This will ask you for:
 
 After that it will change some settings in the F<smoke.sh> file.
 
-=item Edit F<smokew32.bat> (MSWin32 only, deprecated)
+=item * Edit F<smokew32.bat> (MSWin32 only, deprecated)
 
 Edit the F<smokew32.bat> batch file and set the right values.
 

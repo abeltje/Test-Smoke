@@ -584,12 +584,8 @@ as a clean master source directory for this smoke session
 run the regen headers script (which 5.9.0 now has as a distinct script)
 rather than just a Makefile target
 
-=back
-
 I now have a clean, up-to-date source tree with accurate headers. For each
 smoking configuration
-
-=over 4
 
 =item 4
 
