@@ -4,7 +4,7 @@ $| = 1;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.014';
+$VERSION = '0.015';
 
 use Cwd;
 use File::Spec;
@@ -29,6 +29,7 @@ my %opt = (
     mserver      => undef,
     v            => undef,
 
+    rptfile      => 'mktest.rpt',
     mail         => 1,
     report       => undef,
     defaultenv   => undef,
@@ -115,7 +116,7 @@ GetOptions( \%opt,
 
     'help|h', 'man',
 
-    'config|c:s',
+    'config|c:s', 'rptfile|r=s',
 
     'mail|email!', 'report!', 'defaultenv!',
 ) or do_pod2usage( verbose => 1, myusage => $my_usage );
@@ -166,7 +167,7 @@ if ( $opt{mail} ) {
 # Basically: call mkovz.pl unless -f <builddir>/mktest.rpt
 sub check_for_report {
 
-    my $report = File::Spec->catfile( $opt{ddir}, 'mktest.rpt' );
+    my $report = File::Spec->catfile( $opt{ddir}, $opt{rptfile} );
 
     if ( -f $report ) {
         $opt{v} and print "Found [$report]\n";
