@@ -32,9 +32,9 @@ SETUP: {
     local *DIR;
     opendir DIR, 'win32' or plan skip_all => "Cannot opendir 'win32': $!";
     while ( my $file = readdir DIR ) {
-        -f $file or next;
-      File::Copy::copy( File::Spec->catfile( 'win32', $file ),
-                        File::Spec->catfile( $subdir, $file ) );
+        -f File::Spec->catfile('win32', $file ) or next;
+        File::Copy::copy( File::Spec->catfile( 'win32', $file ),
+                          File::Spec->catfile( $subdir, $file ) );
     }
     closedir DIR;
     # Create a '.patch'
@@ -88,7 +88,9 @@ SKIP: {
 }
 
 END { 
-    rmtree( $ddir );
-    rmtree( $cdir );
+    unless ( $ENV{SMOKE_DEBUG} ) {
+      rmtree( $ddir );
+      rmtree( $cdir );
+    }
     chdir File::Spec->updir;
 }

@@ -72,7 +72,7 @@ sub get_dir($) {
     my @files;
     find sub {
         -f or return;
-        (my $name = $File::Find::name ) =~ s/^\Q$path\E//;
+        my $name = File::Spec->abs2rel( $File::Find::name, $path );
         push @files, $name;
     }, $path;
 
