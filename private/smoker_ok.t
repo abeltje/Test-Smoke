@@ -8,8 +8,9 @@ $| = 1;
 use Cwd;
 use FindBin;
 use File::Spec::Functions;
-use lib catdir( $FindBin::Bin, updir, 'lib' );
-use lib catdir( $FindBin::Bin, updir );
+#use lib catdir( $FindBin::Bin, updir, 'lib' );
+#use lib catdir( $FindBin::Bin, updir );
+use lib $FindBin::Bin;
 
 use SmokertestLib;
 use Test::More 'no_plan';
