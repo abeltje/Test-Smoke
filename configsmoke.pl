@@ -432,19 +432,21 @@ There are two additional configuration default files
 F<smoke56x_dfconfig> and F<smoke58x_dfconfig> to help you configure 
 B<Test::Smoke> for these two maintenance branches of the source-tree.
 
-To create a configuration for the perl 5.6.x brach:
+To create a configuration for the perl 5.8.x brach:
 
-    $ perl configsmoke.pl -p smoke56x
+    $ perl configsmoke.pl -p smoke58x
 
-This will read additional defaults from F<smoke56x_dfconfig> and create
-F<smoke56x_config> and F<smoke56x.sh>/F<smoke56x.cmd> and logfile will be
-F<smoke56x.log>.
+This will read additional defaults from F<smoke58x_dfconfig> and create
+F<smoke58x_config> and F<smoke58x.sh>/F<smoke58x.cmd> and logfile will be
+F<smoke58x.log>.
 
-The same goes for the perl 5.8.x branch:
+The same goes for the perl 5.6.x branch:
 
-    $perl configsmoke.pl -p smoke58x
+    $perl configsmoke.pl -p smoke56x
 
 =head1 CONFIGURATION
+
+B<If you want to clear a setting use a single space!>
 
 Here is a description of the configuration sections.
 
@@ -614,6 +616,11 @@ The default switches passed to B<rsync> are: S<< B<-az --delete> >>
 
 This will use B<Net::FTP> to try to find the latest snapshot on
 <ftp://ftp.funet.fi/languages/perl/snap/>. 
+
+You can also get the perl-5.8.x snapshots (and others) from via HTTP
+if you have B<LWP> installed. There are two things you should remember:
+1) start the server-name B<http://> 2) the snapshot-file must be
+specified.
 
 Snapshots are not in sync with the repository, so if you have a working
 B<patch> program, you can choose to "upgrade" your snapshot by fetching 
@@ -1122,13 +1129,16 @@ $copycmd
 REM $atline
 
 set WD=$cwd\
-for \%\%D in ( \%WD\% ) do \%\%~dD
+rem Change drive-Letter
+for \%\%L in ( "\%WD\%" ) do \%\%~dL
 cd "\%WD\%"
 set CFGNAME=$options{config}
 set LOCKFILE=$options{prefix}.lck
 if NOT EXIST \%LOCKFILE\% goto START_SMOKE
     FIND "\%LOCKFILE\%" \%LOCKFILE\% > NUL:
-    if NOT ERRORLEVEL 1 (echo We seem to be running [or remove \%LOCKFILE\%]>&2) && exit /B 200
+    if ERRORLEVEL 1 goto START_SMOKE
+    echo We seem to be running [or remove \%LOCKFILE\%]>&2
+    goto :EOF
 
 :START_SMOKE
     echo \%LOCKFILE\% > \%LOCKFILE\%
