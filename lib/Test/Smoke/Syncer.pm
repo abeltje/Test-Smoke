@@ -832,7 +832,7 @@ sub __vms_untargz {
 \$ define/user sys\$output TS-UNTGZ.TAR
 \$ $gzip "-cd" $file
 \$ $tar $tar_sw TS-UNTGZ.TAR
-\$ delete TS-UNTGZ.TAR
+\$ delete TS-UNTGZ.TAR;*
 EO_UNTGZ
     $verbose and print " OK\n";
 

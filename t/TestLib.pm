@@ -394,7 +394,7 @@ sub vms_untargz {
 \$ define/user sys\$output TS-UNTGZ.TAR
 \$ $gzip "-cd" $file
 \$ $tar "-xf" TS-UNTGZ.TAR
-\$ delete TS-UNTGZ.TAR
+\$ delete TS-UNTGZ.TAR;*
 EO_UNTGZ
 
     my $ret = system "\@TS-UNTGZ.COM";
