@@ -62,7 +62,15 @@ WriteMakefile(
 
 sub MY::libscan {
     my( $self, $path ) = @_;
-    return $path =~ m:\.svn\b|\bt\b|\bprivate\b: ? "" : $path;
+    my @nopaths = qw( .svn t private investigate );
+    my $patt = join '|', map {
+        /^\w/ and $_ = "\\b$_";
+        /\w$/ and $_ = "$_\\b";
+        $_;
+    } @nopaths;
+    print "$path($patt):\n";
+    print  "\t" . ($path =~ m:$patt: ? "" : $path) . "\n";
+    return $path =~ m:$patt: ? "" : $path;
 }
 
 sub dir_prompt {
