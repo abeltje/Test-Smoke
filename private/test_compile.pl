@@ -8,14 +8,15 @@ use File::Spec;
 
 my @scripts;
 BEGIN {
-    @scripts = qw( mktest.pl mkovz.pl smokeperl.pl runsmoke.pl
+    @scripts = qw( smokeperl.pl runsmoke.pl
                    synctree.pl patchtree.pl mailrpt.pl 
                    archiverpt.pl smokestatus.pl W32Configure.pl
-                   Makefile.PL Configure.pl configsmoke.pl );
+                   Makefile.PL configsmoke.pl );
 
     push @scripts, map File::Spec->catfile(qw( lib Test Smoke ), $_ )
         => qw ( Util.pm Policy.pm SourceTree.pm
                 Syncer.pm Patcher.pm Mailer.pm
+                SysInfo.pm Reporter.pm
                 BuildCFG.pm Smoker.pm );
 
     push @scripts, map File::Spec->catfile(qw( lib Test ), $_ )
