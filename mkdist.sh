@@ -47,7 +47,7 @@ if [ "$SMOKE_DIST_DIR" != "" ] ; then
 fi
 echo "Will put the distribution in: '$distdir'"
 
-trap 'echo "An error while testing..." ; exit' 0
+trap 'if [ $? ] ; then echo "An error while testing..."; fi ; exit' 0
 
 # Check if all the distributed perl-files compile
 # Check if all the distibuted files with POD are pod_ok
@@ -63,6 +63,7 @@ if [ "$SMOKE_TEST_ONLY" == "1" ] ; then
         SMOKE_SKIP_SIGTEST=1 prove -I lib private/*.t t/*.t || exit
     fi
     echo "SMOKE_TEST_ONLY was set, quitting..."
+    trap '' 0
     exit
 else
     prove -I lib private/smoker_*.t || exit
