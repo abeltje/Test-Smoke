@@ -213,9 +213,9 @@ for (<OUT>) {
         }
         next;
     }
-    if (m/^\s*Unable\ to\
-          (?=([cbmt]))(?:build|configure|make|test)\
-          (anything\ but\ mini)?perl/x) {
+    if (m/^\s*Unable\ to
+          \ (?=([cbmt]))(?:build|configure|make|test)
+          \ (anything\ but\ mini)?perl/x) {
         $2 and $1 = uc $1; # M for no perl but miniperl
         foreach my $layer ( @layers ) {
             $rpt{$conf}{$debug}{ $layer }  = $1;
