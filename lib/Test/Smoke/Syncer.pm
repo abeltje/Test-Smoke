@@ -5,6 +5,7 @@ use strict;
 use vars qw( $VERSION );
 $VERSION = '0.010';
 
+use Config;
 use Cwd;
 use File::Spec;
 require File::Path;
@@ -47,8 +48,9 @@ my %CONFIG = (
 
 # these settings have to do with synctype==hardlink
     df_hdir    => undef,
+    df_haslink => $Config{d_link} eq 'define',
 
-    hardlink   => [qw( hdir )],
+    hardlink   => [qw( hdir haslink )],
 
     df_fsync   => 'rsync',
     df_mdir    => undef,
@@ -1117,6 +1119,8 @@ C<sync()> uses the B<File::Find> module to make the hardlink forest in {ddir}.
 sub sync {
     my $self = shift;
 
+    require File::Copy unless $self->{haslink};
+
     -d $self->{ddir} or File::Path::mkpath( $self->{ddir} );
 
     my $source_dir = File::Spec->canonpath( $self->{hdir} );
@@ -1131,7 +1135,9 @@ sub sync {
         } else {
             -e $dest and 1 while unlink $dest;
             $self->{v} > 1 and print "link $_ $dest";
-            my $ok = link $_, $dest;
+            my $ok = $self->{haslink}
+                ? link $_, $dest
+                : File::Copy::copy( $_, $dest );
             if ( $self->{v} > 1 ) {
                 print $ok ? " OK\n" : " $!\n";
             }

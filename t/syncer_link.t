@@ -6,7 +6,7 @@ use strict;
 use File::Spec;
 use lib File::Spec->rel2abs( 't' );
 use TestLib;
-use Test::More tests => 9;
+use Test::More tests => 12;
 
 use_ok( 'Test::Smoke::Syncer' );
 
@@ -64,6 +64,40 @@ SKIP: {
     } else {
         skip "Cannot check inodes on Windows-fs", 1;
     }
+
+    rmtree( File::Spec->catdir(qw( t perl )), $syncer->{v} );
+    rmtree( File::Spec->catdir(qw( t perl-current )), $syncer->{v} );
+}
+
+SKIP: { # Check that the same works for {haslink} == 0
+# Try to find tar/gzip, Archive::Tar/Compress::Zlib
+# When found, t/ftppub/snap/perl@20000.tgz can be extracted
+# and used as a base for the hardlink sync
+
+    my $to_skip = 2;
+    my $tar = find_uncompress() or
+        skip "Cannot find decompression stuff", $to_skip;
+
+    do_uncompress( $tar, 't', 
+                   File::Spec->catfile(qw( ftppub snap perl@20000.tgz )) ) or
+        skip "Cannot decompress testsnapshot", $to_skip;
+
+    ok( -d File::Spec->catdir(qw( t perl )), "snapshot OK" );
+
+    my $syncer = Test::Smoke::Syncer->new( hardlink => { v=> 0,
+        ddir    => File::Spec->catdir(qw( t perl-current )),
+        hdir    => File::Spec->catdir(qw( t perl )),
+        haslink => 0,
+    } );
+
+    my %perl = map { ($_ => 1) } get_dir( $syncer->{hdir} );
+    $syncer->sync();
+    my %perl_current = map { ($_ => 1) } get_dir( $syncer->{ddir} );
+
+    is( scalar keys %perl_current, scalar keys %perl,
+        "number of files the same [nolink]" );
+    is_deeply( \%perl_current, \%perl, "Same files in the two dirs [nolink]" );
+
 
     rmtree( File::Spec->catdir(qw( t perl )), $syncer->{v} );
     rmtree( File::Spec->catdir(qw( t perl-current )), $syncer->{v} );
