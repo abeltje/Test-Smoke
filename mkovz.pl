@@ -86,8 +86,8 @@ B<daily-build-reports@perl.org> is used.
 
 =item builddir
 
-The C<builddir> is the directory where you have just build perl and where the 
-B<mktest.out> file is that C<mktest.pl> left there.
+The C<builddir> is the directory where you have just built perl and
+where C<mktest.pl> wrote the B<mktest.out> output file.
 
 The default is the current working directory.
 
@@ -172,6 +172,14 @@ for (<OUT>) {
         $debug = s/-DDEBUGGING\s*// ? "D" : "";
         s/\s+-des//;
         s/\s+$//;
+        unless ( $Config{cc} ) { # This is fallback
+            my( $cc ) = grep /^-Dcc=(['"])?(.+?)\1/ # '
+                => quotewords( '\s+', 1, $_ );
+            if ( $cc =~ s/^-Dcc=(['"])?(.+?)\1/$2/ ) { #'
+                $Config{cc} = $cc;
+                `$cc -v 2>&1` =~ /version (.+)/ and $Config{ccversion} = $1;
+            }
+        }
         $conf = $_ || " ";
         $confs{$_}++ or push @confs, $conf;
         next;
@@ -180,7 +188,8 @@ for (<OUT>) {
         $perlio = $1;
         if ( $perlio eq 'minitest' ) {
             $rpt{$conf}{$debug}{$_} = "-" for @layers;
-            $rpt{$conf}{$debug}{minitest} = "M";
+            $rpt{$conf}{$debug}{minitest} = 
+                $rpt{$conf}{$debug}{stdio} = "M";
             $perlio = 'stdio';
         }
         # Deal with harness output
@@ -190,8 +199,9 @@ for (<OUT>) {
         $rpt{$conf}{$debug}{$perlio} = $rpt{$conf}{$debug}{minitest} || "O";
         next;
     }
-    if ( m/Inconsistent testresults/ ) {
+    if ( m/Inconsistent test\s*results/ ) {
         push @{ $rpt{$conf}{$debug}{$perlio} }, $_;
+        next;
     }
     if (m/^\s*Skipped this configuration/) {
 	if ($^O =~ m/^(?: hpux | freebsd )$/x) {
@@ -296,7 +306,7 @@ for my $conf (@confs) {
 
 	    my $res = $rpt{$conf}{$debug}{$perlio};
 	    if (ref $res) {
-                my $stat_x = grep /Inconsistent testresults/ => $res->[0];
+                my $stat_x = grep /Inconsistent test\s*results/ => $res->[0];
                 $rpt_stat .= $bldenv eq 'minitest' 
                     ? "M " : $stat_x ? "X " : "F ";
 		my $s_conf = $conf;
@@ -460,7 +470,7 @@ For more recent changes see B<ChangeLog>.
 1.14
     - Changed part of the report printing to use a format (write) 
     - switch back the <email> <testdir> args that Merijn accidentally swapped
-    - Be a bit more subtile about Win32 username
+    - Be a bit more subtle about Win32 username
     - Don't die() when lib/Config.pm isn't found
 
 1.13
