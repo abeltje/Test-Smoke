@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.022';
+$VERSION = '0.023';
 
 use base 'Exporter';
 @EXPORT_OK = qw( &sysinfo &tsuname );
@@ -516,8 +516,8 @@ sub Solaris {
         }
         $cpu .= " ($speed$magnitude)";
     } elsif (-x "/usr/sbin/sizer") { # OSF/1.
-        $cpu = $cpu_type;
-        chomp( $cpu_type = `sizer -implver` );
+        $cpu = $type;
+        chomp( $type = `sizer -implver` );
     }
 
     my $ncpu = grep /on-?line/ => `psrinfo`;
