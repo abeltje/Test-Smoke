@@ -190,6 +190,7 @@ sub _parse {
     return $self unless defined $self->{_outfile};
 
     my( %rpt, $cfgarg, $debug, $tstenv, $start );
+    $rpt{count} = 0;
     # reverse and use pop() instead of using unshift()
     my @lines = reverse split /\n+/, $self->{_outfile};
     while ( defined( local $_ = pop @lines ) ) {
@@ -225,6 +226,7 @@ sub _parse {
         if ( s/^\s*Configuration:\s*// ) {
             # You might need to do something here with 
             # the previous Configuration: $cfgarg
+            $rpt{count}++;
             s/-Dusedevel(\s+|$)//;
             s/\s*-des//;
             $debug = s/-DDEBUGGING\s*// ? "D" : "N";
@@ -282,6 +284,7 @@ sub _parse {
         next;
     }
 
+    $rpt{avg} = $rpt{secs} / $rpt{count};
     $self->{_rpt} = \%rpt;
     $self->_post_process;
 }
@@ -454,6 +457,7 @@ sub preamble {
 
     my $this_host = $si->host;
     my $time_msg  = time_in_hhmm( $self->{_rpt}{secs} );
+    my $savg_msg  = time_in_hhmm( $self->{_rpt}{avg}  );
 
     my $cinfo = $self->{_rpt}{cinfo};
     unless ( $cinfo ) { # Old .out file?
@@ -468,7 +472,7 @@ Automated smoke report for $Config{version} patch $self->{_rpt}{patch}
 $this_host: $cpu ($archname)
     on        $os
     using     $cinfo
-    smoketime $time_msg
+    smoketime $time_msg (average $savg_msg)
 
 __EOH__
 }
