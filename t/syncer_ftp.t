@@ -80,7 +80,7 @@ require Test::Smoke::Patcher; # for testing only
 # Now begin testing
 use_ok( 'Test::Smoke::Syncer' );
 
-my $patch = whereis( 'patch' );
+my $patch = find_a_patch();
 SKIP: { # Here we try for 'Archive::Tar'/'Compress::Zlib'
 
     eval { require Archive::Tar; };

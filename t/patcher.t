@@ -11,6 +11,7 @@ use Cwd;
 
 use Test::More tests => 32;
 BEGIN { use_ok( 'Test::Smoke::Patcher' ) };
+my $verbose = exists $ENV{SMOKE_VERBOSE} ? $ENV{SMOKE_VERBOSE} : 0;
 
 {
     my $tdir = 't';
@@ -34,7 +35,7 @@ my $testpatch = File::Spec->catfile( 't', 'test.patch' );
 SKIP: { # test Test::Smoke::Patcher->patch_single()
     my $to_skip = 13;
     skip "Cannot find a working 'patch' program.", $to_skip unless $patch;
-    my $patcher = Test::Smoke::Patcher->new( single => { v => 0,
+    my $patcher = Test::Smoke::Patcher->new( single => { v => $verbose,
         -ddir  => File::Spec->catdir( 't', 'perl' ),
         -patch => $patch,
     });
@@ -101,7 +102,7 @@ SKIP: { # Test multi mode
     my $relpatch = File::Spec->catfile( File::Spec->updir, 'test.patch' );
     my $pi_content = "$relpatch\n";
 
-    my $patcher = Test::Smoke::Patcher->new( multi => { v => 0,
+    my $patcher = Test::Smoke::Patcher->new( multi => { v => $verbose,
         ddir  => File::Spec->catdir( 't', 'perl' ),
         patch => $patch,
     });
@@ -151,7 +152,7 @@ EOPINFO
 {
     ok( defined &TRY_REGEN_HEADERS, "Exported \&TRY_REGEN_HEADERS" );
     Test::Smoke::Patcher->config( flags => TRY_REGEN_HEADERS );
-    my $patcher = Test::Smoke::Patcher->new( single => { v => 0,
+    my $patcher = Test::Smoke::Patcher->new( single => { v => $verbose,
         ddir => File::Spec->catdir(qw( t perl )),
     } );
     is( $patcher->{flags}, TRY_REGEN_HEADERS, "flags set from config()" );
