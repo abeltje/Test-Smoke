@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.003';
+$VERSION = '0.004';
 
 use Cwd;
 use File::Spec;
@@ -459,16 +459,20 @@ sub extend_with_harness {
         } @harness : "@harness";
         my $changed_dir;
         chdir 't' and $changed_dir = 1;
+        my $harness_all_ok = 0;
         my $harness_out = join "", map {
             my( $name, $fail ) = 
                 m/(\S+\.t)\s+.+[?%]\s+(\d+(?:[-\s]+\d+)*)/;
-            my $dots = '.' x (40 - length $name );
-            "$name${dots}FAILED $fail\n";
-        } grep m/\S+\.t\s+.+?\d+(?:[-\s+]\d+)*/ =>
-            $self->_run( "./perl harness $harness" );
+            my $dots = '.' x (30 - length $name );
+            "    $name${dots}FAILED $fail\n";
+        } grep m/\S+\.t\s+.+?\d+(?:[-\s+]\d+)*/ => map {
+            /All tests successful/ && $harness_all_ok++;
+            $_;
+        } $self->_run( "./perl harness $harness" );
         $harness_out =~ s/^\s*$//;
-        $harness_out ||= join "", map "    $_" => @nok;
-        $self->ttylog("\n", $harness_out );
+        $harness_out ||= join "", map "    $_" => @nok
+            unless $harness_all_ok;
+        $self->ttylog("\n", $harness_out, "\n" );
         $changed_dir and chdir File::Spec->updir;
     }
 }
