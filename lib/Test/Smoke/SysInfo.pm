@@ -80,7 +80,8 @@ This is the short info string about the Operating System.
 
 sub __get_os {
     require POSIX;
-    my $os = join " ", (POSIX::uname())[0,2];
+    my $os = join " - ", (POSIX::uname())[0,2];
+    $os =~ s/(\S+)/\L$1/;
     MOREOS: {
         local $_ = $^O;
 
