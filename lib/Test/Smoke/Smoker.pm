@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.011';
+$VERSION = '0.013';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -335,7 +335,9 @@ sub make_ {
     my $miniperl = "miniperl$exe_ext";
     my $perl     = "perl$exe_ext";
     -x $miniperl or return BUILD_NOTHING;
-    return -x $perl ? BUILD_PERL : BUILD_MINIPERL;
+    return -x $perl 
+        ? $self->{_run_exit} ? BUILD_MINIPERL : BUILD_PERL
+        : BUILD_MINIPERL;
 }
 
 =item make_test_prep( )
@@ -465,7 +467,7 @@ sub extend_with_harness {
     my @harness = sort keys %inconsistent;
     if ( @harness ) {
         local $ENV{PERL_SKIP_TTY_TEST} = 1;
-        my $harness = "@harness";
+        my $harness = join " ", @harness;
         $self->tty( "\nExtending failures with harness:\n\t$harness\n" );
         my $changed_dir;
         chdir 't' and $changed_dir = 1;
@@ -612,7 +614,9 @@ sub _run {
 
     defined $sub and return &$sub( $command, @args );
 
-    return qx( $command );
+    my @output = qx( $command );
+    $self->{_run_exit} = $? >> 8;
+    return wantarray ? @output : join " ", @output;
 }
 
 =item $self->_make( $command )
