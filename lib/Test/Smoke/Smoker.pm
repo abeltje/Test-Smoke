@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.008';
+$VERSION = '0.009';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -465,9 +465,9 @@ sub extend_with_harness {
     for ( @nok ) {
         m!^(?:\.\.[\\/])?(\w+/[-\w/\\]+)\.*(.*)! or next;
         # t/harness chdir()s into t/, so -f is false for t/op/*.t etc
-        my $test_name = "$1.t";
+        my( $test_name, $status ) = ( "$1.t", $2 );
+
         $test_name = catfile( 't', $test_name ) if /^\w/ && ! /^t\b/;
-        my $status = $2;
         my $test_base = catdir( $self->{ddir}, 't' );
         my $test_path = abs2rel( rel2abs( $test_name, $self->{ddir} ), 
                                  $test_base );
