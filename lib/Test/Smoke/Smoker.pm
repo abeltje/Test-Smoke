@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.009';
+$VERSION = '0.010';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -472,8 +472,7 @@ sub extend_with_harness {
         my $test_path = abs2rel( rel2abs( $test_name, $self->{ddir} ), 
                                  $test_base );
         $test_path =~ tr!\\!/! if $self->{is_win32};
-        $inconsistent{ $test_path } = $status
-            unless exists $inconsistent{ $test_path };
+        $inconsistent{ $test_path } ||= $status;
     }
     @harness = sort keys %inconsistent;
     if ( @harness ) {
@@ -501,6 +500,8 @@ sub extend_with_harness {
             $self->{v} > 1 and $self->tty( $_ );
             $_;
         } $self->_run( "$tst_perl harness $harness" );
+        # safeguard against empty results
+        $inconsistent{ $_ } ||= 'FAILED' for keys %inconsistent;
         $harness_out =~ s/^\s*$//;
         if ( $harness_all_ok ) {
             $harness_out .= scalar keys %inconsistent
