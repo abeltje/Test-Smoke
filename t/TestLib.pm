@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT );
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -195,7 +195,11 @@ sub find_untargz {
     unless ( $uncompress ) {
         eval { require Archive::Tar; };
         unless ( $@ ) {
-            eval { require Compress::Zlib; };
+            if ( $Archive::Tar::VERSION >= 0.99 ) {
+                eval { require IO::Zlib };
+            } else {
+                eval { require Compress::Zlib };
+            }
             $uncompress = 'Archive::Tar' unless $@;
         }
     }

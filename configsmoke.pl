@@ -8,6 +8,7 @@ use File::Path;
 use Data::Dumper;
 use FindBin;
 use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
+use lib $FindBin::Bin;
 
 use Getopt::Long;
 my %options = ( 
@@ -30,8 +31,9 @@ foreach my $opt (qw( config jcl log )) {
     $options{$opt} = "$options{ $key }$suffix{ $opt }";
 }
 
+# $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.022'; # $Id$
+$VERSION = '0.023';
 
 eval { require $options{config} };
 $options{oldcfg} = 1, print "Using '$options{config}' for defaults.\n" 
@@ -1383,7 +1385,11 @@ sub get_avail_tar {
     my $use_modules = 0;
     eval { require Archive::Tar };
     unless ( $@ ) {
-        eval { require Compress::Zlib };
+        if ( $Archive::Tar::VERSION >= 0.99 ) {
+            eval { require IO::Zlib };
+        } else {
+            eval { require Compress::Zlib };
+        }
         $use_modules = !$@;
     }
 
