@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.006';
+$VERSION = '0.007';
 
 use base 'Exporter';
 @EXPORT_OK = qw( &sysinfo );
@@ -419,14 +419,36 @@ Use the C<%ENV> hash to find information. Fall back on the *::Generic
 values if these values have been unset or are unavailable (sorry I do
 not have Win9[58]).
 
+Use L<Win32::TieRegistry> if available to get better information.
+
 =cut
 
 sub Windows {
 
+    my $cpu_type = $ENV{PROCESSOR_ARCHITECTURE};
+    my $cpu      = $ENV{PROCESSOR_IDENTIFIER};
+    my $ncpu     = $ENV{NUMBER_OF_PROCESSORS};
+    eval { require Win32::TieRegistry };
+    unless ( $@ ) {
+        Win32::TieRegistry->import();
+        my $basekey = join "\\",
+            qw( LMachine HARDWARE DESCRIPTION System CentralProcessor );
+        my $pnskey = "$basekey\\0\\ProcessorNameString";
+        my $cpustr = $Win32::TieRegistry::Registry->{ $pnskey };
+        $cpustr =~ tr/ / /sd;
+        my $mhzkey = "$basekey\\0\\~MHz";
+        $cpustr .= sprintf "(~%d MHz)",
+            hex $Win32::TieRegistry::Registry->{ $mhzkey };
+        $cpu = $cpustr;
+        $ncpu = keys %{ $Win32::TieRegistry::Registry->{ $basekey } };
+        my $idkey = "$basekey\\0\\Identifier";
+        ($cpu_type) = $Win32::TieRegistry::Registry->{ $idkey } =~ /^(\S+)/;
+    }
+
     return {
-        _cpu_type => $ENV{PROCESSOR_ARCHITECTURE},
-        _cpu      => $ENV{PROCESSOR_IDENTIFIER},
-        _ncpu     => $ENV{NUMBER_OF_PROCESSORS},
+        _cpu_type => $cpu_type,
+        _cpu      => $cpu,
+        _ncpu     => $ncpu,
         _host     => __get_hostname(),
         _os       => __get_os(),
     };
