@@ -39,12 +39,17 @@ WriteMakefile(
                        SUFFIX   => ".gz",
 		     },
     PREREQ_PM     => { 'File::Spec' => 0.82, 'Test::More' => 0},
-    PMLIBDIRS     => [ 'lib', File::Spec->curdir ],
+    PMLIBDIRS     => [ File::Spec->curdir ],
     EXE_FILES     => [qw( synctree.pl patchtree.pl mailrpt.pl W32Configure.pl
                           mktest.pl mkovz.pl smoke.sh smokew32.bat
-                          configsmoke.pl smokeperl.pl )],
+                          configsmoke.pl smokeperl.pl runsmoke.pl )],
     %install
 );
+
+sub MY::libscan {
+    my( $self, $path ) = @_;
+    return m:\.svn|\bt\b: ? "" : $path;
+}
 
 sub dir_prompt {
 
