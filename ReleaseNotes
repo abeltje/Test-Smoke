@@ -1,119 +1,43 @@
 =head1 NAME
 
-ReleaseNotes - These are the Release Notes for 1.18.02
+ReleaseNotes - These are the Release Notes for 1.19
 
 =head1 SYNOPSIS
 
-These are the major changes since version 1.17.
+These are the major changes since version 1.18.
 
 =head1 DESCRIPTION
 
 I have done more refactoring and wrote some new code and documentation
-since v1.17.
+since v1.18.
 
-Here is a list of changes for 1.18.xx MAINT:
-
-=over 4
-
-=item 1
-
-I forgot to call C<< S<make -i distclean> >> before do_manifest_check().
-
-=item 2
-
-Added the new report status B<X> to report failing tests under 
-C<< S<make _test> >> that do not fail under C<harness>.
-
-=item 3
-
-Added a little archive script, that archives the report and the
-logfile.
-
-=item 4
-
-Alan Burlison asked for something to give a status report on running
-smokes. So I put something together in F<smokestatus.pl>, thank you
-Alan for this good idea.
-
-=cut
-
-Major changes since 1.17
+Major changes since 1.18
 
 =over 4
 
 =item 1
 
-Jarkko suggested a timeout mechanism so that smokes are stopped on a
-specific time or after a specified duration.
-
-    {killtime} eq '07:30' stops the smoke at 07:30 (AM)
-    {killtime} eq '+9:30' stop after 9.5 hours
-
-(this change was integrated into 1.17.02 MAINT)
+I finally got around to rewriting F<mkovz.pl> and replaced it with
+L<Test::Smoke::Reporter> and decided to use <mailrpt.pl> as the new
+front-end.
 
 =item 2
 
-L<Test::Smoke::BuildCFG> is a new interface for handling build
-configurations. This OO interface will serialize the parsed build
-configurations and give you the ability to iterate over them.
+The new reports have better hardware detection, with many thanks to
+Merijn Brand (most osses), Campo Weijerman (AIX), Allen Smith (IRIX),
+Alan Burlison (Solaris).
+
+The compiler info is now logged after each Configure, so this is will be
+available in reports even though the last Configure failed.
 
 =item 3
 
-L<Test::Smoke::Smoker> is a new interface for running a smoke
-cycle. It basically replaces the inner works of F<mktest.pl>.
-
-F<mktest.pl> is hereby deprecated and F<runsmoke.pl> is its
-replacement front-end to B<Test::Smoke>/B<Test::Smoke::Smoker>
+After "many" requests, the old stuff (F<mktest.pl>, F<mkovz.pl> etc)
+is now B<gone> (although I had planned the 1.20)!
 
 =item 4
 
-Merijn was in dire need of a C<--continue> option and it was on
-Abigail's wishlist as well as on mine. So I hacked it.
-
-=item 5
-
-I wanted support for Jarkko's 5.8.x snapshots. These are only
-available via HTTP without a directory listing. There was already
-support for a specific snapshot file but not for HTTP. If  you have
-B<LWP> installed, B<Test::Smoke> will use C<LWP::Simple::mirror()> to
-fetch the snapshot. (You should create a separate configuration for
-this.) Use this feature together with the new C<--snapshot=i> switch
-for F<smokeperl.pl>:
-
-    $ ./snap58x.sh --snapshot 19876
-
-(these changes were integrated from 1.17.07 MAINT)
-
-=item 6
-
-The new C<--defaultenv> switch allows you to run the test-suite
-without C<< $ENV{PERLIO} >> (a single pass for C<< S<make test> >>).
-
-=item 7
-
-F<configsmoke.pl> now does a basic check for unsupported build-options
-in the build-configurations file.
-
-B<This feature is still in its infancy, so if you have any information
-regarding your platform, please let us know.>
-
-=item 8
-
-The keys in the F<*_config> files will now be ordered if 
-C<< Data::Dumper->can('Sortkeys') >>. This was a feature request from
-Merijn.
-
-=item 9
-
-In some cases F<miniperl> gets build but no F<perl>. Hugo suggested we
-should run C<< S<make minitest> >> in this case. The new status B<M>
-will appear in the reports and if there are test failures they are
-marked with B<[minitest]>.
-
-=item 10
-
-Now that we have a new Champion for 5.6.2 (thank you Rafael) there are
-some extra defaults to help configuring Test::Smoke for this release.
+F<smokestatus.pl> tries to give a better guesstimate for ETA.
 
 =back
 
