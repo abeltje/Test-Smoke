@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.006';
+$VERSION = '0.007';
 
 use Cwd;
 use File::Spec;
@@ -440,6 +440,17 @@ sub default_buildcfg() {
 __EOCONFIG__
 }
 
+=item new_configuration( $config )
+
+A wrapper around C<< Test::Smoke::BuildCFG::Config->new() >> so the
+object is accessible from outside this package.
+
+=cut
+
+sub new_configuration {
+    return Test::Smoke::BuildCFG::Config->new( @_ );
+}
+
 1;
 
 =back
@@ -449,7 +460,7 @@ __EOCONFIG__
 package Test::Smoke::BuildCFG::Config;
 
 use overload
-    '""'     => sub { $_[0]->[0] },
+    '""'     => sub { $_[0]->[0] || "" },
     fallback => 1;
 
 use Text::ParseWords qw( quotewords );
@@ -546,9 +557,13 @@ Create a hash with all the build arguments as keys.
 sub _split_args {
     my $self = shift;
 
+    my $i = 0;
     $self->[2] = {
-        map { ( $_ => 1 ) } quotewords( '\s+', 1, $self->[0] )
+        map { ( $_ => $i++ ) } quotewords( '\s+', 1, $self->[0] )
     };
+    $self->[0] = join( " ", sort {
+        $self->[2]{ $a } <=> $self->[2]{ $b }
+    } keys %{ $self->[2] } ) || "";
 }
 
 =item $buildcfg->has_arg( $arg[,...] )
@@ -611,6 +626,24 @@ sub args_eq {
         }
     }
     return (@left || keys %copy) ? 0 : 1;
+}
+
+=item rm_arg( $arg[,..] )
+
+Simply remove the argument(s) from the list and recreate the arguments
+line.
+
+=cut
+
+sub rm_arg {
+    my $self = shift;
+
+    foreach my $arg ( @_ ) {
+        exists $self->[2]{ $arg } and delete $self->[2]{ $arg };
+    }
+    $self->[0] = join( " ", sort {
+        $self->[2]{ $a } <=> $self->[2]{ $b }
+    } keys %{ $self->[2] } ) || "";
 }
 
 1;

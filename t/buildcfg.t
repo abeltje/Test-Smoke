@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 
-use Test::More tests => 67;
+use Test::More tests => 79;
 my $verbose = 0;
 
 use FindBin;
@@ -238,6 +238,30 @@ OUT
     1 while unlink 'mktest.out';
 }
 
+# Test the interface to Test::Smoke::BuildCFG::Config
+{
+    my $cfgline = q[-Duseithreads -Dcc='gcc'];
+    my $bcfg = Test::Smoke::BuildCFG::new_configuration( $cfgline );
+    isa_ok $bcfg, 'Test::Smoke::BuildCFG::Config';
+
+    is "$bcfg", $cfgline, "stringify($cfgline)";
+    ok $bcfg->has_arg( "-Dcc='gcc'" ),    "has -Dcc='gcc'";
+    ok $bcfg->has_arg( "-Duseithreads" ), "has -Duseithreads";
+    ok $bcfg->has_arg( "-Dcc='gcc'", "-Duseithreads" ), "has both";
+    ok $bcfg->any_arg( "-Dcc='gcc'", "-Duseithreads" ), "has either";
+    ok $bcfg->args_eq( $cfgline ), "args_eq()";
+
+    is $bcfg->rm_arg( "-Dcc='gcc'" ), "-Duseithreads", "rm_arg()";
+    is "$bcfg", "-Duseithreads", "stringify()";
+}
+
+{
+    my $bcfg = Test::Smoke::BuildCFG::new_configuration( "" );
+    isa_ok $bcfg, "Test::Smoke::BuildCFG::Config";
+    is "$bcfg", "", "stringify empty";
+
+    ok !$bcfg->has_arg( '-Duseithreads' ), "hasnt_arg(-Duseithreads)";
+}
 
 package Test::BCFGTester;
 use strict;

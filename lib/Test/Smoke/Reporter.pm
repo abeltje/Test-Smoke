@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.017';
+$VERSION = '0.018';
 
 use Cwd;
 use File::Spec::Functions;
@@ -399,8 +399,9 @@ sub _post_process {
     my @failures = map {
         { tests => $_,
           cfgs  => [ map {
+              my $cfg_clean = __rm_common_args( $_->{cfg}, \%common_args );
               my $env = join "/", @{ $_->{env} };
-              "[$env] $_->{cfg}";
+              "[$env] $cfg_clean";
         } @{ $failures{ $_ } }],
       }
     } sort { $order{$a} <=> $order{ $b} } keys %failures;
@@ -419,6 +420,21 @@ sub _post_process {
     }
     $self->{_tstenvraw} = $self->{_tstenv};
     $self->{_tstenv} = [ reverse sort keys %bldenv2 ];
+}
+
+=item __rm_common_args( $cfg, \%common )
+
+Removes the the arguments stored as keys in C<%common> from C<$cfg>.
+
+=cut
+
+sub __rm_common_args {
+    my( $cfg, $common ) = @_;
+
+    require Test::Smoke::BuildCFG;
+    my $bcfg = Test::Smoke::BuildCFG::new_configuration( $cfg );
+
+    return $bcfg->rm_arg( keys %$common );
 }
 
 =item $reporter->write_to_file( [$name] )
@@ -463,7 +479,8 @@ sub report {
     $report .= $self->letter_legend . "\n";
     $report .= $self->smoke_matrix . $self->bldenv_legend;
 
-    $report .= "\nFailures:\n" . $self->failures if $self->has_test_failures;
+    $report .= "\nFailures: (common-args) $self->{_rpt}{common_args}\n"
+            .  $self->failures if $self->has_test_failures;
     $report .= "\n" . $self->mani_fail           if $self->has_mani_failures;
 
     if ( $self->{showcfg} && $self->{cfg} && $self->has_test_failures ) {
