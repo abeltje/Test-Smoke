@@ -37,7 +37,9 @@ is now B<gone> (although I had planned the 1.20)!
 
 =item 4
 
-F<smokestatus.pl> tries to give a better guesstimate for ETA.
+F<smokestatus.pl> tries to give a better guesstimate for ETA. It also
+has the new C<--matrix> option to also show the smoke-matrix with the
+status report.
 
 =back
 
