@@ -23,7 +23,7 @@ use Test::Smoke::Util qw( get_patch calc_timeout do_pod2usage );
 
 use Getopt::Long;
 Getopt::Long::Configure( 'pass_through' );
-my %options = ( config => 'smokecurrent_config', run => 1,
+my %options = ( config => 'smokecurrent_config', run => 1, pfile => undef,
                 fetch => 1, patch => 1, mail => undef, archive => undef,
                 continue => 0, ccp5p_onfail => undef, killtime => undef,
                 is56x => undef, defaultenv => undef, smartsmoke => undef );
@@ -43,6 +43,7 @@ GetOptions( \%options,
     'smartsmoke!',
     'snapshot|s=i',
     'killtime=s',
+    'pfile=s',
 
     'help|h', 'man',
 ) or do_pod2usage(  verbose => 1, myusage => $myusage );
@@ -82,6 +83,8 @@ It can take these options
   --snapshot <patchlevel>  Set a new patchlevel for snapshot smokes
   --killtime (+)hh::mm     (Re)set the guard-time for this smoke
 
+  --pfile <patchesfile>    Set a patches-to-apply-file
+
 All other arguments are passed to F<Configure>!
 
 =head1 DESCRIPTION
@@ -103,10 +106,14 @@ defined Test::Smoke->config_error and
 # Correction for backward compatability
 !defined $options{ $_ } && !exists $conf->{ $_ } and $options{ $_ } = 1
     for qw( run fetch patch mail archive );
+
 # Make command-line options override configfile
 defined $options{ $_ } and $conf->{ $_ } = $options{ $_ }
     for qw( is56x defaultenv continue killtime
             smartsmoke run fetch patch mail ccp5p_onfail archive );
+
+# Make sure the --pfile command-line override works
+$options{pfile} and $conf->{patch_type} ||= 'multi';
 
 if ( $options{continue} ) {
     $options{v} and print "Will try to continue current smoke\n";
