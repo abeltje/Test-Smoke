@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.019';
+$VERSION = '0.020';
 
 use base 'Exporter';
 @EXPORT_OK = qw( &sysinfo &tsuname );
