@@ -1,4 +1,81 @@
+2003-03-05  Abe Timmerman  <abeltje@local>
+
+	* ReleaseNotes: 1.05: (abeltje)
+	  * Keep up with versions
+	  * FIX: pod thingy
+
+	* Makefile.PL: 1.10: (abeltje)
+	  * 'smokew32.cfg' is now known as 'w32current.cfg'
+
+	* mktest.pl: 1.17: (abeltje)
+	  * FIX: $ENV{PERL_UNICODE}, delete unless used and set to empty to
+	  mimic -C0 (see perlrun)
+
+	* configsmoke.pl: 1.07: (abeltje)
+	  * 'smokew32.cfg' is now known as 'w32current.cfg'
+
+	* MANIFEST: 1.19: (abeltje)
+	  * 'smokew32.cfg' is now known as 'w32current.cfg'
+
+2003-03-02  Abe Timmerman  <abeltje@local>
+
+	* patchtree.pl: 1.03: (abeltje)
+	  * regen_headers for 'MSWin32'
+
+	* smokeperl.pl: 1.10: (abeltje)
+	  + Added local $0 for MKTEST and MKOVZ
+	  + Added TRY_REGEN_HEADERS for patchtree on MSWin32
+	  * FIX: some POD stuff
+
+	* mkovz.pl: Keep up with versions
+
+	* t/patcher.t: 1.06: (abeltje)
+	  + Added test to check TRY_REGEN_HEADERS
+
+	* lib/Test/Smoke/Patcher.pm: 1.07: (abeltje)
+	  + Added the perl_regen_headers() method
+	  + Added a {flags} attribute
+	  + Added TRY_REGEN_HEADERS constant (Exported)
+
+	* smokew32.cfg: This is now known as 'w32current.cfg'
+
+	* smokew32.bat: 1.10: (abeltje)
+	  * Changed 'smokew32.cfg' to 'w32current.cfg' (Complete the new
+	  naming scheme)
+
+	* w32current.cfg: This used to be 'smokew32.cfg'
+
+2003-02-27  Abe Timmerman  <abeltje@local>
+
+	* smokew32.cfg: 1.08: (abeltje)
+	  * FIX: detypo (in the new PERL_COPY_ON_WRITE section)
+
+	* t/for_nmake.t, t/for_dmake.t: 1.12: (abeltje)
+	  + Added tests for the new "-Accflags='...'"
+
+	* lib/Test/Smoke/Util.pm: 1.08: (abeltje)
+	  + Configure_win32(): Added the possibility to do -Accflags='...'
+
+	* smokew32.cfg: 1.07: (abeltje)
+	  + Added a section for PERL_COPY_ON_WRITE
+
+	* README: 1.18: The NAME section
+
+	* README: 1.17: (abeltje)
+	  * Added a reference to the cygwin tools for Windows users
+	  * Some detypo's
+
+2003-02-26  Abe Timmerman  <abeltje@local>
+
+	* smokeperl.pl: 1.09: (abeltje)
+	  * $VERSION++
+
+	* mkovz.pl: 1.17: (abeltje)
+	  * FIX: Fail status produced too many letters in the reports
+
 2003-02-24  Abe Timmerman  <abeltje@local>
+
+	* ChangeLog: This is REV-1_16_20
 
 	* smokeperl.pl: 1.08: (abeltje)
 	  + Added the '--force-c-locale' setting for F<mktest.pl>
