@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.005';
+$VERSION = '0.006';
 
 use Cwd;
 use File::Spec::Functions;
@@ -20,6 +20,7 @@ my %CONFIG = (
 
     df_locale     => undef,
     df_defaultenv => undef,
+    df_is56x      => undef,
 
     df_v          => 0,
 );
@@ -311,6 +312,14 @@ sort the buildenvironments, statusletters and test failures.
 
 sub _post_process {
     my $self = shift;
+
+    unless ( defined $self->{is56x} ) {
+        my %cfg = get_smoked_Config( $self->{ddir}, 'version' );
+        my $p_version = sprintf "%d.%03d%03d", split /\./, $cfg{version};
+        $self->{is56x} = $p_version < 5.007;
+    }
+    $self->{defaultenv} ||= $self->{is56x};
+
     my( %bldenv, %cfgargs );
     my $rpt = $self->{_rpt};
     foreach my $config ( @{ $rpt->{cfglist} } ) {
@@ -365,11 +374,13 @@ sub _post_process {
                     delete $status->{minitest};
                 }
                 $self->{v} > 1 and print "\t[$tstenv]: $status->{$tstenv}\n";
-            } 
-            exists $status->{perlio} or 
-                $status->{perlio} = '-' unless $self->{defaultenv};
-            exists $status->{ "locale:$self->{locale}" } or 
-                $status->{ "locale:$self->{locale}" } = '-' if $self->{locale};
+            }
+            unless ( $self->{defaultenv} ) {
+                exists $status->{perlio} or $status->{perlio} = '-';
+                exists $status->{ "locale:$self->{locale}" } or 
+                    $status->{ "locale:$self->{locale}" } = '-'
+                        if $self->{locale};
+            }
 
             $count{ $_ }++ for map {
                 m/[cmMtFXO]/ ? $_ : m/-/ ? 'O' : 'o' 

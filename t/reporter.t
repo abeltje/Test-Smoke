@@ -4,16 +4,23 @@ use Data::Dumper;
 
 # $Id$
 
+use File::Spec::Functions;
+use FindBin;
+use lib $FindBin::Bin;
+use TestLib;
+
 my $verbose = 0;
-use Test::More tests => 33;
+use Test::More tests => 34;
 
 use_ok 'Test::Smoke::Reporter';
 
+my $config_sh = catfile( $FindBin::Bin, 'config.sh' );
 {
-    my $reporter = Test::Smoke::Reporter->new( 
+    create_config_sh( $config_sh, version => '5.6.1' );
+    my $reporter = Test::Smoke::Reporter->new(
+        ddir       => $FindBin::Bin,
         v          => $verbose, 
         outfile    => '',
-        defaultenv => 1,
     );
     isa_ok( $reporter, 'Test::Smoke::Reporter' );
 
@@ -64,7 +71,9 @@ __EOM__
 }
 
 {
-    my $reporter = Test::Smoke::Reporter->new( 
+    create_config_sh( $config_sh, version => '5.8.3' );
+    my $reporter = Test::Smoke::Reporter->new(
+        ddir    => $FindBin::Bin,
         v       => $verbose, 
         outfile => '',
     );
@@ -153,7 +162,9 @@ __EOM__
 }
 
 {
-    my $reporter = Test::Smoke::Reporter->new( 
+    create_config_sh( $config_sh, version => '5.9.0' );
+    my $reporter = Test::Smoke::Reporter->new(
+        ddir    => $FindBin::Bin,
         v       => $verbose, 
         outfile => '',
     );
@@ -232,10 +243,15 @@ __EOM__
          "Failures:";
 }
 
+unlink $config_sh;
+
 { # This test is just to test 'PASS' (and not PASS-so-far)
+#    create_config_sh( $config_sh, version => '5.00504' );
     my $reporter = Test::Smoke::Reporter->new( 
+        ddir    => $FindBin::Bin,
         v       => $verbose, 
         outfile => '',
+        is56x   => 1,
     );
     my $patchlevel = 22111;
 
@@ -268,4 +284,23 @@ EORESULTS
     chomp( my $summary = $reporter->summary );
     is $summary, 'Summary: PASS', $summary;
     like $reporter->report, "/^Summary: PASS\n/m", "Summary from report";
+
+    my @r_lines = split /\n/, $reporter->smoke_matrix;
+    is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";
+   22111     Configuration (common) -Dcc='ccache egcc'
+----------- ---------------------------------------------------------
+O O         -Uuseperlio
+__EOM__
+
+}
+
+sub create_config_sh {
+    my( $file, %cfg ) = @_;
+
+    my $cfg_sh = "# This is a testfile config.sh\n";
+    $cfg_sh   .= "# created by $0\n";
+
+    $cfg_sh   .= join "", map "$_='$cfg{$_}'\n" => keys %cfg;
+
+    put_file( $cfg_sh, $file );
 }
