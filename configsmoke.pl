@@ -31,7 +31,7 @@ foreach my $opt (qw( config jcl log )) {
 }
 
 use vars qw( $VERSION $conf );
-$VERSION = '0.014';
+$VERSION = '0.015';
 
 eval { require $options{config} };
 $options{oldcfg} = 1, print "Using '$options{config}' for defaults.\n" 
@@ -619,7 +619,6 @@ See also L<Test::Smoke::Syncer>
 =cut
 
 $arg = $want_forest ? 'fsync' : 'sync_type';
-$conf->{sync_type} = $conf->{fsync} || 'rsync' unless $want_forest;
 $config{ $arg } = lc prompt( $arg );
 
 SYNCER: {
@@ -1086,6 +1085,7 @@ if NOT EXIST \%LOCKFILE\% goto START_SMOKE
 :START_SMOKE
     echo \%LOCKFILE\% > \%LOCKFILE\%
     set WD=$cwd\
+    for \%\%D in ( \%WD\% ) do \%\%~dD
     cd "\%WD\%"
     set OLD_PATH=\%PATH\%
     set PATH=$cwd;\%PATH\%
