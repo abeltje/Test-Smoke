@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT );
-$VERSION = '0.001';
+$VERSION = '0.002';
 
 use base 'Exporter';
 @EXPORT = qw( &clean_mktest_stuff &make_report &get_report );
@@ -12,6 +12,7 @@ use File::Spec::Functions;
 
 sub clean_mktest_stuff {
     my( $ddir ) = @_;
+    return if exists $ENV{SMOKE_NO_CLEANUP} && $ENV{SMOKE_NO_CLEANUP};
     my $mktest_pat = catfile( $ddir, 'mktest.*' );
     system "rm -f $mktest_pat";
 }
