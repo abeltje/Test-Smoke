@@ -13,7 +13,7 @@ use Test::Smoke::Util qw( do_pod2usage );
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.029';
+$VERSION = '0.034';
 
 use Getopt::Long;
 my %options = ( 
@@ -94,6 +94,17 @@ my @untars = get_avail_tar();
 my $untarmsg = join "", map "\n\t$_" => @untars;
 
 my %versions = (
+    '5.5.x' => { source => 'ftp.linux.activestate.com::perl-5.005xx',
+                 server => 'ftp.funet.fi',
+                 sdir   => '/pub/languages/perl/snap/5.5.x',
+                 sfile  => '',
+                 pdir   => '/pub/staff/gsar/APC/perl-5.005xx-diffs',
+                 cfg    => 'perl55x.cfg',
+                 ddir   => File::Spec->rel2abs( 
+                               File::Spec->catdir( File::Spec->updir,
+                                                   'perl-5.5.x' ) ),
+                 text   => 'Perl 5.00504-to-be',
+                 is56x  => 1},
     '5.6.2' => { source => 'ftp.linux.activestate.com::perl-5.6.2',
                  ddir   => File::Spec->rel2abs( 
                                File::Spec->catdir( File::Spec->updir,
@@ -102,20 +113,20 @@ my %versions = (
                  text   => 'Perl 5.6.2-to-be',
                  is56x  => 1 },
     '5.8.x' => { source =>  'ftp.linux.activestate.com::perl-5.8.x',
-                 server => 'http://www.iki.fi',
-                 sdir   => '/jhi',
-                 sfile  => 'perl@20617.tgz',
+                 server => 'ftp.funet.fi',
+                 sdir   => '/pub/languages/perl/snap/5.8.x',
+                 sfile  => '',
                  pdir   => '/pub/staff/gsar/APC/perl-5.8.x-diffs',
                  ddir   => File::Spec->rel2abs( 
                                File::Spec->catdir( File::Spec->updir,
                                                    'perl-5.8.x' ) ),
-                 text   => 'Perl 5.8.1-to-be',
+                 text   => 'Perl 5.8.2-to-be',
                  cfg    => ( $^O eq 'MSWin32' 
                         ? 'w32current.cfg' :'perlcurrent.cfg' ),
                  is56x  => 0 },
     '5.9.x' => { source => 'ftp.linux.activestate.com::perl-current',
                  server => 'ftp.funet.fi',
-                 sdir   => '/pub/languages/perl/snap/',
+                 sdir   => '/pub/languages/perl/snap/5.9.x',
                  sfile  => '',
                  pdir   => '/pub/staff/gsar/APC/perl-current-diffs',
                  ddir   => File::Spec->rel2abs( 
@@ -821,7 +832,7 @@ There is an issue when using the "forest" sync, but I will look into that.
 =cut
 
 # Is it just my NetBSD-1.5 box with an old patch?
-my $patchbin = whereis( 'gpatch' ) || whereis( 'patch' );
+my $patchbin = find_a_patch();
 PATCHER: {
     last PATCHER unless $patchbin;
     $config{patch} = $patchbin;
@@ -1309,7 +1320,7 @@ EO_DIE
 #
 # Written by $0 v$VERSION
 # @{[ scalar localtime ]}
-# NOTE: Changes made in this file wil be \*lost\*
+# NOTE: Changes made in this file will be \*lost\*
 #       after rerunning $0
 #
 # $cronline
@@ -1368,7 +1379,7 @@ setlocal
 
 REM Written by $0 v$VERSION
 REM @{[ scalar localtime ]}
-REM NOTE: Changes made in this file wil be \*lost\*
+REM NOTE: Changes made in this file will be \*lost\*
 REM       after rerunning $0
 $copycmd
 REM $atline
@@ -1544,6 +1555,16 @@ sub whereis {
         }
     }
     return @fnames ? wantarray ? @fnames : \@fnames : '';
+}
+
+sub find_a_patch {
+
+    my $patch_bin;
+    foreach my $patch (qw( gpatch npatch patch )) {
+        $patch_bin = whereis( $patch ) or next;
+        my $version = `$patch_bin --version`;
+        $? or return $patch_bin;
+    }
 }
 
 sub renice {

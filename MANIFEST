@@ -16,12 +16,13 @@ patchtree.pl
 runsmoke.pl
 smoke.sh
 smokew32.bat
+perl55x.cfg
 perl562.cfg
 perlcurrent.cfg
 smoke.cfg
 w32current.cfg
+smoke55x_dfconfig
 smoke562_dfconfig
-smoke56x_dfconfig
 smoke58x_dfconfig
 smokeperl.pl
 smokestatus.pl
