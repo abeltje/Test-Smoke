@@ -467,7 +467,7 @@ sub extend_with_harness {
             my( $name, $fail ) = 
                 m/(\S+\.t)\s+.+%\s+([\d?]+(?:[-\s]+\d+)*)/;
             if ( $name ) {
-                my $dots = '.' x (30 - length $name );
+                my $dots = '.' x (40 - length $name );
                 "    $name${dots}FAILED $fail\n";
             } else {
                 ( $fail ) = m/^\s+(\d+(?:[-\s]+\d+)*)/;
@@ -482,7 +482,8 @@ sub extend_with_harness {
         $harness_out =~ s/^\s*$//;
         if ( $harness_all_ok ) {
             $harness_out ||= @nok
-                ? "Inconsistent testresults:\n" . join "", map "    $_" => @nok
+                ? "Inconsistent test results (between _test and harness):\n" . 
+                  join "", map "    $_" => @nok
                 : "All tests successful.";
         } else {
             $harness_out ||= join "", map "    $_" => @nok;
