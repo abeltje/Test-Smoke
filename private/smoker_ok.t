@@ -49,6 +49,7 @@ use_ok( 'Test::Smoke::Smoker' );
         $smoker->log( "\nConfiguration: $bcfg\n", '-' x 78, "\n" );
         my $stat = $smoker->make_;
         is( $stat, Test::Smoke::Smoker::BUILD_PERL(), "make" );
+        ok( $smoker->make_test_prep, "make test-prep" );
         ok( $smoker->make_test( "$bcfg" ), "make test" );
     }
 
