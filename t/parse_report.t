@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 
-use Test::More tests => 7;
+use Test::More tests => 8;
 
 my @eg = (
     { plevel => 19000, os => 'linux', osvers => '2.4.18-4g',
@@ -17,17 +17,24 @@ my @eg = (
     { plevel => 19004, os => 'dec_osf', osvers => '5.1a',
       arch => 'alpha/1 cpu', sum => 'FAIL(F)', version => '5.9.0' },
     { plevel => 19005, os => 'linux', osvers => '2.4.23-sparc-r1 [gentoo]',
-      arch => 'sparc64/1 cpu', sum => 'FAIL(F)', version => '5.8.3' },
+      arch => 'sparc64/1 cpu', sum => 'FAIL(F)', version => '5.8.3',
+      cpu => 'TI UltraSparc I (SpitFire)' },
+    { plevel => 19006, os => 'netbsd', osvers => '1.5',
+      arch => 'i386/1 cpu', sum => 'FAIL(F)', version => '5.8.3',
+      ccvers => 'egcs-2.91.66 19990314 (egcs-1.1.2 release)',
+      cpu => 'Intel Pentium II (Deschutes) (686-class)' },
 );
 
 BEGIN { use_ok( 'Test::Smoke::Util', 'parse_report_Config' ); }
 
 foreach my $eg ( @eg ) {
+    my $ccvers = $eg->{ccvers} || 42;
+    my $cpu = $eg->{cpu} || 'A very long(R) archstring(C) (999MHz)';
     my $report = <<__EOR__;
 Automated smoke report for $eg->{version} patch $eg->{plevel}
-host: A very long(R) archstring(C) (999MHZ) ($eg->{arch})
+host: $cpu ($eg->{arch})
     on        $eg->{os} - $eg->{osvers}
-    using     cc version 4.2
+    using     cc version $ccvers
     smoketime 42 minutes 42 seconds
 
 Summary: $eg->{sum}
@@ -37,7 +44,8 @@ __EOR__
 
     @conf{qw( version plevel os osvers arch sum ) } = 
         parse_report_Config( $report );
-
+    $conf{ccvers} = $ccvers if $eg->{ccvers};
+    $conf{cpu} = $cpu if $eg->{cpu};
     my $subject = "Smoke [$eg->{version}] $eg->{plevel} $eg->{sum} $eg->{os}" .
                   " $eg->{osvers} ($eg->{arch})";
     is_deeply( \%conf, $eg, $subject );

@@ -652,7 +652,7 @@ sub parse_report_Config {
     my $osname   = $report =~ /\bon\s+(.*) - / ? $1 : '';
     my $osvers   = $report =~ /\bon\s+.* - (.*)/? $1 : '';
     $osvers =~ s/\s+\(.*//;
-    my $archname = $report =~ /on.* \((.*)\)/ ? $1 : '';
+    my $archname = $report =~ /:.* \((.*)\)/ ? $1 : '';
     my $summary  = $report =~ /^Summary: (.*)/m ? $1 : '';
 
     return ( $version, $plevel, $osname, $osvers, $archname, $summary );
