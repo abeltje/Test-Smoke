@@ -17,7 +17,7 @@ my $cfg_name = 'test.cfg';
 is( get_cfg_filename(), undef, "Return undef for no args" );
 is( get_cfg_filename( 'willnotexists' ), undef,
     "Return undef for unknown" );
-is( get_cfg_filename( '../smoke.cfg' ), '../smoke.cfg',
+is( get_cfg_filename( '../perlcurrent.cfg' ), '../perlcurrent.cfg',
     "Confirm existance" );
 
 SKIP: {
