@@ -324,6 +324,9 @@ sub check_dot_patch {
             }
             $self->{patchlevel} = $patch_level;
             return $self->{patchlevel};
+        } else {
+            $self->{patchlevel} = $patch_level;
+            return $self->{patchlevel}
         }
     }
     return undef;
