@@ -12,7 +12,10 @@ use base 'Exporter';
     &skip_filter
 );
 
-@EXPORT_OK = qw( &get_ncpu &get_smoked_Config &parse_report_Config );
+@EXPORT_OK = qw( 
+    &get_ncpu &get_smoked_Config &parse_report_Config 
+    &get_regen_headers &run_regen_headers
+);
 
 use Text::ParseWords;
 use File::Spec;
@@ -637,6 +640,61 @@ sub parse_report_Config {
     my $summary  = $report =~ /^Summary: (.*)/m ? $1 : '';
 
     return ( $version, $plevel, $osname, $osvers, $archname, $summary );
+}
+
+=item get_regen_headers( $ddir )
+
+C<get_regen_headers()> looks in C<$ddir> to find either 
+F<regen_headers.pl> or F<regen.pl> (change 18851).
+
+Returns undef if not found or a string like C<< "$^X $regen_headers_pl" >>
+
+=cut
+
+sub get_regen_headers {
+    my( $ddir ) = @_;
+
+    $ddir ||= File::Spec->curdir; # Don't smoke in a dir "0"!
+
+    my $regen_headers_pl = File::Spec->catfile( $ddir, "regen_headers.pl" );
+    -f $regen_headers_pl and return "$^X $regen_headers_pl";
+
+    $regen_headers_pl = File::Spec->catfile( $ddir, "regen.pl" );
+    -f $regen_headers_pl and return "$^X $regen_headers_pl";
+
+    return; # Should this be "make regen_headers"?
+}
+
+=item run_regen_headers( $ddir, $verbose );
+
+C<run_regen_headers()> gets its executable from C<get_regen_headers()>
+and opens a pipe from it. warn()s on error.
+
+=cut
+
+sub run_regen_headers {
+    my( $ddir, $verbose ) = @_;
+
+    my $regen_headers = get_regen_headers( $ddir );
+
+    defined $regen_headers or do {
+        warn "Cannot find a regen_headers script\n";
+        return;
+    };
+
+    $verbose and print "Running [$regen_headers]\n";
+    local *REGENH;
+    if ( open REGENH, "$regen_headers |" ) {
+        while ( <REGENH> ) { $verbose > 1 and print }
+        close REGENH or do {
+            warn "Error in pipe [$regen_headers]\n";
+            return;
+        }
+    } else {
+        warn "Cannot fork [$regen_headers]\n";
+        return;
+    }
+    return 1;
 }
 
 =item skip_filter( $line )
