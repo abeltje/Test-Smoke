@@ -10,6 +10,187 @@ The filelists have a short symbolic indicator:
 
 Enjoy!
 ___________________________________________________________________________
+[   772] By: abeltje                          on 2004-10-30 16:23:53 +0200
+        Log: * [CHANGE]
+	       * minor fixes
+	       * now we do a real snapshot: 1.19_51
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   771] By: abeltje                          on 2004-10-30 14:42:36 +0200
+        Log: * [CHANGE]
+	       + Added support for OpenVMS
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[   770] By: abeltje                          on 2004-10-30 14:32:35 +0200
+        Log: * [CHANGE]
+	       + Added support for VMS and -Dusevmsdebug
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Reporter.pm,
+	     /Test-Smoke/lib/Test/Smoke/Smoker.pm
+___________________________________________________________________________
+[   769] By: abeltje                          on 2004-10-30 14:05:56 +0200
+        Log: * [CHANGE]
+	       + Added 'vmsperl.cfg' as the default build configurations
+		 file on OpenVMS
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           + /Test-Smoke/vmsperl.cfg
+           ! /Test-Smoke/MANIFEST
+___________________________________________________________________________
+[   767] By: abeltje                          on 2004-10-18 22:23:13 +0200
+        Log: * [CHANGE]
+	       * use File::Basename::dirname( $0 ) instead of
+		 $FindBin::Bin (VMS doesn't like it)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/mailrpt.pl
+___________________________________________________________________________
+[   766] By: abeltje                          on 2004-10-17 20:28:22 +0200
+        Log: * [CHANGE]
+	       * added some debug information
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/t/syncer_copy.t
+___________________________________________________________________________
+[   765] By: abeltje                          on 2004-10-17 20:27:00 +0200
+        Log: * [FIX]
+	       * More VMS related stuff
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/t/TestLib.pm
+___________________________________________________________________________
+[   764] By: abeltje                          on 2004-10-17 20:25:28 +0200
+        Log: * [CHANGE]
+	       + added a lot of VMS stuff
+	       * fixed some stuff that didn't work on VMS
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/BuildCFG.pm,
+	     /Test-Smoke/lib/Test/Smoke/Syncer.pm,
+	     /Test-Smoke/lib/Test/Smoke/SysInfo.pm,
+	     /Test-Smoke/lib/Test/Smoke/Util.pm
+___________________________________________________________________________
+[   763] By: abeltje                          on 2004-10-17 18:28:54 +0200
+        Log: * [FIX]
+	       * FindBin doesn't work on VMS, so another construct is now
+		 used
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/t/TestLib.pm, /Test-Smoke/t/buildcfg.t,
+	     /Test-Smoke/t/mailer.t, /Test-Smoke/t/patcher.t,
+	     /Test-Smoke/t/policy.t, /Test-Smoke/t/regenstuff.t,
+	     /Test-Smoke/t/reporter.t, /Test-Smoke/t/smoked_config.t,
+	     /Test-Smoke/t/smoker.t, /Test-Smoke/t/syncer_copy.t,
+	     /Test-Smoke/t/syncer_ftp.t, /Test-Smoke/t/syncer_ftpclient.t,
+	     /Test-Smoke/t/syncer_link.t, /Test-Smoke/t/sysinfo.t,
+	     /Test-Smoke/t/util_times.t
+___________________________________________________________________________
+[   762] By: abeltje                          on 2004-10-17 16:22:00 +0200
+        Log: * [CHANGE]
+	       + added set_vms_rooted_log()
+	       + added tests for set_vms_rooted_log()
+	       - removed check_MANIFEST() now done by
+		 Test::Smoke::SourceTree
+	       - remove the tests for check_MANIFEST() [manifest.t]
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           + /Test-Smoke/t/vms_rl.t
+           - /Test-Smoke/t/manifest.t
+           ! /Test-Smoke/MANIFEST, /Test-Smoke/lib/Test/Smoke/Util.pm
+___________________________________________________________________________
+[   761] By: abeltje                          on 2004-10-17 16:16:16 +0200
+        Log: * [CHANGE]
+	       * standardize filenames and help VMS
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/FTPClient.pm
+___________________________________________________________________________
+[   760] By: abeltje                          on 2004-10-01 21:47:57 +0200
+        Log: * [FIX]
+	       * Forgot to add the 'ftp' sync method (change 750)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/synctree.pl
+___________________________________________________________________________
+[   759] By: abeltje                          on 2004-10-01 21:45:19 +0200
+        Log: * [CHANGE]
+	       * A lot of File::Spec stuff that doesn't really work on VMS
+		 :-(
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/FTPClient.pm,
+	     /Test-Smoke/lib/Test/Smoke/SourceTree.pm,
+	     /Test-Smoke/t/syncer_copy.t,
+	     /Test-Smoke/t/syncer_ftpclient.t, /Test-Smoke/t/tree.t
+___________________________________________________________________________
+[   758] By: abeltje                          on 2004-10-01 21:38:52 +0200
+        Log: * [FIX]
+	      * The MANIFEST should reflect the contents
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/t/ftppub/perl-current/MANIFEST
+___________________________________________________________________________
+[   757] By: abeltje                          on 2004-10-01 15:36:02 +0200
+        Log: * [FIX]
+	       * undefined value in $Config{d_link} if not available
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Syncer.pm
+___________________________________________________________________________
+[   755] By: abeltje                          on 2004-10-01 13:05:34 +0200
+        Log: * [FIX]
+	       * Merijn found a bug with $_ getting mixed up
+		 * Change 735 didn't do the right thing
+		 * made all for() and while () code with named variables
+	       * Start of the VMS port in __get_os()
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[   754] By: abeltje                          on 2004-10-01 12:59:55 +0200
+        Log: * [CHANGE]
+	       * clean up the mirrored directory
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/t/syncer_ftpclient.t
+___________________________________________________________________________
+[   753] By: abeltje                          on 2004-10-01 12:57:05 +0200
+        Log: * [FIX]
+	       * make sure $verbose is not undefined in __do_mirror()
+	       * fix POD stuff
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/FTPClient.pm
+___________________________________________________________________________
+[   751] By: abeltje                          on 2004-10-01 12:45:38 +0200
+        Log: * [CHANGE]
+	       + Change 750 didn't put the added files in MANIFEST
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/MANIFEST
+___________________________________________________________________________
+[   750] By: abeltje                          on 2004-10-01 12:40:46 +0200
+        Log: * [CHANGE]
+	       + Added Test::Smoke::FTPClient for mirroring a sourcetree
+	       + Added the 'ftp' sync-method for Test::Smoke::Syncer
+	       + Added a test-environment
+	       + Added a small test to see if it all works
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           + /Test-Smoke/t/ftppub/perl-current,
+	     /Test-Smoke/t/ftppub/perl-current/MANIFEST,
+	     /Test-Smoke/t/ftppub/perl-current/patchlevel.h,
+	     /Test-Smoke/t/ftppub/perl-current/patchme.txt,
+	     /Test-Smoke/t/ftppub/perl-current/win32,
+	     /Test-Smoke/t/ftppub/perl-current/win32/Makefile,
+	     /Test-Smoke/t/ftppub/perl-current/win32/makefile.mk,
+	     /Test-Smoke/t/syncer_ftpclient.t
+           ! /Test-Smoke/lib/Test/Smoke/FTPClient.pm,
+	     /Test-Smoke/lib/Test/Smoke/Syncer.pm
+___________________________________________________________________________
+[   739] By: abeltje                          on 2004-09-25 00:53:00 +0200
+        Log: * [CHANGE]
+	       + Add wrapper around Test::Smoke::BuildCFG::Config->new()
+	       + Add Test::Smoke::BuildCFG::Config->rm_arg
+	       * cleanup common-args from failures
+	       * update the tests
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/BuildCFG.pm,
+	     /Test-Smoke/lib/Test/Smoke/Reporter.pm,
+	     /Test-Smoke/t/buildcfg.t, /Test-Smoke/t/reporter.t
+___________________________________________________________________________
+[   737] By: abeltje                          on 2004-09-20 23:38:57 +0200
+        Log: * [CHANGE]
+	       * This is a snapshot-ish change
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Changes, /Test-Smoke/META.yml,
+	     /Test-Smoke/SIGNATURE, /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
 [   735] By: abeltje                          on 2004-09-20 23:10:50 +0200
         Log: * [CHANGE]
 	       * cleaning of "BLOCK: { local $_ }" code
