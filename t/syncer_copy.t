@@ -76,7 +76,7 @@ SKIP: {
 
     isa_ok( $syncer, 'Test::Smoke::Syncer' );
     isa_ok( $syncer, 'Test::Smoke::Syncer::Copy' );
-diag Dumper $syncer;
+    $ENV{SMOKE_DEBUG} and diag Dumper $syncer;
 
     my $patch = $syncer->sync;
     is( $patch, 20000, "Patchlevel after copy: $patch" );
