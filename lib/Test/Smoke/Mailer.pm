@@ -2,7 +2,7 @@ package Test::Smoke::Mailer;
 use strict;
 
 use vars qw( $VERSION );
-$VERSION = '0.003';
+$VERSION = '0.006';
 
 use Test::Smoke::Util qw( parse_report_Config );
 
@@ -19,7 +19,7 @@ my %CONFIG = (
     mail             => [qw( cc mailbin )],
     df_mailxbin      => 'mailx',
     mailx            => [qw( cc mailxbin )],
-    df_sendmailbin   => 'senadmail',
+    df_sendmailbin   => 'sendmail',
     sendmail         => [qw( from cc sendmailbin )],
     'Mail::Sendmail' => [qw( from cc mserver )],
     'MIME::Lite'     => [qw( from cc mserver )],
