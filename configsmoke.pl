@@ -361,7 +361,7 @@ Examples:$untarmsg",
         dft => 'n',
     },
     defaultenv => {
-        msg => 'Run the test-suite without \$ENV{PERLIO}?',
+        msg => "Run the test-suite without \$ENV{PERLIO}?",
         alt => [qw( N y )],
         dft => 'n',
     },
