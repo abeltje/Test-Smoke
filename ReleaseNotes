@@ -1,16 +1,15 @@
 =head1 NAME
 
-ReleaseNotes - These are the Release Notes for 1.16_30
+ReleaseNotes - These are the Release Notes for 1.17
 
 =head1 SYNOPSIS
 
-This is a development snapshot! (posing as v1.17_RC1)
-(Sorry, but it may still have bugs or be incomplete)
+These are the major changes since version 1.16.
 
 =head1 DESCRIPTION
 
 I have done a lot of refactoring and wrote loads of new code and
-documentation.
+documentation since v1.16.
 
 =over 4
 
@@ -90,6 +89,16 @@ To configre Test::Smoke for smoking perl-5.8.x(MAINT):
 =item 13
 
 I think I finally got B<make install> to do what I want.
+
+=item 14
+
+We now include the hostname of the machine in the report for easy
+recognition.
+
+=item 15
+
+The shellscript (F<smokecurrent.sh>/F<smokecurrent.cmd>) implements a
+sort of lock machanism, so that "overlapping" smokes are prevented.
 
 =back
 
