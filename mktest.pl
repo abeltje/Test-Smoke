@@ -335,8 +335,9 @@ sub run_tests {
                 $ENV{PERLIO} = $perlio;
                 is_win32 and $ENV{PERLIO} .= " :crlf";
                 $ENV{LC_ALL} = 'C' if $force_c_locale;
+                delete $ENV{PERL_UNICODE};
             } else {
-                $ENV{PERL_UNICODE} = 1;
+                $ENV{PERL_UNICODE} = ""; # See -C in perlrun
                 $ENV{LC_ALL} = $locale;
                 $perlio_logmsg .= ":$locale";
             }
