@@ -53,6 +53,10 @@ smokestatus.pl - Check the status of a running smoke
 F<smokestatus.pl> uses the configuration file created by
 F<configsmoke.pl>.
 
+=item * B<Output options>
+
+    -m | --matrix            Add the letter-matrix when possible
+
 =item * B<General options>
 
     -d | --dir <directory>   Specify where the *_config files are
