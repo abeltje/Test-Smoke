@@ -20,6 +20,7 @@ perl562.cfg
 perlcurrent.cfg
 smoke.cfg
 w32current.cfg
+smoke562_dfconfig
 smoke56x_dfconfig
 smoke58x_dfconfig
 smokeperl.pl
