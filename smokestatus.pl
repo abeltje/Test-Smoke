@@ -4,7 +4,7 @@ $| = 1;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.006';
+$VERSION = '0.007';
 
 use Cwd;
 use File::Spec;
@@ -14,7 +14,9 @@ use FindBin;
 use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
 use lib $FindBin::Bin;
 use Test::Smoke;
-use Test::Smoke::Util qw( get_patch do_pod2usage parse_report_Config );
+use Test::Smoke::Util qw( 
+    do_pod2usage time_in_hhmm
+    get_patch parse_report_Config );
 
 my $myusage = "Usage: $0 -c [smokeconfig]";
 use Getopt::Long;
@@ -224,27 +226,6 @@ sub parse_out {
     $rpt{running} = $cnt unless exists $rpt{config}->{ $cfg };
 
     return \%rpt    
-}
-
-sub time_in_hhmm {
-    my $diff = shift;
-
-    my $digits = $diff =~ /\./ ? 3 : 0;
-    my $days = int( $diff / (24*60*60) );
-    $diff -= 24*60*60 * $days;
-    my $hour = int( $diff / (60*60) );
-    $diff -= 60*60 * $hour;
-    my $mins = int( $diff / 60 );
-    $diff -=  60 * $mins;
-
-    my @parts;
-    $days and push @parts, sprintf "%d day%s",   $days, $days == 1 ? "" : 's';
-    $hour and push @parts, sprintf "%d hour%s",  $hour, $hour == 1 ? "" : 's';
-    $mins and push @parts, sprintf "%d minute%s",$mins, $mins == 1 ? "" : 's';
-    $diff && !$days && !$hour and
-        push @parts, sprintf "%.${digits}f seconds", $diff;
-
-    return join " ", @parts;
 }
 
 sub get_configs {

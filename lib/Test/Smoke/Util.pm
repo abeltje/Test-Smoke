@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.23';
+$VERSION = '0.24';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -17,7 +17,7 @@ use base 'Exporter';
 @EXPORT_OK = qw( 
     &get_ncpu &get_smoked_Config &parse_report_Config 
     &get_regen_headers &run_regen_headers
-    &calc_timeout 
+    &calc_timeout &time_in_hhmm
     &do_pod2usage
 );
 
@@ -750,6 +750,34 @@ sub calc_timeout {
         $timeout = 60 * $kill_min;
     }
     return $timeout;
+}
+
+=item time_in_hhmm( $diff )
+
+Create a string telling elapsed time in days, hours, minutes, seconds
+from the number of seconds.
+
+=cut
+
+sub time_in_hhmm {
+    my $diff = shift;
+
+    my $digits = $diff =~ /\./ ? 3 : 0;
+    my $days = int( $diff / (24*60*60) );
+    $diff -= 24*60*60 * $days;
+    my $hour = int( $diff / (60*60) );
+    $diff -= 60*60 * $hour;
+    my $mins = int( $diff / 60 );
+    $diff -=  60 * $mins;
+
+    my @parts;
+    $days and push @parts, sprintf "%d day%s",   $days, $days == 1 ? "" : 's';
+    $hour and push @parts, sprintf "%d hour%s",  $hour, $hour == 1 ? "" : 's';
+    $mins and push @parts, sprintf "%d minute%s",$mins, $mins == 1 ? "" : 's';
+    $diff && !$days && !$hour and
+        push @parts, sprintf "%.${digits}f seconds", $diff;
+
+    return join " ", @parts;
 }
 
 =item do_pod2man( %pod2usage_options )
