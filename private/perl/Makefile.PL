@@ -95,6 +95,9 @@ _test:
 test: test-prep 
 	$(MAKE) _test
 
+test_harness: test-prep
+	cd t && ./perl harness smoke/*.t
+
 minitest: test-prep
 	cd t && ./perl TEST smoke/mini*.t
 
