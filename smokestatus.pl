@@ -116,8 +116,12 @@ foreach my $config ( @configs ) {
         if exists $rpt->{running};
 
     my $todo = $ccnt - $rpt->{count};
+    my $est_curr = $rpt->{avg} - ( $rpt->{rtime} - $rpt->{count}*$rpt->{avg} );
+    my $est_todo = $todo > 0
+        ? ( ($todo * $rpt->{avg}) + $est_curr ) : 0;
+    $est_todo > $todo * $rpt->{avg} and $est_todo = $todo * $rpt->{avg};
     my $todo_time = $rpt->{avg} eq 'unknown' ? '.' :
-        ", estimated completion in " . time_in_hhmm( $todo * $rpt->{avg} );
+        ", estimated completion in " . time_in_hhmm( $est_todo );
     printf "    $todo configuration%s to finish$todo_time\n",
            $todo == 1 ? "" : "s"
         if $todo;
@@ -210,6 +214,7 @@ sub parse_out {
     $rpt{count} = scalar keys %{ $rpt{config} };
     $rpt{avg}   = $rpt{count} ? $rpt{secs} / $rpt{count} : 'unknown';
     $rpt{time}  = time_in_hhmm( $rpt{secs} );
+    $rpt{rtime} = time() - $rpt{started};
     $rpt{fail} = 0; $rpt{stat} = { };
     foreach my $config ( keys %{ $rpt{config} } ) {
 
