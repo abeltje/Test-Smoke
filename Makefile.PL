@@ -55,8 +55,8 @@ WriteMakefile(
                        PREOP    => "cpansign -s",
 		     },
     PREREQ_PM     => { 'File::Spec' => 0.82, 'Test::More' => 0},
-    PMLIBDIRS     => [ curdir() ],
-    EXE_FILES     => \@scripts,
+#    PMLIBDIRS     => [ curdir() ],
+    EXE_FILES     => [ grep -f => glob 'bin/*' ],
     %install
 );
 

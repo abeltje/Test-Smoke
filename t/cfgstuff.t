@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 
-use File::Spec;
+use File::Spec::Functions;
 
 use Test::More tests => 9;
 BEGIN { use_ok( 'Test::Smoke::Util' ); }
@@ -17,7 +17,8 @@ my $cfg_name = 'test.cfg';
 is( get_cfg_filename(), undef, "Return undef for no args" );
 is( get_cfg_filename( 'willnotexists' ), undef,
     "Return undef for unknown" );
-is( get_cfg_filename( '../perlcurrent.cfg' ), '../perlcurrent.cfg',
+my $distcfg = catfile( updir(), 'bin', 'perlcurrent.cfg' );
+is( get_cfg_filename( $distcfg ), $distcfg,
     "Confirm existance" );
 
 SKIP: {
