@@ -1,6 +1,8 @@
 #! /usr/bin/perl -w
 use strict;
 
+# $Id$
+
 use File::Spec;
 use FindBin;
 use lib $FindBin::Bin;
@@ -8,7 +10,6 @@ use TestLib;
 use Cwd;
 
 use Test::More tests => 32;
-
 BEGIN { use_ok( 'Test::Smoke::Patcher' ) };
 
 {

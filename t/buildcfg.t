@@ -1,8 +1,9 @@
 #! /usr/bin/perl -w
 use strict;
-use Data::Dumper;
 
-use Test::More 'no_plan';
+# $Id$
+
+use Test::More tests => 31;
 my $verbose = 0;
 
 use_ok "Test::Smoke::BuildCFG";

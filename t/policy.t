@@ -1,10 +1,10 @@
 #! /usr/bin/perl -w
 use strict;
-$|++;
+$| = 1;
 
+# $Id$
 # This file checks to see if the new Test::Smoke::Policy object
 # does the same as the old way Merijn originaly wrote
-# if so, I'll change 'mktest.pl' to use the new object
 
 use FindBin;
 use lib $FindBin::Bin;

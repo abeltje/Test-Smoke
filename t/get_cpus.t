@@ -1,10 +1,11 @@
 #! perl -w
 use strict;
 
+# $Id$
+
 use Config;
 
 use Test::More tests => 3;
-
 BEGIN { use_ok( 'Test::Smoke::Util', 'get_ncpu' ); }
 
 ok( defined &get_ncpu, "get_ncpu() is defined" );

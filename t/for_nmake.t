@@ -1,10 +1,11 @@
 #! perl -w
 use strict;
 
+# $Id$
+
 use File::Spec;
 
 use Test::More tests => 61;
-
 BEGIN { use_ok( 'Test::Smoke::Util' ); }
 END { 
     1 while unlink 'win32/smoke.mk';

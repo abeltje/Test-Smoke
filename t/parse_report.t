@@ -1,6 +1,8 @@
 #! /usr/bin/perl -w
 use strict;
 
+# $Id$
+
 use Test::More tests => 6;
 
 my @eg = (

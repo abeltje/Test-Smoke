@@ -1,11 +1,12 @@
 #! /usr/perl/perl -w
 use strict;
 
+# $Id$
+
 use FindBin;
 use Data::Dumper;
 
 use Test::More tests => 6;
-
 BEGIN { use_ok( 'Test::Smoke' ) }
 
 is( Test::Smoke->VERSION, $Test::Smoke::VERSION, 

@@ -1,12 +1,13 @@
 #! perl -w
 use strict;
 
+# $Id$
+
 use FindBin;
 use lib $FindBin::Bin;
 use TestLib;
 
 use Test::More tests => 11;
-
 BEGIN { 
     use_ok( 'Test::Smoke::Util', qw( get_regen_headers run_regen_headers ) );
 }

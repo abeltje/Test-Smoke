@@ -1,10 +1,11 @@
 #! perl -w
 use strict;
 
+# $Id$
+
 use File::Spec;
 
 use Test::More tests => 15;
-
 BEGIN { use_ok( 'Test::Smoke::Util' ); }
 
 while ( <DATA> ) {

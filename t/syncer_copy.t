@@ -1,6 +1,8 @@
 #! /usr/bin/perl -w
 use strict;
 
+# $Id$
+
 use FindBin;
 use lib $FindBin::Bin;
 use TestLib;

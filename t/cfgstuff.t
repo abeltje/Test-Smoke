@@ -1,10 +1,11 @@
 #! perl -w
 use strict;
 
+# $Id$
+
 use File::Spec;
 
 use Test::More tests => 9;
-
 BEGIN { use_ok( 'Test::Smoke::Util' ); }
 
 # This test creates files in the current directory,

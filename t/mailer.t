@@ -1,6 +1,8 @@
 #! /usr/bin/perl -w
 use strict;
 
+# $Id$
+
 use File::Spec;
 use FindBin;
 use lib File::Spec->catdir( $FindBin::Bin );

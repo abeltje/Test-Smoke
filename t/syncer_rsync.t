@@ -1,6 +1,8 @@
 #! /usr/bin/perl -w
 use strict;
 
+# $Id$
+
 use Data::Dumper;
 use File::Spec;
 use Test::More tests => 33;

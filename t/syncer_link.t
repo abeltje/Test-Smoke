@@ -1,6 +1,8 @@
 #! /usr/bin/perl -w
 use strict;
 
+# $Id$
+
 use File::Spec;
 use lib File::Spec->rel2abs( 't' );
 use TestLib;

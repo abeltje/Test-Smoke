@@ -1,6 +1,8 @@
 #! perl -w
 use strict;
 
+# $Id$
+
 use FindBin;
 use lib $FindBin::Bin;
 use TestLib;
@@ -10,7 +12,6 @@ use File::Spec;
 use Data::Dumper;
 
 use Test::More tests => 14;
-
 BEGIN { use_ok( 'Test::Smoke::Util' ); }
 
 chdir 't' or die "chdir: $!" if -d 't';

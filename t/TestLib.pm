@@ -1,10 +1,11 @@
 package TestLib;
 use strict;
 
+# $Id$
 use vars qw( $VERSION @EXPORT );
-use base 'Exporter';
 $VERSION = '0.01';
 
+use base 'Exporter';
 @EXPORT = qw( 
     &whereis 
     &find_unzip &do_unzip
