@@ -239,7 +239,7 @@ sub _parse {
             s/-Dusedevel(\s+|$)//;
             s/\s*-des//;
             $statarg = $_;
-            $debug = s/-DDEBUGGING\s*// ? "D" : "N";
+            $debug = s/-D(DEBUGGING|usevmsdebug)\s*// ? "D" : "N";
             s/\s+$//;
 
             $cfgarg = $_ || "";
@@ -348,10 +348,11 @@ sub _post_process {
     my %count = ( O => 0, F => 0, X => 0, M => 0, 
                   m => 0, c => 0, o => 0, t => 0 );
     my( %failures, %order ); my $ord = 1;
+    my $debugging = $^O eq 'VMS' ? '-Dusevmsdebug' : '-DDEBUGGING';
     foreach my $config ( @{ $rpt->{cfglist} } ) {
         foreach my $dbinfo (qw( N D )) {
             my $cfg = $config;
-            ( $cfg =  $cfg ? "-DDEBUGGING $cfg" : "-DDEBUGGING" )
+            ( $cfg =  $cfg ? "$debugging $cfg" : $debugging )
                 if $dbinfo eq "D";
             $self->{v} and print "Processing [$cfg]\n";
             my $status = $self->{_rpt}{ $config }{ $dbinfo };
@@ -654,21 +655,23 @@ sub bldenv_legend {
     my $locale = $self->{_locale};
     $self->{defaultenv} = ( @{ $self->{_tstenv} } == 1 )
         unless defined $self->{defaultenv};
+    my $debugging = $^O eq 'VMS' ? '-Dusevmsdebug' : '-DDEBUGGING';
+
     return  $locale ? <<EOL : $self->{defaultenv} ? <<EOS : <<EOE;
-| | | | | +- LC_ALL = $locale -DDEBUGGING
-| | | | +--- PERLIO = perlio -DDEBUGGING
-| | | +----- PERLIO = stdio  -DDEBUGGING
+| | | | | +- LC_ALL = $locale $debugging
+| | | | +--- PERLIO = perlio $debugging
+| | | +----- PERLIO = stdio  $debugging
 | | +------- LC_ALL = $locale
 | +--------- PERLIO = perlio
 +----------- PERLIO = stdio
 
 EOL
-| +--------- -DDEBUGGING
+| +--------- $debugging
 +----------- no debugging
 
 EOS
-| | | +----- PERLIO = perlio -DDEBUGGING
-| | +------- PERLIO = stdio  -DDEBUGGING
+| | | +----- PERLIO = perlio $debugging
+| | +------- PERLIO = stdio  $debugging
 | +--------- PERLIO = perlio
 +----------- PERLIO = stdio
 
