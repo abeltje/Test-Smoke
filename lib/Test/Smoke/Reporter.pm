@@ -254,6 +254,8 @@ sub _parse {
         }
 
         if ( m/Inconsistent testresults/ ) {
+            ref $rpt{$cfgarg}->{$debug}{$tstenv} or
+                $rpt{$cfgarg}->{$debug}{$tstenv} = [ ];
             push @{ $rpt{$cfgarg}->{$debug}{$tstenv} }, $_;
         }
 
@@ -281,7 +283,8 @@ sub _parse {
             next;
         }
         if ( /^\s+\d+(?:[-\s]+\d+)*/ ) {
-            push @{ $rpt{$cfgarg}->{$debug}{$tstenv}}, $_;
+            push @{ $rpt{$cfgarg}->{$debug}{$tstenv} }, $_
+                if ref $rpt{$cfgarg}->{$debug}{$tstenv};
             next;
         }
         next;
@@ -347,7 +350,7 @@ sub _post_process {
                              { cfg => $cfg, env => [ $showenv ] };
                         $order{ $failed } ||= $ord++;
                     }
-                    $status->{ $tstenv } = $failed =~ /^Inconsistant/
+                    $status->{ $tstenv } = $failed =~ /^Inconsistent/
                         ? "X" : "F";
                 }
                 if ( $tstenv eq 'minitest' ) {
