@@ -14,7 +14,8 @@ my %CONFIG = (
     df_fdir           => undef,
     df_is56x          => 0,
     df_locale         => '',
-    df_force_c_locale => '0',
+    df_force_c_locale => 0,
+    df_default_env    => 0,
 
     df_is_win32       => $^O eq 'MSWin32',
     df_w32cc          => 'MSVC60',
@@ -86,6 +87,7 @@ sub new {
 
     $fields{logfh}  = $fh;
     select( ( select( $fh ), $|++ )[0] );
+    $fields{defaultenv} = 1 if $fields{is56x};
 
     bless { %fields }, $class;
 }
@@ -310,10 +312,10 @@ sub make_test {
 
     # No use testing different io layers without PerlIO
     # just output 'stdio' for mkovz.pl
-    my @layers = ( ($config_args =~ /-Uuseperlio\b/) || $self->{is56x} )
+    my @layers = ( ($config_args =~ /-Uuseperlio\b/) || $self->{defaultenv} )
                ? qw( stdio ) : qw( stdio perlio );
 
-    if ( !($config_args =~ /-Uuseperlio\b/ || $self->{is56x}) && 
+    if ( !($config_args =~ /-Uuseperlio\b/ || $self->{defaultenv}) && 
          $self->{locale} ) {
         push @layers, 'locale';
     }
@@ -329,6 +331,8 @@ sub make_test {
             $ENV{LC_ALL} = 'C' if $self->{force_c_locale};
             $ENV{LC_ALL} or delete $ENV{LC_ALL};
             delete $ENV{PERL_UNICODE};
+            # make default 'make test' runs possible
+            delete $ENV{PERLIO} if $self->{defaultenv};
         } else {
             $ENV{PERL_UNICODE} = ""; # See -C in perlrun
             $ENV{LC_ALL} = $self->{locale};

@@ -11,7 +11,7 @@ use Getopt::Long;
 my %options = ( config => 'smokecurrent_config', run => 1,
                 fetch => 1, patch => 1, mail => undef, 
                 continue => 0,
-                is56x => undef, smartsmoke => undef );
+                is56x => undef, defaultenv => undef, smartsmoke => undef );
 GetOptions( \%options, 
     'config|c=s', 
     'continue',
@@ -20,6 +20,8 @@ GetOptions( \%options,
     'mail!',
     'run!',
     'is56x',
+    'defaultenv!',
+    'continue',
     'smartsmoke!',
     'snapshot|s=i',
 );
@@ -53,7 +55,9 @@ It can take these options
 
   --continue               Try to continue an interrupted smoke
   --is56x                  This is a perl-5.6.x smoke
+  --defaultenv             Run a smoke in the default environment
   --[no]smartsmoke         Don't smoke unless patchlevel changed
+  --snapshot <patchlevel>  Set a new patchlevel for snapshot smokes
 
 =cut
 
@@ -71,7 +75,7 @@ defined Test::Smoke->config_error and
     for qw( run fetch patch mail );
 # Make command-line options override configfile
 defined $options{ $_ } and $conf->{ $_ } = $options{ $_ }
-    for qw( is56x smartsmoke run fetch patch mail );
+    for qw( is56x defaultenv smartsmoke run fetch patch mail );
 
 use Test::Smoke::Syncer;
 use Test::Smoke::Patcher;
@@ -175,7 +179,8 @@ sub call_mktest {
 sub call_mkovz {
     return unless $options{run};
     local @ARGV = ( 'nomail', $conf->{ddir} );
-    push  @ARGV, $conf->{locale} if $conf->{locale};
+    push  @ARGV, $conf->{locale} ? $conf->{locale} : "";
+    push  @ARGV, $conf->{defaultenv} if $conf->{defaultenv};
     my $mkovz = File::Spec->catfile( $FindBin::Bin, 'mkovz.pl' );
     local $0 = $mkovz;
     do $mkovz or die "Error in mkovz.pl: $@";
@@ -238,7 +243,7 @@ sub snapshot_name {
 
 =head1 SEE ALSO
 
-L<configsmoke.pl>, L<mktest.pl>, L<mkovz.pl>
+L<README>, L<FAQ>, L<configsmoke.pl>, L<mktest.pl>, L<mkovz.pl>
 
 =head1 REVISION
 

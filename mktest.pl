@@ -34,6 +34,7 @@ my $smoker         = $Config{cf_email};
 my $fdir           = undef;
 my $locale         = undef;
 my $is56x          = undef;
+my $defaultenv     = undef;
 my $force_c_locale = undef;
 
 =head1 NAME
@@ -64,6 +65,8 @@ mktest.pl - Configure, build and test bleading edge perl
 
 =item * --is56x
 
+=item * --defaultenv
+
 =item * --[no]force-c-locale
 
 =back
@@ -88,8 +91,11 @@ GetOptions (
     "f|forest=s"       => \$fdir,
     "l|locale=s"       => \$locale,
     "is56x"            => \$is56x,
+    "defaultenv!"      => \$defaultenv,
     "force-c-locale!"  => \$force_c_locale,
 ) or usage;
+
+$defaultenv = 1 if $is56x;
 
 $verbose and print "$0 running at verbose level $verbose\n";
 
@@ -321,10 +327,10 @@ sub run_tests {
 
         # No use testing different io layers without PerlIO
         # just output 'stdio' for mkovz.pl
-        my @layers = ( ($config_args =~ /-Uuseperlio\b/) || $is56x )
+        my @layers = ( ($config_args =~ /-Uuseperlio\b/) || $defaultenv )
             ? qw( stdio ) : qw( stdio perlio );
 
-        if ( !($config_args =~ /-Uuseperlio\b/ || $is56x) && $locale ) {
+        if ( !($config_args =~ /-Uuseperlio\b/ || $defaultenv) && $locale ) {
             push @layers, 'locale';
         }
 
@@ -339,6 +345,8 @@ sub run_tests {
                 $ENV{LC_ALL} = 'C' if $force_c_locale;
                 $ENV{LC_ALL} or delete $ENV{LC_ALL};
                 delete $ENV{PERL_UNICODE};
+                # make default 'make test' runs possible
+                delete $ENV{PERLIO} if $defaultenv; 
             } else {
                 $ENV{PERL_UNICODE} = ""; # See -C in perlrun
                 $ENV{LC_ALL} = $locale;
@@ -429,9 +437,9 @@ See:
 
 =over 4
 
-=item * http://www.perl.com/perl/misc/Artistic.html
+=item * L<http://www.perl.com/perl/misc/Artistic.html>
 
-=item * http://www.gnu.org/copyleft/gpl.html
+=item * L<http://www.gnu.org/copyleft/gpl.html>
 
 =back
 

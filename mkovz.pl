@@ -10,7 +10,8 @@ use strict;
 
 use Test::Smoke;
 use vars qw($VERSION);
-$VERSION = Test::Smoke->VERSION; # $Id$
+$VERSION = Test::Smoke->VERSION; 
+# $Id$
 
 use File::Spec;
 use Cwd;
@@ -24,6 +25,7 @@ my $email = shift || 'daily-build-reports@perl.org';
 my $testd = shift || cwd ();
 my $mailer = "/usr/bin/mailx";
 my $locale = shift;
+my $defaultenv = shift;
 
 my %Config = get_smoked_Config( $testd, qw( version cf_email
                                             osname osvers 
@@ -50,6 +52,7 @@ $Config{archname} .= "/$cpus" if $cpus;
 
 my $p_version = sprintf "%d.%03d%03d", split /\./, $Config{version};
 my $is56x = $p_version >= 5.006 && $p_version < 5.007;
+$defaultenv ||= $is56x;
 
 =head1 NAME
 
@@ -95,7 +98,7 @@ It's a hack! It should be picked up from B<mktest.out>
 
 =cut
 
-my @layers = $is56x ? qw( stdio ) : qw( stdio perlio );
+my @layers = $defaultenv ? qw( stdio ) : qw( stdio perlio );
 $locale and push @layers, "locale";
 
 my (%rpt, @confs, %confs, @manifest, $common_cfg);
@@ -295,7 +298,7 @@ if ( @rpt_sum_stat ) {
     $rpt_summary = $count{o} == 0 ? 'PASS' : 'PASS-so-far';
 }
 
-print $locale ? <<EOL : $is56x ? <<EOS : <<EOE;
+print $locale ? <<EOL : $defaultenv ? <<EOS : <<EOE;
 | | | | | +- LC_ALL = $locale -DDEBUGGING
 | | | | +--- PERLIO = perlio -DDEBUGGING
 | | | +----- PERLIO = stdio  -DDEBUGGING
