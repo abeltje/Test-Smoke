@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.018';
+$VERSION = '0.019';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -381,6 +381,7 @@ sub make_ {
     my $exe_ext  = $Config{_exe} || $Config{exe_ext};
     my $miniperl = "miniperl$exe_ext";
     my $perl     = "perl$exe_ext";
+    $perl = "ndbg$perl" if $self->{is_vms} && $config->has_arg('-Dusevmsdebug');
     -x $miniperl or return BUILD_NOTHING;
     return -x $perl 
         ? $self->{_run_exit} ? BUILD_MINIPERL : BUILD_PERL
