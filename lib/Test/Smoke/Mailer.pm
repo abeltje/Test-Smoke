@@ -2,12 +2,13 @@ package Test::Smoke::Mailer;
 use strict;
 
 # $Id$
-use vars qw( $VERSION $P5P);
-$VERSION = '0.007';
+use vars qw( $VERSION $P5P $NOCC_RE);
+$VERSION = '0.008';
 
 use Test::Smoke::Util qw( parse_report_Config );
 
-$P5P = 'perl5-porters@perl.org';
+$P5P       = 'perl5-porters@perl.org';
+$NOCC_RE   = ' (?:PASS\b|FAIL\(X\))';
 my %CONFIG = (
     df_mailer        => 'Mail::Sendmail',
     df_ddir          => undef,
@@ -146,17 +147,19 @@ sub error {
 
 C<_get_cc()> implements the C<--ccp5p_onfail> option. It looks at the
 subject to see if the smoke FAILed and then adds the I<perl5-porters>
-mailing-list to the C<Cc:> field, unless it is already in C<To:> or
-C<Cc:>.
+mailing-list to the C<Cc:> field unless it is already part of C<To:>
+or C<Cc:>.
+
+The new behaviour is to only return C<Cc:> on fail. This is determined
+by the new global regex kept in C<< $Test::Smoke::Mailer::NOCC_RE >>.
 
 =cut
 
 sub _get_cc {
     my( $self, $subject ) = @_;
-    return $self->{cc} || "" unless $self->{ccp5p_onfail};
+    return "" if $subject =~ m/$NOCC_RE/;
 
-    # State all cases for which p5p should be added
-    return $self->{cc} || "" unless $subject !~ / PASS\b/;
+    return $self->{cc} || "" unless $self->{ccp5p_onfail};
 
     my $p5p = $Test::Smoke::Mailer::P5P or return $self->{cc};
     my @cc = $self->{cc} ? $self->{cc} : ();

@@ -13,7 +13,7 @@ use Test::Smoke::Util qw( do_pod2usage );
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.036';
+$VERSION = '0.037';
 
 use Getopt::Long;
 my %options = ( 
@@ -386,7 +386,7 @@ EOT
 
     to => {
        msg => <<EOMSG,
-To which address(es) should the report be send?
+To which address(es) should the report *always* be send?
 \t(comma separated list, *please* do not include perl5-porters!)
 EOMSG
        alt => [ ],
@@ -395,7 +395,8 @@ EOMSG
 
     cc => {
        msg => <<EOMSG,
-To which address(es) should the report be CCed?
+* THIS FEATURE HAS CHANGED IN 1.19! *
+To which address(es) should the report be CCed *on fail*?
 \t(comma separated list, *please* do not include perl5-porters!)
 EOMSG
        alt => [ ],
@@ -461,7 +462,7 @@ EOT
     docron => {
         msg => 'Should the smoke be scheduled?',
         alt => [qw( Y n )],
-        dft => 'y',
+        dft => 'n',
     },
     crontime => {
         msg => 'At what time should the smoke be scheduled?',

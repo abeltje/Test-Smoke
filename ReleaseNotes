@@ -47,6 +47,11 @@ Some work has been done on the Win32 side. Most notably a start has
 been made to try and support Win98. Also some work on the
 F<W32Configure.pl> script.
 
+=item 6
+
+The behaviour attached to the C<cc> option for L<Test::Smoke::Mailer>
+has changed so that it will now only send C<Cc:> on failure.
+
 =back
 
 =head1 REVISION
