@@ -47,6 +47,8 @@ if [ "$SMOKE_DIST_DIR" != "" ] ; then
 fi
 echo "Will put the distribution in: '$distdir'"
 
+trap 'echo "An error while testing..." ; exit' 0
+
 # Check if all the distributed perl-files compile
 # Check if all the distibuted files with POD are pod_ok
 prove private/test_*.pl || exit
@@ -55,10 +57,10 @@ if [ "$SMOKE_TEST_ONLY" == "1" ] ; then
     if [ "$SMOKE_COVER" == "1" ] ; then
         cover -delete
         SMOKE_SKIP_SIGTEST=1 HARNESS_PERL_SWITCHES=-MDevel::Cover \
-            prove -I lib private/*.t t/*.t
+            prove -I lib private/*.t t/*.t || exit
         cover
     else
-        SMOKE_SKIP_SIGTEST=1 prove -I lib private/*.t t/*.t
+        SMOKE_SKIP_SIGTEST=1 prove -I lib private/*.t t/*.t || exit
     fi
     echo "SMOKE_TEST_ONLY was set, quitting..."
     exit
