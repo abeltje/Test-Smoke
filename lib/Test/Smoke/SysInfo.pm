@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.004';
+$VERSION = '0.005';
 
 =head1 NAME
 
@@ -124,15 +124,14 @@ sub __get_os {
         };
         /solaris|sunos/i   && do {
             require Config;
-            local $" = " - ";
-            # Used once warning :-(
-            %Config::Config and 
-                $os = "@Config::Config{qw( osname osvers )}";
+            $os = join " - ", $Config::Config{osname},
+                              $Config::Config{osvers};
         };
         /windows|mswin32/i && do {
             eval { require Win32 };
             $@ and last MOREOS;
-            ( $os = join " ", Win32::GetOSName() ) =~ s/Service\s+Pack\s+/SP/;
+            $os = "$^O - " . join " ", Win32::GetOSName();
+            $os =~ s/Service\s+Pack\s+/SP/;
             last MOREOS;
         };
     }
