@@ -9,8 +9,8 @@ $VERSION = '0.006';
 use Cwd;
 use File::Spec;
 use FindBin;
-use lib $FindBin::Bin;
 use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
+use lib $FindBin::Bin;
 use Test::Smoke;
 use Test::Smoke::Patcher;
 

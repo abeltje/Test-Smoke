@@ -9,8 +9,8 @@ $VERSION = '0.001';
 use Cwd;
 use File::Spec;
 use FindBin;
-use lib $FindBin::Bin;
 use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
+use lib $FindBin::Bin;
 use Config;
 use Test::Smoke;
 use Test::Smoke::Util qw( calc_timeout );
@@ -20,15 +20,16 @@ my %opt = (
     config         => undef,
     ddir           => undef,
     fdir           => undef,
-    run            => 1,
+    run            => undef,
     dry_run        => undef,
     locale         => undef,
     force_c_locale => undef,
     is56x          => undef,
     defaultenv     => undef,
     continue       => undef,
-    w32make        => 'nmake',
-    w32cc          => 'MSVC60',
+
+    w32make        => undef,
+    w32cc          => undef,
     v              => undef,
 );
 

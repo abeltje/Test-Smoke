@@ -9,8 +9,8 @@ $VERSION = Test::Smoke->VERSION;
 use Cwd;
 use File::Spec;
 use FindBin;
-use lib $FindBin::Bin;
 use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
+use lib $FindBin::Bin;
 use Config;
 use Test::Smoke::Syncer;
 use Test::Smoke::Patcher;
@@ -25,7 +25,6 @@ my %options = ( config => 'smokecurrent_config', run => 1,
                 is56x => undef, defaultenv => undef, smartsmoke => undef );
 GetOptions( \%options, 
     'config|c=s', 
-    'continue',
     'fetch!', 
     'patch!', 
     'mail!',
