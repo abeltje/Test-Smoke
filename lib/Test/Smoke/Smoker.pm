@@ -393,7 +393,7 @@ sub make_test {
             next;
 	}
 
-        my $test_target = $self->{is56x} ? 'test' : '_test';
+        my $test_target = $self->{is56x} ? 'test-notty' : '_test';
         local *TST;
         # MSWin32 builds from its own directory
         if ( $self->{is_win32} ) {
