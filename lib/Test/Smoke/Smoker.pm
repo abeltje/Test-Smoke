@@ -1,12 +1,13 @@
 package Test::Smoke::Smoker;
 use strict;
 
+# $Id$
+use vars qw( $VERSION );
+$VERSION = '0.002';
+
 use Config;
 use Test::Smoke::Util;
 use Cwd;
-
-use vars qw( $VERSION );
-$VERSION = '0.001';
 
 my %CONFIG = (
     df_v              => 0,
@@ -279,7 +280,8 @@ sub make_ {
     $self->tty( "\nmake ..." );
     $self->_make( "" );
 
-    my $perl = "perl$Config{_exe}";
+    my $exe_ext = $Config{_exe} || $Config{exe_ext};
+    my $perl = "perl$exe_ext";
     return -x $perl;
 }
 
@@ -292,7 +294,8 @@ Run C<< I<make test-perp> >> and check if F<t/perl> exists.
 sub make_test_prep {
     my $self = shift;
 
-    my $perl = File::Spec->catfile( "t", "perl$Config{_exe}" );
+    my $exe_ext = $Config{_exe} || $Config{exe_ext};
+    my $perl = File::Spec->catfile( "t", "perl$exe_ext" );
 
     $self->{run} and unlink $perl;
     $self->_make( "test-prep" );
@@ -364,7 +367,7 @@ sub make_test {
         my @nok = ();
         select ((select (TST), $| = 1)[0]);
         while (<TST>) {
-            $self->{v} > 2 and print;
+            $self->{v} > 2 and $self->tty( $_ );
             skip_filter( $_ ) and next;
 
             # make mkovz.pl's life easier
@@ -372,11 +375,11 @@ sub make_test {
 
             if (m/^u=.*tests=/) {
                 s/(\d\.\d*) /sprintf "%.2f ", $1/ge;
-                $self->ttylog( $_ );
+                $self->log( $_ );
             } else {
                 push @nok, $_;
             }
-            print;
+            $self->tty( $_ );
         }
         close TST or do {
             require Carp;
@@ -384,7 +387,7 @@ sub make_test {
         };
         $self->ttylog( map { "    $_" } @nok );
         if (grep m/^All tests successful/, @nok) {
-            print "\nOK, archive results ...";
+            $self->tty( "\nOK, archive results ..." );
             $self->{patch} and $nok[0] =~ s/\./ for .patch = $self->{patch}./;
         } else {
             my @harness;
@@ -395,7 +398,7 @@ sub make_test {
             }
             if (@harness) {
                 local $ENV{PERL_SKIP_TTY_TEST} = 1;
-       	        print "\nExtending failures with Harness\n";
+       	        $self->tty( "\nExtending failures with Harness\n" );
                 my $harness = $self->{is_win32} ?
                 join " ", map { 
                     s{^\.\.[/\\]}{};
@@ -407,8 +410,8 @@ sub make_test {
                           => $self->_run( "./perl t/harness $harness" ) );
             }
         }
-        print "\n";
-        $had_LC_ALL and exists $ENV{LC_ALL} and delete $ENV{LC_ALL};
+        $self->tty( "\n" );
+        !$had_LC_ALL && exists $ENV{LC_ALL} and delete $ENV{LC_ALL};
     }
 }
 
@@ -461,7 +464,7 @@ sub _make {
 
 =head1 SEE ALSO
 
-L<patch>, L<Test::Smoke::Syncer::Snapshot>
+L<Test::Smoke>
 
 =head1 COPYRIGHT
 
