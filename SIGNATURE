@@ -15,18 +15,18 @@ not run its Makefile.PL or Build.PL.
 Hash: SHA1
 
 SHA1 01ee19a0c674cf8f89ac9a679dbe8bdff90ee2a9 ChangeLog
-SHA1 5bba45f2ee0e41587c72c9011c806b5c39dfe480 Changes
+SHA1 0935a45edec31ea62d6e5ea51ab11ab7e223044a Changes
 SHA1 2b43309104313890e547be6d4a68a2ed9ad1ca12 Configure.pl
 SHA1 34b972ecb7aae9cfb77aa1e307fa7462d37513a6 FAQ
-SHA1 ad4fd47e793020f8c6cb658b10c6ec9977cd1b31 MANIFEST
-SHA1 58d35f1033bdef4bc21a89ebf0c67d578a2e3125 Makefile.PL
+SHA1 3a4eedc6f600f8ce4da1c41deea2d1567a291a56 MANIFEST
+SHA1 4bbb08d1c83b2c7e26a5c503cc3d55d4a08e824d Makefile.PL
 SHA1 b7ac5f24038350dbc3500e09912b950dfc10368a README
-SHA1 9860775831d4ded038053243da1c100f1a42cca3 ReleaseNotes
+SHA1 0efdd79dab0a2e17ceb5faa93640f3d0912cb1d3 ReleaseNotes
 SHA1 7bc570cbc3f00733b591aefde4f2e54aec2f1e0c W32Configure.pl
-SHA1 28bf5c40c4c2aa935b9a113b0159d179c495343b configsmoke.pl
+SHA1 2669a8284fedeae556e8da1d32b7f056fe1b5de2 configsmoke.pl
 SHA1 2fad9823a59c904bbd58e03ab2ebc280e53847a3 lib/Mail/Sendmail.pm
-SHA1 66fc0657aae798161a3571ba123be0a60ff21367 lib/Test/Smoke.pm
-SHA1 7481980ba06f4c68fb4d9165a0c5637f9c947113 lib/Test/Smoke/BuildCFG.pm
+SHA1 977548c4f4ea42234d5ca848c1686e9abaed03f5 lib/Test/Smoke.pm
+SHA1 ffb22112e4b86c8290d354fbe24b0f5229dbc617 lib/Test/Smoke/BuildCFG.pm
 SHA1 a2d63725130d33f69701aa4f47c5b48b5bf793c4 lib/Test/Smoke/Mailer.pm
 SHA1 64470ddba6c8a3e8431b063548074fa7890f10a1 lib/Test/Smoke/Patcher.pm
 SHA1 67d56efc543342ddf48118aaae289f29f26c8c50 lib/Test/Smoke/Policy.pm
@@ -35,10 +35,10 @@ SHA1 1fc5a231d6606787cd6fc25f4967d885764d8101 lib/Test/Smoke/SourceTree.pm
 SHA1 de6d9a59590cc09def0313819d89468eeccefd9b lib/Test/Smoke/Syncer.pm
 SHA1 0d41802eb62abac0a0a0ead7adad836038b55073 lib/Test/Smoke/Util.pm
 SHA1 876b8dc7194c47c050daad16a25a51e7673dc1da mailrpt.pl
-SHA1 eed2df95f72b93cb16ffaf9add0c08531808a4b7 mkovz.pl
+SHA1 92a985a8675785577c92733571938ab1fbefe225 mkovz.pl
 SHA1 1b167078eb738d9bfa95349f8e94bdb2446b9c9d mktest.pl
 SHA1 014f35769d2a6c5ec8c707f6a3776060d2ed5a66 patchtree.pl
-SHA1 d9e4f37541047b755c5561f7ceb9980234321626 perl56x.cfg
+SHA1 52aba21d4361f68d2a29928a5b314bb51973d52c perl562.cfg
 SHA1 56b1e260a1214fa31ad92671f171b55c453e8c06 perlcurrent.cfg
 SHA1 9ea07a2f1a601577bff755ebf4e97648b7e01a8a runsmoke.pl
 SHA1 5ed6a488ae5b7f76e99fdbffddac7af9aebaf4b0 smoke.cfg
@@ -85,7 +85,7 @@ SHA1 bf19bef65fea0d9d980305228f575437be1f4bce w32current.cfg
 Version: GnuPG v1.0.6 (GNU/Linux)
 Comment: For info see http://www.gnupg.org
 
-iD8DBQE/KWDzxqqoeg1/sS8RAsu+AJ9KEnLtLbwtkdrSshJkQxjWwpyoNQCg0oBP
-zqQHX7PnGYn5Ea5dylhZNG4=
-=5LDk
+iD8DBQE/KZ5Lxqqoeg1/sS8RAuMdAJ4oymir9qi6ugZzVI8TJX+srR0KTgCggQ4b
+YOQysqvmscyQTf4IicBqyB8=
+=weY/
 -----END PGP SIGNATURE-----

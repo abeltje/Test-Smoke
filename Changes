@@ -9,6 +9,60 @@ The filelists have a short symbolic indicator:
 
 Enjoy!
 ___________________________________________________________________________
+[   300] By: abeltje                          on 2003-08-01 00:50:09 +0200
+        Log: * [FIX] spaces got lost in a regex
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/mkovz.pl
+___________________________________________________________________________
+[   299] By: abeltje                          on 2003-07-31 23:08:03 +0200
+        Log: * [FIX] pod-interference in HERE doc (deafult_buildcfg()
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/BuildCFG.pm
+___________________________________________________________________________
+[   298] By: abeltje                          on 2003-07-31 23:03:26 +0200
+        Log: This is 1.17_62 aka RC2
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   297] By: abeltje                          on 2003-07-31 23:00:30 +0200
+        Log: * [CHANGE] Set some new defaults for 5.6.2
+        Url: http://ati2/svn/Test-Smoke
+           - /Test-Smoke/perl56x.cfg
+           ! /Test-Smoke/MANIFEST, /Test-Smoke/ReleaseNotes,
+             /Test-Smoke/configsmoke.pl
+          !> /Test-Smoke/perl562.cfg =(/Test-Smoke/perl56x.cfg:272)
+___________________________________________________________________________
+[   296] By: abeltje                          on 2003-07-31 22:55:52 +0200
+        Log: * Make mkdist.sh a bit more flexible
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/mkdist.sh
+___________________________________________________________________________
+[   295] By: abeltje                          on 2003-07-31 22:51:41 +0200
+        Log: * [ADD] This distribution now has gpg signing
+        Url: http://ati2/svn/Test-Smoke
+           + /Test-Smoke/SIGNATURE, /Test-Smoke/t/00signature.t
+           ! /Test-Smoke/MANIFEST, /Test-Smoke/Makefile.PL
+___________________________________________________________________________
+[   294] By: abeltje                          on 2003-07-31 15:23:36 +0200
+        Log: * [CHANGE]
+		* Allow forced default_buildcfg()
+		+ Add Test::Smoke::BuildCFG::Config->args_eq()
+		+ Update the tests
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/BuildCFG.pm,
+             /Test-Smoke/t/buildcfg.t
+___________________________________________________________________________
+[   293] By: abeltje                          on 2003-07-31 01:08:15 +0200
+        Log: * Keep up with version numbers after changes
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/BuildCFG.pm,
+             /Test-Smoke/lib/Test/Smoke/Util.pm
+___________________________________________________________________________
+[   292] By: abeltje                          on 2003-07-30 20:22:21 +0200
+        Log: * Another shot at 1.17_61
+        Url: http://ati2/svn/Test-Smoke
+           ! /Test-Smoke/Changes
+___________________________________________________________________________
 [   291] By: abeltje                          on 2003-07-30 20:20:32 +0200
         Log: * Reorganize the private tests and make-dist tool
         Url: http://ati2/svn/Test-Smoke
