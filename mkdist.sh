@@ -100,11 +100,6 @@ fi
 
 # I keep forgetting about Changes, so automate:
 svnchanges > Changes
-if [ "$SMOKE_CI_FILES" == "1" ] ; then
-    svn ci Changes -m "* regen Changes for $SMOKE_VERSION"
-else
-    echo "Skipping commit of 'Changes'"
-fi
 
 # Now create the Makefile and and run the public test-suite
 PERL_MM_USE_DEFAULT=y $SMOKE_PERL Makefile.PL
@@ -115,6 +110,25 @@ make test || exit
 
 trap 0
 
+# Autocommit the regenerated file, before signing
+if [ "$SMOKE_CI_FILES" == "1" ] ; then
+    # Commit the newly generated Files
+    cat <<EOF > svntargets.ci
+Changes
+SIGNATURE
+META.yml
+EOF
+    cat <<EOF > svnmsg.ci
+* [AUTOCOMMIT]
+  * Regenerate 'Changes', 'SIGNATURES', 'META.yml'
+EOF
+    svn ci --targets svntargets.ci -F svnmsg.ci
+    rm -f svntargets.ci
+    rm -f svnmsg.ci
+else
+    echo "Skipping autocommit of regenerated files"
+fi
+
 # Create the distribution and move it to the distribution directory
 perl -i -pe 's/^#?local-user abeltje/local-user abeltje/' ~/.gnupg/options
 make dist
@@ -124,13 +138,6 @@ mv -v *.tar.gz $distdir
 # Clean up!
 make veryclean > /dev/null
 rm -f */*/*/*~
-
-if [ "$SMOKE_CI_FILES" == "1" ] ; then
-    # Also commit the newly generated SIGNATURE
-    svn ci SIGNATURE -m "* regen SIGNATURE for $SMOKE_VERSION"
-else
-    echo "Skipping commit of 'SIGNATURE'"
-fi
 
 SMOKE_SOURCE=`svn info | perl -ne 's/^Url: // and print'`
 SMOKE_SOURCE=`echo $SMOKE_SOURCE | perl -pe 's|http://([^/]+)/|http://yola/|'`
