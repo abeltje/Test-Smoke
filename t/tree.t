@@ -7,7 +7,7 @@ use Data::Dumper;
 require File::Spec;
 use File::Find;
 
-use Test::More tests => 20;
+use Test::More tests => 22;
 
 # We need to test SourceTree.pm
 sub mani_file_from_list($;@) {
@@ -182,10 +182,18 @@ SKIP: { # Check that check_MANIFEST() finds dubious files with MANIFEST.SKIP
     1 while unlink $skipit;
 }
 
+{ #
+    my $tree1 = Test::Smoke::SourceTree->new( 't' );
+    my $tree2 = $tree1->new( 't' );
+    isa_ok $tree2, 'Test::Smoke::SourceTree';
+    my $empty = $tree2->_read_mani_file( 'MANIFEST.SKIP', 1 );
+    is_deeply $empty, { }, "Return empty hashref [no MANIFEST]";
+}
+
 { # check new() croak()s without an argument
 
-#line 200
+#line 300
     my $tree = eval { Test::Smoke::SourceTree->new() };
     ok( $@, "new() must have arguments" );
-    like( $@, "/Usage:.*?at \Q$0\E line 200/", "it croak()s alright" );
+    like( $@, "/Usage:.*?at \Q$0\E line 300/", "it croak()s alright" );
 }

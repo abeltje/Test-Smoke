@@ -45,7 +45,7 @@ SETUP: {
     print DOTPATCH "20000\n";
     close DOTPATCH or plan skip_all => "Cannot write '.patch': $!";
     # Create a 'MANIFEST'
-    my @MANIFEST = ( 'MANIFEST', get_dir( $cdir ) );
+    my @MANIFEST = map manify_path( $_ ) => ( 'MANIFEST', get_dir( $cdir ) );
     local *MANIFEST;
     my $manifest = File::Spec->catfile( $cdir, 'MANIFEST' );
     open MANIFEST, "> $manifest" or

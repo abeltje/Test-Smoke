@@ -402,7 +402,7 @@ sub make_test {
         my @nok = ();
         select ((select (TST), $| = 1)[0]);
         while (<TST>) {
-            $self->{v} > 2 and $self->tty( $_ );
+            $self->{v} > 1 and $self->tty( $_ );
             skip_filter( $_ ) and next;
 
             # make mkovz.pl's life easier
@@ -442,18 +442,20 @@ sub make_test {
 
 sub extend_with_harness {
     my( $self, @nok ) = @_;
-    my @harness;
+    my( @harness, %inconsistant );
     for ( @nok ) {
-        m!^(?:\.\.[\\/])?(\w+/[-\w/]+).*! or next;
-        # Remeber, we chdir into t, so -f is false for op/*.t etc
+        m!^(?:\.\.[\\/])?(\w+/[-\w/]+)\.*(.*)! or next;
+        # harness chdir()s into t, so -f is false for t/op/*.t etc
         my $test_name = "$1.t";
+        my $status = $2;
         push @harness, (-f $test_name) 
             ? File::Spec->catdir( File::Spec->updir, $test_name )
             : $test_name;
+        $inconsistant{ $harness[-1] } = $status;
     }
     if ( @harness ) {
         local $ENV{PERL_SKIP_TTY_TEST} = 1;
-	        $self->tty( "\nExtending failures with Harness\n" );
+        $self->tty( "\nExtending failures with Harness\n" );
         my $harness = $self->{is_win32} ?
         join " ", map { 
             s{^\.\.[/\\]}{};
@@ -467,13 +469,14 @@ sub extend_with_harness {
             my( $name, $fail ) = 
                 m/(\S+\.t)\s+.+%\s+([\d?]+(?:[-\s]+\d+)*)/;
             if ( $name ) {
+                delete $inconsistant{ $name };
                 my $dots = '.' x (40 - length $name );
                 "    $name${dots}FAILED $fail\n";
             } else {
                 ( $fail ) = m/^\s+(\d+(?:[-\s]+\d+)*)/;
                 " " x 41 . "$fail\n";
             }
-        } grep m/^\s+\d+(?:[-\s]+\d+)/ ||
+        } grep m/^\s+\d+(?:[-\s]+\d+)*/ ||
                m/\S+\.t\s+.+%\s+[\d?]+(?:[-\s+]\d+)*/ => map {
             /All tests successful/ && $harness_all_ok++;
             $self->{v} > 1 and $self->tty( $_ );
@@ -481,12 +484,18 @@ sub extend_with_harness {
         } $self->_run( "./perl harness $harness" );
         $harness_out =~ s/^\s*$//;
         if ( $harness_all_ok ) {
-            $harness_out ||= @nok
-                ? "Inconsistent test results (between _test and harness):\n" . 
-                  join "", map "    $_" => @nok
-                : "All tests successful.";
+            $harness_out .= scalar keys %inconsistant
+                ? "Inconsistent test results (between TEST and harness):\n" . 
+                  join "", map {
+                      my $dots = '.' x (40 - length $_ );
+                      "    $_${dots}$inconsistant{ $_ }\n";
+                  } keys %inconsistant
+                : $harness_out ? "" : "All tests successful.";
         } else {
-            $harness_out ||= join "", map "    $_" => @nok;
+            $harness_out .= join "", map {
+                my $dots = '.' x (40 - length $_ );
+                "    $_${dots}$inconsistant{ $_ }\n";
+            } keys %inconsistant;
         }
         $self->ttylog("\n", $harness_out, "\n" );
         $changed_dir and chdir File::Spec->updir;

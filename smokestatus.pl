@@ -4,7 +4,7 @@ $| = 1;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.004';
+$VERSION = '0.006';
 
 use Cwd;
 use File::Spec;
@@ -19,7 +19,7 @@ use Test::Smoke::Util qw( get_patch do_pod2usage parse_report_Config );
 my $myusage = "Usage: $0 -c [smokeconfig]";
 use Getopt::Long;
 my %opt = (
-
+    dir     => undef,
     config  => undef,
     help    => 0,
     man     => 0,
@@ -51,6 +51,7 @@ F<configsmoke.pl>.
 
 =item * B<General options>
 
+    -d | --dir <directory>   Specify where the *_config files are
     -h | --help              Show help message (needs Pod::Usage)
     --man                    Show the perldoc  (needs Pod::Usage)
 
@@ -65,6 +66,7 @@ reports.
 
 GetOptions( \%opt,
     'all|a', 'running|r',
+    'dir|d=s',
 
     'help|h', 'man',
 
@@ -75,6 +77,10 @@ do_pod2usage( verbose => 1, exitval => 1, myusage => $myusage )
     unless $opt{all} || $opt{running} || defined $opt{config};
 $opt{ man} and do_pod2usage( verbose => 2, exitval => 0, myusage => $myusage );
 $opt{help} and do_pod2usage( verbose => 1, exitval => 0, myusage => $myusage );
+
+defined $opt{dir} or $opt{dir} = File::Spec->curdir;
+$opt{dir} && -d $opt{dir} or $opt{dir} = '';
+$opt{dir} ||= $FindBin::Bin;
 
 my %save_opt = %opt;
 my @configs = $opt{all} 
@@ -113,6 +119,9 @@ foreach my $config ( @configs ) {
     printf "    $todo configuration%s to finish$todo_time\n",
            $todo == 1 ? "" : "s"
         if $todo;
+
+    printf "    Average smoke duration: %s.\n", time_in_hhmm( $rpt->{avg} )
+        if $rpt->{count};
 }
 
 sub guess_status {
@@ -240,14 +249,15 @@ sub time_in_hhmm {
 
 sub get_configs {
     local *DH;
-    opendir DH, $FindBin::Bin or return;
+    opendir DH, $opt{dir} or return;
     my @list = grep /_config\z/ => readdir DH;
     closedir DH;
     return sort @list;
 }
+
 sub get_lcks {
     local *DH;
-    opendir DH, $FindBin::Bin or return;
+    opendir DH, $opt{dir} or return;
     my @list = map { s/\.lck\z/_config/; $_ } grep /\.lck\z/ => readdir DH;
     closedir DH;
     return sort @list;
@@ -258,7 +268,7 @@ sub process_args {
 
     $opt{config} eq "" and $opt{config} = 'smokecurrent_config';
     read_config( $opt{config} ) or do {
-        my $config_name = File::Spec->catfile( $FindBin::Bin, $opt{config} );
+        my $config_name = File::Spec->catfile( $opt{dir}, $opt{config} );
         read_config( $config_name );
     };
 

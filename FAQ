@@ -30,7 +30,7 @@ as possible.
 
 =head2 Where is Test::Smoke?
 
-On CPAN: L<http://search.cpan.org/authour/ABELTJE/Test-Smoke>
+On CPAN: L<http://search.cpan.org/dist/Test-Smoke>
 
 =head2 What are these configuration files about?
 
@@ -98,6 +98,52 @@ There are two (2) special prefixes: B<smoke562> and B<smoke58x>. These
 will set the default answers for F<configsmoke.pl> to be appropriate
 for smoking the maintenance branches for these versions of perl.
 
+=head2 How do I include I<copy-on-write> testing in my smokes?
+
+TIMTOWTDO :-)
+
+Most of this works for flags that need to be added to C<ccflags> in
+general.
+
+=over 4
+
+=item B<-Accflags='-DPERLL_COPY_ON_WRITE'>
+
+The fastest way to do it is to add a new section to your
+buildconfiguration file, like this:
+
+    =
+    # Add a new two line section for -DPERL_COPY_ON_WRITE
+
+    -Accflags='-DPERL_COPY_ON_WRITE'
+    =
+
+That will always work, but IMO looks a bit "loud" in the reports.
+
+=item B<< Default F<Policy.sh> >>
+
+Since maintenence version 1.18.10, the default F<Policy.sh> is
+generated from the policy-target sections in the buildconfigurations
+file. It is now possible to just add this three line section to your
+buildconfiguration file:
+
+    =
+    /-DPERL_COPY_ON_WRITE/
+
+    -DPERL_COPY_ON_WRITE
+    =
+
+=item B<< Your own F<Policy.sh> >>
+
+Some people use the posibility to handle site specific build
+environments from F<< <builddir>/../Policy.sh >>. This excludes the
+use of the default F<Policy.sh>. You will need to add the
+B<-DPERL_COPY_ON_WRITE> flag to the C<ccflags=''> line in your
+F<Policy.sh>. After that you must add the policy-target section, as
+above, to your buildconfiguration file.
+
+=back
+
 =head2 What are all the scripts in the smoke suite for?
 
 =over 4
@@ -157,11 +203,13 @@ This script copies the report and the logfile to a configurable place.
 This script prints a little status report for a smoke confifuration:
 
     $ ./smokestatus.pl -c smoke58x
-    Busy smoking patchlevel 20562.
-    13 out of 18 configurations finished in 7 hours 19 minutes.
-    10 configuration(s) showed failures (F).
-    0 failure(s) in the running configuration.
-    5 configuration(s) to finish, in est. 2 hours 49 minutes.
+    Checking status for configuration 'smoke58x'
+      Change number 21537 started on Sun Oct 26 06:30:39 2003.
+        4 out of 10 configurations finished in 3 hours 6 minutes.
+        1 configuration showed failures (F).
+        0 failures in the running configuration.
+        6 configurations to finish, estimated completion in 4 hours 40 minutes
+        Average smoke duration: 46 minutes 42.250 seconds.
 
 =item B<W32Configure.bat>
 
@@ -178,7 +226,6 @@ a unixy way.
 
 Yes, you can kill all the smoke related processes. Each stage is
 directly logged in F<< <builddir>/mktest.out >>.
-
 
 As of version 1.17.02 you can specify a timeout (if you have alarm())
 
@@ -200,7 +247,7 @@ There are several ways to monitor the reports send in:
 =item Subscribe to the mailinglist
 
 You can subscribe to that list by sending an empty message to
-<smokers-reports-subscribe@perl.org>.
+<daily-build-reports-subscribe@perl.org>.
 You do B<not> have to be subscribed to send reports!
 
 =item The WWW archive
@@ -268,7 +315,7 @@ environments, and you will also need to set these up:
 Note that Windows builds (MSVC, Borland or MinGW) also need the "crlf"
 layer:
 
-    C:>(set PERLIO=stdio :crlf) && .\perl harness -v <pathto\failingtest>
+    S:>(set PERLIO=stdio :crlf) && .\perl harness -v <pathto\failingtest>
 
 Be careful with the environment variables on Windows, they are sticky.
 
@@ -279,7 +326,7 @@ Be careful with the environment variables on Windows, they are sticky.
 Note that Windows builds (MSVC, Borland or MinGW) also need the "crlf"
 layer:
 
-    C:>(set PERLIO=perlio :crlf) && .\perl harness -v <pathto\failingtest>
+    S:>(set PERLIO=perlio :crlf) && .\perl harness -v <pathto\failingtest>
 
 Be careful with the environment variables on Windows, they are sticky.
 
@@ -306,9 +353,7 @@ $Id$
 
 =head1 COPYRIGHT
 
-(c) 2002-2003, All rights reserved.
-
-  * Abe Timmerman <abeltje@cpan.org>
+Copyright 2002-2003, Abe Timmerman <abeltje@cpan.org> All rights reserved.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

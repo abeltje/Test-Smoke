@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT );
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -11,6 +11,7 @@ use base 'Exporter';
     &find_a_patch
     &find_unzip &do_unzip
     &find_untargz &do_untargz
+    &manify_path
     &get_dir &get_file &put_file
     &rmtree &mkpath
 );
@@ -60,6 +61,22 @@ sub whereis {
         }
     }
     return '';
+}
+
+=item manify_path( $path )
+
+Do a OS-specific split on the path, and join with '/' for MANIFEST
+format.
+
+=cut
+
+sub manify_path($) {
+    my $path = shift or return;
+    # There should be no volume on these file_paths
+    my( undef, $dirs, $file ) = File::Spec->splitpath( $path );
+    my @subdirs = grep $_ && length $_ => File::Spec->splitdir( $dirs );
+    push @subdirs, $file;
+    return join '/', @subdirs;
 }
 
 =item get_dir( $path )

@@ -9,7 +9,7 @@ use TestLib;
 
 use File::Find;
 use File::Spec;
-use Data::Dumper;
+#use Data::Dumper;
 
 use Test::More tests => 14;
 BEGIN { use_ok( 'Test::Smoke::Util' ); }
@@ -17,7 +17,7 @@ BEGIN { use_ok( 'Test::Smoke::Util' ); }
 chdir 't' or die "chdir: $!" if -d 't';
 
 SKIP: {
-    my @MANIFEST = ( 'MANIFEST', get_dir( './' ) );
+    my @MANIFEST = map manify_path( $_ ) => ( 'MANIFEST', get_dir( './' ) );
     local *MANIFEST;
     open MANIFEST, "> MANIFEST" or skip "Can't create MANIFEST: $!", 4;
     print MANIFEST "$_\n" for @MANIFEST;
@@ -33,13 +33,13 @@ SKIP: {
     my $missing = (keys %$MANIFEST)[0];
     is( $missing, '.patch', "Yup, .patch is suspicious" );
     is( $MANIFEST->{ $missing }, 1, "and missing from the directory" );
-    1 while unlink 'MANIFEST';
 }
 
 # Put more files in MANIFEST than present
 SKIP: {
+    1 while unlink 'MANIFEST';
     my @extra_names = qw( Iamnotthere t/Iamnotthere );
-    my @MANIFEST = ( 'MANIFEST', get_dir( './' ) );
+    my @MANIFEST = map manify_path( $_ ) => ( 'MANIFEST', get_dir( './' ) );
     push @MANIFEST, @extra_names;
 
     local *MANIFEST;
@@ -62,13 +62,12 @@ SKIP: {
     for my $file ( @extras ) {
         like( $file, "/^$regex\$/", "MANIFEST still has: $file" );
     }
-
-    1 while unlink 'MANIFEST';
 }
 
 # Put less files in MANIFEST than present
 SKIP: {
-    my @MANIFEST = ( 'MANIFEST', get_dir( './' ) );
+    1 while unlink 'MANIFEST';
+    my @MANIFEST = map manify_path( $_ ) => ( 'MANIFEST', get_dir( './' ) );
     my( $missing ) = splice @MANIFEST, -1, 1;
 
     local *MANIFEST;
@@ -96,8 +95,6 @@ SKIP: {
     is( keys %$MANIFEST, 0, "Empty, so we get the ok" );
 }
 
-END { 
-    1 while unlink 'MANIFEST';
-    chdir File::Spec->updir
-        if File::Spec->catdir( File::Spec->updir, 't' );
-}
+
+1 while unlink 'MANIFEST';
+chdir File::Spec->updir;

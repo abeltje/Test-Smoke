@@ -44,8 +44,8 @@ Test::Smoke::SourceTree - Manipulate the perl source-tree
 =cut
 
 # Define some constants
-sub ST_MISSING()    { return 1 }
-sub ST_UNDECLARED() { return 0 }
+sub ST_MISSING()    { 1 }
+sub ST_UNDECLARED() { 0 }
 
 =item Test::Smoke::SourceTree->new( $tree_dir )
 

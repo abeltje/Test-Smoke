@@ -21,6 +21,7 @@ use Test::Smoke::Mailer;
 use Test::Smoke::Util qw( get_patch calc_timeout do_pod2usage );
 
 use Getopt::Long;
+Getopt::Long::Configure( 'pass_through' );
 my %options = ( config => 'smokecurrent_config', run => 1,
                 fetch => 1, patch => 1, mail => undef, archive => undef,
                 continue => 0,
@@ -75,6 +76,8 @@ It can take these options
   --defaultenv             Run a smoke in the default environment
   --[no]smartsmoke         Don't smoke unless patchlevel changed
   --snapshot <patchlevel>  Set a new patchlevel for snapshot smokes
+
+All other arguments are passed to F<Configure>!
 
 =head1 DESCRIPTION
 
@@ -182,7 +185,7 @@ sub call_mktest {
     };
     $Config{d_alarm} and alarm $timeout;
 
-    run_smoke( $conf->{continue} );
+    run_smoke( $conf->{continue}, @ARGV );
 }
 
 sub call_mkovz {
@@ -240,9 +243,11 @@ sub snapshot_name {
     my( $plevel ) = $options{snapshot} =~ /(\d+)/;
     my $sfile = $conf->{sfile};
     if ( $sfile ) {
-        $sfile =~ s/\d+/$plevel/;
+        $sfile =~ s/([-@])\d+\./$1$plevel./;
     } else {
-        $sfile = "perl\@$plevel.$conf->{snapext}";
+        my $sep = $conf->{is56x} ? '562-' : '@';
+        my $ext = $conf->{snapext} || 'tar.gz';
+        $sfile = "perl${sep}${plevel}.$ext";
     }
     return $sfile;
 }

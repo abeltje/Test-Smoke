@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.002';
+$VERSION = '0.003';
 
 use File::Spec;
 
@@ -119,7 +119,7 @@ sub write {
     }
 }
 
-=item $self->_read_Policy( $srcpath )
+=item $self->_read_Policy( $srcpath[, $verbose[, @ccflags]] )
 
 C<_read_Policy()> checks the C<< $srcpath >> for these conditions:
 
@@ -135,10 +135,12 @@ C<_read_Policy()> checks the C<< $srcpath >> for these conditions:
 
 =back
 
+The C<@ccflags> are passed to C<< $self->default_Policy() >>
+
 =cut
 
 sub _read_Policy {
-    my( $self, $srcpath, $verbose ) = @_;
+    my( $self, $srcpath, $verbose, @ccflags ) = @_;
     $srcpath = '' unless defined $srcpath;
 
     $self->{v} ||= defined $verbose ? $verbose : 0;
@@ -166,18 +168,42 @@ sub _read_Policy {
         my $p_name = File::Spec->catfile( $srcpath, 'Policy.sh' );
 
         unless ( open POLICY, $p_name ) {
-            *POLICY = *DATA{IO};
+            $self->{_policy} = $self->default_Policy( @ccflags );
             $vmsg = "default content";
         } else {
+            $self->{_policy} = do { local $/; <POLICY> };
+            close POLICY;
             $vmsg = $p_name;
         }
 
-        $self->{_policy} = do { local $/; <POLICY> };
-        close POLICY;
     }
     $self->{v} and print "Reading 'Policy.sh' from $vmsg($self->{v})\n";
 }
- 
+
+=item $policy->default_Policy( [@ccflags] )
+
+Generate the default F<Policy.sh> from a set of ccflags, but be
+backward compatible.
+
+=cut
+
+sub default_Policy {
+    my $self = shift;
+    my @ccflags = @_ ? @_ : qw( -DDEBUGGING );
+
+    local $" = " ";
+    return <<__EOPOLICY__;
+#!/bin/sh
+
+# Default Policy.sh from Test::Smoke
+
+# Be sure to define -DDEBUGGING by default, it's easier to remove
+# it from Policy.sh than it is to add it in on the correct places
+
+ccflags='@ccflags'
+__EOPOLICY__
+}
+
 1;
 
 =back
@@ -203,13 +229,3 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 =cut
-
-__DATA__
-#!/bin/sh
-
-# Default Policy.sh
-
-# Be sure to define -DDEBUGGING by default, it's easier to remove
-# it from Policy.sh than it is to add it in on the correct places
-
-ccflags='-DDEBUGGING'

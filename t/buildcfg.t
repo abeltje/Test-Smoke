@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 
-use Test::More tests => 61;
+use Test::More tests => 62;
 my $verbose = 0;
 
 use FindBin;
@@ -156,6 +156,35 @@ __EOCFG__
     my $bcfg = Test::Smoke::BuildCFG->new( undef,  { v => $verbose } );
 
     is_deeply $bcfg->{_sections}, $dft_sect, "Default configuration";
+}
+
+{ # Check the new ->policy_targets() method
+    my $dft_cfg = <<__EOCFG__;
+/-DPERL_COPY_ON_WRITE/
+
+-DPERL_COPY_ON_WRITE
+=
+
+-Duseithreads
+=
+/-DDEBUGGING/
+
+-DDEBUGGING
+__EOCFG__
+
+    my $dft_sect = [
+        { policy_target => '-DPERL_COPY_ON_WRITE', 
+          args          => [ '', '-DPERL_COPY_ON_WRITE'] },
+        [ '', '-Duseithreads' ],
+        { policy_target => '-DDEBUGGING', args => [ '', '-DDEBUGGING'] },
+    ];
+
+    my $bcfg = Test::Smoke::BuildCFG->new( \$dft_cfg => { v => $verbose } );
+
+    is_deeply [ $bcfg->policy_targets ], 
+              [qw( -DPERL_COPY_ON_WRITE -DDEBUGGING )],
+              "Policy targets...";
+
 }
 
 # Now we need to test the C<continue()> constructor

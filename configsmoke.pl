@@ -106,6 +106,10 @@ my %versions = (
                  text   => 'Perl 5.00504-to-be',
                  is56x  => 1},
     '5.6.2' => { source => 'ftp.linux.activestate.com::perl-5.6.2',
+                 server => 'http://rgarciasuarez.free.fr',
+                 sdir   => '/snap',
+                 sfile  => 'perl562-21463.tar.gz',
+                 pdir   => '/pub/staff/gsar/APC/perl-5.6.2-diffs',
                  ddir   => File::Spec->rel2abs( 
                                File::Spec->catdir( File::Spec->updir,
                                                    'perl-5.6.2' ) ),
@@ -1591,10 +1595,9 @@ sub get_avail_sync {
 
     my $pversion = $config{perl_version} || '5.9.x';
 
-    # (has_ftp && 5.9.x) || (has_lwp && !5.6.x)
+    # (has_ftp && 5.9.x) || has_lwp
     unshift @synctype, 'snapshot' 
-        if ( $has_ftp && $pversion eq '5.9.x' ) ||
-           ( $has_lwp && $pversion ne '5.6.2' );
+        if ( $has_ftp && $pversion eq '5.9.x' ) || $has_lwp;
     unshift @synctype, 'rsync' if whereis( 'rsync' );
     return @synctype;
 }

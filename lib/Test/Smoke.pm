@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION $conf @EXPORT );
-$VERSION = '1.18_51';
+$VERSION = '1.18_52';
 
 use base 'Exporter';
 @EXPORT  = qw( $conf &read_config &run_smoke );
@@ -96,18 +96,28 @@ sub do_manifest_check {
     }
 }
 
-=item run_smoke( $continue, $patch )
+=item run_smoke( [$continue[, @df_buildopts]] )
 
 C<run_smoke()> sets up de build environment and gets the private Policy
 file and build configurations and then runs the smoke stuff for all 
 configurations.
+
+All arguments after the C<$continue> are taken as default buildoptions
+and passed to C<./Configure>.
 
 =cut
 
 sub run_smoke {
     my $continue = shift;
     defined $continue or $continue = $conf->{continue};
-    my $patch = shift || Test::Smoke::Util::get_patch( $conf->{ddir} );
+
+    my @df_buildopts = @_ ? grep /^-[DUA]/ => @_ : ();
+    # We *always* want -Dusedevel!
+    push @df_buildopts, '-Dusedevel' 
+        unless grep /^-Dusedevel$/ => @df_buildopts;
+    Test::Smoke::BuildCFG->config( dfopts => join " ", @df_buildopts );
+
+    my $patch = Test::Smoke::Util::get_patch( $conf->{ddir} );
 
     exists $Config{ldlibpthname} && $Config{ldlibpthname} and
         $ENV{ $Config{ldlibpthname} } ||= '',
@@ -124,7 +134,8 @@ sub run_smoke {
     my $mode = $continue ? ">>" : ">";
     open LOG, "$mode $logfile" or die "Cannot create 'mktest.out': $!";
 
-    my $Policy   = Test::Smoke::Policy->new( File::Spec->updir, $conf->{v} );
+    my $Policy   = Test::Smoke::Policy->new( File::Spec->updir, $conf->{v},
+                                             $BuildCFG->policy_targets );
 
     my $smoker   = Test::Smoke::Smoker->new( \*LOG, $conf );
     $smoker->mark_in;

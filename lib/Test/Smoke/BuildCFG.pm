@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.004';
+$VERSION = '0.005';
 
 use Cwd;
 use File::Spec;
@@ -342,6 +342,27 @@ sub configurations {
     my $self = shift;
 
     @{ $self->{_list} };
+}
+
+=item $buildcfg->policy_targets( )
+
+Returns a list of policytargets from the policy substitution sections
+
+=cut
+
+sub policy_targets {
+    my $self = shift;
+
+    return unless UNIVERSAL::isa( $self->{_sections}, "ARRAY" );
+
+    my @targets;
+    for my $section ( @{ $self->{_sections} } ) { 
+        next unless UNIVERSAL::isa( $section, "HASH" ) && 
+                    $section->{policy_target};
+        push @targets, $section->{policy_target};
+    }
+
+    return @targets;
 }
 
 =item __get_smoked_configs( $logfile )
