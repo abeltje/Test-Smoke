@@ -10,6 +10,44 @@ The filelists have a short symbolic indicator:
 
 Enjoy!
 ___________________________________________________________________________
+[   796] By: abeltje                          on 2004-11-19 23:01:39 +0100
+        Log: * prepare for the 1.19_53 snapshot!
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   795] By: abeltje                          on 2004-11-19 22:27:45 +0100
+        Log: * [FIX]
+	       * take out the debug-print statements
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Makefile.PL
+___________________________________________________________________________
+[   794] By: abeltje                          on 2004-11-19 22:24:37 +0100
+        Log: * [CHANGE]
+	       * more of a fix, I shouldn't use one Makefile.PL for both
+		 creating distributions and user deployment
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Makefile.PL
+___________________________________________________________________________
+[   793] By: abeltje                          on 2004-11-19 21:32:51 +0100
+        Log: * [CHANGE] (By Jarkko Hietaniemi!)
+	       * This should sort out the Solaris/OSF harware information
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[   792] By: abeltje                          on 2004-11-19 20:27:25 +0100
+        Log: * [CHANGE] (By Craig Berry!)
+	       * -Dusevmsdebug builds "ndbgperl.exe" on OpenVMS, so check
+		  for that
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm
+___________________________________________________________________________
+[   790] By: abeltje                          on 2004-11-14 11:13:43 +0100
+        Log: * [AUTOCOMMIT]
+	       * Regenerate 'Changes', 'SIGNATURES', 'META.yml'
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Changes, /Test-Smoke/META.yml,
+	     /Test-Smoke/SIGNATURE
+___________________________________________________________________________
 [   789] By: abeltje                          on 2004-11-14 11:10:12 +0100
         Log: * [CHANGE]
 	       * Prepare for the Test::Smoke-1.19_52 snapshot
