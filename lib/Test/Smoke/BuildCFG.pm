@@ -321,16 +321,16 @@ sub default_buildcfg() {
 
     return <<__EOCONFIG__;
 
-== Build all configurations with and without ithreads
+= Build all configurations with and without ithreads
 
 -Duseithreads
-== Build perl with these options
+= Build perl with these options
 -Uuseperlio
 
 -Duse64bitint
 -Duselongdouble
 -Dusemorebits
-== All configurations with and without -DDEBUGGING
+= All configurations with and without -DDEBUGGING
 /-DDEBUGGING/
 
 -DDEBUGGING
