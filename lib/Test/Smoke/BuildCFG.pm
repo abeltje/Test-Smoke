@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.002';
+$VERSION = '0.003';
 
 use Cwd;
 use File::Spec;
