@@ -503,12 +503,13 @@ sub extend_with_harness {
                   } keys %inconsistant
                 : $harness_out ? "" : "All tests successful.";
         } else {
-            $harness_out .=
-                "Inconsistent test results (between TEST and harness):\n" . 
-                join "", map {
-                    my $dots = '.' x (40 - length $_ );
-                    "    $_${dots}$inconsistant{ $_ }\n";
-                } keys %inconsistant;
+            $harness_out .= scalar keys %inconsistant
+                ? "Inconsistent test results (between TEST and harness):\n" . 
+                  join "", map {
+                      my $dots = '.' x (40 - length $_ );
+                      "    $_${dots}$inconsistant{ $_ }\n";
+                  } keys %inconsistant
+                : "";
         }
         $self->ttylog("\n", $harness_out, "\n" );
         $changed_dir and chdir File::Spec->updir;

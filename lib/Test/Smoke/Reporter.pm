@@ -348,7 +348,7 @@ sub _post_process {
                     $status->{stdio} = "M";
                     delete $status->{minitest};
                 }
-                $self->{v} > 1 and print "[$tstenv]: $status->{$tstenv}\n";
+                $self->{v} > 1 and print "\t[$tstenv]: $status->{$tstenv}\n";
             } 
             exists $status->{perlio} or 
                 $status->{perlio} = '-' unless $self->{defaultenv};
