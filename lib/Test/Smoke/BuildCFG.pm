@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.005';
+$VERSION = '0.006';
 
 use Cwd;
 use File::Spec;
@@ -363,6 +363,28 @@ sub policy_targets {
     }
 
     return @targets;
+}
+
+=item as_string
+
+Return the parsed configuration as a string.
+
+=cut
+
+sub as_string {
+    my $self = shift;
+    my @sections;
+    for my $section ( @{ $self->{_sections} } ) {
+        if ( UNIVERSAL::isa( $section, 'ARRAY' ) ) {
+            push @sections, $section;
+        } elsif ( UNIVERSAL::isa( $section, 'HASH' ) ) {
+            push @sections, [
+                "/$section->{policy_target}/",
+                @{ $section->{args} },
+            ];
+        }
+    }
+    return join "=\n", map join( "\n", @$_, "" ) => @sections;
 }
 
 =item __get_smoked_configs( $logfile )

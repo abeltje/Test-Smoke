@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 
-use Test::More tests => 62;
+use Test::More tests => 67;
 my $verbose = 0;
 
 use FindBin;
@@ -36,6 +36,7 @@ __EOCFG__
 
     is_deeply $bcfg->{_sections}, $dft_sect, "Parse a configuration";
 
+    is $bcfg->as_string, $dft_cfg, "as_string()";
 }
 
 { # Check that order within sections is honored
@@ -77,6 +78,7 @@ __EOCFG__
         }
         ok( $config->args_eq( "$config" ), "Stringyfied: args_eq($config)" );
     }
+    is $bcfg->as_string, $dft_cfg, "as_string()";
 }
 
 { # Check that empty lines at the end of sections are honored
@@ -114,6 +116,7 @@ __EOCFG__
         }
         ok( $config->args_eq( "$config" ), "Stringyfied: args_eq($config)" );
     }
+    is $bcfg->as_string, $dft_cfg, "as_string()"
 }
 
 { # Check that empty sections are skipped
@@ -144,6 +147,9 @@ __EOCFG__
 
     is_deeply $bcfg->{_sections}, $dft_sect, "Empty sections are skipped";
 
+    ( my $as_string = $dft_cfg ) =~ s/^[^=]*=\n//;
+    $as_string =~ s/^=.*/=/mg;
+    is $bcfg->as_string, $as_string, "as_string()";
 }
 
 { # This is to test the default configuration
@@ -185,6 +191,7 @@ __EOCFG__
               [qw( -DPERL_COPY_ON_WRITE -DDEBUGGING )],
               "Policy targets...";
 
+    is $bcfg->as_string, $dft_cfg, "as_string()";
 }
 
 # Now we need to test the C<continue()> constructor
