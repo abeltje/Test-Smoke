@@ -5,7 +5,7 @@ use Data::Dumper;
 # $Id$
 
 my $verbose = 0;
-use Test::More tests => 30;
+use Test::More tests => 33;
 
 use_ok 'Test::Smoke::Reporter';
 
@@ -57,6 +57,8 @@ EORESULTS
 O O         -Uuseperlio
 __EOM__
 
+    chomp( my $summary = $reporter->summary );
+    is $summary, 'Summary: PASS', $summary;
 #    diag Dumper $reporter->{_counters};
 #    diag $reporter->report;
 }
@@ -143,6 +145,9 @@ EORESULTS
 F O F F O F 
 __EOM__
 
+    chomp( my $summary = $reporter->summary );
+    is $summary, 'Summary: FAIL(F)', $summary;
+
 #    diag Dumper $reporter->{_counters};
 #    diag $reporter->report;
 }
@@ -220,6 +225,8 @@ EORESULTS
 O O F F     
 __EOM__
 
+    chomp( my $summary = $reporter->summary );
+    is $summary, 'Summary: FAIL(F)', $summary;
     like $reporter->report, 
          '/^Failures:\n\[stdio\/perlio\]\s* -DDEBUGGING/m',
          "Failures:";
@@ -258,9 +265,7 @@ Finished smoking 22111
 Stopped smoke at 1073869001
 EORESULTS
 
-    my $report = $reporter->report;
-    is $reporter->{_rpt}{patch}, $patchlevel, "Patchlevel $patchlevel";
-    like $report, "/^Summary: PASS\n/m", 
-         "Report PASS for -Uuseperlio";
-
+    chomp( my $summary = $reporter->summary );
+    is $summary, 'Summary: PASS', $summary;
+    like $reporter->report, "/^Summary: PASS\n/m", "Summary from report";
 }

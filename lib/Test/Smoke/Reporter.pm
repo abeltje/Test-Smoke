@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.003';
+$VERSION = '0.004';
 
 use Cwd;
 use File::Spec::Functions;
@@ -365,9 +365,8 @@ sub _post_process {
                 $status->{ "locale:$self->{locale}" } = '-' if $self->{locale};
 
             $count{ $_ }++ for map {
-                $status->{ $_ } =~ ( m/[cmMtFXO]/ 
-                    ? $status->{ $_ } :  ( m/-/ ? 'O' : 'o' ) )
-            } keys %$status;
+                m/[cmMtFXO]/ ? $_ : m/-/ ? 'O' : 'o' 
+            } map $status->{ $_ } => keys %$status;
         }
     }
     my @failures = map {
