@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION $conf @EXPORT );
-$VERSION = '1.17_60';
+$VERSION = '1.17_61';
 
 use base 'Exporter';
 @EXPORT  = qw( $conf &read_config &run_smoke );
