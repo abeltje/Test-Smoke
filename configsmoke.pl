@@ -83,10 +83,10 @@ my @untars = get_avail_tar();
 my $untarmsg = join "", map "\n\t$_" => @untars;
 
 my %versions = (
-    '5.6.x' => { source => 'ftp.linux.activestate.com::perl-5.6.x',
+    '5.6.2' => { source => 'ftp.linux.activestate.com::perl-5.6.2',
                  ddir   => File::Spec->rel2abs( 
                                File::Spec->catdir( File::Spec->updir,
-                                                   'perl-5.6.x' ) ),
+                                                   'perl-5.6.2' ) ),
                  cfg    => 'perl56x.cfg',
                  text   => 'Perl 5.6.2-to-be',
                  is56x  => 1 },
@@ -816,8 +816,11 @@ only do a single pass C<< S<make test> >>.
 =cut
 
 $arg = 'defaultenv';
-$config{ $arg } = prompt_yn( $arg );
-
+if ( $config{is56x} ) {
+    $config{ $arg } = 1;
+} else {
+    $config{ $arg } = prompt_yn( $arg );
+}
 =item locale
 
 C<locale> and its value are passed to F<mktest.pl> and its value is passed
