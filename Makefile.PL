@@ -5,7 +5,9 @@ use 5.004;
 use ExtUtils::MakeMaker;
 use Config;
 
-use FindBin;
+my $findbin;
+use File::Basename;
+BEGIN { $findbin = dirname $0 }
 use File::Spec::Functions qw( :DEFAULT rel2abs );
 use Cwd;
 use File::Path;
@@ -13,7 +15,8 @@ use File::Path;
 # Some strange stuff happens when WriteMakefile() is called
 # on a non-clean distribution, cleanup before
 my $devnull = File::Spec->devnull;
-system "$Config{make} -i distclean >$devnull 2>&1";
+my $hideout = $^O eq 'VMS' ? '' : ' >$devnull 2>&1';
+system "$Config{make} -i distclean$hideout";
 
 my %install = ( );
 unless ( @ARGV ) {
@@ -34,7 +37,7 @@ unless ( @ARGV ) {
 my @scripts = qw( synctree.pl patchtree.pl mailrpt.pl W32Configure.pl
                   configsmoke.pl smokeperl.pl runsmoke.pl
                   archiverpt.pl smokestatus.pl );
--f catfile( $FindBin::Bin, '.patch' ) and push @scripts, '.patch';
+-f catfile( $findbin, '.patch' ) and push @scripts, '.patch';
 
 WriteMakefile(
     NAME	  => "Test-Smoke",
