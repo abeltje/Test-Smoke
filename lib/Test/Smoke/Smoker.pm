@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.019';
+$VERSION = '0.020';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -638,8 +638,6 @@ I<miniperl>, so we do C<< S<make minitest> >>.
 
 sub make_minitest {
     my $self = shift;
-
-    $self->{is_vms} and return 1;
 
     $self->ttylog( "TSTENV = minitest\t" );
     local *TST;
