@@ -4,16 +4,17 @@ $| = 1;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.007';
+$VERSION = '0.008';
 
 use Cwd;
-use File::Spec;
+use File::Spec::Functions;
 use File::Path;
 use File::Copy;
 use FindBin;
-use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
+use lib catdir( $FindBin::Bin, 'lib' );
 use lib $FindBin::Bin;
 use Test::Smoke;
+use Test::Smoke::Reporter;
 use Test::Smoke::Util qw( 
     do_pod2usage time_in_hhmm
     get_patch parse_report_Config );
@@ -23,6 +24,7 @@ use Getopt::Long;
 my %opt = (
     dir     => undef,
     config  => undef,
+    matrix  => undef,
     help    => 0,
     man     => 0,
 );
@@ -66,21 +68,22 @@ reports.
 
 =cut
 
-GetOptions( \%opt,
-    'all|a', 'running|r',
-    'dir|d=s',
+GetOptions( \%opt, qw(
+    all|a      running|r
+    dir|d=s
+    matrix|m!
 
-    'help|h', 'man',
+    help|h     man
 
-    'config|c:s',
-) or do_pod2usage( verbose => 1, myusage => $myusage );
+    config|c:s
+)) or do_pod2usage( verbose => 1, myusage => $myusage );
 
 do_pod2usage( verbose => 1, exitval => 1, myusage => $myusage )
     unless $opt{all} || $opt{running} || defined $opt{config};
 $opt{ man} and do_pod2usage( verbose => 2, exitval => 0, myusage => $myusage );
 $opt{help} and do_pod2usage( verbose => 1, exitval => 0, myusage => $myusage );
 
-defined $opt{dir} or $opt{dir} = File::Spec->curdir;
+defined $opt{dir} or $opt{dir} = curdir();
 $opt{dir} && -d $opt{dir} or $opt{dir} = '';
 $opt{dir} ||= $FindBin::Bin;
 
@@ -93,7 +96,7 @@ foreach my $config ( @configs ) {
     $opt{config} = $config;
     process_args();
     print "Checking status for configuration '$opt{config}'\n";
-    my $rpt  = parse_out( $opt{ddir} ) or do {
+    my $rpt  = parse_out( { ddir => $opt{ddir} } ) or do {
         guess_status( $opt{ddir}, $opt{adir}, $opt{config} );
         next;
     };
@@ -104,20 +107,20 @@ foreach my $config ( @configs ) {
     printf "  Change number $rpt->{patch} started on %s.\n", 
            scalar localtime( $rpt->{started} );
 
-    print "    $rpt->{count} out of $ccnt configurations finished",
-          $rpt->{count} ? " in $rpt->{time}.\n" : ".\n";
+    print "    $rpt->{ccount} out of $ccnt configurations finished",
+          $rpt->{ccount} ? " in $rpt->{time}.\n" : ".\n";
 
     printf "    $rpt->{fail} configuration%s showed failures%s.\n",
            ($rpt->{fail} == 1 ? "":"s"), $rpt->{stat} ? " ($rpt->{stat})":""
-        if $rpt->{count};
+        if $rpt->{ccount};
 
     printf "    $rpt->{running} failure%s in the running configuration.\n",
            ($rpt->{running} == 1 ? "" : "s")
         if exists $rpt->{running};
 
-    my $todo = $ccnt - $rpt->{count};
+    my $todo = $ccnt - $rpt->{ccount};
     my $est_curr = $rpt->{avg} ne "unknown"
-        ? $rpt->{avg} - ( $rpt->{rtime} - $rpt->{count}*$rpt->{avg} ) : 0;
+        ? $rpt->{avg} - ( $rpt->{rtime} - $rpt->{ccount}*$rpt->{avg} ) : 0;
     my $est_todo = $todo > 0 && $rpt->{avg} ne 'unknown'
         ? ( (($todo - 1) * $rpt->{avg}) + $est_curr ) : 0;
     $est_todo > $todo * $rpt->{avg} and $est_todo = $todo * $rpt->{avg};
@@ -128,14 +131,21 @@ foreach my $config ( @configs ) {
         if $todo;
 
     printf "    Average smoke duration: %s.\n", time_in_hhmm( $rpt->{avg} )
-        if $rpt->{count};
+        if $rpt->{ccount};
+
+    if ( $rpt->{ccount} > 0 && $opt{matrix} ) {
+        print join "\n", map "    $_\n" 
+            => split /\n/, $rpt->{reporter}->matrix;
+        print join "\n", map "    $_\n" 
+            => split /\n/, $rpt->{reporter}->bldenv_legend;
+    }
 }
 
 sub guess_status {
     my( $ddir, $adir, $config ) = @_;
     ( my $patch = get_patch( $ddir ) || "" ) =~ s/\?//g;
     if ( $patch && $adir ) {
-        my $a_rpt = File::Spec->catfile( $adir, "rpt${patch}.rpt" );
+        my $a_rpt = catfile( $adir, "rpt${patch}.rpt" );
         my $mtime = -e $a_rpt ? (stat $a_rpt)[9] : undef;
         if ( $mtime ) {
             local *REPORT;
@@ -157,80 +167,36 @@ sub guess_status {
 }
 
 sub parse_out {
-    my( $ddir ) = @_;
-    my $mktest_out = File::Spec->catfile( $ddir, 'mktest.out' );
-    local *MKTESTOUT;
-    open MKTESTOUT, "< $mktest_out" or return;
-    my( %rpt, $cfg, $cnt, $start );
-    while ( <MKTESTOUT> ) {
-        m/^\s*$/ and next;
-        m/^-+$/  and next;
-        s/\s*$//;
+    my( $conf ) = @_;
 
-        next if /^MANIFEST/ || /^PERLIO\s*=/ ||
-                /^Skipped this configuration/;
+    return unless -f catfile $conf->{ddir}, 'mktest.out';
 
-        if  ( my( $patch ) = /^Smoking patch\s* (\d+\S*)/ ) {
-            $rpt{patch} = $patch;
-            next;
-        }
-
-        if ( my( $status, $time ) = /(Started|Stopped) smoke at (\d+)/ ) {
-            if ( $status eq "Started" ) {
-                $start = $time;
-                $rpt{started} ||= $time;
-            } else {
-                $rpt{secs} += ($time - $start) if defined $start;
-            }
-            next;
-        }
-
-        if ( s/^\s*Configuration:\s*// ) {
-            $rpt{config}->{ $cfg } = $cnt if defined $cfg;
-            $cfg = $_; $cnt = 0;
-            next;
-        }
-
-        if ( /^Finished smoking \d+/ ) {
-            $rpt{config}{ $cfg } = $cnt;
-            $rpt{finished} = "Finished";
-            next;
-        }
-
-        if ( my( $status, $mini ) = 
-             m/^\s*Unable\ to
-               \ (?=([cbmt]))(?:build|configure|make|test)
-               \ (anything\ but\ mini)?perl/x) {
-            $mini and $status = uc $status; # M for no perl but miniperl
-            $cnt = $status;
-            next;
-        }
-        $cnt = 0, next if /^\s*All tests successful/;
-        $cnt++,   next if /FAILED|DIED/;
-	next;
-    }
-    close MKTESTOUT;
+    my $reporter = Test::Smoke::Reporter->new( $conf );
+    my %rpt = %{ $reporter->{_rpt} };
 
     $rpt{finished} ||= "Busy";
-    $rpt{count} = scalar keys %{ $rpt{config} };
-    $rpt{avg}   = $rpt{count} ? $rpt{secs} / $rpt{count} : 'unknown';
+    $rpt{ccount} = scalar keys %{ $rpt{config} };
+    $rpt{avg}   = $rpt{ccount} ? $rpt{secs} / $rpt{ccount} : 0;
     $rpt{time}  = time_in_hhmm( $rpt{secs} );
     $rpt{rtime} = time() - $rpt{started};
     $rpt{fail} = 0; $rpt{stat} = { };
-    foreach my $config ( keys %{ $rpt{config} } ) {
 
-        if ( $rpt{config}{ $config } ) {
-            $rpt{config}{ $config } = "F" 
-                if $rpt{config}{ $config } =~ /^\d+$/;
+    foreach my $config ( keys %{ $rpt{statcfg} } ) {
+
+        if ( $rpt{statcfg}{ $config } ) {
+            $rpt{statcfg}{ $config } = "F" 
+                if $rpt{statcfg}{ $config } =~ /^\d+$/;
 
             $rpt{fail}++;
-            $rpt{stat}->{ $rpt{config}{ $config } }++;
+            $rpt{stat}->{ $rpt{statcfg}{ $config } }++;
         }
     }
     $rpt{stat} = join "", sort keys %{ $rpt{stat} };
 
-    $rpt{running} = $cnt unless exists $rpt{config}->{ $cfg };
+    $rpt{running} = $rpt{ccount} 
+        unless exists $rpt{statcfg}->{ $rpt{last_cfg} };
 
+    $rpt{reporter} = $reporter;
     return \%rpt    
 }
 

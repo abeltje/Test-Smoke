@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.004';
+$VERSION = '0.005';
 
 use Cwd;
 use File::Spec::Functions;
@@ -192,7 +192,7 @@ sub _parse {
     $self->{_rpt} = { }; $self->{_cache} = { }; $self->{_mani} = [ ];
     return $self unless defined $self->{_outfile};
 
-    my( %rpt, $cfgarg, $debug, $tstenv, $start );
+    my( %rpt, $cfgarg, $debug, $tstenv, $start, $statarg, $fcnt );
     $rpt{count} = 0;
     # reverse and use pop() instead of using unshift()
     my @lines = reverse split /\n+/, $self->{_outfile};
@@ -229,9 +229,13 @@ sub _parse {
         if ( s/^\s*Configuration:\s*// ) {
             # You might need to do something here with 
             # the previous Configuration: $cfgarg
+            $rpt{statcfg}{ $statarg } = $fcnt if defined $statarg;
+            $fcnt = 0;
+
             $rpt{count}++;
             s/-Dusedevel(\s+|$)//;
             s/\s*-des//;
+            $statarg = $_;
             $debug = s/-DDEBUGGING\s*// ? "D" : "N";
             s/\s+$//;
 
@@ -250,6 +254,7 @@ sub _parse {
 
         if ( m/^\s*All tests successful/ ) {
             $rpt{$cfgarg}->{$debug}{$tstenv} = "O";
+            $fcnt = 0;
             next;
         }
 
@@ -259,11 +264,11 @@ sub _parse {
             push @{ $rpt{$cfgarg}->{$debug}{$tstenv} }, $_;
         }
 
-#        if ( /^Finished smoking \d+/ ) {
-#            $rpt{config}{ $cfg } = $cnt;
-#            $rpt{finished} = "Finished";
-#            next;
-#        }
+        if ( /^Finished smoking \d+/ ) {
+            $rpt{statcfg}{ $statarg } = $fcnt;
+            $rpt{finished} = "Finished";
+            next;
+        }
 
         if ( my( $status, $mini ) =
              m/^\s*Unable\ to
@@ -280,6 +285,7 @@ sub _parse {
             ref $rpt{$cfgarg}->{$debug}{$tstenv} or
                 $rpt{$cfgarg}->{$debug}{$tstenv} = [ ];
             push @{ $rpt{$cfgarg}->{$debug}{$tstenv} }, $_;
+            $fcnt++;
             next;
         }
         if ( /^\s+\d+(?:[-\s]+\d+)*/ ) {
@@ -290,6 +296,7 @@ sub _parse {
         next;
     }
 
+    $rpt{last_cfg} = $statarg;
     $rpt{avg} = $rpt{secs} / $rpt{count};
     $self->{_rpt} = \%rpt;
     $self->_post_process;
