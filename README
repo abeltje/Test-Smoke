@@ -1,6 +1,6 @@
 =head1 NAME
 
-README - Perl Core Test Smoke Suite (1.19)
+README - Perl Core Test Smoke Suite (1.20)
 
 =head1 SYNOPSIS
 
@@ -165,6 +165,13 @@ reports in a database and build a nice WEB-front-end:
 
     http://www.alianwebserver.com/cgi-bin/smoke_db
 
+=item B<TinySmoke db>
+
+I also keep a database of smokereports that are created by Test::Smoke
+1.17 or higher.
+
+    http://www.test-smoke.org/cgi/tsdb
+
 =back
 
 =back
@@ -175,7 +182,7 @@ $Id$
 
 =head1 COPYRIGHT and LICENSE
 
-Copyright (C) 2001-2003
+Copyright (C) 2001-2004
 
   * H.Merijn Brand
   * Abe Timmerman
@@ -221,6 +228,13 @@ Contributors and/or co-authors:
     Cygwin		John Peacock <jpeacock@rowman.com>
     Sharing issues	Blair Zajac <blair@orcaware.com>
     Good ideas          Jos Boumans <kane@dwim.org>
+    VMS                 Craig Berry
+    SysInfo             Alain Barbet
+                        Merijn Brand
+                        Alan Burlison
+                        Allen Smith
+                        David Woolger
+                        Campo Wijerman
 
 and all the people having useful suggestions and nits, starting at
 YAPC::Europe-2.0.01, where Michael talked Merijn into simplifying his own

@@ -1,56 +1,39 @@
 =head1 NAME
 
-ReleaseNotes - These are the Release Notes for 1.19
+ReleaseNotes - These are the Release Notes for 1.20
 
 =head1 SYNOPSIS
 
-These are the major changes since version 1.18.
+These are the major changes since version 1.19
 
 =head1 DESCRIPTION
 
-I have done more refactoring and wrote some new code and documentation
-since v1.18.
+Thanks to Bernd Ulmann for giving me access to his VAX and the help of
+the vmsperl community, I have added support for OpenVMS.
 
-Major changes since 1.18
+Major changes since 1.19
 
 =over 4
 
 =item 1
 
-I finally got around to rewriting F<mkovz.pl> and replaced it with
-L<Test::Smoke::Reporter> and decided to use <mailrpt.pl> as the new
-front-end.
+C<Test::Smoke::SysInfo> is a work in progress. Some more tweaking for
+Solaris was done with the help of Alan Burlison and Davis Woolger.
 
 =item 2
 
-The new reports have better hardware/OS detection, with many thanks to
-Merijn Brand (most osses), Campo Weijerman (AIX), Allen Smith (IRIX),
-Alan Burlison (Solaris).
-
-The compiler info is now logged after each Configure, so this is will be
-available in reports even though the last Configure failed.
+I order to support systems without C<rsync(1)> access, I have added
+C<Test::Smoke::FTPClient> that syncs source-trees with Net::FTP from
+the ActiveState ftp repository. It is slow, but gets the job done.
 
 =item 3
 
-After "many" requests, the old stuff (F<mktest.pl>, F<mkovz.pl> etc)
-is now B<gone> (although I had planned the 1.20)!
+A lot of filename/directoryname issues with VMS were resolved.
 
 =item 4
 
-F<smokestatus.pl> tries to give a better guesstimate for ETA. It also
-has the new C<--matrix> option to also show the smoke-matrix with the
-status report.
-
-=item 5
-
-Some work has been done on the Win32 side. Most notably a start has
-been made to try and support Win98. Also some work on the
-F<W32Configure.pl> script.
-
-=item 6
-
-The behaviour attached to the C<cc> option for L<Test::Smoke::Mailer>
-has changed so that it will now only send C<Cc:> on failure.
+A new way to get testresults directly from "make test_harness" was
+introduced to help VMS (and perhaps Win32).
 
 =back
 
@@ -60,9 +43,7 @@ $Id$
 
 =head1 COPYRIGHT
 
-(c) 2002-2003, All rights reserved.
-
-  * Abe Timmerman <abeltje@cpan.org>
+(c) 2002-2004, Abe Timmerman <abeltje@cpan.org> All rights reserved.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
