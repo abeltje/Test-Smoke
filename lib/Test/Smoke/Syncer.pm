@@ -1,11 +1,12 @@
 package Test::Smoke::Syncer;
 use strict;
 
+# $Id$
 use vars qw( $VERSION );
-$VERSION = '0.008'; # $Id$
+$VERSION = '0.008';
 
-use File::Spec;
 use Cwd;
+use File::Spec;
 require File::Path;
 
 my %CONFIG = (

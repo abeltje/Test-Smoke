@@ -1,8 +1,10 @@
 package Test::Smoke::Util;
 use strict;
 
+# $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.18'; # $Id$
+$VERSION = '0.18';
+
 use base 'Exporter';
 @EXPORT = qw( 
     &Configure_win32 

@@ -1,8 +1,9 @@
 package Test::Smoke::Policy;
 use strict;
 
+# $Id$
 use vars qw( $VERSION );
-$VERSION = '0.002'; # $Id$
+$VERSION = '0.002';
 
 use File::Spec;
 
