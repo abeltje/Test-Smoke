@@ -27,5 +27,5 @@ my $dev_null = File::Spec->devnull;
 
 foreach my $script ( @scripts ) {
     ok( system( qq{$^X  "-Ilib" "-c" "$script" > $dev_null 2>&1} ) == 0,
-        "perl -c '$script' okay" );
+        "perl -c '$script'" );
 }
