@@ -10,6 +10,98 @@ The filelists have a short symbolic indicator:
 
 Enjoy!
 ___________________________________________________________________________
+[   789] By: abeltje                          on 2004-11-14 11:10:12 +0100
+        Log: * [CHANGE]
+	       * Prepare for the Test::Smoke-1.19_52 snapshot
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   788] By: abeltje                          on 2004-11-14 11:08:08 +0100
+        Log: * [CHANGE]
+	       * changes the logic of constructing absolute paths
+	       * fix the "odd number of arguments" in the opt hash
+		 assignment
+	       * add an '@' to the DCL script name for printing
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[   787] By: abeltje                          on 2004-11-14 10:59:24 +0100
+        Log: * [CHANGE]
+	       * On Merijns request. "not ok xx # skip" shouldn't count as
+		 failure
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Util.pm,
+	     /Test-Smoke/t/skip_filter.t
+___________________________________________________________________________
+[   786] By: abeltje                          on 2004-11-12 16:24:53 +0100
+        Log: * [CHANGE]
+	       * Now that we almost fully support variable rptfile name,
+		 the user-interface need to also support it
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/mailrpt.pl
+___________________________________________________________________________
+[   785] By: abeltje                          on 2004-11-11 07:12:23 +0100
+        Log: * [CHANGE]
+	       * Reporter knows about variable reportnames, so Mailer
+		 should also know.
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Mailer.pm
+___________________________________________________________________________
+[   784] By: abeltje                          on 2004-11-08 07:54:20 +0100
+        Log: * [FIX]
+	       * thinko in the new -Dusevmsdebug reporting
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Reporter.pm
+___________________________________________________________________________
+[   783] By: abeltje                          on 2004-11-07 15:46:55 +0100
+        Log: * [CHANGE]
+	       * another FindBin replacement
+	       * no redirection in system command for OpenVMS
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Makefile.PL
+___________________________________________________________________________
+[   782] By: abeltje                          on 2004-11-04 07:24:31 +0100
+        Log: * [FIX]
+	       * Transform filenames with multiple dots for OpenVMS during
+		 check_MANIFEST()
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SourceTree.pm
+___________________________________________________________________________
+[   781] By: abeltje                          on 2004-11-04 07:21:27 +0100
+        Log: * [CHANGE]
+	       * Forgot (change 776): $VERSION += 0.001
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[   780] By: abeltje                          on 2004-10-31 15:20:38 +0100
+        Log: * [CHANGE]
+	       * No under-bars in perl version numbers! (VMS)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Util.pm
+___________________________________________________________________________
+[   779] By: abeltje                          on 2004-10-31 14:21:57 +0100
+        Log: * [CHANGE]
+	       * Update for the upcomming 1.20
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/README, /Test-Smoke/ReleaseNotes
+___________________________________________________________________________
+[   776] By: abeltje                          on 2004-10-31 11:02:14 +0100
+        Log: * [FIX]
+	       * Solaris `prtdiag` output is inconsistent between
+		 versions/hardware
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[   774] By: abeltje                          on 2004-10-30 16:32:53 +0200
+        Log: * regen SIGNATURE for 1.19_51
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/SIGNATURE
+___________________________________________________________________________
+[   773] By: abeltje                          on 2004-10-30 16:29:23 +0200
+        Log: * regen Changes for 1.19_51
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Changes
+___________________________________________________________________________
 [   772] By: abeltje                          on 2004-10-30 16:23:53 +0200
         Log: * [CHANGE]
 	       * minor fixes
