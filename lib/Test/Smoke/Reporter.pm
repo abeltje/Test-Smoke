@@ -674,7 +674,7 @@ sub signature {
     return <<__EOS__
 
 -- 
-Report by Test::Smoke v$Test::Smoke::VERSION (Reporter v$VERSION) running on perl $this_pver
+Report by Test::Smoke v$Test::Smoke::VERSION\@$Test::Smoke::REVISION (Reporter v$VERSION) running on perl $this_pver
 __EOS__
 }
 

@@ -2,8 +2,9 @@ package Test::Smoke;
 use strict;
 
 # $Id$
-use vars qw( $VERSION $conf @EXPORT );
-$VERSION = '1.18_65';
+use vars qw( $VERSION $REVISION $conf @EXPORT );
+$VERSION  = '1.18_66';
+($REVISION) = __has_dot_patch() ? __get_dot_patch() : q$Rev$  =~ /(\d+)/;
 
 use base 'Exporter';
 @EXPORT  = qw( $conf &read_config &run_smoke );
@@ -169,6 +170,33 @@ sub run_smoke {
         require Carp;
         Carp::carp "Error on closing logfile: $!";
    };
+}
+
+=item __has_dot_patch( )
+
+Checks to see if F<.patch> exists.
+
+=cut
+
+use FindBin;
+use File::Spec::Functions;
+sub __has_dot_patch {
+    return -f catfile $FindBin::Bin, '.patch';
+}
+
+=item __get_dot_patch( )
+
+Read the contents of F<.patch>.
+
+=cut
+
+sub __get_dot_patch {
+    my $dotpatch = catfile $FindBin::Bin, '.patch';
+    local *DOTPATCH;
+    open DOTPATCH, "< $dotpatch" or return q$Rev$ =~ /(\d+)/;
+    chomp( my $plevel = <DOTPATCH> );
+    close DOTPATCH;
+    return $plevel;
 }
 
 1;

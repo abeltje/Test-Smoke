@@ -5,7 +5,8 @@ use 5.004;
 use ExtUtils::MakeMaker;
 use Config;
 
-use File::Spec;
+use FindBin;
+use File::Spec::Functions qw( :DEFAULT rel2abs );
 use Cwd;
 use File::Path;
 
@@ -18,8 +19,8 @@ my %install = ( );
 unless ( @ARGV ) {
     my $dft_install = exists $ENV{SMOKE_INSTDIR} && $ENV{SMOKE_INSTDIR} ne ""
         ? $ENV{SMOKE_INSTDIR}
-        : File::Spec->catdir( File::Spec->updir, 'smoke' );
-    $dft_install = File::Spec->rel2abs( $dft_install );
+        : catdir( updir(), 'smoke' );
+    $dft_install = rel2abs( $dft_install );
 
     my $install_dir = dir_prompt( 
         "Where would you like to install Test::Smoke?\n",
@@ -30,6 +31,10 @@ unless ( @ARGV ) {
 #                 LIB   => File::Spec->catdir( $install_dir, 'lib' ) );
                  LIB   => $install_dir );
 }
+my @scripts = qw( synctree.pl patchtree.pl mailrpt.pl W32Configure.pl
+                  configsmoke.pl smokeperl.pl runsmoke.pl
+                  archiverpt.pl smokestatus.pl );
+-f catfile( $FindBin::Bin, '.patch' ) and push @scripts, '.patch';
 
 WriteMakefile(
     NAME	  => "Test-Smoke",
@@ -47,10 +52,8 @@ WriteMakefile(
                        PREOP    => "cpansign -s",
 		     },
     PREREQ_PM     => { 'File::Spec' => 0.82, 'Test::More' => 0},
-    PMLIBDIRS     => [ File::Spec->curdir ],
-    EXE_FILES     => [qw( synctree.pl patchtree.pl mailrpt.pl W32Configure.pl
-                          configsmoke.pl smokeperl.pl runsmoke.pl
-                          archiverpt.pl smokestatus.pl )],
+    PMLIBDIRS     => [ curdir() ],
+    EXE_FILES     => \@scripts,
     %install
 );
 
@@ -74,7 +77,7 @@ sub dir_prompt {
         my $dir_existed = -d $dir;
         File::Path::mkpath( $dir, 1, 0755 ) unless $dir_existed;
         chdir $dir or warn "Cannot chdir($dir): $!\n" and redo GETDIR;
-        $dir = File::Spec->canonpath( cwd() );
+        $dir = canonpath( cwd() );
         chdir $cwd or warn "Cannot chdir($cwd) back: $!\n";
         File::Path::rmtree( $dir ) unless $dir_existed;
 
