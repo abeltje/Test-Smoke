@@ -2,7 +2,7 @@ package Test::Smoke;
 use strict;
 
 use vars qw( $VERSION $conf @EXPORT );
-$VERSION = '1.16_24';
+$VERSION = '1.16_25';
 
 use base 'Exporter';
 @EXPORT  = qw( $conf &read_config );
@@ -11,7 +11,7 @@ my $ConfigError;
 
 =head1 NAME
 
-Test::Smoke - Centralise $VERSION and handle reading the config
+Test::Smoke - The perl core test smoke suite
 
 =head1 SYNOPSIS
 
