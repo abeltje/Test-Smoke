@@ -4,7 +4,7 @@
 # (c)'01 H.Merijn Brand [27 August 2001]
 #    and Nicholas Clark
 # 20020909: Abe Timmerman
-# REVISION: 1.17
+# REVISION: 1.18
 use strict;
 
 sub usage ()
@@ -328,6 +328,7 @@ sub run_tests {
         }
 
 	foreach my $perlio ( @layers ) {
+            my $had_LC_ALL = exists $ENV{LC_ALL};
             local( $ENV{PERLIO}, $ENV{LC_ALL}, $ENV{PERL_UNICODE} ) =
                  ( "", defined $ENV{LC_ALL} ? $ENV{LC_ALL} : "", "" );
             my $perlio_logmsg = $perlio;
@@ -335,6 +336,7 @@ sub run_tests {
                 $ENV{PERLIO} = $perlio;
                 is_win32 and $ENV{PERLIO} .= " :crlf";
                 $ENV{LC_ALL} = 'C' if $force_c_locale;
+                $ENV{LC_ALL} or delete $ENV{LC_ALL};
                 delete $ENV{PERL_UNICODE};
             } else {
                 $ENV{PERL_UNICODE} = ""; # See -C in perlrun
@@ -400,6 +402,7 @@ sub run_tests {
 		}
 	    }
 	    print TTY "\n";
+            $had_LC_ALL and exists $ENV{LC_ALL} and delete $ENV{LC_ALL};
 	}
     }
 } # run_tests
