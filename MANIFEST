@@ -33,6 +33,7 @@ lib/Test/Smoke/BuildCFG.pm
 lib/Test/Smoke/Mailer.pm
 lib/Test/Smoke/Patcher.pm
 lib/Test/Smoke/Policy.pm
+lib/Test/Smoke/Reporter.pm
 lib/Test/Smoke/Smoker.pm
 lib/Test/Smoke/Syncer.pm
 lib/Test/Smoke/SourceTree.pm
@@ -50,6 +51,7 @@ t/manifest.t
 t/patcher.t
 t/parse_report.t
 t/policy.t
+t/reporter.t
 t/regenstuff.t
 t/skip_filter.t
 t/smoked_config.t
