@@ -1,11 +1,12 @@
 package Test::Smoke::BuildCFG;
 use strict;
 
+# $Id$
 use vars qw( $VERSION );
 $VERSION = '0.002';
 
-use File::Spec;
 use Cwd;
+use File::Spec;
 require File::Path;
 
 my %CONFIG = (
@@ -441,7 +442,7 @@ sub _split_args {
 =item $buildcfg->has_arg( $arg[,...] )
 
 Check the build arguments hash for C<$arg>. If you specify more then one 
-the results will be locically ANDed!
+the results will be logically ANDed!
 
 =cut
 
@@ -453,13 +454,24 @@ sub has_arg {
     return $ok;
 }
 
+=item $buildcfg->any_arg( $arg[,...] )
+
+Check the build arguments hash for C<$arg>. If you specify more then one 
+the results will be logically ORed!
+
+=cut
+
+sub any_arg {
+    my $self = shift;
+
+    my $ok = 0;
+    $ok ||= exists $self->[2]{ $_ } foreach @_;
+    return $ok;
+}
+
 1;
 
 =back
-
-=head1 REVISION
-
-$Id$
 
 =head1 SEE ALSO
 
