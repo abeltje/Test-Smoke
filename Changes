@@ -9,6 +9,32 @@ The filelists have a short symbolic indicator:
 
 Enjoy!
 ___________________________________________________________________________
+[   263] By: abeltje                          on 2003-07-24 16:54:44 +0200
+        Log: * $VERSION=1.17_61
+        Url: http://fikkie:70/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   262] By: abeltje                          on 2003-07-24 16:52:25 +0200
+        Log: * [ADD]
+	       + Report the fact that miniperl was build but no perl!!!
+        Url: http://fikkie:70/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm, /Test-Smoke/mkovz.pl
+___________________________________________________________________________
+[   261] By: abeltje                          on 2003-07-24 16:39:00 +0200
+        Log: * [FIX] wrong escape on a signlequoted string
+        Url: http://fikkie:70/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[   260] By: abeltje                          on 2003-07-24 16:36:10 +0200
+        Log: * [FIX] POD mistakes
+        Url: http://fikkie:70/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Util.pm
+___________________________________________________________________________
+[   258] By: abeltje                          on 2003-07-21 18:07:20 +0200
+        Log: * Changes for 1.17_60 aka 1.18-RC1
+        Url: http://fikkie:70/svn/Test-Smoke
+           ! /Test-Smoke/Changes
+___________________________________________________________________________
 [   257] By: abeltje                          on 2003-07-21 18:06:26 +0200
         Log: * This starts 1.17_60 aka 1.18-RC1
         Url: http://fikkie:70/svn/Test-Smoke
