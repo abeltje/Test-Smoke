@@ -14,15 +14,18 @@ BEGIN { use_ok( 'Test::Smoke::Patcher' ) };
 my $verbose = exists $ENV{SMOKE_VERBOSE} ? $ENV{SMOKE_VERBOSE} : 0;
 
 {
+    my $df_vals = Test::Smoke::Patcher->config( 'all_defaults' );
     my $tdir = 't';
     my $fs_tdir = File::Spec->rel2abs( $tdir );
     my $patcher = Test::Smoke::Patcher->new( single => { ddir  => $tdir } );
     isa_ok( $patcher, 'Test::Smoke::Patcher' );
     is( $patcher->{ddir}, $fs_tdir, "destination dir ($fs_tdir)" );
-    is( $patcher->{pfile}, undef, "pfile attribute undef" );
-    is( $patcher->{patch}, 'patch', "patch attribute" );
-    is( $patcher->{popts}, '', "popts attribute empty" );
-    is( $patcher->{v}, 0, "v attribute is zero" );
+
+    # Check that the default values are returned
+    for my $attr (qw( pfile patchbin popts v )) {
+        is( $patcher->{ $attr }, $df_vals->{ $attr }, 
+            "'$attr' attribute" );
+    }
 
     # now test the options stuff
     $patcher->{popts} = '-bp1';

@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT );
-$VERSION = '0.004';
+$VERSION = '0.005';
 
 use base 'Exporter';
 use File::Spec;
@@ -18,15 +18,15 @@ sub TRY_REGEN_HEADERS() { 1 }
 my %CONFIG = (
     df_ddir     => File::Spec->rel2abs( cwd ),
     df_pfile    => undef,
-    df_patch    => 'patch',
+    df_patchbin => 'patch',
     df_popts    => '',       # '-p1' is added in call_patch()
     df_flags    => 0,
     df_oldpatch => 0,
     df_v        => 0,
 
     valid_type => { single => 1, multi => 1 },
-    single     => [qw( pfile patch popts flags oldpatch )],
-    multi      => [qw( pfile patch popts flags oldpatch )],
+    single     => [qw( pfile patchbin popts flags oldpatch )],
+    multi      => [qw( pfile patchbin popts flags oldpatch )],
 );
 
 =head1 NAME
@@ -124,11 +124,11 @@ The patch-resource can also be specified in four (4) ways.
 C<new()> crates the object. Valid types are B<single> and B<multi>.
 Valid keys for C<%args>:
 
-    * ddir:  the build directory
-    * pfile: path to either the patch (single) or a textfile (multi)
-    * popts: options to pass to 'patch' (-p1)
-    * patch: full path to the patch binary (patch)
-    * v:     verbosity 0..2
+    * ddir:     the build directory
+    * pfile:    path to either the patch (single) or a textfile (multi)
+    * popts:    options to pass to 'patch' (-p1)
+    * patchbin: full path to the patch binary (patch)
+    * v:        verbosity 0..2
 
 =cut
 
@@ -375,9 +375,9 @@ sub call_patch {
 
     # patch is verbose enough if $self->{v} == 1
     $self->{v} > 1 and 
-        print "[$self->{pfinfo}] | $self->{patch} $opts $redir\n";
+        print "[$self->{pfinfo}] | $self->{patchbin} $opts $redir\n";
 
-    if ( open PATCHBIN, "| $self->{patch} $opts $redir" ) {
+    if ( open PATCHBIN, "| $self->{patchbin} $opts $redir" ) {
         binmode PATCHBIN;
         print PATCHBIN $$ref_to_content;
         close PATCHBIN or do {
@@ -386,7 +386,7 @@ sub call_patch {
         };
     } else {
         require Carp;
-        Carp::croak "Cannot fork ($self->{patch}): $!";
+        Carp::croak "Cannot fork ($self->{patchbin}): $!";
     }
     chdir $cwd or do {
         require Carp;

@@ -10,35 +10,35 @@ use File::Spec;
 require File::Path;
 
 my %CONFIG = (
-    df_sync => 'rsync',
-    df_ddir => File::Spec->rel2abs( 'perl-current', File::Spec->curdir ),
-    df_v    => 0,
+    df_sync     => 'rsync',
+    df_ddir     => File::Spec->rel2abs( 'perl-current', File::Spec->curdir ),
+    df_v        => 0,
 
 # these settings have to do synctype==rsync
-    df_rsync  => 'rsync', # you might want a path there
-    df_opts   => '-az --delete',
-    df_source => 'ftp.linux.activestate.com::perl-current',
+    df_rsync    => 'rsync', # you might want a path there
+    df_opts     => '-az --delete',
+    df_source   => 'ftp.linux.activestate.com::perl-current',
 
-    rsync     => [qw( rsync source opts )],
+    rsync       => [qw( rsync source opts )],
 
 # these settings have to do with synctype==snapshot
-    df_ftp     => 'Net::FTP',
-    df_server  => 'ftp.funet.fi',
-    df_sdir    => '/pub/languages/perl/snap',
-    df_sfile   => '',
-    df_snapext => 'tgz',
+    df_ftp      => 'Net::FTP',
+    df_server   => 'ftp.funet.fi',
+    df_sdir     => '/pub/languages/perl/snap',
+    df_sfile    => '',
+    df_snapext  => 'tgz',
 
-    df_tar     => ( $^O eq 'MSWin32' ?
+    df_tar      => ( $^O eq 'MSWin32' ?
         'Archive::Tar' : 'gzip -d -c %s | tar xf -' ),
 
-    df_patchup => 0,
-    df_pserver => 'ftp2.activestate.com',
-    df_pdir    => '/pub/staff/gsar/APC/perl-current-diffs',
-    df_unzip   => $^O eq 'MSWin32' ? 'Compress::Zlib' : 'gzip -dc',
-    df_patch   => 'patch',
-    df_cleanup => 1,
-    snapshot   => [qw( ftp server sdir sfile snapext tar 
-                       patchup pserver pdir unzip patch cleanup )],
+    df_patchup  => 0,
+    df_pserver  => 'ftp2.activestate.com',
+    df_pdir     => '/pub/staff/gsar/APC/perl-current-diffs',
+    df_unzip    => $^O eq 'MSWin32' ? 'Compress::Zlib' : 'gzip -dc',
+    df_patchbin => 'patch',
+    df_cleanup  => 1,
+    snapshot    => [qw( ftp server sdir sfile snapext tar 
+                       patchup pserver pdir unzip patchbin cleanup )],
 
 # these settings have to do with synctype==copy
     df_cdir    => undef,
@@ -796,12 +796,12 @@ This requires a working B<patch> program.
 You should pass this extra information to
 C<< Test::Smoke::Syncer::Snapshot->new() >>:
 
-  * patchup: should we do this? ( 0 )
-  * pserver: which FTP server? ( ftp2.activestate.com )
-  * pdir:    directory ( /pub/staff/gsar/APC/perl-current-diffs )
-  * unzip:   ( gzip ) [ Compress::Zlib ]
-  * patch:   ( patch )
-  * cleanup: remove patches after applied? ( 1 )
+  * patchup:  should we do this? ( 0 )
+  * pserver:  which FTP server? ( ftp2.activestate.com )
+  * pdir:     directory ( /pub/staff/gsar/APC/perl-current-diffs )
+  * unzip:    ( gzip ) [ Compress::Zlib ]
+  * patchbin: ( patch )
+  * cleanup:  remove patches after applied? ( 1 )
 
 =cut
 
@@ -902,10 +902,10 @@ sub _apply_patches {
         my $patch = $self->_read_patch( $file ) or next;
 
         my $patcher = Test::Smoke::Patcher->new( single => {
-            ddir  => $self->{ddir},
-            patch => $self->{patch},
-            pfile => \$patch,
-            v     => $self->{v},
+            ddir     => $self->{ddir},
+            patchbin => $self->{patchbin},
+            pfile    => \$patch,
+            v        => $self->{v},
         });
         eval { $patcher->patch };
         if ( $@ ) {

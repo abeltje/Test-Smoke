@@ -328,10 +328,10 @@ Examples:$untarmsg",
         chk => '.+',
     },
 
-    patch => {
+    patchbin => {
         msg => undef,
         alt => [ ],
-        dft => whereis( 'gpatch') || whereis( 'patch' ),
+        dft => find_a_patch(),
     },
 
     popts => {
@@ -776,11 +776,12 @@ SYNCER: {
         $config{ $arg } = prompt( $arg );
 
         $arg = 'patchup';
-        if ( whereis( 'patch' ) ) {
-            $config{ $arg } = lc prompt( $arg ) eq 'y' ? 1 : 0;
+        $config{patchbin} ||= find_a_patch();
+        if ( $config{patchbin} ) {
+            $config{ $arg } = prompt_yn( $arg );
 
             if ( $config{ $arg } ) {
-                for $arg (qw( pserver pdir unzip patch )) {
+                for $arg (qw( pserver pdir unzip patchbin )) {
                     $config{ $arg } = prompt( $arg );
                 }
                 $opt{cleanup}->{msg} .= " 2(patches) 3(both)";
@@ -839,8 +840,8 @@ There is an issue when using the "forest" sync, but I will look into that.
 my $patchbin = find_a_patch();
 PATCHER: {
     last PATCHER unless $patchbin;
-    $config{patch} = $patchbin;
-    print "\nFound [$config{patch}]";
+    $config{patchbin} = $patchbin;
+    print "\nFound [$config{patchbin}]";
     $arg = 'pfile';
     $config{ $arg } = prompt_file( $arg, 1 );
 
@@ -1264,7 +1265,7 @@ sub sort_configkeys {
 
         # Sync related
         qw( sync_type fsync rsync opts source tar server sdir sfile
-            patchup pserver pdir unzip patch cleanup cdir hdir patch pfile ),
+            patchup pserver pdir unzip patchbin cleanup cdir hdir pfile ),
 
         # OS specific make related
         qw( w32args w32cc w32make ),
