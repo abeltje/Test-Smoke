@@ -175,7 +175,7 @@ sub parse_out {
     my %rpt = %{ $reporter->{_rpt} };
 
     $rpt{finished} ||= "Busy";
-    $rpt{ccount} = scalar keys %{ $rpt{config} };
+    $rpt{ccount} = scalar keys %{ $rpt{statcfg} };
     $rpt{avg}   = $rpt{ccount} ? $rpt{secs} / $rpt{ccount} : 0;
     $rpt{time}  = time_in_hhmm( $rpt{secs} );
     $rpt{rtime} = time() - $rpt{started};
