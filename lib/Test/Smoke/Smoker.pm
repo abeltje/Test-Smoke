@@ -379,16 +379,17 @@ sub make_test {
             next;
 	}
 
+        my $test_target = $self->{is56x} ? 'test' : '_test';
         local *TST;
         # MSWin32 builds from its own directory
         if ( $self->{is_win32} ) {
             chdir "win32" or die "unable to chdir () into 'win32'";
             # Same as in make ()
-            open TST, "$self->{w32make} -f smoke.mk _test |";
+            open TST, "$self->{w32make} -f smoke.mk $test_target |";
             chdir ".." or die "unable to chdir () out of 'win32'";
         } else {
             local $ENV{PERL} = "./perl";
-            open TST, "make _test |" or do {
+            open TST, "make $test_target |" or do {
                 use Carp;
                 Carp::carp "Cannot fork 'make _test': $!";
                 next;
@@ -458,14 +459,16 @@ sub extend_with_harness {
         } @harness : "@harness";
         my $changed_dir;
         chdir 't' and $changed_dir = 1;
-        $self->ttylog("\n",
-               map {
-                   my( $name, $fail ) = 
-                       m/(\S+\.t)\s+.+[?%]\s+(\d+(?:[-\s]+\d+)*)/;
-                   my $dots = '.' x (40 - length $name );
-                   "$name${dots}FAILED $fail\n";
-               } grep m/\S+\.t\s+.+?\d+(?:[-\s+]\d+)*/ =>
-                  $self->_run( "./perl harness $harness" ) );
+        my $harness_out = join "", map {
+            my( $name, $fail ) = 
+                m/(\S+\.t)\s+.+[?%]\s+(\d+(?:[-\s]+\d+)*)/;
+            my $dots = '.' x (40 - length $name );
+            "$name${dots}FAILED $fail\n";
+        } grep m/\S+\.t\s+.+?\d+(?:[-\s+]\d+)*/ =>
+            $self->_run( "./perl harness $harness" );
+        $harness_out =~ s/^\s*$//;
+        $harness_out ||= join "", map "    $_" => @nok;
+        $self->ttylog("\n", $harness_out );
         $changed_dir and chdir File::Spec->updir;
     }
 }
