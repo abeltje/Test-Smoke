@@ -223,6 +223,7 @@ sub copy_from_MANIFEST {
     File::Path::mkpath( $$dest, $verbose ) unless -d;
 
     require File::Basename;
+    require File::Copy;
     foreach my $file ( @manifest_files ) {
         $file or next;
 
@@ -253,8 +254,13 @@ it under the same terms as Perl itself.
 
 See:
 
-  * <http://www.perl.com/perl/misc/Artistic.html>,
-  * <http://www.gnu.org/copyleft/gpl.html>
+=over 4
+
+=item * L<http://www.perl.com/perl/misc/Artistic.html>
+
+=item * L<http://www.gnu.org/copyleft/gpl.html>
+
+=back
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
