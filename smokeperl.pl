@@ -22,18 +22,19 @@ GetOptions( \%options,
 );
 
 use vars qw( $conf $VERSION );
-$VERSION = '1.16_21';
+$VERSION = '1.16_22';
 
 =head1 NAME
 
-smokeperl - The perl Test::Smoke suite
+smokeperl.pl - The perl Test::Smoke suite
 
 =head1 SYNOPSIS
 
     $ ./smokeperl.pl [-c configname]
 
 or
-    C:\Perlsmoke>perl perlsmoke.pl [-c configname]
+
+    C:\smoke\Test-Smoke-1.17>perl smokeperl.pl [-c configname]
 
 =head1 OPTIONS
 
@@ -93,6 +94,9 @@ PATCHAPERL: {
     }
     last PATCHAPERL unless exists $conf->{patch_type} && 
                            $conf->{patch_type} eq 'multi' && $conf->{pfile};
+    if ( $^O eq 'MSWin32' ) {
+        Test::Smoke::Patcher->config( flags => TRY_REGEN_HEADERS );
+    }
     my $patcher = Test::Smoke::Patcher->new( $conf->{patch_type}, $conf );
     eval { $patcher->patch };
 }
@@ -111,6 +115,7 @@ MKTEST: {
     push  @ARGV, @{ $conf->{w32args} } if exists $conf->{w32args};
     my $mktest = File::Spec->catfile( $FindBin::Bin, 'mktest.pl' );
     $conf->{v} > 1 and print "$mktest @ARGV\n";
+    local $0 = $mktest;
     do $mktest or die "Error 'mktest': $@";
 }
 
@@ -119,6 +124,7 @@ MKOVZ: {
     local @ARGV = ( 'nomail', $conf->{ddir} );
     push  @ARGV, $conf->{locale} if $conf->{locale};
     my $mkovz = File::Spec->catfile( $FindBin::Bin, 'mkovz.pl' );
+    local $0 = $mkovz;
     do $mkovz or die "Error in mkovz.pl: $@";
 }
 
