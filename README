@@ -1,6 +1,6 @@
 =head1 NAME
 
-README - Perl Core Test Smoke Suite (1.17)
+README - Perl Core Test Smoke Suite (1.18)
 
 =head1 SYNOPSIS
 
@@ -30,7 +30,11 @@ the configurations "by hand" to check if your environment is okay.
 
 =head1 INSTALLATION
 
-The standard Perl installation commands:
+The Test::Smoke suite has been designed to be installed outside of the
+normal Perl library-tree. It will also run from the directory in which
+it was un-tar-gzipped, but if you like to keep up to date with
+Test::Smoke releases, it might be useful to use the standard
+perl-module installation commands:
 
     $ perl Makefile.PL
     $ make
@@ -38,7 +42,8 @@ The standard Perl installation commands:
     $ make install
 
 The F<Makefile.PL> program will ask for a directory in which
-Test::Smoke should be installed (unless you specify one yourself).
+Test::Smoke should be installed (this will set I<PREFIX>,
+I<INSTALLSCRIPT> and I<LIB> all to that directory).
 
 You are now ready to run the F<configsmoke.pl> configuration program:
 
@@ -56,66 +61,25 @@ Now you are set to go:
 
 If something useful happens, do it every night using a scheduler.
 
-We still supply the old way to run the perl core test smoke suite, but
-it is not really maintained or supported. Here is what Merijn used to
-say about installing that:
-
-  Edit F<smoke.sh> and change the PC= definition to reflect the
-  location you choose as a builddir. 
-  Theoretically you are now ready to go, just use B<at> to give
-  it a first shot for tonight.
-  Optionally delete lines from F<config.cfg> (or a local copy
-  with a different name) for which you are certain your system
-  doesn't support it (like threading or 64bit configurations)
-
 =head1 CONFIGURATION
 
-As of v1.16_10 there is more than one way to run and configure the
-perl core test smoke suite.
-
 =over 4
 
-=item * F<configsmoke.pl>
+=item Test::Smoke configuration
 
-This will ask your for:
+You can create configurations by running the F<configsmoke.pl>
+program. Please see its L<documentation|configsmoke.pl>.
 
-=over 4
+=item Build configurations
 
-=item * Build directory (where the source-tree should go)
+At the moment there are no guidelines of how to change the
+build-configuration best to fit the needs of perl5-porters while still
+getting as much smoke out of the test as possible, simply because the
+needs of perl5-porters change over time:).
 
-=item * Which build-configurations file to use (perlcurrent.cfg)
-
-=item * How to sync with the repository/snapshot
-
-=item * Which patches-to-be-applied file to use
-
-=item * Platform specific stuff
-
-=item * How to mail the report
-
-=back
-
-=item * F<Configure.pl> (unixy only, deprecated)
-
-This will ask you for:
-
-=over 4
-
-=item * Build directory (where the source-tree should go)
-
-=item * How and when to schedule smokes
-
-=item * Which build-configurations file to use (smoke.cfg)
-
-=item * umask
-
-=back
-
-After that it will change some settings in the F<smoke.sh> file.
-
-=item * Edit F<smokew32.bat> (MSWin32 only, deprecated)
-
-Edit the F<smokew32.bat> batch file and set the right values.
+This also makes Test::Smoke somewhat volatile, as we aim to please the
+perl5-porters as much as possible, to help make perl even better, more
+stable and as thoroughly tested as possible.
 
 =back
 
@@ -156,22 +120,13 @@ your system,  you can create your own copy of smoke.cfg where you either
 add new combinations and/or test levels, or delete lines to speed up the
 run time of Test::Smoke.
 
-At the moment there are no guidelines of how to change the configuration
-best to fit the needs of perl5-porters while still getting as much smoke
-out of the test as possible, simply because the needs of perl5-porters
-change over time:).
-
-This also makes Test::Smoke somewhat volatile, as we aim to please the
-perl5-porters as much as possible, to help make perl even better, more
-stable and as thoroughly tested as possible.
-
 =head1 Availability and references
 
 =over 4
 
 =item B<Distribution>
 
-    http://search.cpan.org/author/ABELTJE/
+    http://search.cpan.org/author/ABELTJE/Test-Smoke/
 
 =item B<Archives>
 
@@ -206,6 +161,10 @@ reports in a database and build a nice WEB-front-end:
 =back
 
 =back
+
+=head1 REVISION
+
+$Id$
 
 =head1 COPYRIGHT and LICENSE
 
