@@ -144,9 +144,9 @@ foreach my $config ( @configs ) {
 
     if ( $rpt->{ccount} > 0 && $opt{matrix} ) {
         printf "    Matrix, using %s:\n", $rpt->{reporter}->ccinfo;
-        print join "", map "    $_\n" 
+        print join "", map "  $_\n" 
             => split /\n/, $rpt->{reporter}->smoke_matrix;
-        print join "", map "    $_\n" 
+        print join "", map "  $_\n" 
             => split /\n/, $rpt->{reporter}->bldenv_legend;
     }
 }
