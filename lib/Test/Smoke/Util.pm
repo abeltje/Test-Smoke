@@ -762,7 +762,8 @@ from the number of seconds.
 sub time_in_hhmm {
     my $diff = shift;
 
-    my $digits = $diff =~ /\./ ? 3 : 0;
+    # Only show decimal point for diffs < 5 minutes
+    my $digits = $diff =~ /\./ ? $diff < 5*60 ? 3 : 0 : 0;
     my $days = int( $diff / (24*60*60) );
     $diff -= 24*60*60 * $days;
     my $hour = int( $diff / (60*60) );
