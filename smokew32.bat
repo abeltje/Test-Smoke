@@ -11,7 +11,7 @@ REM AT 22:25 /EVERY:M,T,W,Th,F,S,Su c:\path\to\smokew32.bat
 REM Change your BuildDir(TS_DB), Config File(TS_CF)
 REM and C-Compiler(CCTYPE) here:
 set TS_BD=c:\usr\local\src\bleadperl\perl
-set TS_CF=smokew32.cfg
+set TS_CF=w32current.cfg
 set CCTYPE=GCC
 
 REM We now have 'synctree.pl', We'll set the default to 'rsync'
