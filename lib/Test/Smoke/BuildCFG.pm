@@ -241,9 +241,10 @@ sub _parse {
     $self->{v} > 1 and printf "Found %d raw-sections\n", scalar @sections;
 
     foreach my $section ( @sections ) {
+        chomp $section;
         my $index = 0;
-        my %opts = map { $_ => $index++ } map { s/^\s+$//; $_ }
-            grep !/^#/ => split /\n/, $section;
+        my %opts = map { s/^\s+$//; $_ => $index++ }
+            grep !/^#/ => split /\n/, $section, -1;
         # Skip empty sections
         next if (keys %opts == 0) or (exists $opts{ "" } and keys %opts == 1);
 

@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 
-use Test::More tests => 46;
+use Test::More tests => 61;
 my $verbose = 0;
 
 use FindBin;
@@ -61,6 +61,43 @@ __EOCFG__
     my $bcfg = Test::Smoke::BuildCFG->new( \$dft_cfg => { v => $verbose } );
 
     is_deeply $bcfg->{_sections}, $dft_sect, "Section-order kept";
+
+    my $first = ( $bcfg->configurations )[0];
+    isa_ok( $first, 'Test::Smoke::BuildCFG::Config');
+    is( "$first", $first->[0], "as_string: $first->[0]" );
+    foreach my $config ( $bcfg->configurations ) {
+        if ( ($config->policy)[0]->[1] ) {
+            ok( $config->has_arg( '-DDEBUGGING' ), "has_arg(-DDEBUGGING)" );
+            like( "$config", '/-DDEBUGGING/', 
+                  "'$config' has -DDEBUGGING" );
+        } else {
+            ok( !$config->has_arg( '-DDEBUGGING' ), "! has_arg(-DDEBUGGING)" );
+            unlike( "$config", '/-DDEBUGGING/', 
+                    "'$config' has no -DDEBUGGING" );
+        }
+        ok( $config->args_eq( "$config" ), "Stringyfied: args_eq($config)" );
+    }
+}
+
+{ # Check that empty lines at the end of sections are honored
+    my $dft_cfg = <<__EOCFG__;
+-Duseithreads
+
+=
+/-DDEBUGGING/
+
+-DDEBUGGING
+__EOCFG__
+
+    my $dft_sect = [
+        [ '-Duseithreads', '' ],
+        { policy_target => '-DDEBUGGING', args => [ '', '-DDEBUGGING'] },
+    ];
+
+    my $bcfg = Test::Smoke::BuildCFG->new( \$dft_cfg => { v => $verbose } );
+
+    is_deeply $bcfg->{_sections}, $dft_sect, 
+              "Empty lines at end of section kept";
 
     my $first = ( $bcfg->configurations )[0];
     isa_ok( $first, 'Test::Smoke::BuildCFG::Config');
