@@ -53,6 +53,11 @@ for F<smokeperl.pl>:
 
 (these changes were integrated from 1.17.07 MAINT)
 
+=item 6
+
+The new C<--defaultenv> switch allows you to run the test-suite
+without C<< $ENV{PERLIO} >> (a single pass for C<< S<make test> >>).
+
 =back
 
 =head1 COPYRIGHT
