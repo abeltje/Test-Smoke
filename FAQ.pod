@@ -4,7 +4,6 @@ FAQ - Test::Smoke frequently asked questions
 
 =head1 DESCRIPTION
 
-
 =head2 What is Test::Smoke?
 
 B<Test::Smoke> is the symbolic name for set of scripts and modules
@@ -160,6 +159,48 @@ directly logged in F<< <builddir>/mktest.out >>.
 Yes, but some information might be missing (the compiler info).
 
     $ perl mailrpt.pl -c [configname]
+
+=head2 Where do the reports go?
+
+To the address configured in F<configsmoke.pl>. The default is
+<smokers-reports@perl.org>.
+
+There are several ways to monitor the reports send in:
+
+=over 4
+
+=item Subscribe to the mailinglist
+
+You can subscribe to that list by sending an empty message to
+<smokers-reports-subscribe@perl.org>.
+You do B<not> have to be subscribed to send reports!
+
+=item The WWW archive
+
+The mailinglist has an archive on the web:
+L<http://archive.develooper.com/daily-build-reports@perl.org/>.
+
+=item The usenet mirror
+
+The mailinglist also has a mirror on usenet:
+<news:nntp.perl.org/perl.daily-build.reports>
+
+Posts to the newsgroup will also be mirrored on the mailinglist.
+
+=item The usenet WWW archive
+
+The usenet mirror also has an archive on the web:
+L<http://nntp.x.perl.org/group/perl.daily-build.reports>
+
+=back
+
+=head2 What's with the B<daily-build> and <smokers> names?
+
+There has been enough discussion on the subject, so lets agree to
+disagree (it was all before my time).
+
+The case is now that the official name for the mailinglist is
+B<daily-build-reports> and there is an alias to B<smokers-reports>.
 
 =head1 COPYRIGHT
 
