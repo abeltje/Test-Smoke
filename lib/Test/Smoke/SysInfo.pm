@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.018';
+$VERSION = '0.019';
 
 use base 'Exporter';
 @EXPORT_OK = qw( &sysinfo &tsuname );
@@ -68,6 +68,8 @@ sub new {
 
         $chk_os =~ /cygwin|mswin32|windows/i
                                  && return bless Windows(), $class;
+
+        $chk_os =~ /VMS/         && return bless VMS(),     $class;
     }
     return bless Generic(), $class;
 }
@@ -553,6 +555,23 @@ sub Windows {
         _host     => __get_hostname(),
         _os       => __get_os(),
     };
+}
+
+=head2 VMS()
+
+Use some VMS specific stuff to get system information.
+
+=cut
+
+sub VMS {
+    my $vms = Generic();
+    if ( $vms->{_cpu} =~ /VAX/i ) {
+        $vms->{_ncpu} = grep /CPU \d+ is in RUN state/ => `SHOW CPU/ACTIVE`;
+    } else { # Alpha (there is more info available
+        $vms->{_ncpu} = grep /Active\s+\d+/ => `SHOW CPU/ACTIVE`;
+    }
+
+    return $vms;
 }
 
 =head2 sysinfo( )

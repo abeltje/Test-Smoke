@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.28';
+$VERSION = '0.29';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -588,6 +588,12 @@ sub get_ncpu {
         /mswin32|cygwin/i && do {
             $cpus = exists $ENV{NUMBER_OF_PROCESSORS} 
                 ? $ENV{NUMBER_OF_PROCESSORS} : '';
+            last OS_CHECK;
+        };
+
+        /vms/i && do {
+            my @output = grep /CPU \d+ is in RUN state/ => `show cpu/active`;
+            $cpus = @output ? scalar @output : '';
             last OS_CHECK;
         };
 

@@ -171,6 +171,9 @@ sub new {
         my $value = exists $args{$_} ? $args{ $_ } : $CONFIG{ "df_$_" };
         ( $_ => $value )
     } ( v => ddir => @{ $CONFIG{ $sync_type } } );
+    if ( ! File::Spec->file_name_is_absolute( $fields{ddir} ) ) {
+        $fields{ddir} = File::Spec->catdir( cwd(), $fields{ddir} );
+    }
     $fields{ddir} = File::Spec->rel2abs( $fields{ddir} );
 
     DO_NEW: {

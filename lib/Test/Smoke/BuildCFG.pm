@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.007';
+$VERSION = '0.008';
 
 use Cwd;
 use File::Spec;
@@ -642,6 +642,24 @@ sub rm_arg {
         exists $self->[2]{ $arg } and delete $self->[2]{ $arg };
     }
     $self->[0] = join( " ", sort {
+        $self->[2]{ $a } <=> $self->[2]{ $b }
+    } keys %{ $self->[2] } ) || "";
+}
+
+=item $config->vms
+
+Redo the the commandline switches in a VMSish way.
+
+=cut
+
+sub vms {
+    my $self = shift;
+
+    return join( " ", map {
+	tr/"'//d;
+        s/^-//;
+        qq/-"$_"/;
+    } sort {
         $self->[2]{ $a } <=> $self->[2]{ $b }
     } keys %{ $self->[2] } ) || "";
 }
