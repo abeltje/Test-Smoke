@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.012';
+$VERSION = '0.013';
 
 use Config;
 use Cwd;
@@ -889,6 +889,11 @@ sub _get_patches {
         push @patch_list, $local_patch if $l_file;
     }
     $ftp->quit;
+
+    @patches = map $_->[0] => sort { $a->[1] <=> $b->[1] } map {
+        /^(\d+).gz/;
+        [$_, $1 ];
+    } @patches;
 
     return @patch_list;
 }
