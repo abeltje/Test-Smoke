@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.010';
+$VERSION = '0.011';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -460,21 +460,9 @@ sub make_test {
 =cut
 
 sub extend_with_harness {
-    my( $self, @nok ) = @_;
-    my( @harness, %inconsistent );
-    for ( @nok ) {
-        m!^(?:\.\.[\\/])?(\w+/[-\w/\\]+)\.*(.*)! or next;
-        # t/harness chdir()s into t/, so -f is false for t/op/*.t etc
-        my( $test_name, $status ) = ( "$1.t", $2 );
-
-        $test_name = catfile( 't', $test_name ) if /^\w/ && ! /^t\b/;
-        my $test_base = catdir( $self->{ddir}, 't' );
-        my $test_path = abs2rel( rel2abs( $test_name, $self->{ddir} ), 
-                                 $test_base );
-        $test_path =~ tr!\\!/! if $self->{is_win32};
-        $inconsistent{ $test_path } ||= $status;
-    }
-    @harness = sort keys %inconsistent;
+    my $self = shift;
+    my %inconsistent = $self->_transform_testnames( @_ );
+    my @harness = sort keys %inconsistent;
     if ( @harness ) {
         local $ENV{PERL_SKIP_TTY_TEST} = 1;
         my $harness = "@harness";
@@ -579,9 +567,40 @@ sub make_minitest {
     return 1;
 }
 
+=item $self->_trasnaform_testnames( @notok )
+
+C<_transform_testnames()> takes a list of testnames, as found by
+C<TEST> (testname without C<.t> suffix followed by dots and a reason)
+and returns a hash with the filenames relative to the C<t/> directory
+as keys and the reason as value.
+
+=cut
+
+sub _transform_testnames {
+    my( $self, @notok ) = @_;
+    my %inconsistent;
+    for my $nok ( @notok ) {
+        my( $test_name, $status ) = split /\.{3,}/, $nok;
+        next unless $test_name;
+        $test_name .= '.t';
+
+        $nok =~ /^\w/ and $test_name = $nok =~ /^(?:ext|lib|t)\b/
+            ? catfile( updir(), $test_name )
+            : catfile( updir(), 't', $test_name );
+
+        my $test_base = catdir( $self->{ddir}, 't' );
+        $test_name = rel2abs( $test_name, $test_base );
+
+        my $test_path = abs2rel( $test_name, $test_base );
+        $test_path =~ tr!\\!/! if $self->{is_win32};
+        $inconsistent{ $test_path } ||= $status;
+    }
+    return %inconsistent;
+}
+
 =item $self->_run( $command[, $sub[, @args]] )
 
-C<run()> returns C<< qx( $command ) >> unless C<$sub> is specified.
+C<_run()> returns C<< qx( $command ) >> unless C<$sub> is specified.
 If C<$sub> is defined (and a coderef) C<< $sub->( $command, @args ) >> will
 be called.
 
