@@ -8,10 +8,13 @@ use File::Spec;
 
 my @scripts;
 BEGIN {
-    @scripts = qw( smokeperl.pl runsmoke.pl
-                   synctree.pl patchtree.pl mailrpt.pl 
-                   archiverpt.pl smokestatus.pl W32Configure.pl
-                   Makefile.PL configsmoke.pl );
+    @scripts = qw( Makefile.PL );
+
+    push @scripts,  map File::Spec->catfile( 'bin', $_ )
+        => qw( smokeperl.pl runsmoke.pl
+               synctree.pl patchtree.pl mailrpt.pl 
+               archiverpt.pl smokestatus.pl W32Configure.pl
+               configsmoke.pl );
 
     push @scripts, map File::Spec->catfile(qw( lib Test Smoke ), $_ )
         => qw ( Util.pm Policy.pm SourceTree.pm
