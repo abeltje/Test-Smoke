@@ -133,11 +133,10 @@ The library to use for des_fcrypt()
 
 Set the cf_email option (Config.pm)
 
-=item * <-Accflags=...>
+=item * B<-Accflags=...>
 
 Adds the option to BUILDOPT. This is implemented differently for 
 B<nmake> and B<dmake>.
-
 Returns the name of the outputfile.
 
 =back
