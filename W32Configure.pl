@@ -3,14 +3,27 @@ use strict;
 $| = 1;
 # BEGIN { die "You must be on MSWin32 for this!\n" unless $^O eq 'MSWin32' }
 
+# $Id$
+use vars qw( $VERSION );
+$VERSION = '0.005';
+
 use File::Spec;
 use FindBin;
+use lib $FindBin::Bin;
 use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
+use Test::Smoke;
 use Test::Smoke::Util qw( Configure_win32 );
 
-use Test::Smoke;
-use vars qw( $VERSION );
-$VERSION = '0.005'; # $Id$
+use Getopt::Long;
+my %opt = (
+    ddir   => '',
+    maker  => '',
+    v      => 0,
+
+    config => undef,
+    help   => 0,
+    man    => 0,
+);
 
 =head1 NAME
 
@@ -72,17 +85,6 @@ This could help debugging.
 
 =cut
 
-my %opt = (
-    ddir   => '',
-    maker  => '',
-    v      => 0,
-
-    config => undef,
-    help   => 0,
-    man    => 0,
-);
-
-use Getopt::Long;
 GetOptions( \%opt,
     'ddir|d=s', 'maker|m=s', 'v|verbose=i',
 

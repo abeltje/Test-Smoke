@@ -2,17 +2,19 @@
 use strict;
 $| = 1;
 
-use Getopt::Long;
-use File::Spec;
+# $Id$
+use vars qw( $VERSION );
+$VERSION = '0.006';
+
 use Cwd;
+use File::Spec;
 use FindBin;
+use lib $FindBin::Bin;
 use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
+use Test::Smoke;
 use Test::Smoke::Patcher;
 
-use Test::Smoke;
-use vars qw( $VERSION );
-$VERSION = '0.006'; # $Id$
-
+use Getopt::Long;
 my %opt = (
     type    => 'multi',
     ddir    => undef,
