@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.007';
+$VERSION = '0.008';
 
 use base 'Exporter';
 @EXPORT_OK = qw( &sysinfo );
@@ -322,13 +322,14 @@ sub IRIX {
     chomp( my( $cpu ) = `hinv -t cpu` );
     $cpu =~ s/^CPU:\s+//;
     chomp( my @processor = `hinv -c processor` );
-    my( $cpu_cnt) = grep /\d+.+processors?$/i => @processor;
+    my( $cpu_cnt ) = grep /\d+.+processors?$/i => @processor;
+    my( $cpu_mhz ) = $cpu_cnt =~ /^\d+ (\d+ MHZ) /;
     my $ncpu = (split " ", $cpu_cnt)[0];
     my $type = (split " ", $cpu_cnt)[-2];
 
     return {
         _cpu_type => $type,
-        _cpu      => $cpu,
+        _cpu      => $cpu . " ($cpu_mhz)",
         _ncpu     => $ncpu,
         _host     => __get_hostname(),
         _os       => __get_os(),

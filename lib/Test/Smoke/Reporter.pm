@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.013';
+$VERSION = '0.014';
 
 use Cwd;
 use File::Spec::Functions;
@@ -301,6 +301,7 @@ sub _parse {
     }
 
     $rpt{last_cfg} = $statarg;
+    $rpt{finished} or $rpt{statcfg}{ $statarg } = $fnct;
     $rpt{avg} = $rpt{secs} / $rpt{count};
     $self->{_rpt} = \%rpt;
     $self->_post_process;
