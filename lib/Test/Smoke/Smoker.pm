@@ -3,6 +3,7 @@ use strict;
 
 use Config;
 use Test::Smoke::Util;
+use Cwd;
 
 use vars qw( $VERSION );
 $VERSION = '0.001';
@@ -10,6 +11,7 @@ $VERSION = '0.001';
 my %CONFIG = (
     df_v              => 0,
     df_run            => 1,
+    df_fdir           => undef,
     df_is56x          => 0,
     df_locale         => '',
     df_force_c_locale => '0',
@@ -199,7 +201,18 @@ sub make_distclean {
     my $self = shift;
     
     $self->tty( "make distclean ..." );
-    $self->_make( "-i distclean 2>/dev/null" );
+    if ( $self->{fdir} && -d $self->{fdir} ) {
+        require Test::Smoke::Syncer;
+        my %options = (
+            hdir => $self->{fdir},
+            ddir => cwd(),
+            v    => 0,
+        );
+        my $distclean = Test::Smoke::Syncer->new( hardlink => %options );
+        $disclean->clean_from_directory( $self->{fdir}, 'mktest.out' );
+    } else {
+        $self->_make( "-i distclean 2>/dev/null" );
+    }
 }
 
 =item $smoker->handle_policy( $policy, @substs );
