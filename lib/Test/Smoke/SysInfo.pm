@@ -269,7 +269,7 @@ sub HPUX {
     close LST;
 
     if (@cpu == 0 && open LST, "echo 'sc product cpu;il' | /usr/sbin/cstm |") {
-        while (<$lst>) {
+        while (<LST>) {
             s/^\s*(PA)\s*(\d+)\s+CPU Module.*/$m 1.1 $1$2/ or next;
             $2 =~ m/^8/ and s/ 1.1 / 2.0 /;
             push @cpu, $_;
