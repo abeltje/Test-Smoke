@@ -17,7 +17,7 @@ use Test::Smoke::Util qw( do_pod2usage );
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.045';
+$VERSION = '0.046';
 
 use Getopt::Long;
 my %options = ( 
@@ -1124,6 +1124,7 @@ EO_MSG
         ? "Which make should be used" : undef;
 
     $config{w32make} = prompt( 'w32make' );
+    $config{testmake} = $config{testmake};
 
     $config{w32args} = [ 
         "--win32-cctype" => $config{w32cc},
@@ -1152,6 +1153,7 @@ VMSMAKE: {
         dft => ( $Config{make} || (sort keys %vmsmakers)[0] ),
     };
     $config{ $arg } = prompt( $arg );
+    $config{testmake} = $config{ $arg }
 }
 
 =item make finetuning
@@ -1357,18 +1359,24 @@ SAVEALL: {
     }
 }
 
-print <<EOMSG;
+WRAPUP: {
+    local $" = "";
+    my $chkbcfg = File::Spec->catfile( $findbin, 'chkbcfg.pl' );
+    print <<EOMSG;
+Finished configuration:
 
-Run the perl core test smoke suite with:
+* Please check "$config{cfg}" for the
+  configurations you want to test:
+@{ [map "    $_" => qx( $^X $chkbcfg $config{cfg} )] }
+
+* Run the perl core test smoke suite with:
 \t$jcl
 
-Please check "$config{cfg}" 
-for the configurations you want to test.
-
-Have the appropriate amount of fun!
+* Have the appropriate amount of fun!
 
                                     The Test::Smoke team.
 EOMSG
+}
 
 =back
 
