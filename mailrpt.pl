@@ -2,36 +2,40 @@
 use strict;
 $| = 1;
 
-use Getopt::Long;
-use File::Spec;
+# $Id$
+use vars qw( $VERSION );
+$VERSION = '0.011';
+
 use Cwd;
+use File::Spec;
 use FindBin;
+use lib $FindBin::Bin;
 use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
 use Test::Smoke::Mailer;
-
 use Test::Smoke;
-use vars qw( $VERSION );
-$VERSION = '0.010'; # $Id$
 
+use Getopt::Long;
 my %opt = (
-    type    => undef,
-    ddir    => undef,
-    to      => undef, #'smokers-reports@perl.org',
-    cc      => undef,
-    from    => undef,
-    mserver => undef,
-    v       => undef,
+    type       => undef,
+    ddir       => undef,
+    to         => undef, #'smokers-reports@perl.org',
+    cc         => undef,
+    from       => undef,
+    mserver    => undef,
+    v          => undef,
 
-    mail    => 1,
-    report  => undef,
-    config  => undef,
-    help    => 0,
-    man     => 0,
+    mail       => 1,
+    report     => undef,
+    defaultenv => undef,
+    config     => undef,
+    help       => 0,
+    man        => 0,
 );
 
 my $defaults = Test::Smoke::Mailer->config( 'all_defaults' );
 
-my %valid_type = map { $_ => 1 } qw( mail mailx sendmail Mail::Sendmail );
+my %valid_type = map { $_ => 1 } qw( mail mailx sendmail 
+                                     Mail::Sendmail MIME::Lite );
 
 =head1 NAME
 
@@ -68,6 +72,7 @@ Other options can override the settings from the configuration file.
 
     --nomail                 Don't send the message
     --report                 Create a report anyway
+    --defaultenv             It was a PERLIO-less smoke
 
     -v | --verbose <0..2>    Set verbose level
     -h | --help              Show help message (needs Pod::Usage)
@@ -82,7 +87,7 @@ no extra options
 
     --from <address>
 
-=item * B<options for> -t Mail::Sendmail
+=item * B<options for> -t Mail::Sendmail | MIME::Lite
 
     --from <address>
     --mserver <smtpserver>  (localhost)
@@ -100,7 +105,7 @@ GetOptions( \%opt,
 
     'config|c:s',
 
-    'mail|email!', 'report!',
+    'mail|email!', 'report!', 'defaultenv!',
 ) or do_pod2usage( verbose => 1 );
 
 $opt{man}  and do_pod2usage( verbose => 2, exitval => 0 );
@@ -157,7 +162,8 @@ sub check_for_report {
     }
 
     local @ARGV = ( 'nomail', $conf->{ddir} );
-    push  @ARGV, $conf->{locale} if $conf->{locale};
+    push  @ARGV, $conf->{locale} ? $conf->{locale} : "";
+    push  @ARGV, $opt{defaultenv} if $opt{defaultenv};
     my $mkovz = File::Spec->catfile( $FindBin::Bin, 'mkovz.pl' );
     $opt{v} and print "Will now start [$mkovz]\n";
     {
