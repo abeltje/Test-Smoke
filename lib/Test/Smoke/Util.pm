@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.20';
+$VERSION = '0.21';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -17,7 +17,8 @@ use base 'Exporter';
 @EXPORT_OK = qw( 
     &get_ncpu &get_smoked_Config &parse_report_Config 
     &get_regen_headers &run_regen_headers
-    &calc_timeout
+    &calc_timeout 
+    &do_pod2usage
 );
 
 use Text::ParseWords;
@@ -743,6 +744,34 @@ sub calc_timeout {
         $timeout = 60 * $kill_min;
     }
     return $timeout;
+}
+
+=item do_pod2man( %pod2usage_options )
+
+If L<Pod::Usage> is there then call its C<pod2usage()>.
+In the other case, print the general message passed with the C<myusage> key.
+
+=cut
+
+sub do_pod2usage {
+    my %p2u_opt = @_;
+    eval { require Pod::Usage };
+    if ( $@ ) {
+        my $usage = $p2u_opt{myusage} || <<__EO_USAGE__;
+Usage: $0 [options]
+__EO_USAGE__
+        print <<EO_MSG;
+$usage
+
+Use 'perldoc $0' for the documentation.
+Please install 'Pod::Usage' for easy access to the docs.
+
+EO_MSG
+        exit( exists $p2u_opt{exitval} ? $p2u_opt{exitval} : 1 );
+    } else {
+        exists $p2u_opt{myusage} and delete $p2u_opt{myusage};
+        Pod::Usage::pod2usage( @_ );
+    }
 }
 
 =item skip_filter( $line )

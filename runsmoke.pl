@@ -4,7 +4,7 @@ $| = 1;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.001';
+$VERSION = '0.002';
 
 use Cwd;
 use File::Spec;
@@ -13,7 +13,7 @@ use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
 use lib $FindBin::Bin;
 use Config;
 use Test::Smoke;
-use Test::Smoke::Util qw( calc_timeout );
+use Test::Smoke::Util qw( calc_timeout do_pod2usage );
 
 use Getopt::Long;
 my %opt = (
@@ -97,7 +97,7 @@ depricated and will not be maintained).
 
 =cut
 
-
+my $myusage = "Usage: $0 [options] <buildcfg>";
 GetOptions( \%opt,
     'config|c:s', 'ddir|d=s',
     'cfg=s',
@@ -114,10 +114,10 @@ GetOptions( \%opt,
     'v|verbose=i',
 
     'help|h', 'man',
-) or do_pod2usage( verbose => 1 );
+) or do_pod2usage( verbose => 1, myusage => $myusage );
 
-$opt{man}  and do_pod2usage( verbose => 2, exitval => 0 );
-$opt{help} and do_pod2usage( verbose => 1, exitval => 0 );
+$opt{ man} and do_pod2usage( verbose => 2, exitval => 0, myusage => $myusage );
+$opt{help} and do_pod2usage( verbose => 1, exitval => 0, myusage => $myusage );
 
 if ( defined $opt{config} ) {
     $opt{config} eq "" and $opt{config} = 'smokecurrent_config';
@@ -163,23 +163,6 @@ $timeout and local $SIG{ALRM} = sub {
 $Config{d_alarm} and alarm $timeout;
 
 run_smoke();
-
-sub do_pod2usage {
-    eval { require Pod::Usage };
-    if ( $@ ) {
-        print <<EO_MSG;
-Usage: $0 [options] <buildcfg>
-
-Use 'perldoc $0' for the documentation.
-Please install 'Pod::Usage' for easy access to the docs.
-
-EO_MSG
-        my %p2u_opt = @_;
-        exit( exists $p2u_opt{exitval} ? $p2u_opt{exitval} : 1 );
-    } else {
-        Pod::Usage::pod2usage( @_ );
-    }
-}
 
 =head1 SEE ALSO
 

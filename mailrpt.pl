@@ -4,7 +4,7 @@ $| = 1;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.011';
+$VERSION = '0.012';
 
 use Cwd;
 use File::Spec;
@@ -13,6 +13,7 @@ use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
 use lib $FindBin::Bin;
 use Test::Smoke::Mailer;
 use Test::Smoke;
+use Test::Smoke::Util qw( do_pod2usage );
 
 use Getopt::Long;
 my %opt = (
@@ -100,6 +101,7 @@ This is a small front-end for L<Test::Smoke::Mailer>.
 
 =cut
 
+my $my_usage = "Usage: $0 -t <type> -d <directory> [options]";
 GetOptions( \%opt,
     'type|t=s', 'ddir|d=s', 'to=s', 'cc=s', 'v|verbose=i',
 
@@ -110,10 +112,10 @@ GetOptions( \%opt,
     'config|c:s',
 
     'mail|email!', 'report!', 'defaultenv!',
-) or do_pod2usage( verbose => 1 );
+) or do_pod2usage( verbose => 1, myusage => $my_usage );
 
-$opt{man}  and do_pod2usage( verbose => 2, exitval => 0 );
-$opt{help} and do_pod2usage( verbose => 1, exitval => 0 );
+$opt{ man} and do_pod2usage( verbose => 2, exitval => 0, myusage => $my_usage);
+$opt{help} and do_pod2usage( verbose => 1, exitval => 0, myusage => $my_usage);
 
 if ( defined $opt{config} ) {
     $opt{config} eq "" and $opt{config} = 'smokecurrent_config';
@@ -177,23 +179,6 @@ sub check_for_report {
 
     unless ( -f $report ) {
         die "Hmmm... cannot find [$report]";
-    }
-}
-
-sub do_pod2usage {
-    eval { require Pod::Usage };
-    if ( $@ ) {
-        print <<EO_MSG;
-Usage: $0 -t <type> -d <directory> [options]
-
-Use 'perldoc $0' for the documentation.
-Please install 'Pod::Usage' for easy access to the docs.
-
-EO_MSG
-        my %p2u_opt = @_;
-        exit( exists $p2u_opt{exitval} ? $p2u_opt{exitval} : 1 );
-    } else {
-        Pod::Usage::pod2usage( @_ );
     }
 }
 
