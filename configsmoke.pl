@@ -104,7 +104,7 @@ my %versions = (
     '5.8.x' => { source =>  'ftp.linux.activestate.com::perl-5.8.x',
                  server => 'http://www.iki.fi',
                  sdir   => '/jhi',
-                 sfile  => 'perl@19856.tgz',
+                 sfile  => 'perl@20617.tgz',
                  pdir   => '/pub/staff/gsar/APC/perl-5.8.x-diffs',
                  ddir   => File::Spec->rel2abs( 
                                File::Spec->catdir( File::Spec->updir,
@@ -754,7 +754,7 @@ SYNCER: {
             $config{ $arg } = prompt( $arg );
         }
         unless ( $config{sfile} ) {
-            $arg = ' snapext';
+            $arg = 'snapext';
             $config{ $arg } = prompt( $arg );
         }
         $arg = 'tar';
