@@ -7,6 +7,7 @@ use FindBin;
 use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
 use Test::Smoke::Syncer;
 
+use Test::Smoke;
 use vars qw( $VERSION $conf );
 $VERSION = '0.007';
 
@@ -15,7 +16,7 @@ my %opt = (
     ddir   => '',
     v      => 0,
 
-    config => '',
+    config => undef,
     help   => 0,
     man    => 0,
 );
@@ -34,7 +35,7 @@ synctree.pl - Cleanup and sync the perl-current source-tree
 
 or
 
-   $ ./synctree.pl -c smokeperl_config
+   $ ./synctree.pl -c smokecurrent_config
 
 =head1 OPTIONS
 
@@ -109,21 +110,30 @@ GetOptions( \%opt,
 
     'help|h', 'man|m',
 
-    'config|c=s',
+    'config|c:s',
 ) or do_pod2usage( verbose => 1 );
 
 $opt{man}  and do_pod2usage( verbose => 2, exitval => 0 );
 $opt{help} and do_pod2usage( verbose => 1, exitval => 0 );
 
-if ( $opt{config} && -f $opt{config} ) {
-    require $opt{config};
+if ( defined $opt{config} ) {
+    $opt{config} eq "" and $opt{config} = 'smokecurrent_config';
+    read_config( $opt{config} ) or do {
+        my $config_name = File::Spec->catfile( $FindBin::Bin, $opt{config} );
+        read_config( $config_name );
+    };
 
-    foreach my $option ( keys %opt ) {
-        if ( $option eq 'type' ) {
-            $opt{type} ||= $conf->{sync_type};
-        } elsif ( exists $conf->{ $option } ) {
-            $opt{ $option } ||= $conf->{ $option }
+    unless ( Test::Smoke->config_error ) {
+        foreach my $option ( keys %opt ) {
+            if ( $option eq 'type' ) {
+                $opt{type} ||= $conf->{sync_type};
+            } elsif ( exists $conf->{ $option } ) {
+                $opt{ $option } ||= $conf->{ $option }
+            }
         }
+    } else {
+        warn "WARNING: Could not process '$opt{config}': " . 
+             Test::Smoke->config_error . "\n";
     }
 }
 
@@ -174,9 +184,9 @@ See:
 
 =over 4
 
-=item * http://www.perl.com/perl/misc/Artistic.html
+=item * L<http://www.perl.com/perl/misc/Artistic.html>
 
-=item * http://www.gnu.org/copyleft/gpl.html
+=item * L<http://www.gnu.org/copyleft/gpl.html>
 
 =back
 
