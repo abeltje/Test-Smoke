@@ -11,3 +11,4 @@ make
 make dist
 mv *.tar.gz ../
 make veryclean
+rm -f */*/*/*~
