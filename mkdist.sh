@@ -41,31 +41,17 @@ fi
 echo "Will put the distribution in: '$distdir'"
 
 # Check if all the distributed perl-files compile
-perl private/test_compile.pl || exit
-
 # Check if all the distibuted files with POD are pod_ok
-perl private/test_pod.pl     || exit
-
-if [ "$SMOKE_TEST_ONLY" == "1" -a "$SMOKE_COVER" == "1" ] ; then
-    cover -delete
-    save_perl5opt=$PERL5OPT
-    PERL5OPT="-MDevel::Cover $save_perl5opt"
-fi
-echo "Should be running with '$PERL5OPT'"
-
-# Run the private Test::Smoke::Smoker tests
-incdir="`pwd`/lib"
-for tst in private/smoker_*.t ; do
-    perl -I$incdir $PERL5OPT $tst  || exit
-done
+prove private/test_*.pl || exit
 
 if [ "$SMOKE_TEST_ONLY" == "1" ] ; then
-    for tst in t/*.t ; do
-        SMOKE_SKIP_SIGTEST=1 perl -I$incdir $PERL5OPT $tst ; #|| exit
-    done
-    if [ "$SMOKE_COVER" == "1" ]; then
+    if [ "$SMOKE_COVER" == "1" ] ; then
+        cover -delete
+        SMOKE_SKIP_SIGTEST=1 HARNESS_PERL_SWITCHES=-MDevel::Cover \
+            prove -I lib private/*.t t/*.t
         cover
-        PERL5OPT=$save_perl5opt
+    else
+        SMOKE_SKIP_SIGTEST=1 prove -I lib private/*.t t/*.t
     fi
     echo "SMOKE_TEST_ONLY was set, quitting..."
     exit
