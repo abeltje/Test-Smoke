@@ -2,12 +2,19 @@ package Test::Smoke;
 use strict;
 
 use vars qw( $VERSION $conf @EXPORT );
-$VERSION = '1.17';
+$VERSION = '1.17_50';
 
 use base 'Exporter';
-@EXPORT  = qw( $conf &read_config );
+@EXPORT  = qw( $conf &read_config &run_smoke );
 
 my $ConfigError;
+
+use Test::Smoke::Policy;
+use Test::Smoke::BuildCFG;
+use Test::Smoke::Smoker;
+use Test::Smoke::SourceTree qw( :mani_const );
+use Test::Smoke::Util qw( get_patch );
+use Config;
 
 =head1 NAME
 
@@ -51,6 +58,87 @@ Return the value of C<$ConfigError>
 
 sub config_error {
     return $ConfigError;
+}
+
+=item is_win32( )
+
+C<is_win32()> returns true if  C<< $^O eq "MSWin32" >>.
+
+=cut
+
+sub is_win32() { $^O eq "MSWin32" }
+
+=item do_manifest_check( $ddir, $smoker )
+
+C<do_manifest_check()> uses B<Test::Smoke::SourceTree> to do the 
+MANIFEST check.
+
+=cut
+
+sub do_manifest_check {
+    my( $ddir, $smoker ) = @_;
+
+    my $tree = Test::Smoke::SourceTree->new( $ddir );
+    my $mani_check = $tree->check_MANIFEST;
+    foreach my $file ( sort keys %$mani_check ) {
+        if ( $mani_check->{ $file } == ST_MISSING ) {
+            $smoker->log( "MANIFEST declared '$file' but it is missing\n" );
+        } elsif ( $mani_check->{ $file } == ST_UNDECLARED ) {
+            $smoker->log( "MANIFEST did not declare '$file'\n" );
+        }
+    }
+}
+
+=item run_smoke( $patch )
+
+C<run_smoke()> sets up de build environment and gets the private Policy
+file and build configurations and then runs the smoke stuff for all 
+configurations.
+
+=cut
+
+sub run_smoke {
+    my $patch = shift || Test::Smoke::Util::get_patch( $conf->{ddir} );
+
+    local *LOG;
+    open LOG, "> " . File::Spec->catfile( $conf->{ddir}, 'mktest.out' )  or
+        die "Cannot create 'mktest.out': $!";
+
+    my $Policy   = Test::Smoke::Policy->new( File::Spec->updir, $conf->{v} );
+    my $BuildCFG = Test::Smoke::BuildCFG->new( $conf->{cfg}, v => $conf->{v} );
+
+    my $smoker   = Test::Smoke::Smoker->new( \*LOG, $conf );
+
+    $smoker->ttylog( "Smoking patch $patch\n" ); 
+    do_manifest_check( $conf->{ddir}, $smoker );
+
+    chdir $conf->{ddir} or die "Cannot chdir($conf->{ddir}): $!";
+    foreach my $this_cfg ( $BuildCFG->configurations ) {
+
+        if ( skip_config( $this_cfg ) ) {
+            $smoker->ttylog( "Skipping: '$this_cfg'\n" );
+            next;
+        }
+
+        $smoker->ttylog( join "\n", 
+                              "", "Configuration: $this_cfg", "-" x 78, "" );
+        $smoker->smoke( $this_cfg, $Policy );
+    }
+
+}
+
+=item skip_config( $config ) 
+
+Returns true if this config should be skipped.
+
+=cut
+
+sub skip_config {
+    my( $config ) = @_;
+
+    my $skip = $config->has_arg(qw( -Uuseperlio -Dusethreads )) ||
+               $config->has_arg(qw( -Uuseperlio -Duseithreads ));
+    return $skip;
 }
 
 1;
