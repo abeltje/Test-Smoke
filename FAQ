@@ -30,7 +30,7 @@ as possible.
 
 =head2 Where is Test::Smoke?
 
-On CPAN: L<http://search.cpan.org/dist/Test-Smoke>
+On CPAN and L<http://search.cpan.org/dist/Test-Smoke>
 
 =head2 What are these configuration files about?
 
@@ -165,16 +165,6 @@ Small wrapper around B<Test::Smoke::Patcher> that can use the settings
 from the smoke-configuration file. It will apply the patches that are
 specified in the patches-to-be-applied file.
 
-=item B<mktest.pl>
-
-This is the main script that runs I<Configure>, I<make> and S<< I<make
-test> >> for all configurations and log the results in F<<
-<builddir>/mktest.out >>.
-
-As of 1.17_55 (1.18-to-be) the use of F<mktest.pl> is deprecated in
-favour of the new F<runsmoke.pl> frontend to B<Test::Smoke::Smoker>. This
-script will not be maintained!
-
 =item B<runsmoke.pl>
 
 Small wrapper around B<Test::Smoke::run_smoke()> that can use the
@@ -182,17 +172,11 @@ settings from the smoke-configuration file. It runs the smoke cycle
 for all configurations and is a replacement for the now unmaintained
 B<mktest.pl>.
 
-=item B<mkovz.pl>
-
-This script generates the report as F<< <builddir>/mktest.rpt >> from
-F<< <builddir>/mktest.out >>. It can also send the report, but
-F<mailrpt.pl> is the preferred way.
-
 =item B<mailrpt.pl>
 
 Small wrapper around B<Test::Smoke::Mailer> that can use the settings
 from the smoke-configuration file. It will check if the report is
-already generated and do so if not (by calling F<mkovz.pl>).
+already generated and do so if not.
 
 =item B<archiverpt.pl>
 
@@ -235,6 +219,52 @@ Yes, but some information might be missing (the compiler info).
 
     $ perl mailrpt.pl -c [configname]
 
+=head2 How can I run continues smokes?
+
+On a unixy system you can try this shellscript if you adjust the
+C<basedir> variable (thank you Johan Vromans for helping with this).
+
+    #! /bin/sh
+    
+    basedir=$HOME/Test-Smoke/smoke
+    cd "$basedir"
+    pidfile=`pwd`/smokeloop.pid
+    stpfile=`pwd`/.stopsmoking
+    versions="58x current"
+
+    if test -f "$pidfile" ; then
+        echo "We seem to be running as: `cat $pidfile`"
+        exit
+    fi
+
+    trap 'trap "" 0 ; rm -f "$pidfile" ; echo "exiting now" ; exit' 0 1 2 3 15
+
+    checkstop() {
+        if test -f "$stpfile" ; then
+            echo "`date`: Stopping on user request"
+            rm -f "$stpfile"
+            exit
+        fi
+    }
+
+    while test 1 ; do
+        checkstop
+        touch "$pidfile"
+
+        for smokever in $versions ; do
+            nice $basedir/smoke$smokever.sh
+            checkstop
+        done
+
+        perl -e 'sleep 3600 if (1+2*rand)*(time-(stat(shift))[9])<600' \
+            "$pidfile"
+    done
+
+This script assumes it is located in the directory where the
+Test::Smoke suite is installed. You can stop execution between smokes
+for different versions by putting the file F<.stopsmoking> in that
+same directory.
+
 =head2 Where do the reports go?
 
 To the address configured in F<configsmoke.pl>. The default is
@@ -266,7 +296,7 @@ Posts to the newsgroup will also be mirrored on the mailinglist.
 =item The usenet WWW archive
 
 The usenet mirror also has an archive on the web:
-L<http://nntp.x.perl.org/group/perl.daily-build.reports>
+L<http://www.nntp.perl.org/group/perl.daily-build.reports>
 
 =back
 
