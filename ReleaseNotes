@@ -23,7 +23,7 @@ front-end.
 
 =item 2
 
-The new reports have better hardware detection, with many thanks to
+The new reports have better hardware/OS detection, with many thanks to
 Merijn Brand (most osses), Campo Weijerman (AIX), Allen Smith (IRIX),
 Alan Burlison (Solaris).
 
@@ -40,6 +40,12 @@ is now B<gone> (although I had planned the 1.20)!
 F<smokestatus.pl> tries to give a better guesstimate for ETA. It also
 has the new C<--matrix> option to also show the smoke-matrix with the
 status report.
+
+=item 5
+
+Some work has been done on the Win32 side. Most notably a start has
+been made to try and support Win98. Also some work on the
+F<W32Configure.pl> script.
 
 =back
 

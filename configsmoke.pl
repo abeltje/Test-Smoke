@@ -13,7 +13,7 @@ use Test::Smoke::Util qw( do_pod2usage );
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.035';
+$VERSION = '0.036';
 
 use Getopt::Long;
 my %options = ( 
@@ -1749,11 +1749,8 @@ sub get_avail_w32compilers {
 }
 
 sub get_Win_version {
-    my @osversion = Win32::GetOSVersion();
-
-    my $win_version = join '.', @osversion[ 1, 2 ];
-    $win_version .= " $osversion[0]" if $osversion[0];
-
+    require Test::Smoke::SysInfo;
+    ( my $win_version = Test::Smoke::SysInfo::__get_os() ) =~ s/^[^-]*- //;
     return $win_version;
 }
 

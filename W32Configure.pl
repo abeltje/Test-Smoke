@@ -5,16 +5,18 @@ $| = 1;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.006';
+$VERSION = '0.007';
 
 use File::Spec;
 use FindBin;
 use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
 use lib $FindBin::Bin;
 use Test::Smoke;
-use Test::Smoke::Util qw( Configure_win32 );
+use Test::Smoke::Util qw( Configure_win32 do_pod2usage );
+require Test::Smoke::SysInfo;
 
 use Getopt::Long;
+Getopt::Long::Configure( 'pass_through' );
 my %opt = (
     ddir   => '',
     maker  => '',
@@ -31,7 +33,7 @@ W32Configure.pl - Configure a Makefile for the Windows port of perl
 
 =head1 SYNOPSIS
 
-  S:\Smoke>perl W32Configure.pl -c -- [Configure options]
+  S:\Smoke>W32Configure -c <config> [Configure options]
 
 =head1 OPTIONS
 
@@ -55,8 +57,8 @@ Other options can override the settings from the configuration file.
 
 =item * B<Configure options>
 
-All configure options should be passed B<after> a double dash ('--'), 
-this is the way L<Getopt::Long> works.
+All configure options can just be specified on the command-line. When
+using a configuration file, you may ommit the '-DCCTYPE=' argument.
 
 For a list of configuration options please see L<Test::Smoke::Util>.
 
@@ -67,7 +69,7 @@ For a list of configuration options please see L<Test::Smoke::Util>.
 B<This is still an alpha interface, anything could change>
 
 This is a raw interface to C<Test::Smoke::Util::Configure_win32()>.
-Just pass it options for the F<Makefile> after a double dash '--'.
+Just pass it options for the F<Makefile> on the command-line.
 See L<Test::Smoke::Util/Configure_win32> for options you can pass!
 
 The result is B<[builddir]\win32\smoke.mk> a makefile that has all
@@ -77,19 +79,20 @@ This could help debugging.
 
 =cut
 
+my $my_usage = "Usage: $0 -m <maker> -d <directory> [Configure-options]";
 GetOptions( \%opt,
     'ddir|d=s', 'maker|w32make|m=s', 'v|verbose=i',
 
     'man', 'help|h',
 
     'config|c:s',
-) or do_pod2usage( verbose => 1 );
+) or do_pod2usage( verbose => 1, myusage => $my_usage );
 
-$opt{man}  and do_pod2usage( verbose => 2, exitval => 0 );
-$opt{help} and do_pod2usage( verbose => 1, exitval => 0 );
+$opt{ man} and do_pod2usage(verbose => 2, exitval => 0, myusage => $my_usage);
+$opt{help} and do_pod2usage(verbose => 1, exitval => 0, myusage => $my_usage);
 
 if ( defined $opt{config} ) {
-    $opt{config} eq "" and $opt{config} = 'smokecurrent_config';
+    $opt{config} eq "" and $opt{config} = 'smokecurrent';
     read_config( $opt{config} ) or do {
         my $config_name = File::Spec->catfile( $FindBin::Bin, $opt{config} );
         read_config( $config_name );
@@ -110,38 +113,23 @@ if ( defined $opt{config} ) {
 }
 
 $opt{maker} ||= 'nmake';
-$opt{ddir} && -d $opt{ddir} or do_pod2usage( verbose => 0 );
+$opt{ddir} && -d $opt{ddir} or
+    do_pod2usage( message => "'$opt{ddir}' does not exist!", 
+                  verbose => 0, myusage => $my_usage );
 
+push @ARGV, "-DCCTYPE=$conf->{w32cc}" unless grep /^-DCCTYPE=/ => @ARGV;
 my $c_args = join " ", @ARGV;
-my @cfgvars = ( 'osvers=' . get_Win_version() );
+my @w32args = @{ $conf->{w32args} };
+@w32args = @w32args[4 .. $#w32args];
+my @cfgvars = @w32args ? @w32args : ( 'osvers=' . get_Win_version() );
+
+$opt{v} and print "./Configure [$c_args] $opt{maker} '@cfgvars'\n";
 
 chdir $opt{ddir} or die "Cannot chdir($opt{ddir}): $!";
 Configure_win32( "./Configure $c_args", $opt{maker}, @cfgvars );
 
-sub do_pod2usage {
-    eval { require Pod::Usage };
-    if ( $@ ) {
-        print <<EO_MSG;
-Usage: $0 -t <type> -d <directory> [options]
-
-Use 'perldoc $0' for the documentation.
-Please install 'Pod::Usage' for easy access to the docs.
-
-EO_MSG
-        my %p2u_opt = @_;
-        exit( exists $p2u_opt{exitval} ? $p2u_opt{exitval} : 1 );
-    } else {
-        Pod::Usage::pod2usage( @_ );
-    }
-}
-
 sub get_Win_version {
-    my @osversion = eval { Win32::GetOSVersion() };
-    $@ and @osversion = ( '', 4, 0 ); # The default is NT 4.0
-
-    my $win_version = join '.', @osversion[ 1, 2 ];
-    $win_version .= " $osversion[0]" if $osversion[0];
-
+    ( my $win_version = Test::Smoke::SysInfo::__get_os() ) =~ s/^[^-]*- //;
     return $win_version;
 }
 
