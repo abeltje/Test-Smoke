@@ -13,7 +13,7 @@ use Test::Smoke::Util qw( do_pod2usage );
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.037';
+$VERSION = '0.038';
 
 use Getopt::Long;
 my %options = ( 
@@ -520,7 +520,7 @@ There are two additional configuration default files
 F<smoke562_dfconfig> and F<smoke58x_dfconfig> to help you configure 
 B<Test::Smoke> for these two maintenance branches of the source-tree.
 
-To create a configuration for the perl 5.8.x brach:
+To create a configuration for the perl 5.8.x branch:
 
     $ perl configsmoke.pl -p smoke58x
 
@@ -1122,7 +1122,7 @@ If you want this then set the directory where you want the stored
 
 $arg = 'adir';
 $config{ $arg } = prompt_dir( $arg );
-$config{lfile} = $options{log} unless $config{ $arg } eq "";
+$config{lfile} = File::Spec->rel2abs( $options{log}, cwd );
 
 =item schedule stuff
 
@@ -1379,8 +1379,10 @@ because it uses commands that are not supported by B<COMMAND.COM>
 
 sub write_bat {
     my $cwd = File::Spec->canonpath( cwd() );
+    my $findbin_bin = File::Spec->canonpath( $FindBin::Bin );
 
-    my $smokeperl = File::Spec->catfile( $FindBin::Bin, 'smokeperl.pl' );
+    my $smokeperl  = File::Spec->catfile( $findbin_bin, 'smokeperl.pl' );
+    my $archiverpt = File::Spec->catfile( $findbin_bin, 'archiverpt.pl' );
     my $copycmd = $config{w32args}->[1] ne "BORLAND" ? "" : <<EOCOPYCMD;
 
 REM I found hanging XCOPY while smoking with BORLAND
@@ -1391,6 +1393,9 @@ EOCOPYCMD
     my $jcl = "$options{jcl}.cmd";
     my $atline = schedule_entry( File::Spec->catfile( $cwd, $jcl ), 
                                  $cron, $crontime );
+    my $archive = $config{lfile} 
+        ? qq/$^X $archiverpt -c "\%CFGNAME\%"/ : "";
+
     local *MYSMOKEBAT;
     open MYSMOKEBAT, "> $jcl" or
         die "Cannot write '$jcl': $!";
@@ -1420,9 +1425,9 @@ if NOT EXIST \%LOCKFILE\% goto START_SMOKE
 :START_SMOKE
     echo \%CFGNAME\% > \%LOCKFILE\%
     set OLD_PATH=\%PATH\%
-    set PATH=$FindBin::Bin;\%PATH\%
+    set PATH=$findbin_bin;\%PATH\%
     $^X $smokeperl -c "\%CFGNAME\%" \%* > "\%WD\%\\$options{log}" 2>&1
-
+    $archive
     set PATH=\%OLD_PATH\%
 
 del \%LOCKFILE\%

@@ -233,8 +233,8 @@ sub archiverpt {
         my $archived_log = "log${patch_level}.log";
         last SKIP_LOG unless defined $conf->{lfile};
         last SKIP_LOG 
-            unless -f File::Spec->catfile( $FindBin::Bin, $conf->{lfile} );
-        copy( File::Spec->catfile( $FindBin::Bin, $conf->{lfile} ),
+            unless -f $conf->{lfile};
+        copy( $conf->{lfile},
               File::Spec->catfile( $conf->{adir}, $archived_log ) ) or
             die "Cannot copy to '$archived_log': $!";
     }

@@ -4,7 +4,7 @@ $| = 1;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.002';
+$VERSION = '0.003';
 
 use Cwd;
 use File::Spec;
@@ -129,10 +129,15 @@ copy( File::Spec->catfile( $opt{ddir}, 'mktest.rpt' ),
 
 SKIP_LOG: {
     my $archived_log = "log${patch_level}.log";
-    last SKIP_LOG unless defined $opt{lfile};
-    last SKIP_LOG unless -f File::Spec->catfile( $FindBin::Bin, $opt{lfile} );
-    copy( File::Spec->catfile( $FindBin::Bin, $opt{lfile} ),
-          File::Spec->catfile( $opt{adir}, $archived_log ) ) or
+    unless ( defined $opt{lfile} ) {
+        $opt{v} and print "No logfile defined!\n";
+        last SKIP_LOG;
+    }
+    unless ( -f $opt{lfile} ) {
+        $opt{v} and print "Logfile '$opt{lfile}' not found!\n";
+        last SKIP_LOG;
+    }
+    copy( $opt{lfile}, File::Spec->catfile( $opt{adir}, $archived_log ) ) or
         die "Cannot copy to '$archived_log': $!";
 }
 
