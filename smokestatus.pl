@@ -126,12 +126,13 @@ foreach my $config ( @configs ) {
         if exists $rpt->{running};
 
     my $todo = $ccnt - $rpt->{ccount};
-    my $est_curr = $rpt->{avg} ne "unknown"
+    my $est_curr = $rpt->{avg} > 0
         ? $rpt->{avg} - ( $rpt->{rtime} - $rpt->{ccount}*$rpt->{avg} ) : 0;
-    my $est_todo = $todo > 0 && $rpt->{avg} ne 'unknown'
+    my $est_todo = $todo > 0 && $rpt->{avg} > 0
         ? ( (($todo - 1) * $rpt->{avg}) + $est_curr ) : 0;
     $est_todo > $todo * $rpt->{avg} and $est_todo = $todo * $rpt->{avg};
-    my $todo_time = ! $rpt->{avg} ? '.' :
+    my $todo_time = $rpt->{avg} <= 0  ? '.' : 
+        $est_todo <= 0 ? ', smoke looks aborted.' :
         ", estimated completion in " . time_in_hhmm( $est_todo );
     printf "    $todo configuration%s to finish$todo_time\n",
            $todo == 1 ? "" : "s"
