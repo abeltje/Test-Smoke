@@ -2,10 +2,21 @@
 use strict;
 $|=1;
 
+# $Id$
+use vars qw( $VERSION );
+$VERSION = Test::Smoke->VERSION;
+
 use Cwd;
 use File::Spec;
 use FindBin;
+use lib $FindBin::Bin;
 use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
+use Config;
+use Test::Smoke::Syncer;
+use Test::Smoke::Patcher;
+use Test::Smoke;
+use Test::Smoke::Mailer;
+use Test::Smoke::Util qw( get_patch calc_timeout );
 
 use Getopt::Long;
 my %options = ( config => 'smokecurrent_config', run => 1,
@@ -25,12 +36,6 @@ GetOptions( \%options,
     'smartsmoke!',
     'snapshot|s=i',
 );
-
-use Config;
-use Test::Smoke;
-use vars qw( $VERSION );
-$VERSION = Test::Smoke->VERSION;
-# $Id$
 
 =head1 NAME
 
@@ -76,12 +81,6 @@ defined Test::Smoke->config_error and
 # Make command-line options override configfile
 defined $options{ $_ } and $conf->{ $_ } = $options{ $_ }
     for qw( is56x defaultenv smartsmoke run fetch patch mail );
-
-use Test::Smoke::Syncer;
-use Test::Smoke::Patcher;
-use Test::Smoke::Mailer;
-use Test::Smoke::Util qw( get_patch );
-use Cwd;
 
 if ( $options{continue} ) {
     $options{v} and print "Will try to continue current smoke\n";
@@ -192,24 +191,9 @@ sub mailrpt {
         return;
     }
     my $mailer = Test::Smoke::Mailer->new( $conf->{mail_type}, $conf );
-    $mailer->mail;
+    $mailer->mail or warn "[$conf->{mail_type}] " . $mailer->error;
 }
 
-sub calc_timeout {
-    my( $killtime ) = @_;
-    my $timeout = 0;
-    if ( $killtime =~ /^\+(\d+):([0-5]?[0-9])$/ ) {
-        $timeout = 60 * (60 * $1 + $2 );
-    } elsif ( $killtime =~ /^((?:[0-1]?[0-9])|(?:2[0-3])):([0-5]?[0-9])$/ ) {
-        my $time_min = 60 * $1 + $2;
-        my( $now_m, $now_h ) = (localtime)[1, 2];
-        my $now_min = 60 * $now_h + $now_m;
-        my $kill_min = $time_min - $now_min;
-        $kill_min += 60 * 24 if $kill_min < 0;
-        $timeout = 60 * $kill_min;
-    }
-    return $timeout;
-}
 
 sub configs_from_log {
     my( $dir ) = @_;

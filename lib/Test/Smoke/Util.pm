@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.18';
+$VERSION = '0.19';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -17,6 +17,7 @@ use base 'Exporter';
 @EXPORT_OK = qw( 
     &get_ncpu &get_smoked_Config &parse_report_Config 
     &get_regen_headers &run_regen_headers
+    &calc_timeout
 );
 
 use Text::ParseWords;
@@ -699,6 +700,44 @@ sub run_regen_headers {
         return;
     }
     return 1;
+}
+
+=item calc_timeout( $killtime )
+
+C<calc_timeout()> calculates the timeout in seconds. 
+C<$killtime> can be one of two formats:
+
+=over 8
+
+=item B<+hh:mm>
+
+This format represents a duration and is the easy format as we only need
+to translate that to seconds.
+
+=item B<hh:mm>
+
+This format represents a clock time (localtime).
+Calculate minutes from midnight for both C<$killtime> and C<localtime()>,
+and get the difference.
+
+=back
+
+=cut
+
+sub calc_timeout {
+    my( $killtime ) = @_;
+    my $timeout = 0;
+    if ( $killtime =~ /^\+(\d+):([0-5]?[0-9])$/ ) {
+        $timeout = 60 * (60 * $1 + $2 );
+    } elsif ( $killtime =~ /^((?:[0-1]?[0-9])|(?:2[0-3])):([0-5]?[0-9])$/ ) {
+        my $time_min = 60 * $1 + $2;
+        my( $now_m, $now_h ) = (localtime)[1, 2];
+        my $now_min = 60 * $now_h + $now_m;
+        my $kill_min = $time_min - $now_min;
+        $kill_min += 60 * 24 if $kill_min < 0;
+        $timeout = 60 * $kill_min;
+    }
+    return $timeout;
 }
 
 =item skip_filter( $line )
