@@ -94,14 +94,15 @@ mv -v *.tar.gz $distdir
 make veryclean > /dev/null
 rm -f */*/*/*~
 
+SMOKE_SOURCE=`svn info | perl -nae 's/^Url: // and print'`
 if [ "$SMOKE_CI_FILES" == "1" ] ; then
     # Also commit the newly generated SIGNATURE
     svn ci SIGNATURE -m "* regen SIGNATURE for $SMOKE_VERSION"
     # Create a snapshot in the repository
-    SMOKE_SOURCE=`svn info | perl -nae 's/^Url: // and print'`
-    svn cp $SMOKE_SOURCE \
-        http://source.Test-Smoke.org/svn/snapshots/Test-Smoke-$SMOKE_VERSION \
-        -m "* [SVN] Create a snapshot in the repository"
+    svn cp "$SMOKE_SOURCE" \
+       "http://source.Test-Smoke.org/svn/snapshots/Test-Smoke-$SMOKE_VERSION" \
+        -m "* [SVN] Create a branch for $SMOKE_VERSION"
 else
     echo "Skipping commit of 'SIGNATURE'"
+    echo "Skipping branch from '$SMOKE_SOURCE' ($SMOKE_VERSION)"
 fi
