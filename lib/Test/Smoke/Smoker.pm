@@ -3,16 +3,16 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.006';
+$VERSION = '0.007';
 
 use Cwd;
-use File::Spec;
+use File::Spec::Functions;
 use Config;
 use Test::Smoke::Util qw( get_smoked_Config skip_filter );
 BEGIN { eval q{ use Time::HiRes qw( time ) } }
 
 my %CONFIG = (
-    df_ddir           => File::Spec->curdir(),
+    df_ddir           => curdir(),
     df_v              => 0,
     df_run            => 1,
     df_fdir           => undef,
@@ -340,7 +340,7 @@ sub make_test_prep {
     my $self = shift;
 
     my $exe_ext = $Config{_exe} || $Config{exe_ext};
-    my $perl = File::Spec->catfile( "t", "perl$exe_ext" );
+    my $perl = catfile( "t", "perl$exe_ext" );
 
     $self->{run} and unlink $perl;
     $self->_make( "test-prep" );
@@ -460,22 +460,23 @@ sub extend_with_harness {
         my $test_name = "$1.t";
         my $status = $2;
         push @harness, (-f $test_name) 
-            ? File::Spec->catdir( File::Spec->updir, $test_name )
+            ? catdir( updir(), $test_name )
             : $test_name;
         $inconsistant{ $harness[-1] } = $status;
     }
     if ( @harness ) {
         local $ENV{PERL_SKIP_TTY_TEST} = 1;
-        $self->tty( "\nExtending failures with Harness\n" );
         my $harness = $self->{is_win32} ?
         join " ", map { 
             s{^\.\.[/\\]}{};
-	            m/^(?:lib|ext)/ and $_ = "../$_";
+            m/^(?:lib|ext)/ and $_ = catfile( updir(), $_ );
             $_;
         } @harness : "@harness";
+        $self->tty( "\nExtending failures with harness:\n\t$harness\n" );
         my $changed_dir;
         chdir 't' and $changed_dir = 1;
         my $harness_all_ok = 0;
+        my $tst_perl = catfile( curdir(), 'perl' );
         my $harness_out = join "", map {
             my( $name, $fail ) = 
                 m/(\S+\.t)\s+.+%\s+([\d?]+(?:[-\s]+\d+)*)/;
@@ -492,7 +493,7 @@ sub extend_with_harness {
             /All tests successful/ && $harness_all_ok++;
             $self->{v} > 1 and $self->tty( $_ );
             $_;
-        } $self->_run( "./perl harness $harness" );
+        } $self->_run( "$tst_perl harness $harness" );
         $harness_out =~ s/^\s*$//;
         if ( $harness_all_ok ) {
             $harness_out .= scalar keys %inconsistant
@@ -512,7 +513,7 @@ sub extend_with_harness {
                 : "";
         }
         $self->ttylog("\n", $harness_out, "\n" );
-        $changed_dir and chdir File::Spec->updir;
+        $changed_dir and chdir updir();
     }
 }
 
