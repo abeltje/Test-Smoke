@@ -31,6 +31,8 @@ BEGIN {
     plan tests => 7;
 }
 
+my $verbose = $ENV{SMOKE_VERBOSE} || 0;
+
 # Can we get away with redefining the Net::FTP stuff?
 
 BEGIN { $^W = 0; } # no warnings 'redefine';
@@ -92,7 +94,7 @@ SKIP: { # Here we try for 'Archive::Tar'/'Compress::Zlib'
     eval { require Compress::Zlib; };
     $@ and skip "Can't load 'Compress::Zlib'", 3;
 
-    my $syncer = Test::Smoke::Syncer->new( snapshot => { v => 0,
+    my $syncer = Test::Smoke::Syncer->new( snapshot => { v => $verbose,
         ddir     => File::Spec->catdir( 't', 'perl-current' ),
         sdir     => '/t/snap',
         tar      => 'Archive::Tar',
@@ -127,7 +129,7 @@ SKIP: { # Here we try for gzip/tar
     $gzip = whereis( 'gunzip' ) unless $gzip;
     $gzip = whereis( 'zcat' ) unless $gzip;
 
-    my $syncer = Test::Smoke::Syncer->new( snapshot => { v => 0,
+    my $syncer = Test::Smoke::Syncer->new( snapshot => { v => $verbose,
         ddir     => File::Spec->catdir( 't', 'perl-current' ),
         sdir     => '/t/snap',
         tar      => $unpack,

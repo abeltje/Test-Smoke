@@ -10,8 +10,9 @@ use Test::More tests => 12;
 
 use_ok( 'Test::Smoke::Syncer' );
 
+my $verbose = $ENV{SMOKE_VERBOSE} ? $ENV{SMOKE_VERBOSE} : 0;
 {
-    my $syncer = Test::Smoke::Syncer->new( hardlink => { v => 0,
+    my $syncer = Test::Smoke::Syncer->new( hardlink => { v => $verbose,
         ddir => File::Spec->catdir(qw( t perl-current )),
         hdir => File::Spec->catdir(qw( t perl )),
     } );
@@ -22,7 +23,7 @@ use_ok( 'Test::Smoke::Syncer' );
 
 { # check that is croak()s
 #line 100
-    my $syncer = eval { Test::Smoke::Syncer->new( hardlink => { v => 0,
+    my $syncer = eval { Test::Smoke::Syncer->new( hardlink => { v => $verbose,
         ddir => File::Spec->catdir(qw( t perl-current )),
     } ) };
 
@@ -45,7 +46,7 @@ SKIP: {
 
     ok( -d File::Spec->catdir(qw( t perl )), "snapshot OK" );
 
-    my $syncer = Test::Smoke::Syncer->new( hardlink => { v=> 0,
+    my $syncer = Test::Smoke::Syncer->new( hardlink => { v=> $verbose,
         ddir => File::Spec->catdir(qw( t perl-current )),
         hdir => File::Spec->catdir(qw( t perl )),
     } );
@@ -84,7 +85,7 @@ SKIP: { # Check that the same works for {haslink} == 0
 
     ok( -d File::Spec->catdir(qw( t perl )), "snapshot OK" );
 
-    my $syncer = Test::Smoke::Syncer->new( hardlink => { v=> 0,
+    my $syncer = Test::Smoke::Syncer->new( hardlink => { v=> $verbose,
         ddir    => File::Spec->catdir(qw( t perl-current )),
         hdir    => File::Spec->catdir(qw( t perl )),
         haslink => 0,
