@@ -100,6 +100,22 @@ fi
 
 # I keep forgetting about Changes, so automate:
 svnchanges > Changes
+if [ "$SMOKE_CI_FILES" == "1" ] ; then
+    # Commit the newly generated Files
+    cat <<EOF > svntargets.ci
+Changes
+EOF
+    cat <<EOF > svnmsg.ci
+* [AUTOCOMMIT]
+  * Regenerate 'Changes'
+EOF
+    svn ci --targets svntargets.ci -F svnmsg.ci
+    rm -f svntargets.ci
+    rm -f svnmsg.ci
+else
+    echo "Skipping autocommit of regenerated Changes"
+fi
+
 
 # Now create the Makefile and and run the public test-suite
 PERL_MM_USE_DEFAULT=y $SMOKE_PERL Makefile.PL
@@ -110,17 +126,22 @@ make test || exit
 
 trap 0
 
-# Autocommit the regenerated file, before signing
+# Create the distribution and move it to the distribution directory
+perl -i -pe 's/^#?local-user abeltje/local-user abeltje/' ~/.gnupg/options
+make dist
+perl -i -pe 's/^local-user abeltje/#local-user abeltje/' ~/.gnupg/options
+mv -v *.tar.gz $distdir
+
+# Autocommit the "make dist" regenerated files
 if [ "$SMOKE_CI_FILES" == "1" ] ; then
     # Commit the newly generated Files
     cat <<EOF > svntargets.ci
-Changes
 SIGNATURE
 META.yml
 EOF
     cat <<EOF > svnmsg.ci
 * [AUTOCOMMIT]
-  * Regenerate 'Changes', 'SIGNATURES', 'META.yml'
+  * Regenerate 'SIGNATURES', 'META.yml'
 EOF
     svn ci --targets svntargets.ci -F svnmsg.ci
     rm -f svntargets.ci
@@ -128,12 +149,6 @@ EOF
 else
     echo "Skipping autocommit of regenerated files"
 fi
-
-# Create the distribution and move it to the distribution directory
-perl -i -pe 's/^#?local-user abeltje/local-user abeltje/' ~/.gnupg/options
-make dist
-perl -i -pe 's/^local-user abeltje/#local-user abeltje/' ~/.gnupg/options
-mv -v *.tar.gz $distdir
 
 # Clean up!
 make veryclean > /dev/null
