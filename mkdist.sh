@@ -1,5 +1,7 @@
 #! /bin/sh
 
+distdir=~/distro
+
 perl test_compile.pl || exit
 perl test_pod.pl     || exit
 PERL_MM_USE_DEFAULT=y
@@ -9,6 +11,6 @@ perl Makefile.PL
 make
 (make test) || exit
 make dist
-mv -v *.tar.gz ../
+mv -v *.tar.gz $distdir
 make veryclean > /dev/null
 rm -f */*/*/*~
