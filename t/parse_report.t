@@ -3,27 +3,37 @@ use strict;
 
 # $Id$
 
-use Test::More tests => 8;
+use Test::More;
 
-my @eg = (
-    { plevel => 19000, os => 'linux', osvers => '2.4.18-4g',
-      arch => 'i686/1 cpu', sum => 'PASS', version => '5.00504' },
-    { plevel => 19001, os => 'MSWin32', osvers => '5.',
-      arch => 'x86/1 cpu', sum => 'PASS', version => '5.9.0' },
-    { plevel => 19002, os => 'aix', osvers => '4.3.1.0',
-      arch => 'PPC_64/8 cpus', sum => 'PASS', version => '5.9.0' },
-    { plevel => 19003, os => 'linux', osvers => '2.4.20-1jv.7.x',
-      arch => 'i686/1 cpu', sum => 'PASS', version => '5.9.0' },
-    { plevel => 19004, os => 'dec_osf', osvers => '5.1a',
-      arch => 'alpha/1 cpu', sum => 'FAIL(F)', version => '5.9.0' },
-    { plevel => 19005, os => 'linux', osvers => '2.4.23-sparc-r1 [gentoo]',
-      arch => 'sparc64/1 cpu', sum => 'FAIL(F)', version => '5.8.3',
-      cpu => 'TI UltraSparc I (SpitFire)' },
-    { plevel => 19006, os => 'netbsd', osvers => '1.5',
-      arch => 'i386/1 cpu', sum => 'FAIL(F)', version => '5.8.3',
-      ccvers => 'egcs-2.91.66 19990314 (egcs-1.1.2 release)',
-      cpu => 'Intel Pentium II (Deschutes) (686-class)' },
-);
+my @eg;
+BEGIN {
+    @eg  = (
+        { plevel => 19000, os => 'linux', osvers => '2.4.18-4g',
+          arch => 'i686/1 cpu', sum => 'PASS', version => '5.00504' },
+        { plevel => 19001, os => 'MSWin32', osvers => '5.',
+          arch => 'x86/1 cpu', sum => 'PASS', version => '5.9.0' },
+        { plevel => 19002, os => 'aix', osvers => '4.3.1.0',
+          arch => 'PPC_64/8 cpus', sum => 'PASS', version => '5.9.0' },
+        { plevel => 19003, os => 'linux', osvers => '2.4.20-1jv.7.x',
+          arch => 'i686/1 cpu', sum => 'PASS', version => '5.9.0' },
+        { plevel => 19004, os => 'dec_osf', osvers => '5.1a',
+          arch => 'alpha/1 cpu', sum => 'FAIL(F)', version => '5.9.0' },
+        { plevel => 19005, os => 'linux', osvers => '2.4.23-sparc-r1 [gentoo]',
+          arch => 'sparc64/1 cpu', sum => 'FAIL(F)', version => '5.8.3',
+          cpu => 'TI UltraSparc I (SpitFire)' },
+        { plevel => 19006, os => 'netbsd', osvers => '1.5',
+          arch => 'i386/1 cpu', sum => 'FAIL(F)', version => '5.8.3',
+          ccvers => 'egcs-2.91.66 19990314 (egcs-1.1.2 release)',
+          cpu => 'Intel Pentium II (Deschutes) (686-class)' },
+        { plevel => 19007, os => 'solaris', osvers => '2.9',
+          arch => 'sparc-LP64/1 cpu', sum => 'FAIL(F)', version => '5.8.3',
+          cpu => 'UltraSPARC-IIe (502MHz)' },
+        { plevel => 19008, os => 'linux', osvers => '2.4.21-1 [redhat]',
+          arch => 'i686/1 cpu', sum => 'FAIL(F)', version => '5.8.3',
+          cpu => 'Pentium III (Coppermine) (GenuineIntel 731MHz)' },
+    );
+    plan tests => 1 + @eg;
+}
 
 BEGIN { use_ok( 'Test::Smoke::Util', 'parse_report_Config' ); }
 

@@ -122,6 +122,12 @@ sub __get_os {
             $os .= " [$distro]" if $distro;
             last MOREOS;
         };
+        /solaris|sunos/i   && do {
+            require Config;
+            # Used once warning :-(
+            %Config::Config and 
+                $os = "@Config::Config{qw( osname osvers )}";
+        };
         /windows|mswin32/i && do {
             eval { require Win32 };
             $@ and last MOREOS;
@@ -378,8 +384,10 @@ Use the L<psrinfo> program to get the system information.
 sub Solaris {
 
     my( $psrinfo ) = grep /the .* operates .* mhz/ix => `psrinfo -v`;
-    my $type = __get_cpu_type();
-    my( $cpu, $speed ) = $psrinfo =~ /the (\w+) processor.*at (\d+) mhz/i;
+    my( $type, $speed ) = $psrinfo =~ /the (\w+) processor.*at (\d+) mhz/i;
+    $type =~ s/(v9)$/ $1 ? "-LP64" : "-LP32"/e;
+    my( $cpu_line ) = grep /\s+$speed\s+MHz\s+/i => `prtdiag`;
+    ( my $cpu = ( split " ", $cpu_line )[4] ) =~ s/.*,//;
     $cpu .= " (${speed}MHz)";
     my $ncpu = grep /on-line/ => `psrinfo`;
 

@@ -182,6 +182,9 @@ sub _read {
 
 =item $self->_parse( )
 
+Interpret the contents of the logfile and prepare them for processing,
+so report can be made.
+
 =cut
 
 sub _parse {
