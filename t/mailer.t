@@ -195,7 +195,13 @@ sub write_report {
 
 sub create_report {
     my $eg = shift;
-    return "Automated smoke report for $eg->{version} patch " .
-           "$eg->{plevel} on $eg->{os} - $eg->{osvers} ($eg->{arch})\n" .
-           "\n\n\nStuff that goes here\nSummary: $eg->{sum}\n";
+    return <<__EOR__;
+Automated smoke report for $eg->{version} patch $eg->{plevel}
+host: TI UltraSparc I (SpitFire) ($eg->{arch})
+    on $eg->{os} - $eg->{osvers}
+    using cc version 4.2
+    smoketime 4 hours 2 minutes
+
+Summary: $eg->{sum}
+__EOR__
 }
