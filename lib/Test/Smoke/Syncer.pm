@@ -90,9 +90,12 @@ to get your perl source-tree up to date.
 
 =item snapshot
 
-This method uses the B<Net::FTP> module to get the latest snapshot. 
+This method uses the B<Net::FTP> or the B<LWP> module to get the 
+latest snapshot. When the B<server> attribute starts with I<http://>
+the fetching is done by C<LWP::Simple::mirror()>.
 To emulate the C<< rsync --delete >> effect, the current source-tree
 is removed.
+
 The snapshot tarball is handled by either B<tar>/B<gzip> or 
 B<Archive::Tar>/B<Compress::Zlib>.
 
