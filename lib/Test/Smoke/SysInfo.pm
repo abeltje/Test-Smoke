@@ -263,15 +263,18 @@ sub HPUX {
             push @cpu, $_;
         }
     }
-    $hpux->{_os} =~ s/ B\./ /;
+    $hpux->{_os} =~ s/ B\.(\d+)/ $1/;
+    my $os_r = $1;
 
-    chomp( my $k64 = `getconf KERNEL_BITS` );
-    $k64 and $hpux->{_os} .= "/$k64";
+    if ($os_r >= 11) {
+       chomp( my $k64 = `getconf KERNEL_BITS` );
+       $k64 and $hpux->{_os} .= "/$k64";
+    }
 
     if ($cpu[0] =~ m/^\S+\s+(\d+\.\d+)\s+(\S+)/) {
 	my( $arch, $cpu ) = ("PA-$1", $2);
 	$hpux->{_cpu} = $cpu;
-	$hpux->{_cpu_type} = `getconf HW_32_64_CAPABLE` =~ m/^1/ 
+        $hpux->{_cpu_type} = $os_r >= 11 && `getconf HW_32_64_CAPABLE` =~ m/^1/
             ? "$arch/64" : "$arch/32";
     }
     return $hpux;
