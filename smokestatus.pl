@@ -4,7 +4,7 @@ $| = 1;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.010';
+$VERSION = '0.011';
 
 use Cwd;
 use File::Spec::Functions;
@@ -76,7 +76,7 @@ reports.
 GetOptions( \%opt, qw(
     all|a      running|r
     dir|d=s
-    matrix|m!
+    matrix|m
 
     help|h     man
 
