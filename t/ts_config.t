@@ -4,7 +4,7 @@ use strict;
 use FindBin;
 use Data::Dumper;
 
-use Test::More 'no_plan';
+use Test::More tests => 6;
 
 BEGIN { use_ok( 'Test::Smoke' ) }
 
