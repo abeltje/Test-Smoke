@@ -64,6 +64,7 @@ t/win32/Makefile
 t/win32/makefile.mk
 t/ftppub/bugtst01.out
 t/ftppub/bugtst02.out
+t/ftppub/bugtst03.out
 t/ftppub/perl-current-diffs/20000.gz
 t/ftppub/perl-current-diffs/20001.gz
 t/ftppub/perl-current-diffs/20003.gz
