@@ -34,6 +34,11 @@ configurations and give you the ability to itterate over them.
 L<Test::Smoke::Smoker> is a new interface for running a smoke
 cycle. It basically replaces the inner works of F<mktest.pl>.
 
+=item 4
+
+Merijn was in dire need of a C<--continue> option and it was on
+Abiagil's wishlist as well as on mine. So I hacked it.
+
 =back
 
 =head1 COPYRIGHT
