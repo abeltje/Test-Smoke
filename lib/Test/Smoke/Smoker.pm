@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.013';
+$VERSION = '0.014';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -196,6 +196,8 @@ sub smoke {
 
     $self->make_distclean;
 
+    $self->{v} > 1 and $self->extra_manicheck;
+
     $self->handle_policy( $policy, $config->policy );
 
     my $c_result = $self->Configure( $config );
@@ -258,6 +260,31 @@ sub make_distclean {
         $distclean->clean_from_directory( $self->{fdir}, 'mktest.out' );
     } else {
         $self->_make( "-i distclean 2>/dev/null" );
+    }
+}
+
+=item $smoker->extra_manicheck( )
+
+C<extra_manicheck()> will only work for C<< $self->{v} > 1 >> and does
+an extra integrity check comparing F<MANIFEST> and the
+source-tree. Output is send to the tty.
+
+=cut
+
+sub extra_manicheck {
+    my $self = shift;
+    $self->{v} > 1 or return;
+
+    require Test::Smoke::SourceTree;
+    Test::Smoke::SourceTree->import( qw( :mani_const ) );
+    my $tree = Test::Smoke::SourceTree->new( $self->{ddir} );
+    my $mani_check = $tree->check_MANIFEST(qw( mktest.out mktest.rpt ));
+    foreach my $file ( sort keys %$mani_check ) {
+        if ( $mani_check->{ $file } == ST_MISSING() ) {
+            $self->tty( "manicheck: missing '$file' (not in source-tree)\n" );
+        } elsif ( $mani_check->{ $file } == ST_UNDECLARED() ) {
+            $self->tty( "manicheck: extra '$file' (not in MANIFEST)\n" );
+        }
     }
 }
 

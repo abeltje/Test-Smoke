@@ -9,7 +9,7 @@ use FindBin;
 use lib $FindBin::Bin;
 use TestLib;
 
-my $verbose = 0;
+my $verbose = exists $ENV{SMOKE_VERBOSE} ? $ENV{SMOKE_VERBOSE} : 0;
 my $showcfg = 0;
 
 use Test::More tests => 53;
@@ -325,7 +325,7 @@ __EOM__
         defaultenv => 0,
         locale     => 'EN_US.UTF-8',
         outfile    => 'bugtst01.out',
-        v          => 0,
+        v          => $verbose,
         showcfg    => $showcfg,
         cfg        => \( my $bcfg = <<__EOCFG__ ),
 -Dcc=gcc
@@ -364,7 +364,7 @@ __EOM__
         is56x      => 0,
         defaultenv => 0,
         outfile    => 'bugtst02.out',
-        v          => 0,
+        v          => $verbose,
         showcfg    => $showcfg,
         cfg        => \( my $bcfg = <<__EOCFG__ ),
 
@@ -406,7 +406,7 @@ __EOM__
         defaultenv => 1,
         is_win32   => 1,
         outfile    => 'bugtst03.out',
-        v          => 0,
+        v          => $verbose,
         showcfg    => $showcfg,
         cfg        => \( my $bcfg = <<'__EOCFG__' ),
 -DINST_TOP=$(INST_DRV)\Smoke\doesntexist
@@ -464,52 +464,53 @@ __EOM__
     }
     my @f_lines = split /n/, $reporter->failures;
     is_deeply \@f_lines, [split /n/, <<'__EOFAIL__'], "Failures(bugtst03)";
-[stdio] -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Accflags='-DPERL_COPY_ON_WRITE'
-[stdio] -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Dusemymalloc -Accflags='-DPERL_COPY_ON_WRITE'
-[stdio] -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duselargefiles -Accflags='-DPERL_COPY_ON_WRITE'
-[stdio] -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duselargefiles -Dusemymalloc -Accflags='-DPERL_COPY_ON_WRITE'
+[default] -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Accflags='-DPERL_COPY_ON_WRITE'
+[default] -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Dusemymalloc -Accflags='-DPERL_COPY_ON_WRITE'
+[default] -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duselargefiles -Accflags='-DPERL_COPY_ON_WRITE'
+[default] -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duselargefiles -Dusemymalloc -Accflags='-DPERL_COPY_ON_WRITE'
     ../ext/Cwd/t/cwd.t......................FAILED 10 12 14 16-18
     op/magic.t..............................FAILED 37-53
     op/tie.t................................FAILED 22
 
-[stdio] -DDEBUGGING -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Accflags='-DPERL_COPY_ON_WRITE'
-[stdio] -DDEBUGGING -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duselargefiles -Accflags='-DPERL_COPY_ON_WRITE'
+[default] -DDEBUGGING -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Accflags='-DPERL_COPY_ON_WRITE'
+[default] -DDEBUGGING -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duselargefiles -Accflags='-DPERL_COPY_ON_WRITE'
     ../ext/Cwd/t/cwd.t......................FAILED 9-20
     op/magic.t..............................FAILED 37-53
     op/tie.t................................FAILED 22
 
-[stdio] -DDEBUGGING -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Dusemymalloc -Accflags='-DPERL_COPY_ON_WRITE'
-[stdio] -DDEBUGGING -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duselargefiles -Dusemymalloc -Accflags='-DPERL_COPY_ON_WRITE'
+[default] -DDEBUGGING -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Dusemymalloc -Accflags='-DPERL_COPY_ON_WRITE'
+[default] -DDEBUGGING -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duselargefiles -Dusemymalloc -Accflags='-DPERL_COPY_ON_WRITE'
     ../ext/Cwd/t/cwd.t......................FAILED 9-20
     ../lib/DBM_Filter/t/utf8.t..............FAILED 13 19
     op/magic.t..............................FAILED 37-53
     op/tie.t................................FAILED 22
 
-[stdio] -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duseithreads
+[default] -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duseithreads
 Inconsistent test results (between TEST and harness):
     ../ext/threads/t/thread.t...............FAILED test 25
 
-[stdio] -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duseithreads -Accflags='-DPERL_COPY_ON_WRITE'
-[stdio] -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duseithreads -Dusemymalloc -Accflags='-DPERL_COPY_ON_WRITE'
+[default] -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duseithreads -Accflags='-DPERL_COPY_ON_WRITE'
+[default] -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duseithreads -Dusemymalloc -Accflags='-DPERL_COPY_ON_WRITE'
     ../ext/Cwd/t/cwd.t......................FAILED 18-20
 
-[stdio] -DDEBUGGING -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duseithreads -Accflags='-DPERL_COPY_ON_WRITE'
-[stdio] -DDEBUGGING -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duseithreads -Dusemymalloc -Accflags='-DPERL_COPY_ON_WRITE'
-[stdio] -DDEBUGGING -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duseithreads -Duselargefiles -Accflags='-DPERL_COPY_ON_WRITE'
-[stdio] -DDEBUGGING -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duseithreads -Duselargefiles -Dusemymalloc -Accflags='-DPERL_COPY_ON_WRITE'
+[default] -DDEBUGGING -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duseithreads -Accflags='-DPERL_COPY_ON_WRITE'
+[default] -DDEBUGGING -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duseithreads -Dusemymalloc -Accflags='-DPERL_COPY_ON_WRITE'
+[default] -DDEBUGGING -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duseithreads -Duselargefiles -Accflags='-DPERL_COPY_ON_WRITE'
+[default] -DDEBUGGING -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duseithreads -Duselargefiles -Dusemymalloc -Accflags='-DPERL_COPY_ON_WRITE'
     ../ext/Cwd/t/cwd.t......................FAILED 9-20
 
-[stdio] -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duseithreads -Duselargefiles
-[stdio] -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duseithreads -Duselargefiles -Dusemymalloc
+[default] -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duseithreads -Duselargefiles
+[default] -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duseithreads -Duselargefiles -Dusemymalloc
 Inconsistent test results (between TEST and harness):
     ../ext/threads/t/problems.t.............dubious
 
-[stdio] -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duseithreads -Duselargefiles -Accflags='-DPERL_COPY_ON_WRITE'
-[stdio] -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duseithreads -Duselargefiles -Dusemymalloc -Accflags='-DPERL_COPY_ON_WRITE'
+[default] -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duseithreads -Duselargefiles -Accflags='-DPERL_COPY_ON_WRITE'
+[default] -DINST_TOP=$(INST_DRV)\Smoke\doesntexist -Duseithreads -Duselargefiles -Dusemymalloc -Accflags='-DPERL_COPY_ON_WRITE'
     ../ext/Cwd/t/cwd.t......................FAILED 18-20
 Inconsistent test results (between TEST and harness):
     ../ext/threads/shared/t/sv_simple.t.....dubious
 __EOFAIL__
+
 }
 
 sub create_config_sh {

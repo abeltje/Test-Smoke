@@ -109,7 +109,7 @@ defined Test::Smoke->config_error and
 
 # Make command-line options override configfile
 defined $options{ $_ } and $conf->{ $_ } = $options{ $_ }
-    for qw( is56x defaultenv continue killtime
+    for qw( is56x defaultenv continue killtime pfile
             smartsmoke run fetch patch mail ccp5p_onfail archive );
 
 # Make sure the --pfile command-line override works

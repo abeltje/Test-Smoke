@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.012';
+$VERSION = '0.013';
 
 use Cwd;
 use File::Spec::Functions;
@@ -356,8 +356,12 @@ sub _post_process {
             my $status = $self->{_rpt}{ $config }{ $dbinfo };
             foreach my $tstenv ( reverse sort keys %bldenv ) {
                 next if $tstenv eq 'minitest' && ! exists $status->{ $tstenv };
+
                 ( my $showenv = $tstenv ) =~ s/^locale://;
                 $self->{_locale} ||= $showenv if $tstenv =~ /^locale:/;
+                $showenv = 'default' 
+                    if $self->{defaultenv} && $showenv eq 'stdio';
+
                 $status->{ $tstenv } ||= '-';
                 if ( ref $status->{ $tstenv } eq "ARRAY" ) {
                     my $failed = join "\n", @{ $status->{ $tstenv } };
@@ -377,7 +381,7 @@ sub _post_process {
                     $status->{stdio} = "M";
                     delete $status->{minitest};
                 }
-                $self->{v} > 1 and print "\t[$tstenv]: $status->{$tstenv}\n";
+                $self->{v} > 1 and print "\t[$showenv]: $status->{$tstenv}\n";
             }
             unless ( $self->{defaultenv} ) {
                 exists $status->{perlio} or $status->{perlio} = '-';
@@ -675,7 +679,7 @@ sub signature {
     return <<__EOS__
 
 -- 
-Report by Test::Smoke v$Test::Smoke::VERSION\@$Test::Smoke::REVISION running on perl $this_pver
+Report by Test::Smoke v$Test::Smoke::VERSION\#$Test::Smoke::REVISION running on perl $this_pver
 (Reporter v$VERSION / Smoker v$Test::Smoke::Smoker::VERSION)
 __EOS__
 }
