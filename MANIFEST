@@ -4,7 +4,6 @@ SIGNATURE
 README
 ReleaseNotes
 Changes
-FAQ
 Makefile.PL
 archiverpt.pl
 configsmoke.pl
@@ -26,6 +25,7 @@ synctree.pl
 W32Configure.pl
 lib/Mail/Sendmail.pm
 lib/Test/Smoke.pm
+lib/Test/Smoke/FAQ
 lib/Test/Smoke/BuildCFG.pm
 lib/Test/Smoke/FTPClient.pm
 lib/Test/Smoke/Mailer.pm
