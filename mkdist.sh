@@ -55,6 +55,8 @@ if [ "$SMOKE_TEST_ONLY" == "1" ] ; then
     fi
     echo "SMOKE_TEST_ONLY was set, quitting..."
     exit
+else
+    prove -I lib private/smoker_*.t || exit
 fi
 
 # Clean up before we start
