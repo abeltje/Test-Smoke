@@ -11,6 +11,7 @@ mailrpt.pl
 mktest.pl
 mkovz.pl
 patchtree.pl
+runsmoke.pl
 smoke.sh
 smokew32.bat
 perl56x.cfg

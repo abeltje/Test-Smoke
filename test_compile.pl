@@ -2,11 +2,13 @@
 use warnings FATAL => 'all';
 use strict;
 
+# $Id$
+
 use File::Spec;
 
 my @scripts;
 BEGIN {
-    @scripts = qw( mktest.pl mkovz.pl smokeperl.pl
+    @scripts = qw( mktest.pl mkovz.pl smokeperl.pl runsmoke.pl
                    synctree.pl patchtree.pl mailrpt.pl W32Configure.pl
                    Makefile.PL Configure.pl configsmoke.pl );
 
