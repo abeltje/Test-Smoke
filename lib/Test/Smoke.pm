@@ -2,7 +2,7 @@ package Test::Smoke;
 use strict;
 
 use vars qw( $VERSION $conf @EXPORT );
-$VERSION = '1.17_50';
+$VERSION = '1.17_51';
 
 use base 'Exporter';
 @EXPORT  = qw( $conf &read_config &run_smoke );
@@ -79,7 +79,7 @@ sub do_manifest_check {
     my( $ddir, $smoker ) = @_;
 
     my $tree = Test::Smoke::SourceTree->new( $ddir );
-    my $mani_check = $tree->check_MANIFEST;
+    my $mani_check = $tree->check_MANIFEST( 'mktest.out' );
     foreach my $file ( sort keys %$mani_check ) {
         if ( $mani_check->{ $file } == ST_MISSING ) {
             $smoker->log( "MANIFEST declared '$file' but it is missing\n" );
