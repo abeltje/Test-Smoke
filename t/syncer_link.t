@@ -3,6 +3,7 @@ use strict;
 
 # $Id$
 
+use Config;
 use File::Spec;
 use lib File::Spec->rel2abs( 't' );
 use TestLib;
@@ -21,7 +22,7 @@ my $verbose = $ENV{SMOKE_VERBOSE} ? $ENV{SMOKE_VERBOSE} : 0;
     isa_ok( $syncer, 'Test::Smoke::Syncer::Hardlink' );
 }
 
-{ # check that is croak()s
+{ # check that it croak()s
 #line 100
     my $syncer = eval { Test::Smoke::Syncer->new( hardlink => { v => $verbose,
         ddir => File::Spec->catdir(qw( t perl-current )),
@@ -37,6 +38,7 @@ SKIP: {
 # and used as a base for the hardlink sync
 
     my $to_skip = 4;
+    $Config{d_link} or skip "No links on $^O", $to_skip;
     my $tar = find_uncompress() or
         skip "Cannot find decompression stuff", $to_skip;
 
@@ -76,6 +78,7 @@ SKIP: { # Check that the same works for {haslink} == 0
 # and used as a base for the hardlink sync
 
     my $to_skip = 3;
+    $Config{d_link} or skip "No links on $^O", $to_skip;
     my $tar = find_uncompress() or
         skip "Cannot find decompression stuff", $to_skip;
 

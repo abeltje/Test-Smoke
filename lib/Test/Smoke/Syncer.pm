@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.013';
+$VERSION = '0.014';
 
 use Config;
 use Cwd;
@@ -667,16 +667,18 @@ sub __find_snap_name {
     my( $ftp, $snapext, $verbose ) = @_;
     $snapext ||= 'tgz';
     $verbose ||= 0;
+    $verbose > 1 and print "Looking for /$snapext\$/\n";
 
     my @list = $ftp->ls();
 
     my $snap_name = ( map $_->[0], sort { $a->[1] <=> $b->[1] } map {
-        $verbose and print "Kept: $_\n";
-        [ $_, /^perl\@(\d+)/ ]
+        my( $p_level ) = /^perl[@#_](\d+)/;
+        $verbose > 1 and print "Kept: $_ ($p_level)\n";
+        [ $_, $p_level ]
     } grep {
-    	/^perl\@\d+/ &&
+    	/^perl[@#_]\d+/ &&
     	/$snapext$/ 
-    } map { $verbose > 1 and print "Found: $_\n"; $_ } @list )[-1];
+    } map { $verbose > 1 and print "Found snapname: $_\n"; $_ } @list )[-1];
 
     return $snap_name;
 }
@@ -781,17 +783,21 @@ sub _extract_with_external {
 
     my @dirs_pre = __get_directory_names();
 
-    my $command = sprintf $self->{tar}, $self->{snapshot};
-    $command .= " $self->{snapshot}" if $command eq $self->{tar};
-
-    $self->{v} and print "$command ";
-    if ( system $command ) {
-        my $error = $? >> 8;
-        require Carp;
-        Carp::carp "Error in command: $error";
-        return undef;
-    };
-    $self->{v} and print "OK\n";
+    if ( $^O ne 'VMS' ) {
+        my $command = sprintf $self->{tar}, $self->{snapshot};
+        $command .= " $self->{snapshot}" if $command eq $self->{tar};
+    
+        $self->{v} and print "$command ";
+        if ( system $command ) {
+            my $error = $? >> 8;
+            require Carp;
+            Carp::carp "Error in command: $error";
+            return undef;
+        };
+        $self->{v} and print "OK\n";
+    } else {
+        __vms_untargz( $self->{tar}, $self->{snapshot}, $self->{v} );
+    }
 
     # Yes another process can also create directories here!
     # Be careful.
@@ -803,6 +809,37 @@ sub _extract_with_external {
     $base_dir ||= 'perl';
 
     return File::Spec->canonpath( File::Spec->catdir( cwd(), $base_dir ) );
+}
+
+=item __vms_untargz( $untargz, $tgzfile, $verbose )
+
+Gunzip and extract the archive in C<$tgzfile> using a small DCL script
+
+=cut
+
+sub __vms_untargz {
+    my( $cmd, $file, $verbose ) = @_;
+    my( $gzip_cmd, $tar_cmd ) = split /\s*\|\s*/, $cmd;
+    my $gzip = $gzip_cmd =~ /^(\S+)/ ? $1 : 'GZIP';
+    my $tar  = $tar_cmd  =~ /^(\S+)/
+        ? $1 : (whereis( 'vmstar' ) || whereis( 'tar' ) );
+    my $tar_sw = $verbose ? '-xvf' : '-xf';
+
+    $verbose and print "Writing 'TS-UNTGZ.COM'";
+    local *TMPCOM;
+    open TMPCOM, "> TS-UNTGZ.COM" or return 0;
+    print TMPCOM <<EO_UNTGZ; close TMPCOM or return 0;
+\$ define/user sys\$output TS-UNTGZ.TAR
+\$ $gzip "-cd" $file
+\$ $tar $tar_sw TS-UNTGZ.TAR
+\$ delete TS-UNTGZ.TAR
+EO_UNTGZ
+    $verbose and print " OK\n";
+
+    my $ret = system "\@TS-UNTGZ.COM";
+#    1 while unlink "TS-UNTGZ.COM";
+
+    return ! $ret;
 }
 
 =item $syncer->patch_a_snapshot( $patch_number )
@@ -1027,7 +1064,7 @@ sub __get_directory_names {
 
     local *DIR;
     opendir DIR, $dir or return ();
-    my @dirs = grep -d File::Spec->catdir( $dir, $_ ) => readdir DIR;
+    my @dirs = grep -d File::Spec->catfile( $dir, $_ ) => readdir DIR;
     closedir DIR;
 
     return @dirs;

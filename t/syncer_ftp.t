@@ -32,6 +32,7 @@ BEGIN {
 }
 
 my $verbose = $ENV{SMOKE_VERBOSE} || 0;
+$verbose and diag "SMOKE_VERBOSE = $verbose";
 
 # Can we get away with redefining the Net::FTP stuff?
 

@@ -35,7 +35,8 @@ What is in here?
 use Config;
 use Carp;
 use File::Find;
-use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs splitdir );
+use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs
+                              splitdir splitpath catpath);
 require File::Path;
 use Cwd;
 
@@ -94,7 +95,8 @@ sub vms_whereis {
     return $prog if exists $kfe{ uc $prog };
 
     my $dclp_env = 'DCL$PATH';
-    my @path = split /$Config{path_sep}/, $ENV{ $dclp_env };
+    my $p_sep = $Config{path_sep} || '|';
+    my @path = split /$p_sep/, $ENV{ $dclp_env }||"";
     my @pext = ( $Config{exe_ext} || $Config{_exe}, '.COM' );
 
     foreach my $dir ( @path ) {
@@ -351,6 +353,8 @@ sub do_untargz {
         $archive->extract( @files );
 
     } else { # assume command
+        $^O eq 'VMS' and return vms_untargz( $untgz, $tgzfile );
+
         my $command = sprintf $untgz, $tgzfile;
         $command .= " $tgzfile" if $command eq $untgz;
 
@@ -361,6 +365,42 @@ sub do_untargz {
         };
     }
     return 1;
+}
+
+=item vms_untargz( $untargz, $tgzfile )
+
+Gunzip and extract the archive in C<$tgzfile>.
+
+=cut
+
+sub vms_untargz {
+    my( $cmd, $file ) = @_;
+    my( $vol, $path, $fname ) = splitpath( $file );
+    my @parts = split /[.@#]/, $fname;
+    if ( @parts > 1 ) {
+        my $ext = ( pop @parts ) || '';
+        $fname = join( "_", @parts ) . ".$ext";
+    }
+    $file = catpath( $vol, $path, $fname );
+
+    my( $gzip_cmd, $tar_cmd ) = split /\s*\|\s*/, $cmd;
+    my $gzip = $gzip_cmd =~ /^(\S+)/ ? $1 : 'GZIP';
+    my $tar  = $tar_cmd  =~ /^(\S+)/
+        ? $1 : (whereis( 'vmstar' ) || whereis( 'tar' ) );
+
+    local *TMPCOM;
+    open TMPCOM, "> TS-UNTGZ.COM" or return 0;
+    print TMPCOM <<EO_UNTGZ; close TMPCOM or return 0;
+\$ define/user sys\$output TS-UNTGZ.TAR
+\$ $gzip "-cd" $file
+\$ $tar "-xf" TS-UNTGZ.TAR
+\$ delete TS-UNTGZ.TAR
+EO_UNTGZ
+
+    my $ret = system "\@TS-UNTGZ.COM";
+    1 while unlink "TS-UNTGZ.COM";
+
+    return ! $ret;
 }
 
 1;
