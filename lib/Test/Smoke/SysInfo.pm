@@ -498,23 +498,28 @@ sub Solaris {
 
     local $ENV{PATH} = "/usr/sbin:$ENV{PATH}";
 
-    my( $psrinfo ) = grep /the .* operates .* [gm]hz/ix => `psrinfo -v`;
-    my( $type, $speed, $magnitude ) = 
+    my @psrinfo = `psrinfo -v`;
+    my( $psrinfo ) = grep /the .* operates .* [gm]hz/ix => @psrinfo;
+    my( $type, $speed, $magnitude ) =
         $psrinfo =~ /the (.+) processor.*at (.+?)\s*([GM]hz)/i;
 
     $type =~ s/(v9)$/ $1 ? "64" : ""/e;
 
-    my $cpu = "";
+    my $cpu = __get_cpu();
     if ( -d "/usr/platform" ) { # Solaris but not OSF/1.
         chomp( my $platform = `uname -i` );
-        local $ENV{PATH} = "/usr/platform/$platform/sbin";
-        my $prtdiag = `prtdiag`;
-        ( $cpu ) = $prtdiag =~ /^System .+\(([^\s\)]+)/;
-        unless ( $cpu ) {
-            my( $cpu_line ) = grep /\s+on-?line\s+/i => split /\n/, $prtdiag;
-            ( $cpu = ( split " ", $cpu_line )[4] ) =~ s/.*,//;
+        my $pfpath = "/usr/platform/$platform/sbin/prtdiag";
+        if ( -x "$pfpath" ) { # Not on Solaris-x86
+            my $prtdiag = `$pfpath`;
+            ( $cpu ) = $prtdiag =~ /^System .+\(([^\s\)]+)/;
+            unless ( $cpu ) {
+                my($cpu_line) = grep /\s+on-?line\s+/i => split /\n/, $prtdiag;
+                ( $cpu = ( split " ", $cpu_line )[4] ) =~ s/.*,//;
+            }
+            $cpu .= " ($speed$magnitude)";
+        } else {
+            $cpu .= " ($speed$magnitude)";
         }
-        $cpu .= " ($speed$magnitude)";
     } elsif (-x "/usr/sbin/sizer") { # OSF/1.
         $cpu = $type;
         chomp( $type = `sizer -implver` );
