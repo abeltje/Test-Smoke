@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION $REVISION $conf @EXPORT );
-$VERSION  = '1.19_66';
+$VERSION  = '1.19_67';
 $REVISION = __get_ts_patchlevel();
 
 use base 'Exporter';
@@ -120,10 +120,10 @@ sub run_smoke {
 
     my $patch = Test::Smoke::Util::get_patch( $conf->{ddir} );
 
-    exists $Config{ldlibpthname} && $Config{ldlibpthname} and
-        $ENV{ $Config{ldlibpthname} } ||= '',
-        substr( $ENV{ $Config{ldlibpthname} }, 0, 0)  =
-            "$conf->{ddir}$Config{path_sep}";
+#    exists $Config{ldlibpthname} && $Config{ldlibpthname} and
+#        $ENV{ $Config{ldlibpthname} } ||= '',
+#        substr( $ENV{ $Config{ldlibpthname} }, 0, 0)  =
+#            "$conf->{ddir}$Config{path_sep}";
 
     my $logfile = File::Spec->catfile( $conf->{ddir}, 'mktest.out' );
     my $BuildCFG = $continue 

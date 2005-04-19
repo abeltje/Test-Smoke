@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.022';
+$VERSION = '0.023';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -218,7 +218,7 @@ sub smoke {
     # Log the compiler info now, the last config could fail
     { # can we config.sh without Configure success?
         my %cinfo = get_smoked_Config( $self->{ddir} => qw(
-            cc ccversion gccversion
+            cc ccversion gccversion 
         ));
         my $version = $cinfo{gccversion} || $cinfo{ccversion};
         $self->log( "\nCompiler info: $cinfo{cc} version $version\n" )
@@ -229,6 +229,13 @@ sub smoke {
         $self->ttylog( "Unable to configure perl in this configuration\n" );
         return 0;
     };
+
+    my %sconf = get_smoked_Config( $self->{ddir} => 'ldlibpthname' );
+    exists $sconf{ldlibpthname} or $sconf{ldlibpthname} = "";
+    $sconf{ldlibpthname} and 
+        local $ENV{ $sconf{ldlibpthname} } = $ENV{ $sconf{ldlibpthname} } || '',
+        substr( $ENV{ $sconf{ldlibpthname} }, 0, 0) =
+            "$self->{ddir}$Config{path_sep}";
 
     my $build_stat = $self->make_( $config );
   
