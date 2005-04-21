@@ -17,7 +17,7 @@ use Test::Smoke::Util qw( do_pod2usage );
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.046';
+$VERSION = '0.047';
 
 use Getopt::Long;
 my %options = ( 
@@ -543,6 +543,13 @@ Which directory should be used for the archives?
 EOT
         alt => [ ],
         dft => "",
+    },
+    # Some ENV stuff
+    perl5lib => {
+        msg => "What value should be used for PERL5LIB in the jcl wrapper?
+\t(Make empty, with single space, to not set it.)",
+        alt => [ ],
+        dft => (exists $ENV{PERL5LIB} ? $ENV{PERL5LIB} : ''),
     },
     # Schedule stuff
     docron => {
@@ -1256,6 +1263,24 @@ $arg = 'adir';
 $config{ $arg } = prompt_dir( $arg );
 $config{lfile} = File::Spec->rel2abs( $options{log}, cwd );
 
+=item ENV stuff
+
+If you have a value for PERL5LIB set in the config environment, you
+could have it transferred tho the jcl-wrapperscript. Do not bother
+asking if it is not there.
+
+=cut
+
+my $has_perl5lib = exists $ENV{PERL5LIB} && defined $ENV{PERL5LIB} &&
+                   length $ENV{PERL5LIB};
+
+P5LIB: {
+    $has_perl5lib or last P5LIB;
+    print "\nI see you have PERL5LIB set to: '$ENV{PERL5LIB}'";
+    $arg = 'perl5lib';
+    $config{ $arg } = prompt( $arg );
+}
+
 =item schedule stuff
 
 =over 4
@@ -1439,6 +1464,9 @@ sub sort_configkeys {
 
         # make fine-tuning
         qw( makeopt testmake ),
+
+        # ENV stuff
+        qw( perl5lib ),
     );
 
     my $i = 0;
@@ -1464,6 +1492,12 @@ sub write_sh {
     my $smokeperl = File::Spec->catfile( $findbin, 'smokeperl.pl' );
     my $cronline = schedule_entry( File::Spec->catfile( $cwd, $jcl ), 
                                    $cron, $crontime );
+
+    my $p5lib = $config{perl5lib} ? <<EO_P5L : '';
+PERL5LIB=$config{perl5lib}
+export PERL5LIB
+EO_P5L
+
     my $handle_lock = $config{killtime} ? <<EO_CONT : <<EO_DIE;
     # Not sure about this, so I will keep the old behaviour 
     # smokeperl.pl will exit(42) on timeout
@@ -1497,6 +1531,7 @@ $handle_lock
 fi
 echo "\$CFGNAME" > "\$LOCKFILE"
 
+$p5lib
 PATH=$findbin:$ENV{PATH}
 export PATH
 umask $config{umask}
@@ -1525,12 +1560,17 @@ sub write_bat {
 
     my $smokeperl  = File::Spec->catfile( $findbin_bin, 'smokeperl.pl' );
     my $archiverpt = File::Spec->catfile( $findbin_bin, 'archiverpt.pl' );
-    my $copycmd = $config{w32args}->[1] ne "BORLAND" ? "" : <<EOCOPYCMD;
+    my $copycmd = <<'EOCOPYCMD';
 
-REM I found hanging XCOPY while smoking with BORLAND
+REM I found hanging XCOPY while smoking
 set COPYCMD=/Y %COPYCMD%
 
 EOCOPYCMD
+    my $p5lib = $config{perl5lib} ? <<EO_P5L : '';
+
+set PERL5LIB=$config{perl5lib}
+EO_P5L
+
 
     my $jcl = "$options{jcl}.cmd";
     my $atline = schedule_entry( File::Spec->catfile( $cwd, $jcl ), 
@@ -1550,6 +1590,7 @@ REM @{[ scalar localtime ]}
 REM NOTE: Changes made in this file will be \*lost\*
 REM       after rerunning $0
 $copycmd
+$p5lib
 REM $atline
 
 set WD=$cwd\\
@@ -1590,6 +1631,8 @@ Write a simple DCL script that helps running the smoke suite.
 sub write_com {
     my $jcl = "$options{jcl}.com";
     my $cwd = File::Spec->canonpath( cwd() );
+    my $p5lib_p = $config{perl5lib} ? ' '  : '!';
+    my $p5lib = "$p5lib_p DEFINE PERL5LIB $config{perl5lib}";
     local *MYSMOKECOM;
     open MYSMOKECOM, "> $jcl" or
         die "Cannot write '$jcl': $!";
@@ -1604,7 +1647,9 @@ sub write_com {
 \$!       SUBMIT/NOPRINTER/NOTIFY $cwd$jcl
 \$!
 \$  SET DEFAULT $cwd
+\$$p5lib
 \$! DEFINE/USER sys\$output $options{log}
+\$! DEFINE/USER sys\$error $options{log}
 \$  MCR $^X ${findbin}smokeperl.pl "-c=$options{config}"
 EO_COM
     close MYSMOKECOM or warn "Error writing '$jcl': $!";
