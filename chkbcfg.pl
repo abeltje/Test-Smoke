@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw ( $VERSION );
-$VERSION = '0.001';
+$VERSION = '0.002';
 
 use File::Spec;
 use FindBin;
@@ -33,13 +33,18 @@ my $cfg_nm = shift or do_pod2usage(verbose => 1, myusage => $myusage );
 
 my $cfgs = Test::Smoke::BuildCFG->new( $cfg_nm );
 
+my( $skips, $smokes ) = ( 0, 0 );
 for my $cfg ( $cfgs->configurations ) {
     if ( skip_config( $cfg ) ) {
         print " skip: '$cfg'\n";
+        $skips++;
     } else {
         print "smoke: '$cfg'\n";
+        $smokes++;
     }
 }
+my $total = $skips + $smokes;
+print "Smoke $smokes; skip $skips (total $total)\n";
 
 =head1 SEE ALSO
 
