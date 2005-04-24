@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.015';
+$VERSION = '0.016';
 
 use Config;
 use Cwd;
@@ -366,21 +366,8 @@ from the F<patchlevel.h> file in the distribution.
 sub version_from_patchlevel_h {
     my $self = shift;
 
-    my $file = File::Spec->catfile( $self->{ddir}, 'patchlevel.h' );
-
-    my( $revision, $version, $subversion ) = qw( 5 ? ? );
-    local *PATCHLEVEL;
-    if ( open PATCHLEVEL, "< $file" ) {
-        my $patchlevel = do { local $/; <PATCHLEVEL> };
-        close PATCHLEVEL;
-        $revision   = $patchlevel =~ /^#define PERL_REVISION\s+(\d+)/m 
-                    ? $1 : '?';
-        $version    = $patchlevel =~ /^#define PERL_VERSION\s+(\d+)/m
-                    ? $1 : '?';
-        $subversion = $patchlevel =~ /^#define PERL_SUBVERSION\s+(\d+)/m 
-                    ? $1 : '?';
-    }
-    return "$revision.$version.$subversion";
+    require Test::Smoke::Util;
+    return Test::Smoke::Util::version_from_patchelevel( $self->{ddir} );
 }
  
 =item $syncer->clean_from_directory( $source_dir[, @leave_these] )

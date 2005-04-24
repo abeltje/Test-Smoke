@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.31';
+$VERSION = '0.32';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -511,6 +511,15 @@ sub version_from_patchlevel_h {
     if ( open PATCHLEVEL, "< $file" ) {
         my $patchlevel = do { local $/; <PATCHLEVEL> };
         close PATCHLEVEL;
+
+        if ( $patchlevel =~ /^#define PATCHLEVEL\s+(\d+)/m ) {
+            # Also support perl < 5.6
+            $version = sprintf "%03u", $1;
+            $subversion = $patchlevel =~ /^#define SUBVERSION\s+(\d+)/m
+                ? sprintf "%02u", $1 : '??';
+            return "$revision.$version$subversion";
+        }
+
         $revision   = $patchlevel =~ /^#define PERL_REVISION\s+(\d+)/m 
                     ? $1 : '?';
         $version    = $patchlevel =~ /^#define PERL_VERSION\s+(\d+)/m

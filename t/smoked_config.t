@@ -10,7 +10,7 @@ BEGIN { $findbin = dirname $0; }
 use lib $findbin;
 use TestLib;
 
-use Test::More tests => 30;
+use Test::More tests => 38;
 BEGIN { use_ok( 'Test::Smoke::Util', 'get_smoked_Config' ) }
 
 # make it work for all
@@ -25,7 +25,7 @@ cf_email='abeltje\@cpan.org'
 version='$version'
 !END!
 
-my( $Config_heavy, $Config_pm, $Config_sh );
+my( $Config_heavy, $Config_pm, $Config_sh, $patchlevel_h );
 SKIP: {
     my $cfg_nm = 'Config_heavy.pl';
     my $to_skip = 5;
@@ -156,6 +156,76 @@ EOCONFIG
     is( $Config{version}, '5.?.?', "Perl version: $Config{version}" );
 }
 
+$patchlevel_h = File::Spec->catfile( $findbin, 'patchlevel.h' );
+SKIP: {
+    my $to_skip = 4;
+
+    local *PL_H;
+    open PL_H, "> $patchlevel_h" or 
+        skip "Can't create '$Config_pm': $!", $to_skip;
+
+    print PL_H <<EOPL;
+#ifndef __PATCHLEVEL_H_INCLUDED__
+#define PATCHLEVEL 5
+#undef SUBVERSION     /* OS/390 has a SUBVERSION in a system header */
+#define SUBVERSION 4
+EOPL
+
+    close PL_H or skip "Error '$patchlevel_h': $!", $to_skip;
+
+    my %Config = get_smoked_Config( $findbin,
+                                    qw( archname cf_email version
+                                        osname osvers ));
+    is( $Config{archname}, $arch, "Architecture $arch" );
+    is( $Config{osname}, $osname, "OS name: $osname" );
+    is( $Config{osvers}, $osvers, "OS version: $osvers" );
+    is( $Config{version}, '5.00504', "Perl version: $Config{version}" );
+
+    1 while unlink $patchlevel_h;
+}
+
+SKIP: {
+    my $to_skip = 4;
+
+    local *PL_H;
+    open PL_H, "> $patchlevel_h" or 
+        skip "Can't create '$Config_pm': $!", $to_skip;
+
+    print PL_H <<EOPL;
+/*    patchlevel.h
+ *
+ *    Copyright (C) 1993, 1995, 1996, 1997, 1998, 1999,
+ *    2000, 2001, 2002, 2003, 2004, by Larry Wall and others
+ *
+ *    You may distribute under the terms of either the GNU General Public
+ *    License or the Artistic License, as specified in the README file.
+ *
+ */
+
+#ifndef __PATCHLEVEL_H_INCLUDED__
+
+/* do not adjust the whitespace! Configure expects the numbers to be
+ * exactly on the third column */
+
+#define PERL_REVISION	5		/* age */
+#define PERL_VERSION	8		/* epoch */
+#define PERL_SUBVERSION	6		/* generation */
+
+EOPL
+
+    close PL_H or skip "Error '$patchlevel_h': $!", $to_skip;
+
+    my %Config = get_smoked_Config( $findbin,
+                                    qw( archname cf_email version
+                                        osname osvers ));
+    is( $Config{archname}, $arch, "Architecture $arch" );
+    is( $Config{osname}, $osname, "OS name: $osname" );
+    is( $Config{osvers}, $osvers, "OS version: $osvers" );
+    is( $Config{version}, '5.8.6', "Perl version: $Config{version}" );
+
+    1 while unlink $patchlevel_h;
+}
+
 SKIP: {
     my $to_skip = 5;
 
@@ -192,7 +262,6 @@ EOCONFIG
 
     1 while unlink $Config_pm;
 }
-
 
 END {
     rmtree( File::Spec->catdir( $findbin, 'lib' ) )
