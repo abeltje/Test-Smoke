@@ -1592,7 +1592,7 @@ EO_P5L
     $config{lfile} or $archive =~ s/^/REM /;
     my $extraopt = "";
     my $report = qq/$^X $mailrpt -c "\%CFGNAME\%"/;
-    unless ( $config{delay_report} ) {
+    if ( $config{delay_report} ) {
         $report =~ s/^/REM /;
         $extraopt = '--noreport';
     }
