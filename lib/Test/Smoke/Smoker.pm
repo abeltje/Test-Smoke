@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.023';
+$VERSION = '0.024';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -536,7 +536,7 @@ sub extend_with_harness {
     if ( @harness ) {
         local $ENV{PERL_SKIP_TTY_TEST} = 1;
         # I'm not happy with this PERLSHR approach for VMS
-        local $ENV{PERLSHR} = $ENV{PERLSHR};
+        local $ENV{PERLSHR} = $ENV{PERLSHR} || "";
         $self->{is_vms} and
              $ENV{PERLSHR} = catfile( $self->{ddir},
                                       'PERLSHR' . $Config{_exe} );
