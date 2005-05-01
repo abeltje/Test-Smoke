@@ -127,9 +127,9 @@ make test || exit
 trap 0
 
 # Create the distribution and move it to the distribution directory
-perl -i -pe 's/^#?local-user abeltje/local-user abeltje/' ~/.gnupg/options
+#perl -i -pe 's/^#?local-user abeltje/local-user abeltje/' ~/.gnupg/options
 make dist
-perl -i -pe 's/^local-user abeltje/#local-user abeltje/' ~/.gnupg/options
+#perl -i -pe 's/^local-user abeltje/#local-user abeltje/' ~/.gnupg/options
 mv -v *.tar.gz $distdir
 
 # Autocommit the "make dist" regenerated files
