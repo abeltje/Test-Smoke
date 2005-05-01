@@ -127,28 +127,26 @@ make test || exit
 trap 0
 
 # Create the distribution and move it to the distribution directory
-#perl -i -pe 's/^#?local-user abeltje/local-user abeltje/' ~/.gnupg/options
 make dist
-#perl -i -pe 's/^local-user abeltje/#local-user abeltje/' ~/.gnupg/options
 mv -v *.tar.gz $distdir
 
-# Autocommit the "make dist" regenerated files
-if [ "$SMOKE_CI_FILES" == "1" ] ; then
-    # Commit the newly generated Files
-    cat <<EOF > svntargets.ci
-SIGNATURE
-META.yml
-EOF
-    cat <<EOF > svnmsg.ci
-* [AUTOCOMMIT]
-  * Regenerate 'SIGNATURES', 'META.yml'
-EOF
-    svn ci --targets svntargets.ci -F svnmsg.ci
-    rm -f svntargets.ci
-    rm -f svnmsg.ci
-else
-    echo "Skipping autocommit of regenerated files"
-fi
+## Autocommit the "make dist" regenerated files
+#if [ "$SMOKE_CI_FILES" == "1" ] ; then
+#    # Commit the newly generated Files
+#    cat <<EOF > svntargets.ci
+#SIGNATURES
+#META.yml
+#EOF
+#    cat <<EOF > svnmsg.ci
+#* [AUTOCOMMIT]
+#  * Regenerate 'SIGNATURES', 'META.yml'
+#EOF
+#    svn ci --targets svntargets.ci -F svnmsg.ci
+#    rm -f svntargets.ci
+#    rm -f svnmsg.ci
+#else
+#    echo "Skipping autocommit of regenerated files"
+#fi
 
 # Clean up!
 make veryclean > /dev/null
