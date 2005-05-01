@@ -1588,14 +1588,12 @@ EO_P5L
     my $jcl = "$options{jcl}.cmd";
     my $atline = schedule_entry( File::Spec->catfile( $cwd, $jcl ), 
                                  $cron, $crontime );
+
     my $archive = qq/$^X $archiverpt -c "\%CFGNAME\%"/;
     $config{lfile} or $archive =~ s/^/REM /;
-    my $extraopt = "";
+
     my $report = qq/$^X $mailrpt -c "\%CFGNAME\%"/;
-    if ( $config{delay_report} ) {
-        $report =~ s/^/REM /;
-        $extraopt = '--noreport';
-    }
+    $config{delay_report} or $report =~ s/^/REM /;
 
     local *MYSMOKEBAT;
     open MYSMOKEBAT, "> $jcl" or
@@ -1628,7 +1626,7 @@ if NOT EXIST \%LOCKFILE\% goto START_SMOKE
     echo \%CFGNAME\% > \%LOCKFILE\%
     set OLD_PATH=\%PATH\%
     set PATH=$findbin_bin;\%PATH\%
-    $^X $smokeperl $extraopt -c "\%CFGNAME\%" \%* > "\%WD\%\\$options{log}" 2>&1
+    $^X $smokeperl -c "\%CFGNAME\%" \%* > "\%WD\%\\$options{log}" 2>&1
     $archive
     $mailrpt
     set PATH=\%OLD_PATH\%
