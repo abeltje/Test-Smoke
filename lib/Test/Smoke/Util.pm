@@ -450,7 +450,7 @@ sub grepccmsg {
         $error{ "Couldn't examine '$logfile' for compiler warnings." } = 1;
     }
 
-    $error{ $1 } ||= $indx++ while $smokelog =~ /$pat/msgo;
+    $error{ $1 } ||= $indx++ while $smokelog =~ /$pat/smg;
 
     # I need to think about this IRIX/$Config{cc} thing
 #    if ($cc eq 'irix') {
