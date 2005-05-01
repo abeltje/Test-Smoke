@@ -533,6 +533,7 @@ sub ccmessages {
     $^O =~ /^(?:linux|.*bsd.*|darwin)/ and $ccinfo = 'gcc';
     my $cc = $ccinfo eq 'gcc' ? 'gcc' : $^O;
 
+    $self->{v} and print "Looking for cc messages: '$cc'\n";
     my $errors = grepccmsg( $cc, $self->{lfile}, $self->{v} );
 
     local $" = "\n";

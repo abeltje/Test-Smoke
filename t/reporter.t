@@ -549,9 +549,9 @@ re_comp.c: In function `S_study_chunk':
 re_comp.c:1618: warning: comparison is always false due to limited range of data type
 EOCCMSG
 
-    ok my $report = $reporter->report, "Report generated";
+    ok my $ccmsg = $reporter->ccmessages, "Got compiler messages";
     for my $line ( @ccmsg ) {
-        like $report, "/\Q$line\E/ms", "$line";
+        like $ccmsg, "/\Q$line\E/ms", "$line";
     }
     rmtree $testdir, $verbose;    
 }

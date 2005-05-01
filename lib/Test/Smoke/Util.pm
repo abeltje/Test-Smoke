@@ -444,6 +444,7 @@ sub grepccmsg {
         local $/;
         $smokelog = <$logfh>;
         close $logfh;
+        $verbose and print "Pattern($cc): /$pat/\n";
     } else {
         $verbose and print "Skipping '$logfile' '$!'\n";
         $error{ "Couldn't examine '$logfile' for compiler warnings." } = 1;
