@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.32';
+$VERSION = '0.33';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -13,7 +13,8 @@ use base 'Exporter';
     &skip_config &skip_filter
 );
 
-@EXPORT_OK = qw( 
+@EXPORT_OK = qw(
+    &grepccmsg
     &get_ncpu &get_smoked_Config &parse_report_Config 
     &get_regen_headers &run_regen_headers
     &calc_timeout &time_in_hhmm
@@ -359,6 +360,109 @@ sub get_cfg_filename {
     return $cfg_name if -f $cfg_name && -s _;
 
     return undef;
+}
+
+=item grepccmsg( $cc, $logfile, $verbose )
+
+This is a port of Jarkko Hietaniemi's grepccerr script.
+
+=cut
+
+sub grepccmsg {
+    my( $cc, $logfile, $verbose ) = @_;
+    defined $logfile or $logfile = "";
+    $cc ||= 'gcc';
+    my %OS2PAT = (
+        'aix' => 
+            # "foo.c", line n.c: pppp-qqq (W) ...error description...
+            # "foo.c", line n.c: pppp-qqq (S) ...error description...
+            '(^".+?", line \d+\.\d+: \d+-\d+ \([WS]\) .+?$)',
+      
+        'dec_osf' =>
+            # DEC OSF/1, Digital UNIX, Tru64 (notice also VMS)
+            # cc: Warning: foo.c, line nnn: ...error description...(error_tag)
+            #     ...error line...
+            # ------^
+            # cc: Error: foo.c, line nnn: ...error description... (error_tag)
+            #     ...error line...
+            # ------^
+            '(^cc: (?:Warning|Error): .+?^-*\^$)',
+      
+       'hpux' =>
+            # cc: "foo.c"" line nnn: warning ppp: ...error description...
+            # cc: "foo.c"" line nnn: error ppp: ...error description...
+            '(^cc: ".+?", line \d+: (?:warning|error) \d+: .+?$)',
+            
+        'irix' =>
+            # cc-pppp cc: WARNING File = foo.c, Line = nnnn
+            # ...error description...
+            # 
+            # ...error line...
+            #   ^
+            # cc-pppp cc: ERROR File = foo.c, Line = nnnn
+            # ...error description...
+            # 
+            # ...error line...
+            #   ^
+            '^(cc-\d+ cc: (?:WARNING|ERROR) File = .+?, ' .
+            'Line = \d+.+?^\s*\^$)',
+      
+        'solaris' =>
+            # "foo.c", line nnn: warning: ...error description...
+            # "foo.c", line nnn: warning: ...:
+            #         ...error description...
+            # "foo.c", line nnn: syntax error ...
+            '(^".+?", line \d+: ' .
+            '(?:warning: (?:(?:.+?:$)?.+?$)|syntax error.+?$))',
+            
+        'VMS' => # same compiler as Tru64, different message syntax
+            #     ...error line...
+            # ......^
+            # %CC-W-MESSAGEID, ...error description...
+            # at line number nnn in file foo.c
+            '(^\n.+?\n^\.+?\^\n^\%CC-(?:I|W|E|F)-\w+, ' .
+            '.+?\nat line number \d+ in file \S+?$)',
+      
+        'gcc' =>
+            # foo.c: In function `foo':
+            # foo.c:nnn: warning: ...
+            # foo.c: In function `foo':
+            # foo.c:nnn:ppp: warning: ...
+                # Sometimes also the column is mentioned.
+            # foo.c: In function `foo':
+            # foo.c:nnn: error: ...
+            '(^(?-s:.+?):(?: In function .+?:$|\d+(?:\:\d+)?: ' .
+            '(?:warning|error): .+?$))',
+    );
+    exists $OS2PAT{ $cc } or $cc = 'gcc';
+    my $pat = $OS2PAT{ $cc };
+
+    my( $indx, %error ) = ( 1 );
+    my $smokelog = '';
+    if ( open my $logfh, "< $logfile" ) {
+        $verbose and print "Reading logfile '$logfile'\n";
+        local $/;
+        $smokelog = <$logfh>;
+        close $logfh;
+    } else {
+        $verbose and print "Skipping '$logfile' '$!'\n";
+        $error{ "Couldn't examine '$logfile' for compiler warnings." } = 1;
+    }
+
+    $error{ $1 } ||= $indx++ while $smokelog =~ /$pat/msgo;
+
+    # I need to think about this IRIX/$Config{cc} thing
+#    if ($cc eq 'irix') {
+#        if ($Config{cc} =~ /-n32|-64/) {
+#    	     delete @error{ grep { /cc-(?:1009|1110|1047) / } keys %error };
+#        }
+#    }
+
+    my @errors = map {
+        chomp; $_;
+    } sort { $error{ $a } <=> $error{ $b } } keys %error;
+
+    return wantarray ? @errors : \@errors;
 }
 
 =item get_config( $filename )

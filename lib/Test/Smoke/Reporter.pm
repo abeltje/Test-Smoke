@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.019';
+$VERSION = '0.020';
 
 use Cwd;
 use File::Spec::Functions;
@@ -11,13 +11,14 @@ require File::Path;
 use Text::ParseWords;
 require Test::Smoke;
 use Test::Smoke::SysInfo;
-use Test::Smoke::Util qw( get_smoked_Config time_in_hhmm );
+use Test::Smoke::Util qw( grepccmsg get_smoked_Config time_in_hhmm );
 
 my %CONFIG = (
     df_ddir       => curdir(),
     df_outfile    => 'mktest.out',
     df_rptfile    => 'mktest.rpt',
     df_cfg        => undef,
+    df_lfile      => undef,
     df_showcfg    => 0,
 
     df_locale     => undef,
@@ -485,6 +486,8 @@ sub report {
             .  $self->failures if $self->has_test_failures;
     $report .= "\n" . $self->mani_fail           if $self->has_mani_failures;
 
+    $report .= $self->ccmessages;
+
     if ( $self->{showcfg} && $self->{cfg} && $self->has_test_failures ) {
         require Test::Smoke::BuildCFG;
         my $bcfg = Test::Smoke::BuildCFG->new( $self->{cfg} );
@@ -511,8 +514,33 @@ sub ccinfo {
         $cinfo = "? ";
         my $ccvers = $Config{gccversion} || $Config{ccversion} || '';
         $cinfo .= ( $Config{cc} || 'unknown cc' ) . " version $ccvers";
+        $self->{_ccinfo} = ($Config{cc} || 'cc') . " version $ccvers";
     }
     return $cinfo;
+}
+
+=item $reporter->ccmessages( )
+
+Use a port of Jarkko's F<grepccerr> script to report the compiler messages.
+
+=cut
+
+sub ccmessages {
+    my $self = shift;
+    my $ccinfo = $self->{_rpt}{cinfo} || $self->{_ccinfo};
+    $ccinfo =~ s/^(.+)\s+version\s+.+/$1/;
+
+    $^O =~ /^(?:linux|.*bsd.*|darwin)/ and $ccinfo = 'gcc';
+    my $cc = $ccinfo eq 'gcc' ? 'gcc' : $^O;
+
+    my $errors = grepccmsg( $cc, $self->{lfile}, $self->{v} );
+
+    local $" = "\n";
+    return @$errors ? <<EOERRORS : "";
+
+Compiler messages($cc):
+@$errors
+EOERRORS
 }
 
 =item $reporter->preamble( )

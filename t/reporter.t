@@ -10,11 +10,12 @@ use File::Basename;
 BEGIN { $findbin = dirname $0; }
 use lib $findbin;
 use TestLib;
+use File::Copy;
 
 my $verbose = exists $ENV{SMOKE_VERBOSE} ? $ENV{SMOKE_VERBOSE} : 0;
 my $showcfg = 0;
 
-use Test::More tests => 53;
+use Test::More tests => 66;
 
 use_ok 'Test::Smoke::Reporter';
 
@@ -514,6 +515,45 @@ Inconsistent test results (between TEST and harness):
     ../ext/threads/shared/t/sv_simple.t.....dubious
 __EOFAIL__
 
+}
+
+{ # Test the grepccmsg() feature
+    my $testdir = catdir $findbin, 'perl-current';
+    mkpath $testdir;
+    copy( catfile( $findbin, 'darwin.out'), catfile( $testdir, 'mktest.out' ) );
+
+    ok( my $reporter = Test::Smoke::Reporter->new(
+        ddir       => $testdir,
+        is56x      => 0,
+        defaultenv => 0,
+        lfile      => catfile( $findbin, 'darwin.log' ),
+        v          => $verbose,
+        showcfg    => $showcfg,
+        cfg        => \( my $bcfg = <<'__EOCFG__' )), "init for grepccmsg() ");
+==
+-Duseithreads
+==
+__EOCFG__
+
+    my @ccmsg = split /\n/, <<'EOCCMSG';
+Compiler messages(gcc):
+regcomp.c: In function `S_make_trie':
+regcomp.c:905: warning: `scan' might be used uninitialized in this function
+regcomp.c: In function `S_study_chunk':
+regcomp.c:1618: warning: comparison is always false due to limited range of data type
+pp_sys.c:311: warning: `S_emulate_eaccess' defined but not used
+byterun.c: In function `byterun':
+byterun.c:906: warning: comparison is always false due to limited range of data type
+DProf.xs:140: warning: `unused' attribute ignored
+re_comp.c: In function `S_study_chunk':
+re_comp.c:1618: warning: comparison is always false due to limited range of data type
+EOCCMSG
+
+    ok my $report = $reporter->report, "Report generated";
+    for my $line ( @ccmsg ) {
+        like $report, "/\Q$line\E/ms", "$line";
+    }
+    rmtree $testdir, $verbose;    
 }
 
 sub create_config_sh {
