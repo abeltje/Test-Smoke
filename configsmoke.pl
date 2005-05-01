@@ -1263,6 +1263,18 @@ $arg = 'adir';
 $config{ $arg } = prompt_dir( $arg );
 $config{lfile} = File::Spec->rel2abs( $options{log}, cwd );
 
+=item delay_report
+
+Some filesystems do not support opening an already opened file. This
+makes it hard to scan the logfile for compiler messages. We can delay
+the creation of the report and call F<mailrpt.pl> after
+F<smokeperl.pl>. MSWin32 and VMS might benefit.
+
+=cut
+
+$arg = 'delay_report';
+$config{ $arg } = $^O =~ /MSWin32|VMS/;
+
 =item ENV stuff
 
 If you have a value for PERL5LIB set in the config environment, you
@@ -1466,7 +1478,7 @@ sub sort_configkeys {
         qw( makeopt testmake ),
 
         # ENV stuff
-        qw( perl5lib ),
+        qw( perl5lib delay_report ),
     );
 
     my $i = 0;
@@ -1560,6 +1572,7 @@ sub write_bat {
 
     my $smokeperl  = File::Spec->catfile( $findbin_bin, 'smokeperl.pl' );
     my $archiverpt = File::Spec->catfile( $findbin_bin, 'archiverpt.pl' );
+    my $mailrpt    = File::Spec->catfile( $findbin_bin, 'mailrpt.pl' );
     my $copycmd = <<'EOCOPYCMD';
 
 REM I found hanging XCOPY while smoking
@@ -1575,8 +1588,14 @@ EO_P5L
     my $jcl = "$options{jcl}.cmd";
     my $atline = schedule_entry( File::Spec->catfile( $cwd, $jcl ), 
                                  $cron, $crontime );
-    my $archive = $config{lfile} 
-        ? qq/$^X $archiverpt -c "\%CFGNAME\%"/ : "";
+    my $archive = qq/$^X $archiverpt -c "\%CFGNAME\%"/;
+    $config{lfile} or $archive =~ s/^/REM /;
+    my $extraopt = "";
+    my $report = qq/$^X $mailrpt -c "\%CFGNAME\%"/;
+    unless ( $config{delay_report} ) {
+        $report =~ /^/REM /;
+        $extraopt = '--noreport';
+    }
 
     local *MYSMOKEBAT;
     open MYSMOKEBAT, "> $jcl" or
@@ -1609,8 +1628,9 @@ if NOT EXIST \%LOCKFILE\% goto START_SMOKE
     echo \%CFGNAME\% > \%LOCKFILE\%
     set OLD_PATH=\%PATH\%
     set PATH=$findbin_bin;\%PATH\%
-    $^X $smokeperl -c "\%CFGNAME\%" \%* > "\%WD\%\\$options{log}" 2>&1
+    $^X $smokeperl $extraopt -c "\%CFGNAME\%" \%* > "\%WD\%\\$options{log}" 2>&1
     $archive
+    $mailrpt
     set PATH=\%OLD_PATH\%
 
 del \%LOCKFILE\%
