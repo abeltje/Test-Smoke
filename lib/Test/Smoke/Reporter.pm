@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.020';
+$VERSION = '0.021';
 
 use Cwd;
 use File::Spec::Functions;
@@ -449,6 +449,7 @@ use C<< catfile( $self->{ddir}, $self->{rptfile} ) >>.
 
 sub write_to_file {
     my $self = shift;
+    return unless defined $self->{_outfile};
     my( $name ) = @_ || ( catfile $self->{ddir}, $self->{rptfile} );
 
     $self->{v} and print "Writing report to '$name':";
@@ -476,6 +477,8 @@ Return a string with the full report
 
 sub report {
     my $self = shift;
+    return unless defined $self->{_outfile};
+
     my $report = $self->preamble;
 
     $report .= $self->summary . "\n";

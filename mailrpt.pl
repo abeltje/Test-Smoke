@@ -4,7 +4,7 @@ $| = 1;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.015';
+$VERSION = '0.016';
 
 use Cwd;
 use File::Spec;
@@ -157,9 +157,9 @@ if ( $opt{mail} ) {
 
 $opt{ddir} && -d $opt{ddir} or do_pod2usage( verbose => 0 );
 
-check_for_report();
+my $cont = check_for_report();
 
-if ( $opt{mail} ) {
+if ( $cont && $opt{mail} ) {
     my $mailer = Test::Smoke::Mailer->new( $opt{type} => \%opt );
     $mailer->mail;
 }
@@ -171,16 +171,22 @@ sub check_for_report {
 
     if ( -f $report ) {
         $opt{v} and print "Found [$report]\n";
-        $opt{report} or return;
+        $opt{report} or return 1;
     } else {
         $opt{v} and print "No report found in [$opt{ddir}].\n";
     }
 
     my $reporter = Test::Smoke::Reporter->new( $conf );
-    $reporter->write_to_file;
-
-    unless ( -f $report ) {
-        die "Hmmm... cannot find [$report]";
+    if ( defined $reporter->{_outfile} ) {
+        $reporter->write_to_file;
+    
+        unless ( -f $report ) {
+            die "Hmmm... cannot find [$report]";
+        }
+        return 1;
+    } else {
+        $opt{v} and print "Skipped, no .out-file\n";
+        return;
     }
 }
 

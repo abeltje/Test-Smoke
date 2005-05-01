@@ -4,10 +4,10 @@ $| = 1;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.003';
+$VERSION = '0.004';
 
 use Cwd;
-use File::Spec;
+use File::Spec::Functions;
 use File::Path;
 use File::Copy;
 use FindBin;
@@ -118,14 +118,16 @@ $opt{adir} && -d $opt{adir} or do {
 my $patch_level = get_patch( $opt{ddir} );
 $patch_level =~ tr/ //sd;
 
-my $archived_rpt = "rpt${patch_level}.rpt";
+my $archived_rpt = catfile( $opt{adir}, "rpt${patch_level}.rpt" );
 
 # Do not archive if it is already done
--f File::Spec->catfile( $opt{adir}, $archived_rpt ) && $opt{force} and exit;
+-f $archived_rpt && !$opt{force} and exit;
 
-copy( File::Spec->catfile( $opt{ddir}, 'mktest.rpt' ), 
-      File::Spec->catfile( $opt{adir}, $archived_rpt ) ) or
-    die "Cannot copy to '$archived_rpt': $!";
+my $mktest_rpt = catfile( $opt{ddir}, 'mktest.rpt' );
+if ( -f $mktest_rpt ) {
+    copy( $mktest_rpt, $archived_rpt ) or
+        die "Cannot copy to '$archived_rpt': $!";
+}
 
 SKIP_LOG: {
     my $archived_log = "log${patch_level}.log";
