@@ -1628,7 +1628,7 @@ if NOT EXIST \%LOCKFILE\% goto START_SMOKE
     set PATH=$findbin_bin;\%PATH\%
     $^X $smokeperl -c "\%CFGNAME\%" \%* > "\%WD\%\\$options{log}" 2>&1
     $archive
-    $mailrpt
+    $report
     set PATH=\%OLD_PATH\%
 
 del \%LOCKFILE\%
