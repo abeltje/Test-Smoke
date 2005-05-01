@@ -17,7 +17,7 @@ use Test::Smoke::Util qw( do_pod2usage );
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.047';
+$VERSION = '0.048';
 
 use Getopt::Long;
 my %options = ( 
@@ -1593,7 +1593,7 @@ EO_P5L
     my $extraopt = "";
     my $report = qq/$^X $mailrpt -c "\%CFGNAME\%"/;
     unless ( $config{delay_report} ) {
-        $report =~ /^/REM /;
+        $report =~ s/^/REM /;
         $extraopt = '--noreport';
     }
 
