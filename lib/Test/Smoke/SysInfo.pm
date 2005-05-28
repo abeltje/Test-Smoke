@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.024';
+$VERSION = '0.025';
 
 use base 'Exporter';
 @EXPORT_OK = qw( &sysinfo &tsuname );
@@ -317,7 +317,7 @@ sub BSD {
 
     my $sysctl_cmd = -x '/sbin/sysctl' ? '/sbin/sysctl' : 'sysctl';
 
-    my %extra = ( cpufrequency => undef );
+    my %extra = ( cpufrequency => undef, cpuspeed => undef );
     my @e_args = map {
         /^hw\.(\w+)\s*[:=]/; $1
     } grep /^hw\.(\w+)/ && exists $extra{ $1 } => `$sysctl_cmd -a hw`; 
@@ -326,11 +326,15 @@ sub BSD {
         chomp( $sysctl{ $name } = `$sysctl_cmd hw.$name` );
         $sysctl{ $name } =~ s/^hw\.$name\s*[:=]\s*//;
     }
-    $sysctl{machine} and $sysctl{machine} =~ s/Power Macintosh/ppc/;
+    $sysctl{machine} and $sysctl{machine} =~ s/Power Macintosh/macppc/;
 
     my $cpu = $sysctl{model};
-    exists $sysctl{cpufrequency}
-        and $cpu .= sprintf " (%.0f MHz)", $sysctl{cpufrequency}/1_000_000;
+
+    if ( exists $sysctl{cpuspeed} ) {
+        $cpu .= sprintf " (%.0f MHz)", $sysctl{cpuspeed};
+    } elsif ( exists $sysctl{cpufrequency} ) {
+        $cpu .= sprintf " (%.0f MHz)", $sysctl{cpufrequency}/1_000_000;
+    }
 
     return {
         _cpu_type => $sysctl{machine} || __get_cpu_type(),
