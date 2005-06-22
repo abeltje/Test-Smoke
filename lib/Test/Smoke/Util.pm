@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.33';
+$VERSION = '0.34';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -1055,6 +1055,7 @@ sub skip_filter {
     m,^(   )?### , ||
     # Clean up Win32's output
     m,^(?:\.\.[/\\])?[\w/\\-]+\.*ok$, ||
+    m,^(?:\.\.[/\\])?[\w/\\-]+\.*ok\s+\d+(\.\d+)?s$, ||
     m,^(?:\.\.[/\\])?[\w/\\-]+\.*ok\,\s+\d+/\d+\s+skipped:, ||
     m,^(?:\.\.[/\\])?[\w/\\-]+\.*skipped[: ], ||
     m,^\t?x?copy , ||

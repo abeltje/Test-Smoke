@@ -5,7 +5,7 @@ use strict;
 
 use File::Spec;
 
-use Test::More tests => 16;
+use Test::More tests => 17;
 BEGIN { use_ok( 'Test::Smoke::Util' ); }
 
 while ( <DATA> ) {
@@ -40,3 +40,4 @@ P C:\usr\local\src\bleadperl\perl\miniperl.exe "-I..\..\lib" "-I..\..\lib" -MExt
 P C:\usr\local\src\bleadperl\perl\miniperl.exe "-I..\..\lib" "-I..\..\lib" -MExtUtils::Command -e cp bin/enc2xs blib\script\enc2xs
 P Creating library file: libExtTest.dll.a
 P not ok 43 # SKIP see perldelta583
+P base/cond...................................ok    0.060s
