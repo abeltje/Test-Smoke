@@ -10,6 +10,251 @@ The filelists have a short symbolic indicator:
 
 Enjoy!
 ___________________________________________________________________________
+[   873] By: abeltje                          on 2005-07-21 18:54:14 +0200
+        Log: * Prepare for a snapshot
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   872] By: abeltje                          on 2005-07-21 18:53:21 +0200
+        Log: * [CHANGE]
+	       * no need to delay the report-generating on MSWin32
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[   871] By: abeltje                          on 2005-07-21 18:26:52 +0200
+        Log: * [CHANGE]
+	       * tweak the MSWin32/MSVC regex in grepccmsg() to skip the
+		 NMAKE messages
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Util.pm
+___________________________________________________________________________
+[   870] By: abeltje                          on 2005-07-21 18:11:53 +0200
+        Log: * [FIX]
+	       * Remove a warning generated with -v > 1 &&
+		 testenv==minitest
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Reporter.pm
+___________________________________________________________________________
+[   869] By: abeltje                          on 2005-07-21 18:03:11 +0200
+        Log: * [FIX]
+	       * also use the lc($cc) to actually get the regex pattern
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Util.pm
+___________________________________________________________________________
+[   868] By: abeltje                          on 2005-07-21 16:30:54 +0200
+        Log: * [CHANGE]
+	       * use {w32cc} to determine if we're using MSVC (to safe the
+		 nmake output)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm
+___________________________________________________________________________
+[   867] By: abeltje                          on 2005-07-21 16:04:44 +0200
+        Log: * [FIX]
+	       * typo in the new support for -v
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/smokeperl.pl
+___________________________________________________________________________
+[   866] By: abeltje                          on 2005-07-21 15:52:44 +0200
+        Log: * [FIX]
+	       * No use trying to find messages in a non-existing file
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Reporter.pm,
+	     /Test-Smoke/lib/Test/Smoke/Util.pm
+___________________________________________________________________________
+[   865] By: abeltje                          on 2005-07-21 15:26:14 +0200
+        Log: * [FIX]
+	       * typo in the mswin32 (MSVC) regex
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Util.pm
+___________________________________________________________________________
+[   864] By: abeltje                          on 2005-07-21 15:21:31 +0200
+        Log: * [CHANGE]
+	       + add a regex for MSVC messages to
+		 Test::Smoke::Util::grepccmsg()
+	       + write the `nmake -f smoke.mk` output to tty (caught by
+		 the redirection in the smoke JCL)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm,
+	     /Test-Smoke/lib/Test/Smoke/Util.pm
+___________________________________________________________________________
+[   863] By: abeltje                          on 2005-07-21 12:28:14 +0200
+        Log: * [CHANGE]
+	       * do some more OpenVMS tweaking
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SourceTree.pm
+___________________________________________________________________________
+[   862] By: abeltje                          on 2005-07-21 12:25:29 +0200
+        Log: * [CHANGE]
+	       + add support for the -v switch
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/smokeperl.pl
+___________________________________________________________________________
+[   861] By: abeltje                          on 2005-06-22 21:26:06 +0200
+        Log: * [CHANGE]
+	       + allow the new timing information that Test::Harness 2.50
+		 provides. Should only affect MSWin32
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Util.pm,
+	     /Test-Smoke/t/skip_filter.t
+___________________________________________________________________________
+[   860] By: abeltje                          on 2005-05-28 02:27:23 +0200
+        Log: * [CHANGE]
+	       * ppc will now be macppc (on mac's)
+	       * OpenBSD has 'cpuspeed' on macppc
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[   859] By: abeltje                          on 2005-05-02 00:20:49 +0200
+        Log: * Prepare for a snatshot @ 1.19_70
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   858] By: abeltje                          on 2005-05-02 00:19:51 +0200
+        Log: * [CHANGE]
+	       * Fix support for delayed archiving and reporting
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/archiverpt.pl,
+	     /Test-Smoke/lib/Test/Smoke/Reporter.pm,
+	     /Test-Smoke/mailrpt.pl
+___________________________________________________________________________
+[   856] By: abeltje                          on 2005-05-01 22:40:30 +0200
+        Log: * [REMOVE]
+	       - No more pgp-signing... (for the moment)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           - /Test-Smoke/SIGNATURE, /Test-Smoke/t/00signature.t
+           ! /Test-Smoke/MANIFEST, /Test-Smoke/Makefile.PL,
+	     /Test-Smoke/mkdist.sh
+___________________________________________________________________________
+[   855] By: abeltje                          on 2005-05-01 21:25:18 +0200
+        Log: * [FIX]
+	       * lets get it right with write_bat() try 4
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[   854] By: abeltje                          on 2005-05-01 21:20:54 +0200
+        Log: * [FIX]
+	       * lets get it right with write_bat()
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[   853] By: abeltje                          on 2005-05-01 21:04:55 +0200
+        Log: * [FIX]
+	       * thinko in write_bat() :-(
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[   852] By: abeltje                          on 2005-05-01 20:53:36 +0200
+        Log: * [FIX]
+	       * typo in write_bat()
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[   851] By: abeltje                          on 2005-05-01 20:48:22 +0200
+        Log: * [CHANGE]
+	       + Add support for grepccmsg() on MSWin32 with delayed
+		 report creation
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl, /Test-Smoke/smokeperl.pl
+___________________________________________________________________________
+[   850] By: abeltje                          on 2005-05-01 19:46:20 +0200
+        Log: * [FIX]
+	       * resolve a 'use of uninitialized value'
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm
+___________________________________________________________________________
+[   849] By: abeltje                          on 2005-05-01 19:41:39 +0200
+        Log: * [CHANGE]
+	       - Remove the '/o' from grepccmsg regex (some systems didn't
+		 like it)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Util.pm
+___________________________________________________________________________
+[   848] By: abeltje                          on 2005-05-01 17:55:45 +0200
+        Log: * [CHANGE]
+	       * make sure all platforms see 'gcc'
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/t/darwin.out
+___________________________________________________________________________
+[   847] By: abeltje                          on 2005-05-01 17:29:01 +0200
+        Log: * [CHANGE]
+	       * now try to make it work on other platforms than darwin
+		 ;-)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Reporter.pm,
+	     /Test-Smoke/lib/Test/Smoke/Util.pm, /Test-Smoke/t/reporter.t
+___________________________________________________________________________
+[   846] By: abeltje                          on 2005-05-01 16:53:00 +0200
+        Log: * [CHANGE] suggested by Jarkko Hietaniemi
+	       + integrate the grepccerr script:
+		 * this will only work if there is a logfile and the os
+		   supports reading from an open file (as the logfile is
+		   an os redirection)
+		 * Still need to split the smoking and the reporting for
+		   MSWin32
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           + /Test-Smoke/t/darwin.log, /Test-Smoke/t/darwin.out
+           ! /Test-Smoke/lib/Test/Smoke/Reporter.pm,
+	     /Test-Smoke/lib/Test/Smoke/Util.pm, /Test-Smoke/t/reporter.t
+___________________________________________________________________________
+[   845] By: abeltje                          on 2005-04-24 18:29:11 +0200
+        Log: * [CHANGE]
+	       * I found that patchlevel.h < 5.6 has different defines for
+		 the version; now also taken into account
+	       * the version_from_patchlevel_h() code wasn't tested
+	       * remove the code from Test::Smoke::Syncer; one copy in
+		 Test::Smoke::Util is enough
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Syncer.pm,
+	     /Test-Smoke/lib/Test/Smoke/Util.pm,
+	     /Test-Smoke/t/smoked_config.t
+___________________________________________________________________________
+[   844] By: abeltje                          on 2005-04-22 22:21:36 +0200
+        Log: * [CHANGE]
+	       + Add some statistics (nrof smoke/skip configs)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/chkbcfg.pl
+___________________________________________________________________________
+[   843] By: abeltje                          on 2005-04-21 16:23:30 +0200
+        Log: * [ADD]
+	       + Add the perl5lib option to set PERL5LIB in the
+		 wrapper-jcl
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[   842] By: abeltje                          on 2005-04-19 15:52:50 +0200
+        Log: * [CHANGE] thanks to Kane and the bsd/os box
+	       * move the setting $ENV{ $Config{ldlibpthname} } to after
+		 the Configure step and use the value that this newly
+		 configured perl has in config.sh
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm,
+	     /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   839] By: abeltje                          on 2005-04-10 17:50:03 +0200
+        Log: * [FIX]
+	       * help Solais (10) for Intel (it hasn't got prtdiag
+		 support)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[   838] By: abeltje                          on 2005-02-22 23:05:45 +0100
+        Log: * [CHANGE] thanks to Steve Hay
+	       + add F<chkbcfg.pl> to the list of scripts
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Makefile.PL
+___________________________________________________________________________
+[   836] By: abeltje                          on 2005-02-13 10:28:48 +0100
+        Log: * [AUTOCOMMIT]
+	       * Regenerate 'SIGNATURES', 'META.yml'
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/META.yml, /Test-Smoke/SIGNATURE
+___________________________________________________________________________
+[   835] By: abeltje                          on 2005-02-13 10:27:17 +0100
+        Log: * [AUTOCOMMIT]
+	       * Regenerate 'Changes'
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Changes
+___________________________________________________________________________
 [   834] By: abeltje                          on 2005-02-13 09:36:25 +0100
         Log: * Prepare for snapshot of 1.19_66
         Url: http://source.Test-Smoke.org/svn/Test-Smoke
