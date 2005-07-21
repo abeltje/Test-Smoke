@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.021';
+$VERSION = '0.022';
 
 use Cwd;
 use File::Spec::Functions;
@@ -381,11 +381,11 @@ sub _post_process {
                     $status->{ $tstenv } = $failed =~ /^Inconsistent/
                         ? "X" : "F";
                 }
+                $self->{v} > 1 and print "\t[$showenv]: $status->{$tstenv}\n";
                 if ( $tstenv eq 'minitest' ) {
                     $status->{stdio} = "M";
                     delete $status->{minitest};
                 }
-                $self->{v} > 1 and print "\t[$showenv]: $status->{$tstenv}\n";
             }
             unless ( $self->{defaultenv} ) {
                 exists $status->{perlio} or $status->{perlio} = '-';
