@@ -27,7 +27,7 @@ my %options = ( config => 'smokecurrent_config', run => 1, pfile => undef,
                 fetch => 1, patch => 1, mail => undef, archive => undef,
                 continue => 0, ccp5p_onfail => undef, killtime => undef,
                 is56x => undef, defaultenv => undef, smartsmoke => undef,
-                delay_report => undef v => undef );
+                delay_report => undef, v => undef );
 
 my $myusage = "Usage: $0 [-c configname]";
 GetOptions( \%options, 
