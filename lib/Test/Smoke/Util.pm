@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.34';
+$VERSION = '0.35';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -377,7 +377,7 @@ sub grepccmsg {
             # "foo.c", line n.c: pppp-qqq (W) ...error description...
             # "foo.c", line n.c: pppp-qqq (S) ...error description...
             '(^".+?", line \d+\.\d+: \d+-\d+ \([WS]\) .+?$)',
-      
+
         'dec_osf' =>
             # DEC OSF/1, Digital UNIX, Tru64 (notice also VMS)
             # cc: Warning: foo.c, line nnn: ...error description...(error_tag)
@@ -387,12 +387,12 @@ sub grepccmsg {
             #     ...error line...
             # ------^
             '(^cc: (?:Warning|Error): .+?^-*\^$)',
-      
+
        'hpux' =>
             # cc: "foo.c"" line nnn: warning ppp: ...error description...
             # cc: "foo.c"" line nnn: error ppp: ...error description...
             '(^cc: ".+?", line \d+: (?:warning|error) \d+: .+?$)',
-            
+
         'irix' =>
             # cc-pppp cc: WARNING File = foo.c, Line = nnnn
             # ...error description...
@@ -406,7 +406,7 @@ sub grepccmsg {
             #   ^
             '^(cc-\d+ cc: (?:WARNING|ERROR) File = .+?, ' .
             'Line = \d+.+?^\s*\^$)',
-      
+
         'solaris' =>
             # "foo.c", line nnn: warning: ...error description...
             # "foo.c", line nnn: warning: ...:
@@ -414,15 +414,15 @@ sub grepccmsg {
             # "foo.c", line nnn: syntax error ...
             '(^".+?", line \d+: ' .
             '(?:warning: (?:(?:.+?:$)?.+?$)|syntax error.+?$))',
-            
-        'VMS' => # same compiler as Tru64, different message syntax
+
+        'vms' => # same compiler as Tru64, different message syntax
             #     ...error line...
             # ......^
             # %CC-W-MESSAGEID, ...error description...
             # at line number nnn in file foo.c
             '(^\n.+?\n^\.+?\^\n^\%CC-(?:I|W|E|F)-\w+, ' .
             '.+?\nat line number \d+ in file \S+?$)',
-      
+
         'gcc' =>
             # foo.c: In function `foo':
             # foo.c:nnn: warning: ...
@@ -433,8 +433,15 @@ sub grepccmsg {
             # foo.c:nnn: error: ...
             '(^(?-s:.+?):(?: In function .+?:$|\d+(?:\:\d+)?: ' .
             '(?:warning|error): .+?$))',
+
+        'mswin32' => # MSVC(?:60)*
+            # foo.c : error LNKnnn: error description
+            # full\path\to\fooc.c : fatal error LNKnnn: error description
+            # foo.c(nnn) : warning Cnnn: warning description
+            '(^(?-s:.+?) : (?:-s.+?)\d+: .+?$)',
+
     );
-    exists $OS2PAT{ $cc } or $cc = 'gcc';
+    exists $OS2PAT{ lc $cc } or $cc = 'gcc';
     my $pat = $OS2PAT{ $cc };
 
     my( $indx, %error ) = ( 1 );

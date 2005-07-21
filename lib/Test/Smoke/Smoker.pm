@@ -379,7 +379,7 @@ sub make_ {
     my $make_args = "";
     $self->{is_vms} && $config->has_arg( '-Dusevmsdebug' ) and
         $make_args = qq[/macro=("__DEBUG__=1")];
-    $self->_make( $make_args );
+    my $make_output = $self->_make( $make_args );
 
     if ( $self->{is_win32} ) { # Win32 creates config.sh during make
         my %cinfo = get_smoked_Config( $self->{ddir} => qw(
@@ -388,6 +388,8 @@ sub make_ {
         my $version = $cinfo{gccversion} || $cinfo{ccversion};
         $self->log( "\nCompiler info: $cinfo{cc} version $version\n" )
             if $cinfo{cc};
+
+        "$config" =~ /-DCCTYPE=MSVC/ and $self->tty( "\n$make_output\n" );
     }
 
     my $exe_ext  = $Config{_exe} || $Config{exe_ext};
