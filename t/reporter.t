@@ -520,13 +520,13 @@ __EOFAIL__
 { # Test the grepccmsg() feature
     my $testdir = catdir $findbin, 'perl-current';
     mkpath $testdir;
-    copy( catfile( $findbin, 'darwin.out'), catfile( $testdir, 'mktest.out' ) );
+    copy( catfile( $findbin, 'gccmsg.out'), catfile( $testdir, 'mktest.out' ) );
 
     ok( my $reporter = Test::Smoke::Reporter->new(
         ddir       => $testdir,
         is56x      => 0,
         defaultenv => 0,
-        lfile      => catfile( $findbin, 'darwin.log' ),
+        lfile      => catfile( $findbin, 'gccmsg.log' ),
         v          => $verbose,
         showcfg    => $showcfg,
         cfg        => \( my $bcfg = <<'__EOCFG__' )), "init for grepccmsg() ");

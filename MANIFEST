@@ -64,6 +64,8 @@ t/tree.t
 t/ts_config.t
 t/util_times.t
 t/vms_rl.t
+t/gccmsg.log
+t/gccmsg.out
 t/win32/Makefile
 t/win32/makefile.mk
 t/ftppub/bugtst01.out
