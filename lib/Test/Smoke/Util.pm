@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.35';
+$VERSION = '0.36';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -370,7 +370,7 @@ This is a port of Jarkko Hietaniemi's grepccerr script.
 
 sub grepccmsg {
     my( $cc, $logfile, $verbose ) = @_;
-    defined $logfile or $logfile = "";
+    defined $logfile or return;
     $cc ||= 'gcc';
     my %OS2PAT = (
         'aix' => 
