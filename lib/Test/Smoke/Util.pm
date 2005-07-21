@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.37';
+$VERSION = '0.38';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -438,7 +438,7 @@ sub grepccmsg {
             # foo.c : error LNKnnn: error description
             # full\path\to\fooc.c : fatal error LNKnnn: error description
             # foo.c(nnn) : warning Cnnn: warning description
-            '(^(?-s:.+?) : (?-s:.+?)\d+: .+?$)',
+            '(^(?!NMAKE)(?-s:.+?) : (?-s:.+?)\d+: .+?$)',
 
     );
     exists $OS2PAT{ lc $cc } or $cc = 'gcc';
