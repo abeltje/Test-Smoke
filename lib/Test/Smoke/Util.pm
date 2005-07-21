@@ -438,7 +438,7 @@ sub grepccmsg {
             # foo.c : error LNKnnn: error description
             # full\path\to\fooc.c : fatal error LNKnnn: error description
             # foo.c(nnn) : warning Cnnn: warning description
-            '(^(?-s:.+?) : (?:-s.+?)\d+: .+?$)',
+            '(^(?-s:.+?) : (?-s:.+?)\d+: .+?$)',
 
     );
     exists $OS2PAT{ lc $cc } or $cc = 'gcc';
