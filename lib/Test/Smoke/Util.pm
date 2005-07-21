@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.36';
+$VERSION = '0.37';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -442,7 +442,7 @@ sub grepccmsg {
 
     );
     exists $OS2PAT{ lc $cc } or $cc = 'gcc';
-    my $pat = $OS2PAT{ $cc };
+    my $pat = $OS2PAT{ lc $cc };
 
     my( $indx, %error ) = ( 1 );
     my $smokelog = '';
