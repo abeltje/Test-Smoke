@@ -27,7 +27,7 @@ my %options = ( config => 'smokecurrent_config', run => 1, pfile => undef,
                 fetch => 1, patch => 1, mail => undef, archive => undef,
                 continue => 0, ccp5p_onfail => undef, killtime => undef,
                 is56x => undef, defaultenv => undef, smartsmoke => undef,
-                delay_report => undef );
+                delay_report => undef v => undef );
 
 my $myusage = "Usage: $0 [-c configname]";
 GetOptions( \%options, 
@@ -47,6 +47,7 @@ GetOptions( \%options,
     'killtime=s',
     'pfile=s',
 
+    'v|verbose=i',
     'help|h', 'man',
 ) or do_pod2usage(  verbose => 1, myusage => $myusage );
 
@@ -112,14 +113,14 @@ defined $options{fetch} && !$options{fetch} && !defined $options{smartsmoke}
 
 # Correction for backward compatability
 !defined $options{ $_ } && !exists $conf->{ $_ } and $options{ $_ } = 1
-    for qw( run fetch patch mail archive );
+    for qw( run fetch patch mail archive v );
 !defined $options{ $_ } && !exists $conf->{ $_ } and $options{ $_ } = 0
     for qw( delay_report );
 
 # Make command-line options override configfile
 defined $options{ $_ } and $conf->{ $_ } = $options{ $_ }
     for qw( is56x defaultenv continue killtime pfile delay_report
-            smartsmoke run fetch patch mail ccp5p_onfail archive );
+            smartsmoke run fetch patch mail ccp5p_onfail archive v );
 
 # Make sure the --pfile command-line override works
 $options{pfile} and $conf->{patch_type} ||= 'multi';
