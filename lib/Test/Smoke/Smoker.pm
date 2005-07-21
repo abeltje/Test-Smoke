@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.024';
+$VERSION = '0.025';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -389,7 +389,7 @@ sub make_ {
         $self->log( "\nCompiler info: $cinfo{cc} version $version\n" )
             if $cinfo{cc};
 
-        "$config" =~ /-DCCTYPE=MSVC/ and $self->tty( "\n$make_output\n" );
+        $self->{w32cc} =~ /MSVC/ and $self->tty( "\n$make_output\n" );
     }
 
     my $exe_ext  = $Config{_exe} || $Config{exe_ext};
