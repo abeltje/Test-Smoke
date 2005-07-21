@@ -17,7 +17,7 @@ use Test::Smoke::Util qw( do_pod2usage );
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.048';
+$VERSION = '0.049';
 
 use Getopt::Long;
 my %options = ( 
@@ -1273,7 +1273,7 @@ F<smokeperl.pl>. MSWin32 and VMS might benefit.
 =cut
 
 $arg = 'delay_report';
-$config{ $arg } = $^O =~ /MSWin32|VMS/;
+$config{ $arg } = $^O =~ /VMS/;
 
 =item ENV stuff
 
@@ -1575,8 +1575,8 @@ sub write_bat {
     my $mailrpt    = File::Spec->catfile( $findbin_bin, 'mailrpt.pl' );
     my $copycmd = <<'EOCOPYCMD';
 
-REM I found hanging XCOPY while smoking
-set COPYCMD=/Y %COPYCMD%
+REM I found hanging XCOPY while smoking; uncommenting the next line might help
+REM set COPYCMD=/Y \%COPYCMD\%
 
 EOCOPYCMD
     my $p5lib = $config{perl5lib} ? <<EO_P5L : '';
