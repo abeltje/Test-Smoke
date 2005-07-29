@@ -17,7 +17,7 @@ use Test::Smoke::Util qw( do_pod2usage );
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.049';
+$VERSION = '0.050';
 
 use Getopt::Long;
 my %options = ( 
@@ -2035,8 +2035,7 @@ sub get_avail_w32compilers {
     if ( $map{ $CC }->{ccbin} = whereis( $map{ $CC }->{ccname} ) ) {
         # No, bcc32 doesn't support --version (One can but try)
         my $output = `"$map{ $CC }->{ccbin}" --version 2>&1`;
-        my $ccvers = $output =~ /(\d+.*)/ ? $1 : '?';
-        $ccvers =~ s/\s+copyright.*//i;
+        my $ccvers = $output =~ /([\d+.]*)/ ? $1 : '?';
         $map{ $CC }->{ccversarg} = "ccversion=$ccvers";
         $map{ $CC }->{CCTYPE} = 'BORLAND';
     }
