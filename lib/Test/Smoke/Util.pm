@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.38';
+$VERSION = '0.39';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -320,6 +320,7 @@ sub set_vms_rooted_logical {
     my $cwd = cwd();
     $dir ||= $cwd;
 
+    -d $dir or mkpath( $dir );
     chdir $dir or die "Cannot chdir($dir): $!";
 
     # On older systems we might exceed the 8-level directory depth limit
@@ -730,7 +731,7 @@ sub get_ncpu {
 
         $cpus = "";
         require Carp;
-        Carp::carp "get_ncpu: unknown operationg system";
+        Carp::carp( "get_ncpu: unknown operationg system" );
     }
 
     return $cpus ? sprintf( "%s cpu%s", $cpus, $cpus ne "1" ? 's' : '' ) : "";
