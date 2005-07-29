@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.022';
+$VERSION = '0.023';
 
 use Cwd;
 use File::Spec::Functions;
@@ -534,7 +534,7 @@ sub ccmessages {
     $ccinfo =~ s/^(.+)\s+version\s+.+/$1/;
 
     $^O =~ /^(?:linux|.*bsd.*|darwin)/ and $ccinfo = 'gcc';
-    my $cc = $ccinfo eq 'gcc' ? 'gcc' : $^O;
+    my $cc = $ccinfo =~ /(gcc|bcc32)/ ? $1 : $^O;
 
     $self->{v} and print "Looking for cc messages: '$cc'\n";
     my $errors = grepccmsg( $cc, $self->{lfile}, $self->{v} ) || [ ];
