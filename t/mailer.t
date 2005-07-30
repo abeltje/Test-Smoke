@@ -158,8 +158,9 @@ SKIP: {
 }
 
 SKIP: {
-    local $ENV{PATH} = "$ENV{PATH}:/usr/sbin";
     my $mhowto = 'sendmail';
+    $^O eq 'VMS' and skip "Do not try '$mhowto' on $^O", 5;
+    local $ENV{PATH} = "$ENV{PATH}:/usr/sbin";
     my $bin = whereis( $mhowto ) or skip "No '$mhowto' found", 5;
     write_report( $eg_config ) or skip "Cannot write report", 5;
 
