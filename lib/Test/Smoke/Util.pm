@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.41';
+$VERSION = '0.42';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -320,7 +320,10 @@ sub set_vms_rooted_logical {
     my $cwd = cwd();
     $dir ||= $cwd;
 
-    -d $dir or mkpath( $dir );
+    -d $dir or do {
+        require File::Path;
+        File::Path::mkpath( $dir );
+    };
     chdir $dir or die "Cannot chdir($dir): $!";
 
     # On older systems we might exceed the 8-level directory depth limit
