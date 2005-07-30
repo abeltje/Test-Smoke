@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.40';
+$VERSION = '0.41';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -444,7 +444,7 @@ sub grepccmsg {
         'bcc32' => # BORLAND 5.5 on MSWin32
             # Warning Wnnn filename line: warning description
             # Error Ennn:: error description
-            '(^(?:(?:Warning W\d+ .+\d+)|(?:Error E\d+)): .+$)',
+            '(^(?:(?:Warning W\d+ .+? \d+)|(?:Error E\d+)): .+?$)',
     );
     exists $OS2PAT{ lc $cc } or $cc = 'gcc';
     my $pat = $OS2PAT{ lc $cc };
