@@ -160,7 +160,7 @@ EOPINFO
     $newfile = get_file(qw( t perl patchme.txt ));
     like( $newfile, '/^VERSION == 20001$/m', "Conent OK" );
     my $plevel = get_file(qw( t perl patchlevel.h ));
-    like $plevel, qq{m/^\\s*,"\Q$descr\E"/m},
+    like $plevel, qq{/^\\s*,"\Q$descr\E"/m},
          "Description added to patchlevel.h";
 }
 

@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT );
-$VERSION = '0.006';
+$VERSION = '0.007';
 
 use base 'Exporter';
 use File::Spec;
@@ -391,9 +391,18 @@ sub call_patch {
 
     # Add a line to patchlevel.h if $descr
     if ( defined $descr ) {
-        my $cmd = qq($^X -x patchlevel.h '$descr');
+        my $cmd = qq($^X -x patchlevel.h "$descr");
         $self->{v} > 1 and print "Adding: [$cmd]\n";
         my $result = qx($cmd);
+        if ( -e 'patchlevel.new' ) {
+            # might be MSWin32; patchlevel.h cannot rename itself
+            -e 'patchlevel.bak' and 1 while unlink 'patchlevel.bak';
+            rename 'patchlevel.h', 'patchlevel.bak';
+            rename 'patchlevel.new', 'patchlevel.h' or do {
+                require Carp;
+                Carp::croak( "Could not rename 'patchlevel.new': $!" );
+            };
+        }
     }
 
     chdir $cwd or do {
