@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.42';
+$VERSION = '0.43';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -14,7 +14,7 @@ use base 'Exporter';
 );
 
 @EXPORT_OK = qw(
-    &grepccmsg
+    &grepccmsg &get_local_patches &set_local_patch
     &get_ncpu &get_smoked_Config &parse_report_Config 
     &get_regen_headers &run_regen_headers
     &calc_timeout &time_in_hhmm
@@ -479,6 +479,80 @@ sub grepccmsg {
     } sort { $error{ $a } <=> $error{ $b } } keys %error;
 
     return wantarray ? @errors : \@errors;
+}
+
+=item get_local_patches( $ddir )
+
+C<get_local_patches()> reads F<patchlevel.h> to scan for the locally
+applied patches array.
+
+=cut
+
+sub get_local_patches {
+    my $ddir = shift || cwd();
+    my $plevel = catfile( $ddir, 'patchlevel.h' );
+
+    my @lpatches = ( );
+    local *PLEVEL;
+    open PLEVEL, "< $plevel" or return @lpatches;
+    my $seen;
+    while ( <PLEVEL> ) {
+        $seen && /^\s*,"(.+)"/ and push @lpatches, $1;
+        /^\s*static .+? local_patches\[\]/ and $seen++;
+    }
+    close PLEVEL;
+    return @lpatches;
+}
+
+=item set_local_patch( $ddir, @descr )
+
+Copy the code from F<patchlevel.h>. Older (pre 5.8.1) perls do not
+have it and it doesn't work on MSWin32.
+
+=cut
+
+sub set_local_patch {
+    my( $ddir, @descr ) = @_;
+
+    my $plh = catfile( $ddir, 'patchlevel.h' );
+    my $pln = catfile( $ddir, 'patchlevel.new' );
+    my $plb = catfile( $ddir, 'patchlevel.bak' );
+    local( *PLIN, *PLOUT );
+    open PLIN,  "< $plh" or return 0;
+    open PLOUT, "> $pln" or return 0;
+    my $seen=0;
+    while ( <PLIN> ) {
+        if ( /\t,NULL/ and $seen ) {
+            while ( my $c = shift @descr ) {
+                print PLOUT qq{\t,"$c"\n};
+           }
+        }
+        $seen++ if /local_patches\[\]/;
+        print PLOUT;
+    }
+    close PLIN;
+    close PLOUT or return 0;
+
+    -e $plb and 1 while unlink $plb;
+    my $errno = "$!";
+    if ( -e $plb ) {
+        require Carp;
+        Carp::carp( "Could not unlink $plb : $errno" );
+        return 0;
+    }
+
+    unless ( rename $plh, $plb ) {
+        require Carp;
+        Carp::carp( "Could not rename $plh to $plb : $!" );
+        return 0;
+    }
+    unless ( rename $pln, $plh ) {
+        require Carp;
+        carp( "Could not rename '$pln' to '$plh' : $!" );
+        return 0;
+    }
+
+    return 1;
 }
 
 =item get_config( $filename )

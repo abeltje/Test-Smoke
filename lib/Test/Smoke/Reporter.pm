@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.023';
+$VERSION = '0.024';
 
 use Cwd;
 use File::Spec::Functions;
@@ -11,7 +11,8 @@ require File::Path;
 use Text::ParseWords;
 require Test::Smoke;
 use Test::Smoke::SysInfo;
-use Test::Smoke::Util qw( grepccmsg get_smoked_Config time_in_hhmm );
+use Test::Smoke::Util qw( grepccmsg get_smoked_Config
+                          time_in_hhmm get_local_patches );
 
 my %CONFIG = (
     df_ddir       => curdir(),
@@ -485,6 +486,8 @@ sub report {
     $report .= $self->letter_legend . "\n";
     $report .= $self->smoke_matrix . $self->bldenv_legend;
 
+    $report .= $self->registered_patches;
+
     $report .= "\nFailures: (common-args) $self->{_rpt}{common_args}\n"
             .  $self->failures if $self->has_test_failures;
     $report .= "\n" . $self->mani_fail           if $self->has_mani_failures;
@@ -520,6 +523,22 @@ sub ccinfo {
         $self->{_ccinfo} = ($Config{cc} || 'cc') . " version $ccvers";
     }
     return $cinfo;
+}
+
+=item $reporter->registered_patches()
+
+Return a section with the locally applied patches (from patchlevel.h).
+
+=cut
+
+sub registered_patches {
+    my $self = shift;
+
+    my @lpatches = get_local_patches( $self->{ddir} );
+    @lpatches or return "";
+
+    my $list = map "    $_\n" => @lpatches;
+    return "Locally applied patches:\n$list\n";
 }
 
 =item $reporter->ccmessages( )
