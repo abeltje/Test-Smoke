@@ -17,7 +17,7 @@ use Test::Smoke::Util qw( do_pod2usage );
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.051';
+$VERSION = '0.052';
 
 use Getopt::Long;
 my %options = ( 
@@ -949,6 +949,8 @@ reversing an already applied patch. The file format is simple:
 
 =item * optionally followed by ';' and options to pass to patch
 
+=item * optionally followed by ';' and a description for the patch
+
 =back
 
 If the file does not exist yet, a skeleton version will be created
@@ -978,7 +980,8 @@ PATCHER: {
         print PATCHES <<EOMSG;
 # Put one filename of a patch on a line, optional args for patch
 # follow the filename separated by a semi-colon (;) [-p1] is default
-# /path/to/patchfile.patch;-p0 -R
+# optionally followed by another ';' and description (added to patchlevel.h)
+# /path/to/patchfile.patch;-p0 -R;Description for this patch
 # Empty lines and lines starting with '#' are ignored
 # File paths are relative to '$config{ddir}' if not absolute
 EOMSG
