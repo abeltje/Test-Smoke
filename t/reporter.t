@@ -15,7 +15,7 @@ use File::Copy;
 my $verbose = exists $ENV{SMOKE_VERBOSE} ? $ENV{SMOKE_VERBOSE} : 0;
 my $showcfg = 0;
 
-use Test::More tests => 66;
+use Test::More tests => 69;
 
 use_ok 'Test::Smoke::Reporter';
 
@@ -553,7 +553,40 @@ EOCCMSG
     for my $line ( @ccmsg ) {
         like $ccmsg, "/\Q$line\E/ms", "$line";
     }
-    rmtree $testdir, $verbose;    
+    rmtree $testdir, $verbose;
+}
+
+{ # Test the registered_patches() feature
+    my $testdir = catdir $findbin, 'perl-current';
+    mkpath $testdir;
+    copy( catfile( $findbin, 'gccmsg.out'), catfile( $testdir, 'mktest.out' ) );
+    my $plhsrc = catdir( $findbin, qw( ftppub perl-current ) );
+    copy( catfile( $plhsrc, 'patchlevel.h' ),
+          catfile( $testdir, 'patchlevel.h' ) );
+    require Test::Smoke::Util;
+    Test::Smoke::Util::set_local_patch( $testdir, "[PATCH] Just testing" );
+
+    ok( my $reporter = Test::Smoke::Reporter->new(
+        ddir       => $testdir,
+        is56x      => 0,
+        defaultenv => 0,
+        lfile      => catfile( $findbin, 'gccmsg.log' ),
+        v          => $verbose,
+        showcfg    => $showcfg,
+        cfg        => \( my $bcfg = <<'__EOCFG__' )), "init for get_local_patches() ");
+==
+-Duseithreads
+==
+__EOCFG__
+
+    my $lp_list = $reporter->registered_patches;
+    like $lp_list, "/\Q[PATCH] Just testing\E/", "Found the patch";
+
+    my $rpt = $reporter->report;
+    like $rpt, "/\\nLocally\\ applied\\ patches:\\n
+                 \\ \\ \\ \\ DEVEL19999\\n
+                 \\ \\ \\ \\ \\[PATCH\\]\\ Just\\ testing/x",
+         "Found patches section";
 }
 
 sub create_config_sh {
