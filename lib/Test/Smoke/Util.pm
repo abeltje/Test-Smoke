@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.43';
+$VERSION = '0.44';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -489,18 +489,25 @@ applied patches array.
 =cut
 
 sub get_local_patches {
-    my $ddir = shift || cwd();
+    my( $ddir, $verbose ) = @_;
+    $ddir = shift || cwd();
     my $plevel = catfile( $ddir, 'patchlevel.h' );
 
     my @lpatches = ( );
     local *PLEVEL;
-    open PLEVEL, "< $plevel" or return @lpatches;
+    $verbose and print "Locally applied patches from '$plevel':";
+    unless ( open PLEVEL, "< $plevel" ) {
+        $verbose and print " error: $!";
+        return @lpatches;
+    }
+    $verbose and print " open ok\n";
     my $seen;
     while ( <PLEVEL> ) {
         $seen && /^\s*,"(.+)"/ and push @lpatches, $1;
         /^\s*static .+? local_patches\[\]/ and $seen++;
     }
     close PLEVEL;
+    $verbose and do { local $"=';'; print "Patches: '@lpatches'\n" };
     return @lpatches;
 }
 

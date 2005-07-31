@@ -15,6 +15,7 @@ use Test::More tests => 9;
 BEGIN { 
     use_ok 'Test::Smoke::Util', qw( get_local_patches set_local_patch );
 }
+my $verbose = $ENV{SMOKE_VERBOSE} || 0;
 
 ok( defined &get_local_patches, "get_local_patches() is defined" );
 ok( defined &set_local_patch, "set_local_patch() is defined" );
@@ -26,7 +27,7 @@ SKIP: {
     my $dst  = catfile( $findbin, $plevh );
     copy( $src, $dst ) or skip "Cannot copy $plevh ($!)", 2;
 
-    my @lpatches = get_local_patches( $findbin );
+    my @lpatches = get_local_patches( $findbin, $verbose );
 
     is @lpatches, 1, "One localpatch";
     is $lpatches[0], 'DEVEL19999', "description: $lpatches[0]";
@@ -35,7 +36,7 @@ SKIP: {
     my @descr = ( "[PATCH] fix 1", "[PATCH] fix 2" );
     ok set_local_patch( $findbin, @descr ), "set_local_patch()";
 
-    @lpatches = get_local_patches( $findbin );
+    @lpatches = get_local_patches( $findbin, $verbose );
     is @lpatches, 3, "Three local patches";
     is $lpatches[1], $descr[0], "descr: $descr[0]";
     is $lpatches[2], $descr[1], "descr: $descr[1]";
