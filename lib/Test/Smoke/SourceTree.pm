@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK %EXPORT_TAGS $NOCASE );
-$VERSION = '0.007';
+$VERSION = '0.008';
 
 use File::Spec;
 use File::Find;
@@ -117,13 +117,16 @@ be in "MANIFEST" format (i.e. using '/' as directory separator).
 sub mani2abs {
     my $self = shift;
 
-    my $file = shift;
+    my $path = shift;
+    my @dirs = split m{/+}, $path;
+    my $file = pop @dirs; 
     if ( $^O eq 'VMS' ) {
         my @parts = split m/\./, $file;
         my $last = pop @parts;
         @parts and
             $file = join( "_", map { s/[^\w-]/_/g; $_ } @parts ) . ".$last";
     }
+    @dirs and $file = join '/', @dirs, $file;
     my @split_path = split m|/|, $file;
     my $base_path = File::Spec->rel2abs( $$self, @_ );
     return File::Spec->catfile( $base_path, @split_path );

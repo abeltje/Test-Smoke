@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.016';
+$VERSION = '0.017';
 
 use Config;
 use Cwd;
@@ -406,10 +406,46 @@ sub clean_from_directory {
     }, $self->{ddir} );
 }
 
+=item $syncer->pre_sync
+
+C<pre_sync()> should be called by the C<sync()> methos to setup the
+sync environment. Currently only useful on I<OpenVMS>.
+
+=cut
+
+sub pre_sync {
+    return 1 unless $^O eq 'VMS';
+    my $self = shift;
+    require Test::Smoke::Util;
+
+    Test::Smoke::Util::set_vms_rooted_logical( TSP5SRC => $self->{ddir} );
+    $self->{vms_ddir} = $self->{ddir};
+    $self->{ddir} = 'TSP5SRC:[000000]';
+}
+
 # Set skeleton-sub
 sub sync { 
     require Carp; 
     Carp::croak ref( $_[0] ) . "->sync() not yet implemented.";
+}
+
+=item $syncer->post_sync
+
+C<post_sync()> should be called by the C<sync()> methos to unset the
+sync environment. Currently only useful on I<OpenVMS>.
+
+=cut
+
+sub post_sync {
+    return 1 unless $^O eq 'VMS';
+    my $self = shift;
+
+    ( my $logical = $self->{ddir} || '' ) =~ s/:\[000000\]$//;
+    return unless $logical;
+    my $result = system "DEASSIGN/JOB $logical";
+
+    $self->{ddir} = delete $self->{vms_ddir};
+    return $result == 0;
 }
 
 1;
@@ -462,6 +498,7 @@ paths mounted via NFS.)
 
 sub sync {
     my $self = shift;
+    $self->pre_sync;
 
     my $command = join " ", $self->{rsync}, $self->{opts};
     $command .= " -v" if $self->{v};
@@ -476,7 +513,9 @@ sub sync {
         Carp::carp "Problem during rsync ($err)";
     }
 
-    return $self->check_dot_patch;
+    my $plevel = $self->check_dot_patch;
+    $self->post_sync;
+    return $plevel;
 }
 
 =back
@@ -530,6 +569,7 @@ and extract the snapshot.
 sub sync {
     my $self = shift;
 
+    $self->pre_sync;
     # we need to have {ddir} before we can save the snapshot
     -d $self->{ddir} or mkpath( $self->{ddir} );
 
@@ -541,7 +581,9 @@ sub sync {
 
     $self->patch_a_snapshot if $self->{patchup};
 
-    return $self->check_dot_patch;
+    my $plevel = $self->check_dot_patch;
+    $self->post_sync;
+    return $plevel;
 }
 
 =item $syncer->_fetch_snapshot( )
@@ -589,7 +631,8 @@ sub _fetch_snapshot {
 
     $ftp->binary(); # before you ask for size!
     my $snap_size = $ftp->size( $snap_name );
-    my $local_snap = File::Spec->catfile( $self->{ddir},
+    my $ddir_var = $self->{vms_ddir} ? 'vms_ddir' : 'ddir';
+    my $local_snap = File::Spec->catfile( $self->{ $ddir_var },
                                           File::Spec->updir, $snap_name );
     $local_snap = File::Spec->canonpath( $local_snap );
 
@@ -597,7 +640,7 @@ sub _fetch_snapshot {
         $self->{v} and print "Skipping download of '$snap_name'\n";
     } else {
         $self->{v} and print "get ftp://$self->{server}$self->{sdir}/" .
-                             "$snap_name ";
+                             "$snap_name\n as $local_snap ";
         my $l_file = $ftp->get( $snap_name, $local_snap );
         my $ok = $l_file eq $local_snap && $snap_size == -s $local_snap;
         $ok or printf "Error in get(%s) [%d]\n", $l_file || "", 
@@ -1108,6 +1151,7 @@ F<MANIFEST.SKIP>!).
 sub sync {
     my $self = shift;
 
+    $self->pre_sync;
     require Test::Smoke::SourceTree;
 
     my $tree = Test::Smoke::SourceTree->new( $self->{cdir} );
@@ -1116,7 +1160,9 @@ sub sync {
     $tree = Test::Smoke::SourceTree->new( $self->{ddir} );
     $tree->clean_from_MANIFEST( 'MANIFEST.SKIP' );
 
-    return $self->check_dot_patch;
+    my $plevel = $self->check_dot_patch;
+    $self->post_sync;
+    return $plevel;
 }
 
 =back
@@ -1170,6 +1216,7 @@ C<sync()> uses the B<File::Find> module to make the hardlink forest in {ddir}.
 sub sync {
     my $self = shift;
 
+    $self->pre_sync;
     require File::Copy unless $self->{haslink};
 
     -d $self->{ddir} or File::Path::mkpath( $self->{ddir} );
@@ -1197,6 +1244,7 @@ sub sync {
 
     $self->clean_from_directory( $source_dir );
 
+    $self->post_sync;
     return $self->check_dot_patch();
 }
 
@@ -1249,6 +1297,7 @@ This does the actual syncing:
 sub sync {
     my $self = shift;
 
+    $self->pre_sync;
     require Test::Smoke::FTPClient;
 
     my $fc = Test::Smoke::FTPClient->new( $self->{ftphost}, {
@@ -1263,7 +1312,10 @@ sub sync {
     $fc->mirror( @{ $self }{qw( ftpsdir ddir )}, 1 ) or return;
 
     $self->{client} = $fc;
-    $self->create_dot_patch;
+
+    my $plevel = $self->create_dot_patch;
+    $self->post_sync;
+    return $plevel;
 }
 
 =head2 $syncer->create_dat_patch
