@@ -587,6 +587,8 @@ __EOCFG__
                  \\ \\ \\ \\ DEVEL19999\\n
                  \\ \\ \\ \\ \\[PATCH\\]\\ Just\\ testing/x",
          "Found patches section";
+
+    rmtree $testdir, $verbose;
 }
 
 sub create_config_sh {
