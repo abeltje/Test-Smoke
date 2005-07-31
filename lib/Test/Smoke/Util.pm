@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.44';
+$VERSION = '0.45';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -504,7 +504,7 @@ sub get_local_patches {
     my $seen;
     while ( <PLEVEL> ) {
         $seen && /^\s*,"(.+)"/ and push @lpatches, $1;
-        /^\s*static .+? local_patches\[\]/ and $seen++;
+        /^\s*static.+?local_patches\[\]/ and $seen++;
     }
     close PLEVEL;
     $verbose and do { local $"=';'; print "Patches: '@lpatches'\n" };
