@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.024';
+$VERSION = '0.025';
 
 use Cwd;
 use File::Spec::Functions;
@@ -537,7 +537,7 @@ sub registered_patches {
     my @lpatches = get_local_patches( $self->{ddir} );
     @lpatches or return "";
 
-    my $list = map "    $_\n" => @lpatches;
+    my $list = join "\n", map "    $_" => @lpatches;
     return "Locally applied patches:\n$list\n";
 }
 
