@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION $REVISION $conf @EXPORT );
-$VERSION  = '1.19_74';
+$VERSION  = '1.19_75';
 $REVISION = __get_ts_patchlevel();
 
 use base 'Exporter';
@@ -159,7 +159,7 @@ sub run_smoke {
         $smoker->make_distclean( );
         $smoker->ttylog( "Smoking patch $patch\n" ); 
         do_manifest_check( $conf->{ddir}, $smoker );
-        set_smoke_localpatch( $conf->{ddir}, $patch );
+        set_smoke_patchlevel( $conf->{ddir}, $patch );
     }
 
     foreach my $this_cfg ( $BuildCFG->configurations ) {
