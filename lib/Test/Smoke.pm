@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION $REVISION $conf @EXPORT );
-$VERSION  = '1.19_72';
+$VERSION  = '1.19_74';
 $REVISION = __get_ts_patchlevel();
 
 use base 'Exporter';
@@ -15,7 +15,8 @@ use Test::Smoke::Policy;
 use Test::Smoke::BuildCFG;
 use Test::Smoke::Smoker;
 use Test::Smoke::SourceTree qw( :mani_const );
-use Test::Smoke::Util qw( get_patch skip_config );
+use Test::Smoke::Util qw( get_patch skip_config
+                          get_local_patches set_local_patch );
 use Config;
 
 =head1 NAME
@@ -97,6 +98,20 @@ sub do_manifest_check {
     }
 }
 
+=item set_smoke_patchlevel( $ddir, $patch[, $verbose] )
+
+Set the current patchlevel as a registered patch like "SMOKE$patch"
+
+=cut
+
+sub set_smoke_patchlevel {
+    my( $ddir, $patch, $verbose ) = @_;
+    $ddir && $patch or return;
+
+    my @smokereg = grep /^SMOKE\d+$/ => get_local_patches( $ddir, $verbose );
+    @smokereg or set_local_patch( $ddir, "SMOKE$patch" );
+}
+
 =item run_smoke( [$continue[, @df_buildopts]] )
 
 C<run_smoke()> sets up de build environment and gets the private Policy
@@ -119,11 +134,6 @@ sub run_smoke {
     Test::Smoke::BuildCFG->config( dfopts => join " ", @df_buildopts );
 
     my $patch = Test::Smoke::Util::get_patch( $conf->{ddir} );
-
-#    exists $Config{ldlibpthname} && $Config{ldlibpthname} and
-#        $ENV{ $Config{ldlibpthname} } ||= '',
-#        substr( $ENV{ $Config{ldlibpthname} }, 0, 0)  =
-#            "$conf->{ddir}$Config{path_sep}";
 
     my $logfile = File::Spec->catfile( $conf->{ddir}, 'mktest.out' );
     my $BuildCFG = $continue 
@@ -149,6 +159,7 @@ sub run_smoke {
         $smoker->make_distclean( );
         $smoker->ttylog( "Smoking patch $patch\n" ); 
         do_manifest_check( $conf->{ddir}, $smoker );
+        set_smoke_localpatch( $conf->{ddir}, $patch );
     }
 
     foreach my $this_cfg ( $BuildCFG->configurations ) {
