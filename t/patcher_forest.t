@@ -49,7 +49,7 @@ SKIP: {
     chdir updir;
     ok( $untgz_ok, "Mockup sourcetree unpacked" );
     ok -d catdir( 't', 'perl' ), "sourcetree is there";
-    like $p_content, 'm/^+/', "patch content ok";
+    like $p_content, 'm/^\+/', "patch content ok";
 
     my $syncer = Test::Smoke::Syncer->new( forest => %config );
     ok my $pl = $syncer->sync, "Forest planted" or
