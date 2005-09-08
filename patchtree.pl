@@ -4,7 +4,7 @@ $| = 1;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.007';
+$VERSION = '0.008';
 
 use Cwd;
 use File::Spec;
@@ -117,9 +117,6 @@ exists $valid_type{ $opt{type} } or do_pod2usage( verbose => 0 );
 $opt{ddir} && -d $opt{ddir} or do_pod2usage( verbose => 0 );
 $opt{pfile} && -f $opt{pfile} or do_pod2usage( verbose => 0 );
 
-if ( $^O eq 'MSWin32' ) {
-    Test::Smoke::Patcher->config( flags => TRY_REGEN_HEADERS );
-}
 my $patcher = Test::Smoke::Patcher->new( $opt{type} => \%opt );
 eval{ $patcher->patch };
 

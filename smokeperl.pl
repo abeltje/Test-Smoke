@@ -188,9 +188,6 @@ sub patchtree {
         last PATCHAPERL unless exists $conf->{patch_type} && 
                                $conf->{patch_type} eq 'multi' && 
                                $conf->{pfile};
-        if ( $^O eq 'MSWin32' ) {
-            Test::Smoke::Patcher->config( flags => TRY_REGEN_HEADERS );
-        }
         my $patcher = Test::Smoke::Patcher->new( $conf->{patch_type}, $conf );
         eval { $patcher->patch };
     }
