@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT );
-$VERSION = '0.007';
+$VERSION = '0.008';
 
 use base 'Exporter';
 use File::Spec;
@@ -17,6 +17,7 @@ sub TRY_REGEN_HEADERS() { 1 }
 
 my %CONFIG = (
     df_ddir     => File::Spec->rel2abs( cwd ),
+    df_fdir     => undef,
     df_pfile    => undef,
     df_patchbin => 'patch',
     df_popts    => '',       # '-p1' is added in call_patch()
@@ -125,6 +126,7 @@ C<new()> crates the object. Valid types are B<single> and B<multi>.
 Valid keys for C<%args>:
 
     * ddir:     the build directory
+    * fdir:     the intermediate forest dir (preferred)
     * pfile:    path to either the patch (single) or a textfile (multi)
     * popts:    options to pass to 'patch' (-p1)
     * patchbin: full path to the patch binary (patch)
@@ -153,8 +155,10 @@ sub new {
     my %fields = map {
         my $value = exists $args{$_} ? $args{ $_ } : $CONFIG{ "df_$_" };
         ( $_ => $value )
-    } ( v => ddir => @{ $CONFIG{ $type } } );
-    $fields{ddir} = File::Spec->rel2abs( $fields{ddir} );
+    } ( v => ddir => fdir => flags => @{ $CONFIG{ $type } } );
+    $fields{pdir} = File::Spec->rel2abs( 
+        defined $fields{fdir} ? $fields{fdir} : $fields{ddir}
+    );
     $fields{ptype} = $type;
 
     bless { %fields }, $class;
@@ -200,8 +204,20 @@ sub patch {
     my $self = shift;
 
     my $method = "patch_$self->{ptype}";
-    $self->$method( @_ );
-    $self->perl_regen_headers;
+    my $ret = $self->$method( @_ );
+    $ret &&= $self->perl_regen_headers;
+
+    if ( $self->{fdir} ) { # This is a forest setup, re-sync
+        require Test::Smoke::Syncer;
+        my %options = (
+            hdir => $self->{fdir},
+            ddir => $self->{ddir},
+            v    => $self->{v},
+        );
+        my $resync = Test::Smoke::Syncer->new( hardlink => %options );
+        $resync->sync;
+    }
+    return $ret;
 }
 
 =item perl_regen_headers( )
@@ -212,12 +228,12 @@ Try to run F<regen_headers.pl> if the flag is set.
 
 sub perl_regen_headers {
     my $self = shift;
-    return unless $self->{flags} & TRY_REGEN_HEADERS;
+#    return 1 unless $self->{flags} & TRY_REGEN_HEADERS;
 
-    my $regen_headers = get_regen_headers( $self->{ddir} );
-    SKIP: if ( $regen_headers ) {
+    my $regen_headers = get_regen_headers( $self->{pdir} );
+    if ( $regen_headers ) {
         my $cwd = cwd;
-        chdir $self->{ddir} or last SKIP;
+        chdir $self->{pdir} or return;
         local *RUN_REGEN;
         if ( open RUN_REGEN, "$regen_headers |" ) {
             while ( <RUN_REGEN> ) {
@@ -226,13 +242,16 @@ sub perl_regen_headers {
             close RUN_REGEN or do {
                 require Carp;
                 Carp::carp( "Error while running [$regen_headers]" );
+                return;
             };
         } else {
             require Carp;
             Carp::carp( "Could not fork [$regen_headers]" );
+            return;
         }
         chdir $cwd;
     }
+    return 1;
 }
 
 =item $patcher->patch_single( )
@@ -263,7 +282,7 @@ sub patch_single {
         $self->{pfinfo} ||= 'file content';
     } else {
         my $full_name = File::Spec->file_name_is_absolute( $pfile ) 
-            ? $pfile : File::Spec->rel2abs( $pfile, $self->{ddir} );
+            ? $pfile : File::Spec->rel2abs( $pfile, $self->{pdir} );
 
         $self->{pfinfo} = $full_name;
         open PATCH, "< $full_name" or do {
@@ -306,7 +325,7 @@ sub patch_multi {
         $self->{pfinfo} ||= 'file content';
     } else {
         my $full_name = File::Spec->file_name_is_absolute( $pfile ) 
-            ? $pfile : File::Spec->rel2abs( $pfile, $self->{ddir} );
+            ? $pfile : File::Spec->rel2abs( $pfile, $self->{pdir} );
         $self->{pfinfo} = $full_name;
         open PATCHES, "< $full_name" or do {
             require Carp;
@@ -318,6 +337,7 @@ sub patch_multi {
 
     $self->{v} > 1 and print "Get patchinfo from $self->{pfinfo}\n";
 
+    my $ok = 1;
     foreach my $patch ( @patches ) {
         next if $patch =~ /^\s*[#]/;
         next if $patch =~ /^\s*$/;
@@ -326,8 +346,10 @@ sub patch_multi {
         if ( $@ ) {
             require Carp;
             Carp::carp( "[$filename] $@" );
+            $ok = 0;
         }
     }
+    return $ok;
 }
 
 =item $self->_make_opts( $switches )
@@ -368,9 +390,9 @@ sub call_patch {
     my $redir = $self->{v} ? "" : ">" . File::Spec->devnull . " 2>&1";
 
     my $cwd = cwd();
-    chdir $self->{ddir} or do {
+    chdir $self->{pdir} or do {
         require Carp;
-        Carp::croak( "Cannot chdir($self->{ddir}): $!" );
+        Carp::croak( "Cannot chdir($self->{pdir}): $!" );
     };
 
     # patch is verbose enough if $self->{v} == 1
@@ -392,7 +414,7 @@ sub call_patch {
     # Add a line to patchlevel.h if $descr
     if ( defined $descr ) {
         require Test::Smoke::Util;
-        Test::Smoke::Util::set_local_patch( $self->{ddir}, $descr );
+        Test::Smoke::Util::set_local_patch( $self->{pdir}, $descr );
     }
 
     chdir $cwd or do {
