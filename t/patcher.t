@@ -21,7 +21,7 @@ my $verbose = exists $ENV{SMOKE_VERBOSE} ? $ENV{SMOKE_VERBOSE} : 0;
     my $fs_tdir = File::Spec->rel2abs( $tdir );
     my $patcher = Test::Smoke::Patcher->new( single => { ddir  => $tdir } );
     isa_ok( $patcher, 'Test::Smoke::Patcher' );
-    is( $patcher->{ddir}, $fs_tdir, "destination dir ($fs_tdir)" );
+    is( $patcher->{pdir}, $fs_tdir, "destination dir ($fs_tdir)" );
 
     # Check that the default values are returned
     for my $attr (qw( pfile patchbin popts v )) {

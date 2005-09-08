@@ -46,6 +46,7 @@ t/get_patch.t
 t/lpatches.t
 t/mailer.t
 t/patcher.t
+t/patcher_forest.t
 t/parse_report.t
 t/policy.t
 t/reporter.t
@@ -81,5 +82,6 @@ t/ftppub/perl-current-diffs/20000.gz
 t/ftppub/perl-current-diffs/20001.gz
 t/ftppub/perl-current-diffs/20003.gz
 t/ftppub/perl-current-diffs/20004.gz
+t/ftppub/perl-current-diffs/20005.gz
 t/ftppub/snap/perl@19000.tgz
 t/ftppub/snap/perl@20000.tgz

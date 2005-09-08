@@ -113,7 +113,7 @@ SKIP: { # Here we try for 'Archive::Tar'/'Compress::Zlib'
     skip "Cannot find a 'patch' program", 1 unless $patch;
     my $plevel2 = $syncer->patch_a_snapshot( $plevel );
 
-    is( $plevel2, 20004, "A patched snapshot $plevel2 by $syncer->{unzip}" );
+    is( $plevel2, 20005, "A patched snapshot $plevel2 by $syncer->{unzip}" );
 
 }
 
@@ -150,7 +150,7 @@ SKIP: { # Here we try for gzip/tar
 
     my $plevel2 = $syncer->patch_a_snapshot( $plevel );
 
-    is( $plevel2, 20004, "A patched snapshot $plevel2 by $syncer->{unzip}" );
+    is( $plevel2, 20005, "A patched snapshot $plevel2 by $syncer->{unzip}" );
 
 }
 

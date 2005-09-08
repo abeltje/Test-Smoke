@@ -161,7 +161,7 @@ require_ok 'Test::Smoke::SourceTree';
 
     my $plevel = $sync->sync;
 
-    is $plevel, '20004', "Patchlevel ok";
+    is $plevel, '20005', "Patchlevel ok";
 
     {
         my $tree = Test::Smoke::SourceTree->new( $stree );
@@ -179,7 +179,7 @@ require_ok 'Test::Smoke::SourceTree';
 
     ok -f $newfile, "extra file($newfile)";
     $plevel = $sync->sync;
-    is $plevel, '20004', "Patchlevel ok (resync)";
+    is $plevel, '20005', "Patchlevel ok (resync)";
 
     {
         my $tree = Test::Smoke::SourceTree->new( $stree );
