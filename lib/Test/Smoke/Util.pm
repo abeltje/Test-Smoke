@@ -454,11 +454,12 @@ sub grepccmsg {
 
     my( $indx, %error ) = ( 1 );
     my $smokelog = '';
-    if ( open my $logfh, "< $logfile" ) {
+    local *LOGFH;
+    if ( open LOGFH, "< $logfile" ) {
         $verbose and print "Reading logfile '$logfile'\n";
         local $/;
-        $smokelog = <$logfh>;
-        close $logfh;
+        $smokelog = <LOGFH>;
+        close LOGFH;
         $verbose and print "Pattern($cc): /$pat/\n";
     } else {
         $verbose and print "Skipping '$logfile' '$!'\n";
