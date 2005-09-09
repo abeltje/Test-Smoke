@@ -36,7 +36,7 @@ my %config = (
 
 my $has_forest = 0;
 SKIP: {
-    my $to_skip = 13;
+    my $to_skip = 11;
     $patch    or skip "Cannot find a working 'patch' program.", $to_skip;
     $untgz    or skip "Cannot un-tar-gz",                       $to_skip;
     $unzipper or skip "No unzip found",                         $to_skip;
