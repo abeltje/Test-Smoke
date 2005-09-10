@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.026';
+$VERSION = '0.027';
 
 use base 'Exporter';
 @EXPORT_OK = qw( &sysinfo &tsuname );
@@ -551,10 +551,8 @@ Use L<Win32::TieRegistry> if available to get better information.
 =cut
 
 sub Windows {
+    my( $cpu_type, $cpu, $ncpu );
 
-    my $cpu_type = $ENV{PROCESSOR_ARCHITECTURE};
-    my $cpu      = $ENV{PROCESSOR_IDENTIFIER};
-    my $ncpu     = $ENV{NUMBER_OF_PROCESSORS};
     eval { require Win32::TieRegistry };
     unless ( $@ ) {
         Win32::TieRegistry->import();
@@ -574,9 +572,9 @@ sub Windows {
     }
 
     return {
-        _cpu_type => $cpu_type,
-        _cpu      => $cpu,
-        _ncpu     => $ncpu,
+        _cpu_type => ( $cpu_type || $ENV{PROCESSOR_ARCHITECTURE} ),
+        _cpu      => ( $cpu || $ENV{PROCESSOR_IDENTIFIER} ),
+        _ncpu     => ( $ncpu || $ENV{NUMBER_OF_PROCESSORS} ),
         _host     => __get_hostname(),
         _os       => __get_os(),
     };
