@@ -365,18 +365,17 @@ You can subscribe to that list by sending an empty message to
 <daily-build-reports-subscribe@perl.org>.
 You do B<not> have to be subscribed to send reports!
 
-=item The WWW archive
-
-The mailinglist has an archive on the web (although this archive seems
-to be behind at the moment):
-L<http://archive.develooper.com/daily-build-reports@perl.org/>.
-
 =item The usenet mirror
 
 The mailinglist also has a mirror on usenet:
 <news:nntp.perl.org/perl.daily-build.reports>
 
 Posts to the newsgroup will also be mirrored on the mailinglist.
+
+=item Google groups
+
+The newsgroup is mirrored on Google groups:
+L<http://groups.google.com/group/perl.daily-build.reports>
 
 =item The usenet WWW archive
 
@@ -464,7 +463,7 @@ B<daily-build-reports> and there is an alias to B<smokers-reports>.
 
 =head1 REVISION
 
-$Id: FAQ 809 2004-12-03 11:14:47Z abeltje $
+$Id$
 
 =head1 COPYRIGHT
 
