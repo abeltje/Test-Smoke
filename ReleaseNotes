@@ -48,6 +48,12 @@ description is also added to F<patchlevel.h>.
 
 Added a new "Locally applied patches:" section to the smoke report.
 
+=item 7
+
+The longtime TODO item of patching with forest setup has been
+resolved. For this type of setup, first the intermediate tree is
+patched and then the build tree is resynced from that.
+
 =back
 
 =head1 REVISION

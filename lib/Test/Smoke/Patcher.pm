@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT );
-$VERSION = '0.008';
+$VERSION = '0.009';
 
 use base 'Exporter';
 use File::Spec;
@@ -21,7 +21,7 @@ my %CONFIG = (
     df_pfile    => undef,
     df_patchbin => 'patch',
     df_popts    => '',       # '-p1' is added in call_patch()
-    df_flags    => 0,
+    df_flags    => 1,
     df_oldpatch => 0,
     df_v        => 0,
 
@@ -155,7 +155,7 @@ sub new {
     my %fields = map {
         my $value = exists $args{$_} ? $args{ $_ } : $CONFIG{ "df_$_" };
         ( $_ => $value )
-    } ( v => ddir => fdir => flags => @{ $CONFIG{ $type } } );
+    } ( v => ddir => fdir => @{ $CONFIG{ $type } } );
     $fields{pdir} = File::Spec->rel2abs( 
         defined $fields{fdir} ? $fields{fdir} : $fields{ddir}
     );
@@ -228,7 +228,7 @@ Try to run F<regen_headers.pl> if the flag is set.
 
 sub perl_regen_headers {
     my $self = shift;
-#    return 1 unless $self->{flags} & TRY_REGEN_HEADERS;
+    return 1 unless $self->{flags} & TRY_REGEN_HEADERS;
 
     my $regen_headers = get_regen_headers( $self->{pdir} );
     if ( $regen_headers ) {
@@ -236,6 +236,7 @@ sub perl_regen_headers {
         chdir $self->{pdir} or return;
         local *RUN_REGEN;
         if ( open RUN_REGEN, "$regen_headers |" ) {
+            $self->{v} and print "Started [$regen_headers]\n";
             while ( <RUN_REGEN> ) {
                 $self->{v} and print;
             }

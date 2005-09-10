@@ -17,7 +17,7 @@ use Test::Smoke::Util qw( do_pod2usage );
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.052';
+$VERSION = '0.053';
 
 use Getopt::Long;
 my %options = ( 
@@ -120,8 +120,8 @@ my %vdirs = map {
     my $vdir = $_;
     is_vms and $vdir =~ tr/.//d;
     ( $_ => $vdir )
-} qw( 5.5.x 5.6.2 5.8.x );
- 
+} qw( 5.5.x 5.8.x ); # unsupported: 5.6.2
+
 my %versions = (
     '5.5.x' => { source => 'ftp.linux.activestate.com::perl-5.005xx',
                  server => 'ftp.funet.fi',
@@ -133,6 +133,9 @@ my %versions = (
                                                "perl-$vdirs{'5.5.x'}" ),
                  text   => 'Perl 5.005 MAINT',
                  is56x  => 1},
+
+=begin unsupported
+
     '5.6.2' => { source => 'ftp.linux.activestate.com::perl-5.6.2',
                  server => 'http://rgarciasuarez.free.fr',
                  sdir   => '/snap',
@@ -145,10 +148,15 @@ my %versions = (
                  ftppwd  => 'smokers@perl.org',
                  ftpsdir => '/pub/staff/gsar/APC/perl-5.6.2',
                  ftpcdir => '/pub/staff/gsar/APC/perl-5.6.2-diffs',
-                 
+
+                 text   => 'Perl 5.6.2 (final?)',
                  cfg    => 'perl562.cfg',
-                 text   => 'Perl 5.6.2-to-be',
                  is56x  => 1 },
+
+=end unsupported
+
+=cut
+
     '5.8.x' => { source =>  'ftp.linux.activestate.com::perl-5.8.x',
                  server => 'ftp.funet.fi',
                  sdir   => '/pub/languages/perl/snap/5.8.x',
@@ -161,7 +169,7 @@ my %versions = (
                  ftppwd  => 'smokers@perl.org',
                  ftpsdir => '/pub/staff/gsar/APC/perl-5.8.x',
                  ftpcdir => '/pub/staff/gsar/APC/perl-5.8.x-diffs',
-                 
+
                  text   => 'Perl 5.8 MAINT',
                  cfg    => ( is_win32 ? 'w32current.cfg'
                            : is_vms ? 'vmsperl.cfg' : 'perl58x.cfg' ),
@@ -178,7 +186,7 @@ my %versions = (
                  ftppwd  => 'smokers@perl.org',
                  ftpsdir => '/pub/staff/gsar/APC/perl-current',
                  ftpcdir => '/pub/staff/gsar/APC/perl-current-diffs',
-                 
+
                  text   => 'Perl 5.10 to-be',
                  cfg    => ( is_win32 ? 'w32current.cfg'
                            : is_vms ? 'vmsperl.cfg' : 'perlcurrent.cfg' ),
@@ -249,7 +257,7 @@ my %opt = (
     },
     # syncing the source-tree
     want_forest => {
-        msg => "Would you like the 'Nick Clark' master sync trees?
+        msg => "Would you like the 'Nick Clark' master sync trees (forest)?
 \tPlease see 'perldoc $0' for an explanation.",
         alt => [qw( N y )],
         dft => 'n',
@@ -401,7 +409,7 @@ Examples:$untarmsg",
         dft => '/pub/staff/gsar/APC/perl-current-diffs',
         chk => '.+',
     },
-                 
+
     patchbin => {
         msg => undef,
         alt => [ ],
@@ -567,7 +575,7 @@ EOT
 
 print <<EOMSG;
 
-Welcome to the Perl core smoke test suite. 
+Welcome to the Perl core smoke test suite.
 
 You will be asked some questions in order to configure this test suite.
 Please make sure to read the documentation "perldoc configsmoke.pl"
@@ -606,11 +614,11 @@ F<smokecurrent.sh>. Again the default prefix can be overridden by specifying
 the C<< -j <prefix> >> or C<< -p <prefix> >> switch.
 
 All output (stdout, stderr) from F<smokeperl.pl> and its sub-processes
-is redirected to a logfile called F<smokecurrent.log> by the small jcl. 
+is redirected to a logfile called F<smokecurrent.log> by the small jcl.
 (Use C<< -l <prefix> >> or C<< -p <prefix> >> to override).
 
 There are two additional configuration default files
-F<smoke562_dfconfig> and F<smoke58x_dfconfig> to help you configure 
+F<smoke562_dfconfig> and F<smoke58x_dfconfig> to help you configure
 B<Test::Smoke> for these two maintenance branches of the source-tree.
 
 To create a configuration for the perl 5.8.x branch:
@@ -657,10 +665,9 @@ Here is a description of the configuration sections.
 
 =item perl_version
 
-C<perl_version> sets a number of default_values. 
-This makes the F<smoke5?x_dfconfig> files almost obsolete, 
-although they still provide a nice way to set the prefix
-and set the perl_version.
+C<perl_version> sets a number of default_values.  This makes the
+F<smoke5?x_dfconfig> files almost obsolete, although they still
+provide a nice way to set the prefix and set the perl_version.
 
 =cut
 
@@ -705,7 +712,7 @@ you will need to confirm your choice.
             print "The current directory *cannot* be used for smoke testing\n";
             redo BUILDDIR;
         }
-    
+
         $config{ $arg } = File::Spec->canonpath( $config{ $arg } );
         my $manifest  = File::Spec->catfile( $config{ $arg }, 'MANIFEST' );
         my $dot_patch = File::Spec->catfile( $config{ $arg }, '.patch' );
@@ -738,8 +745,12 @@ There are several build-cfg files provided with the distribution:
 
 =back
 
+=begin unsupported
+
 Note: 5.6.2 on MSWin32 is not yet provided, but commenting out the
 B<-Duselargefiles> section from F<w32current.cfg> should be enough.
+
+=end unsupported
 
 =cut
 
@@ -1271,7 +1282,7 @@ $config{lfile} = File::Spec->rel2abs( $options{log}, cwd );
 Some filesystems do not support opening an already opened file. This
 makes it hard to scan the logfile for compiler messages. We can delay
 the creation of the report and call F<mailrpt.pl> after
-F<smokeperl.pl>. MSWin32 and VMS might benefit.
+F<smokeperl.pl>. VMS might benefit.
 
 =cut
 
