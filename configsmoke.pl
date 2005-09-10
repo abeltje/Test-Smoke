@@ -14,7 +14,7 @@ BEGIN { $findbin = dirname $0 }
 use lib File::Spec->catdir( $findbin, 'lib' );
 use lib $findbin;
 use Test::Smoke::Util qw( do_pod2usage );
-use Test::Smoke::Sysinfo;
+use Test::Smoke::SysInfo;
 
 # $Id$
 use vars qw( $VERSION $conf );
