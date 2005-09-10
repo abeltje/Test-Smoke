@@ -14,10 +14,11 @@ BEGIN { $findbin = dirname $0 }
 use lib File::Spec->catdir( $findbin, 'lib' );
 use lib $findbin;
 use Test::Smoke::Util qw( do_pod2usage );
+use Test::Smoke::Sysinfo;
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.053';
+$VERSION = '0.054';
 
 use Getopt::Long;
 my %options = ( 
@@ -134,28 +135,22 @@ my %versions = (
                  text   => 'Perl 5.005 MAINT',
                  is56x  => 1},
 
-=begin unsupported
-
-    '5.6.2' => { source => 'ftp.linux.activestate.com::perl-5.6.2',
-                 server => 'http://rgarciasuarez.free.fr',
-                 sdir   => '/snap',
-                 sfile  => 'perl562-21463.tar.gz',
-                 pdir   => '/pub/staff/gsar/APC/perl-5.6.2-diffs',
-                 ddir   => File::Spec->catdir( cwd(), File::Spec->updir,
-                                               "perl-$vdirs{'5.6.2'}" ),
-                 ftphost => 'ftp.linux.activestate.com',
-                 ftpusr  => 'anonymous',
-                 ftppwd  => 'smokers@perl.org',
-                 ftpsdir => '/pub/staff/gsar/APC/perl-5.6.2',
-                 ftpcdir => '/pub/staff/gsar/APC/perl-5.6.2-diffs',
-
-                 text   => 'Perl 5.6.2 (final?)',
-                 cfg    => 'perl562.cfg',
-                 is56x  => 1 },
-
-=end unsupported
-
-=cut
+#    '5.6.2' => { source => 'ftp.linux.activestate.com::perl-5.6.2',
+#                 server => 'http://rgarciasuarez.free.fr',
+#                 sdir   => '/snap',
+#                 sfile  => 'perl562-21463.tar.gz',
+#                 pdir   => '/pub/staff/gsar/APC/perl-5.6.2-diffs',
+#                 ddir   => File::Spec->catdir( cwd(), File::Spec->updir,
+#                                               "perl-$vdirs{'5.6.2'}" ),
+#                 ftphost => 'ftp.linux.activestate.com',
+#                 ftpusr  => 'anonymous',
+#                 ftppwd  => 'smokers@perl.org',
+#                 ftpsdir => '/pub/staff/gsar/APC/perl-5.6.2',
+#                 ftpcdir => '/pub/staff/gsar/APC/perl-5.6.2-diffs',
+#
+#                 text   => 'Perl 5.6.2 (final?)',
+#                 cfg    => 'perl562.cfg',
+#                 is56x  => 1 },
 
     '5.8.x' => { source =>  'ftp.linux.activestate.com::perl-5.8.x',
                  server => 'ftp.funet.fi',
@@ -174,6 +169,7 @@ my %versions = (
                  cfg    => ( is_win32 ? 'w32current.cfg'
                            : is_vms ? 'vmsperl.cfg' : 'perl58x.cfg' ),
                  is56x  => 0 },
+
     '5.9.x' => { source => 'ftp.linux.activestate.com::perl-current',
                  server => 'ftp.funet.fi',
                  sdir   => '/pub/languages/perl/snap/5.9.x',
@@ -2142,30 +2138,41 @@ sub check_buildcfg {
 
     my ($rev, @vparts ) = $config{perl_version} =~ /^(\d)(?:\.(\d+))+/;
     my $pversion = sprintf "%d.%03d%02d", $rev, @vparts, 0;
-    print "Checking '$file_name' ($pversion/$^O)\n";
+
+    my $uname_s = Test::Smoke::SysInfo::tsuname( 's' );
+    my( $os, $osver ) = split /\s+-\s+/, $uname_s;
+    $osver = sprintf "%d.%03d", split m/\D+/, $osver, 3;
+
+    print "Checking '$file_name'\n     for $pversion on $uname_s\n";
+
     my @no_option = $pversion >= 5.009 ? ( '-Uuseperlio' ) : ( );
     OSCHECK: {
-        local $_ = $^O;
-        /darwin|bsd/i && do { 
+        $os =~ /darwin/ && $osver >= 8 and do {
+            push @no_option, qw( -Duselongdouble -Dusemorebits );
+            last OSCHECK;
+        };
+
+        $os =~ /darwin|bsd/i && do { 
             push @no_option, qw( -Duselongdouble -Dusemorebits -Duse64bitall );
         };
 
-	/linux/i && do {
+	$os =~ /linux/i && do {
             push @no_option, qw( -Duse64bitall );
         };
 
-        /mswin32/i && do {
+        $os =~ /mswin32/i && do {
             push @no_option, qw( -Duselargefiles ) if $config{is56x};
         };
 
-        /cygwin/i && do {
+        $os =~ /cygwin/i && do {
             push @no_option, qw( -Duse64bitall -Duselongdouble -Dusemorebits );
         };
-
-        foreach my $option ( @no_option ) {
-            !/^#/ && /\Q$option\E/ && s/^/#/ for @bcfg;
-        }
     }
+
+    foreach my $option ( @no_option ) {
+        !/^#/ && /\Q$option\E/ && s/^/#/ for @bcfg;
+    }
+
     my $newcfg = join "", grep !/^#/ => @bcfg;
     return if $oldcfg eq $newcfg;
 
@@ -2199,11 +2206,11 @@ sub finish_cfgcheck {
     my $msg = "";
     if ( $overwrite ) {
         my $backup = "$fname.bak";
-        -f $backup and chmod( 0775, $backup ) and unlink $backup;
+        -f $backup and chmod( 0775, $backup ) and 1 while unlink $backup;
         rename $fname, $backup or 
             warn "Cannot rename '$fname' to '$backup': $!";
     } else {
-        $fname = "$options{prefix}.cfg";
+        $fname = "$options{prefix}.cfg.save";
         $msg = " (in case you want it later)";
     }
     # change the filemode (make install used to make perlcurrent.cfg readonly)
