@@ -10,6 +10,285 @@ The filelists have a short symbolic indicator:
 
 Enjoy!
 ___________________________________________________________________________
+[   914] By: abeltje                          on 2005-10-16 23:01:03 +0200
+        Log: * [SNAPSHOT]
+	       * prepare for another snapshot
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   913] By: abeltje                          on 2005-10-16 22:58:50 +0200
+        Log: * [CHANGE]
+	       + add the Win32 check for -DCCTYPE (thanks Steve Hay)
+	       + add $ENV{PERL_DESTRUCT_LEVEL} for extend_with_harness()
+		 (request by Nick Clark)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm
+___________________________________________________________________________
+[   911] By: abeltje                          on 2005-09-11 00:48:21 +0200
+        Log: * [CHANGE] thanks to reini urban
+	       * use the Windows environment variables always as fallback
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[   910] By: abeltje                          on 2005-09-10 14:23:12 +0200
+        Log: * [FIX]
+	       * typo in module name
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[   909] By: abeltje                          on 2005-09-10 13:59:47 +0200
+        Log: * [CHANGE]
+	       - Remove the develooper.com link for webarchive
+	       + Add a link to Google groups far a seachable webarchive
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/FAQ
+___________________________________________________________________________
+[   908] By: abeltje                          on 2005-09-10 13:57:47 +0200
+        Log: * [CHANGE]
+	       * fix a hide code with POD thing (use #)
+	       + chk_buildcfg() allow -Duse64bitall for OS X 10.4
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[   907] By: abeltje                          on 2005-09-10 12:46:17 +0200
+        Log: * [CHANGE]
+	       * pre-release tweaks
+		 - hide the 5.6.2 tree
+		 + add verbosity to
+		   Test::Smoke::Patcher::perl_regen_headers()
+	       + mention the fix for patchtree in forest setup
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/ReleaseNotes, /Test-Smoke/configsmoke.pl,
+	     /Test-Smoke/lib/Test/Smoke/Patcher.pm
+___________________________________________________________________________
+[   906] By: abeltje                          on 2005-09-09 18:26:12 +0200
+        Log: * [FIX]
+	       * no lexical filehandles in 5.005_04!
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Util.pm
+___________________________________________________________________________
+[   905] By: abeltje                          on 2005-09-09 02:25:41 +0200
+        Log: * [FIX]
+	       * get the skip tests count right
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/t/patcher_forest.t
+___________________________________________________________________________
+[   904] By: abeltje                          on 2005-09-09 01:39:37 +0200
+        Log: * [FIX]
+	       * now get the regex right (bad programmer, no cookie)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/t/patcher_forest.t
+___________________________________________________________________________
+[   903] By: abeltje                          on 2005-09-09 01:35:58 +0200
+        Log: * [FIX]
+	       * '+' needs escaping in a regex
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/t/patcher_forest.t
+___________________________________________________________________________
+[   902] By: abeltje                          on 2005-09-09 01:10:28 +0200
+        Log: * [CHANGE]
+	       - remove the flag => TRY_REGEN_HEADERS setting for windows;
+		 after patching regen_headers is now always called
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/patchtree.pl, /Test-Smoke/smokeperl.pl
+___________________________________________________________________________
+[   901] By: abeltje                          on 2005-09-09 01:01:37 +0200
+        Log: * [CHANGE]
+	       + add new helpfiles for testing
+	       + add new tests for patch forest (change 900)
+	       * fix some tests to reflect the new helpfiles
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           + /Test-Smoke/t/ftppub/perl-current-diffs/20005.gz,
+	     /Test-Smoke/t/patcher_forest.t
+           ! /Test-Smoke/MANIFEST,
+	     /Test-Smoke/t/ftppub/snap/perl@20000.tgz,
+	     /Test-Smoke/t/patcher.t, /Test-Smoke/t/syncer_ftp.t,
+	     /Test-Smoke/t/syncer_ftpclient.t
+___________________________________________________________________________
+[   900] By: abeltje                          on 2005-09-09 00:56:46 +0200
+        Log: * [CHANGE] Thanks to Jim Cromie for making me do this
+	       + add support for patching the intermediate tree in a
+		 forest and resyncing the build tree from that
+	       * code fixes to return patch() success (or not)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Patcher.pm
+___________________________________________________________________________
+[   899] By: abeltje                          on 2005-08-05 15:40:47 +0200
+        Log: * [FIX]
+	       * 898 was not right: should be set_smoke_patchlevel()
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   898] By: abeltje                          on 2005-08-05 15:15:15 +0200
+        Log: * [CHANGE]
+	       + add set_smoke_localpatch() to add the patchlevel as
+		 locally applied patch
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   897] By: abeltje                          on 2005-08-05 15:11:31 +0200
+        Log: * [CHANGE]
+	       * Update with new features
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/ReleaseNotes
+___________________________________________________________________________
+[   896] By: abeltje                          on 2005-08-03 00:30:45 +0200
+        Log: * [CHANGE]
+	       + Get rid of Merijn's LSB-release thingy on SuSE
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[   895] By: abeltje                          on 2005-07-31 18:19:56 +0200
+        Log: * [FIX]
+	       * get the regex for local_patches[] right
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Util.pm
+___________________________________________________________________________
+[   894] By: abeltje                          on 2005-07-31 17:44:42 +0200
+        Log: * [CHANGE]
+	       + add verbose stuff to get_local_patches()
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Reporter.pm,
+	     /Test-Smoke/lib/Test/Smoke/Util.pm, /Test-Smoke/t/lpatches.t
+___________________________________________________________________________
+[   893] By: abeltje                          on 2005-07-31 14:14:29 +0200
+        Log: * [CHANGE]
+	      + document the new local patch description feature
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[   892] By: abeltje                          on 2005-07-31 13:43:54 +0200
+        Log: * [FIX]
+	       * remove the test directory!
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/t/reporter.t
+___________________________________________________________________________
+[   891] By: abeltje                          on 2005-07-31 13:41:20 +0200
+        Log: * [CHANGE]
+	       + add a test for the "Locally applied patches:" section
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/t/reporter.t
+___________________________________________________________________________
+[   890] By: abeltje                          on 2005-07-31 12:45:15 +0200
+        Log: * [CHANGE]
+	       * Some more VMS tweaks
+		 * fix mani2abs() in Test::Smoke::SourceTree
+		 + add pre_sync() and post_sync() to the
+		   Test::Smoke::Syncer object
+		   * just to set the destination dir on VMS to a rooted
+		     logical
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SourceTree.pm,
+	     /Test-Smoke/lib/Test/Smoke/Syncer.pm
+___________________________________________________________________________
+[   889] By: abeltje                          on 2005-07-31 12:36:24 +0200
+        Log: * [FIX]
+	       * do the local patches list proper (with join)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Reporter.pm
+___________________________________________________________________________
+[   888] By: abeltje                          on 2005-07-31 12:11:41 +0200
+        Log: * [CHANGE]
+	       + complete the "locally applied patches" thing (883, 885)
+		 * copy the add description code from patchlevel.h and use
+		   that
+		 + add a list of locally applied patches to the report
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           + /Test-Smoke/t/lpatches.t
+           ! /Test-Smoke/MANIFEST, /Test-Smoke/lib/Test/Smoke/Patcher.pm,
+	     /Test-Smoke/lib/Test/Smoke/Reporter.pm,
+	     /Test-Smoke/lib/Test/Smoke/Util.pm,
+	     /Test-Smoke/t/ftppub/perl-current/patchlevel.h
+___________________________________________________________________________
+[   887] By: abeltje                          on 2005-07-30 17:27:01 +0200
+        Log: * [FIX]
+	       * do some more skipping (sendmail) on VMS
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/t/mailer.t
+___________________________________________________________________________
+[   886] By: abeltje                          on 2005-07-30 12:44:20 +0200
+        Log: * [FIX]
+	       * need to load File::Path to have rmtree() in
+		 set_vms_rooted_logical()
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Util.pm
+___________________________________________________________________________
+[   885] By: abeltje                          on 2005-07-30 04:05:23 +0200
+        Log: * [CHANGE]
+	       * help MSWin32 to set the new patchlevel.h
+	       * clean the testing regex (the joy of Test::More versions)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Patcher.pm,
+	     /Test-Smoke/t/patcher.t
+___________________________________________________________________________
+[   884] By: abeltje                          on 2005-07-30 03:40:40 +0200
+        Log: * [FIX]
+	       * fix the bcc32 regex for grepccmsg()
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Util.pm
+___________________________________________________________________________
+[   883] By: abeltje                          on 2005-07-30 03:38:46 +0200
+        Log: * [CHANGE]
+	       * fix the Carp::xxx() calls Test::Smoke::Patcher
+	       + add support for patch descriptions
+		 + run $^X -x patchlevel.h "$descr"
+	       + add tests for the descriptions in patchlevel.h
+	       * update the snapshots with newer patchlevel.h to test the
+		 descriptions
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Patcher.pm,
+	     /Test-Smoke/t/ftppub/snap/perl@19000.tgz,
+	     /Test-Smoke/t/ftppub/snap/perl@20000.tgz,
+	     /Test-Smoke/t/patcher.t
+___________________________________________________________________________
+[   882] By: abeltje                          on 2005-07-30 00:10:09 +0200
+        Log: * [CHANGE] (with help from Steve Hay)
+	       + support grepccmsg() for BORLAND bcc32 on MSWin32
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Reporter.pm,
+	     /Test-Smoke/lib/Test/Smoke/Smoker.pm,
+	     /Test-Smoke/lib/Test/Smoke/Util.pm
+___________________________________________________________________________
+[   881] By: abeltje                          on 2005-07-29 14:26:54 +0200
+        Log: * [FIX] by Steve Hay
+	       * Carp::carp() needs parentheses in get_ncpu()
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Util.pm
+___________________________________________________________________________
+[   880] By: abeltje                          on 2005-07-29 13:58:14 +0200
+        Log: * [FIX]
+	       * now get BORLAND ccversion right (change 879)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[   879] By: abeltje                          on 2005-07-29 13:39:04 +0200
+        Log: * [CHANGE]
+	       * apply a patch like #24855 (by Steve Hay) to help BORLAND
+		 ccversion
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[   877] By: abeltje                          on 2005-07-23 13:37:18 +0200
+        Log: * Prepare new snapshot: 1.19_72
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   876] By: abeltje                          on 2005-07-21 20:37:50 +0200
+        Log: * [CHANGE]
+	       + Add gccmsg.* to the distro
+	       * make t/reporter.t work with these new files
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           - /Test-Smoke/t/darwin.log, /Test-Smoke/t/darwin.out
+           ! /Test-Smoke/MANIFEST, /Test-Smoke/t/reporter.t
+          !> /Test-Smoke/t/gccmsg.log =(/Test-Smoke/t/darwin.log:846),
+	     /Test-Smoke/t/gccmsg.out =(/Test-Smoke/t/darwin.out:848)
+___________________________________________________________________________
+[   874] By: abeltje                          on 2005-07-21 19:01:47 +0200
+        Log: * [AUTOCOMMIT]
+	       * Regenerate 'Changes'
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Changes
+___________________________________________________________________________
 [   873] By: abeltje                          on 2005-07-21 18:54:14 +0200
         Log: * Prepare for a snapshot
         Url: http://source.Test-Smoke.org/svn/Test-Smoke
