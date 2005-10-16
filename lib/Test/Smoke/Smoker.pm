@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.026';
+$VERSION = '0.027';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -20,6 +20,7 @@ my %CONFIG = (
     df_locale         => '',
     df_force_c_locale => 0,
     df_defaultenv     => 0,
+    df_harness_destruct => 2,
 
     df_is_vms         => $^O eq 'VMS',
     df_vmsmake        => 'MMK',
@@ -349,7 +350,10 @@ sub Configure {
     if ( $self->{is_win32} ) {
         my @w32args = @{ $self->{w32args} };
         @w32args = @w32args[ 4 .. $#w32args ];
-        $makefile = $self->_run( "./Configure $config", 
+        my $w32_cfg = "$config" =~ /-DCCTYPE=/
+            ? "$config" : "$config -DCCTYPE=$self->{w32cc}";
+
+        $makefile = $self->_run( "./Configure $w32_cfg", 
                                  \&Test::Smoke::Util::Configure_win32,
                                  $self->{w32make}, @w32args  );
     } elsif ( $self->{is_vms} ) {
@@ -536,6 +540,8 @@ sub extend_with_harness {
     my %inconsistent = $self->_transform_testnames( @_ );
     my @harness = sort keys %inconsistent;
     if ( @harness ) {
+        # @20051016 By request of Nicholas Clark
+        local $ENV{PERL_DESTRUCT_LEVEL} = $self->{harness_destruct};
         local $ENV{PERL_SKIP_TTY_TEST} = 1;
         # I'm not happy with this PERLSHR approach for VMS
         local $ENV{PERLSHR} = $ENV{PERLSHR} || "";
