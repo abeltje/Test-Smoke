@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.45';
+$VERSION = '0.46';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -502,12 +502,19 @@ sub get_local_patches {
         return @lpatches;
     }
     $verbose and print " open ok\n";
-    my $seen;
+    my( $seen, $patchnum );
     while ( <PLEVEL> ) {
+        $patchnum = $1 if /#define PERL_PATCHNUM\s+(\d+)/;
         $seen && /^\s*,"(.+)"/ and push @lpatches, $1;
         /^\s*static.+?local_patches\[\]/ and $seen++;
     }
     close PLEVEL;
+    if ( defined $patchnum ) {
+        @lpatches = map {
+            s/^(MAINT|DEVEL)$/$1$patchnum/;
+            $_;
+        } @lpatches;
+    }
     $verbose and do { local $"=';'; print "Patches: '@lpatches'\n" };
     return @lpatches;
 }
@@ -680,16 +687,18 @@ sub get_patch {
     local *PATCHLEVEL_H;
     my $patchlevel_h = File::Spec->catfile( $ddir, 'patchlevel.h' );
     if ( open PATCHLEVEL_H, "< $patchlevel_h" ) {
-        my $declaration_seen = 0;
+        my( $declaration_seen, $patchnum ) = ( 0, 0 );
         while ( <PATCHLEVEL_H> ) {
+            $patchnum = $1 if /#define PERL_PATCHNUM\s+(\d+)/;
             $declaration_seen ||= /local_patches\[\]/;
-            $declaration_seen && /^\s+,"(?:DEVEL|MAINT)(\d+)|(RC\d+)"/ or next;
-            $patch_level = $1 || $2 || '?????';
+            $declaration_seen &&
+                /^\s+,"(?:(?:DEVEL|MAINT)(\d+)?)|(RC\d+)"/ or next;
+            $patch_level = $patchnum || $1 || $2 || '?????';
             if ( $patch_level =~ /^RC/ ) {
                 $patch_level = version_from_patchlevel_h( $ddir ) .
                                "-$patch_level";
             } else {
-                $patch_level .= '(+)';
+                $patch_level .= $patchnum ? "" : '(+)';
             }
         }
     }

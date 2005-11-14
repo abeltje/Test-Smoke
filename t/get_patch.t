@@ -4,8 +4,9 @@ use strict;
 # $Id$
 
 use File::Spec;
+use File::Copy;
 
-use Test::More tests => 5;
+use Test::More tests => 6;
 BEGIN { use_ok( 'Test::Smoke::Util' ); }
 
 chdir 't' or die "chdir: $!" if -d 't';
@@ -79,6 +80,14 @@ EO_PATCHLEVEL
     my $get_patch = get_patch();
 
     is( $get_patch, "5.9.0-RC$rc", "Found Release Candidate: $get_patch" );
+}
+
+SKIP: {
+    my $src = File::Spec->catfile( 'ftppub', 'pl_with_pn.h' );
+    copy $src, 'patchlevel.h' or skip 1, "Cannot copy patchlevel.h: $!";
+
+    my $get_patch = get_patch;
+    is $get_patch, 25000, "PATCH_NUM $get_patch";
 }
 
 END { 

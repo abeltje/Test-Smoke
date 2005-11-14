@@ -73,6 +73,7 @@ t/win32/makefile.mk
 t/ftppub/bugtst01.out
 t/ftppub/bugtst02.out
 t/ftppub/bugtst03.out
+t/ftppub/pl_with_pn.h
 t/ftppub/perl-current/MANIFEST
 t/ftppub/perl-current/patchlevel.h
 t/ftppub/perl-current/patchme.txt
