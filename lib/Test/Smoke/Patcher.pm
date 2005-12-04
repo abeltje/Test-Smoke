@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT );
-$VERSION = '0.009';
+$VERSION = '0.010';
 
 use base 'Exporter';
 use File::Spec;
@@ -294,7 +294,7 @@ sub patch_single {
         close PATCH;
     }
 
-    $self->{v} > 1 and print "Get patch from $self->{pfinfo}\n";
+    $self->{v} and print "Get patch from $self->{pfinfo}\n";
     $self->call_patch( \$content, @_ );
 }
 
@@ -336,13 +336,14 @@ sub patch_multi {
         close PATCHES;
     }
 
-    $self->{v} > 1 and print "Get patchinfo from $self->{pfinfo}\n";
+    $self->{v} and print "Get patchinfo from $self->{pfinfo}\n";
 
     my $ok = 1;
     foreach my $patch ( @patches ) {
         next if $patch =~ /^\s*[#]/;
         next if $patch =~ /^\s*$/;
         my( $filename, $switches, $descr ) = split /\s*;\s*/, $patch, 3;
+        $descr = $descr ? $descr . " ($filename)" : $filename;
         eval { $self->patch_single( $filename, $switches, $descr ) };
         if ( $@ ) {
             require Carp;
