@@ -11,7 +11,7 @@ use lib $findbin;
 use TestLib;
 use Cwd;
 
-use Test::More tests => 35;
+use Test::More tests => 41;
 BEGIN { use_ok( 'Test::Smoke::Patcher' ) };
 my $verbose = exists $ENV{SMOKE_VERBOSE} ? $ENV{SMOKE_VERBOSE} : 0;
 
@@ -173,6 +173,60 @@ EOPINFO
     is( $patcher->{flags}, TRY_REGEN_HEADERS, "flags set from config()" );
 
     # Should test if it calls 'regen_headers.pl'
+}
+
+{
+    my $pfile = File::Spec->catfile( 't', 'test.patch' );
+    put_file( <<EOF, $pfile );
+# Test patchinfo file
+!perly
+EOF
+
+    my $ddir = File::Spec->catdir(qw( t perl ));
+    -d $ddir or mkpath( $ddir, $verbose );
+    my $rhd = File::Spec->catfile( $ddir, 'regen.pl' );
+    put_file( <<EOF, $rhd );
+#! perl -w
+use File::Spec::Functions;
+my \$lib;
+BEGIN { \$lib = updir }
+use lib \$lib;
+use TestLib;
+my \$rhd = 'regen_pl.out';
+put_file( "File \$rhd (\$0)\\n", \$rhd )
+EOF
+
+    my $rpy = File::Spec->catfile( $ddir, 'regen_perly.pl' );
+    my @yfiles = qw( perly.tab perly.h perly.y );
+
+    put_file( <<EOF, $rpy );
+#! perl -w
+use File::Spec::Functions;
+my \$lib;
+BEGIN { \$lib = updir }
+use lib \$lib;
+use TestLib;
+my \@files = qw( @yfiles );
+for my \$yf ( \@files ) { put_file( "File \$yf (\$0)\\n", \$yf ) }
+EOF
+
+    my $patcher = Test::Smoke::Patcher->new( multi => { v => $verbose,
+        ddir => $ddir,
+        pfile => File::Spec->rel2abs( $pfile ),
+    });
+
+    isa_ok $patcher, 'Test::Smoke::Patcher';
+
+    $patcher->patch;
+    ok $patcher->{perly}, "regen_perly.pl";
+    ok -f File::Spec->catfile( $ddir, 'regen_pl.out' ), "Check 'regen_pl.out'";
+    for my $yf ( @yfiles ) {
+        ok -f File::Spec->catfile( $ddir, $yf ), "Check '$yf'";
+    }
+
+    unless ( $ENV{SMOKE_DEBUG} ) {
+        rmtree( $ddir, $verbose );
+    }
 }
 
 END {

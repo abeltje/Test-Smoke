@@ -18,7 +18,7 @@ use Test::Smoke::SysInfo;
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.055';
+$VERSION = '0.056';
 
 use Getopt::Long;
 my %options = ( 
@@ -990,7 +990,10 @@ PATCHER: {
 # optionally followed by another ';' and description (added to patchlevel.h)
 # /path/to/patchfile.patch;-p0 -R;Description for this patch
 # Empty lines and lines starting with '#' are ignored
-# File paths are relative to '$config{ddir}' if not absolute
+# File paths are relative to '$config{ddir}'
+# If your patch requires 'regen_perly' you'll need Bison 2 and
+# uncomment the next line (keep the exclamation-point there):
+#!perly
 EOMSG
         close PATCHES or last PATCHER;
         print "Created skeleton '$config{$arg}'\n";
