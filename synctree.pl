@@ -57,7 +57,7 @@ Other options can override the settings from the configuration file.
 =item * B<General options>
 
     -d | --ddir <directory>  Set the directory for the source-tree
-    -t | --type <type>       'rsync', 'snapshot', 'copy' [mandatory]
+    -t | --type <type>       'rsync', 'snapshot', 'copy', 'ftp' [mandatory]
 
     -v | --verbose <0..2>    Set verbose level
     -h | --help              Show help message (needs Pod::Usage)
@@ -65,21 +65,21 @@ Other options can override the settings from the configuration file.
 
 =item * B<options for> -t rsync
 
-    --source <rsync-src>     (ftp.linux.activestate.com::perl-current)
+    --source <rsync-src>     (public.activestate.com::perl-current)
     --rsync <path/to/rsync>  (rsync)
     --opts <rsync-opts>      (-az --delete)
 
 =item * B<options for> -t snapshot
 
-    --server <ftp-server>    (ftp.funet.fi)
-    --sdir <directory>       (/pub/languages/perl/snap)
+    --server <ftp-server>    (public.activestate.com)
+    --sdir <directory>       (/pub/apc/perl-current-snap)
     --sfile <file>           ('')
     --snapext <ext>          (tgz)
     --tar <un-tar-gz>        (gzip -dc %s | tar -xf -)
 
     --patchup                patch a snapshot [needs the patch program]
-    --pserver <ftp-server>   (ftp2.activestate.com)
-    --pdir <directory>       (/pub/staff/gsar/APC/perl-current-diffs)
+    --pserver <ftp-server>   (public.activestate.com)
+    --pdir <directory>       (/pub/apc/perl-current-diffs)
     --unzip <command>        (gzip -dc)
     --patch <command>        (patch)
     --cleanup <level>        (0) none; (1) snapshot; (2) diffs; (3) both
@@ -90,7 +90,13 @@ Other options can override the settings from the configuration file.
 
 =item * B<options for> -t hardlink
 
-    --hdir <directory>       Source directory to hardlink from
+    --hdir <directory>     Source directory to hardlink from
+
+=item * B<options for> -t ftp
+
+    --ftphost              Host with sources (public.activestate.com)
+    --ftpsdir              Sourcedir to mirror (/pub/apc/perl-current)
+    --ftpcdir              Diffs dir to get change (/pub/apc/perl-current-diffs)
 
 =item * B<options for> -t forest
 

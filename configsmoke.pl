@@ -18,7 +18,7 @@ use Test::Smoke::SysInfo;
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.054';
+$VERSION = '0.055';
 
 use Getopt::Long;
 my %options = ( 
@@ -124,64 +124,64 @@ my %vdirs = map {
 } qw( 5.5.x 5.8.x ); # unsupported: 5.6.2
 
 my %versions = (
-    '5.5.x' => { source => 'ftp.linux.activestate.com::perl-5.005xx',
-                 server => 'ftp.funet.fi',
-                 sdir   => '/pub/languages/perl/snap/5.5.x',
+    '5.5.x' => { source => 'public.activestate.com::perl-5.005xx',
+                 server => 'public.activestate.com',
+                 sdir   => '/pub/apc/perl-5.005xx-snap',
                  sfile  => '',
-                 pdir   => '/pub/staff/gsar/APC/perl-5.005xx-diffs',
+                 pdir   => '/pub/apc/perl-5.005xx-diffs',
                  cfg    => 'perl55x.cfg',
                  ddir   => File::Spec->catdir( cwd(), File::Spec->updir,
                                                "perl-$vdirs{'5.5.x'}" ),
                  text   => 'Perl 5.005 MAINT',
                  is56x  => 1},
 
-#    '5.6.2' => { source => 'ftp.linux.activestate.com::perl-5.6.2',
-#                 server => 'http://rgarciasuarez.free.fr',
-#                 sdir   => '/snap',
-#                 sfile  => 'perl562-21463.tar.gz',
-#                 pdir   => '/pub/staff/gsar/APC/perl-5.6.2-diffs',
+#    '5.6.2' => { source => 'public.activestate.com::perl-5.6.2',
+#                 server => 'public.activestate.com',
+#                 sdir   => '/pub/apc/perl-5.6.2-snap',
+#                 sfile  => 'perl-5.6.2-latest.tar.gz',
+#                 pdir   => '/pub/apc/perl-5.6.2-diffs',
 #                 ddir   => File::Spec->catdir( cwd(), File::Spec->updir,
 #                                               "perl-$vdirs{'5.6.2'}" ),
-#                 ftphost => 'ftp.linux.activestate.com',
+#                 ftphost => 'public.activestate.com',
 #                 ftpusr  => 'anonymous',
 #                 ftppwd  => 'smokers@perl.org',
-#                 ftpsdir => '/pub/staff/gsar/APC/perl-5.6.2',
-#                 ftpcdir => '/pub/staff/gsar/APC/perl-5.6.2-diffs',
+#                 ftpsdir => '/pub/apc/perl-5.6.2',
+#                 ftpcdir => '/pub/apc/perl-5.6.2-diffs',
 #
 #                 text   => 'Perl 5.6.2 (final?)',
 #                 cfg    => 'perl562.cfg',
 #                 is56x  => 1 },
 
-    '5.8.x' => { source =>  'ftp.linux.activestate.com::perl-5.8.x',
-                 server => 'ftp.funet.fi',
-                 sdir   => '/pub/languages/perl/snap/5.8.x',
-                 sfile  => '',
-                 pdir   => '/pub/staff/gsar/APC/perl-5.8.x-diffs',
+    '5.8.x' => { source =>  'public.activestate.com::perl-5.8.x',
+                 server => 'public.activestate.com',
+                 sdir   => '/pub/apc/perl-5.8.x-snap',
+                 sfile  => 'perl-5.8.x-latest.tar.gz',
+                 pdir   => '/pub/apc/perl-5.8.x-diffs',
                  ddir   => File::Spec->catdir( cwd(), File::Spec->updir,
                                                "perl-$vdirs{'5.8.x'}" ),
-                 ftphost => 'ftp.linux.activestate.com',
+                 ftphost => 'public.activestate.com',
                  ftpusr  => 'anonymous',
                  ftppwd  => 'smokers@perl.org',
-                 ftpsdir => '/pub/staff/gsar/APC/perl-5.8.x',
-                 ftpcdir => '/pub/staff/gsar/APC/perl-5.8.x-diffs',
+                 ftpsdir => '/pub/apc/perl-5.8.x',
+                 ftpcdir => '/pub/apc/perl-5.8.x-diffs',
 
                  text   => 'Perl 5.8 MAINT',
                  cfg    => ( is_win32 ? 'w32current.cfg'
                            : is_vms ? 'vmsperl.cfg' : 'perl58x.cfg' ),
                  is56x  => 0 },
 
-    '5.9.x' => { source => 'ftp.linux.activestate.com::perl-current',
-                 server => 'ftp.funet.fi',
-                 sdir   => '/pub/languages/perl/snap/5.9.x',
-                 sfile  => '',
-                 pdir   => '/pub/staff/gsar/APC/perl-current-diffs',
+    '5.9.x' => { source => 'public.activestate.com::perl-current',
+                 server => 'public.activestate.com',
+                 sdir   => '/pub/apc/perl-current-snap',
+                 sfile  => 'perl-current-latest.tar.gz',
+                 pdir   => '/pub/apc/perl-current-diffs',
                  ddir   => File::Spec->catdir( cwd(), File::Spec->updir,
                                                'perl-current' ),
-                 ftphost => 'ftp.linux.activestate.com',
+                 ftphost => 'public.activestate.com',
                  ftpusr  => 'anonymous',
                  ftppwd  => 'smokers@perl.org',
-                 ftpsdir => '/pub/staff/gsar/APC/perl-current',
-                 ftpcdir => '/pub/staff/gsar/APC/perl-current-diffs',
+                 ftpsdir => '/pub/apc/perl-current',
+                 ftpcdir => '/pub/apc/perl-current-diffs',
 
                  text   => 'Perl 5.10 to-be',
                  cfg    => ( is_win32 ? 'w32current.cfg'

@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.017';
+$VERSION = '0.018';
 
 use Config;
 use Cwd;
@@ -18,27 +18,29 @@ my %CONFIG = (
 # these settings have to do synctype==rsync
     df_rsync    => 'rsync', # you might want a path there
     df_opts     => '-az --delete',
-    df_source   => 'ftp.linux.activestate.com::perl-current',
+    df_source   => 'public.activestate.com::perl-current',
 
     rsync       => [qw( rsync source opts )],
 
 # these settings have to do with synctype==snapshot
     df_ftp      => 'Net::FTP',
-    df_server   => 'ftp.funet.fi',
-    df_sdir     => '/pub/languages/perl/snap',
+    df_server   => 'public.activestate.com',
+    df_sdir     => '/pub/apc/perl-current-snap',
     df_sfile    => '',
-    df_snapext  => 'tgz',
+    df_snapext  => 'tar.gz',
 
     df_tar      => ( $^O eq 'MSWin32' ?
         'Archive::Tar' : 'gzip -d -c %s | tar xf -' ),
 
     df_patchup  => 0,
-    df_pserver  => 'ftp2.activestate.com',
-    df_pdir     => '/pub/staff/gsar/APC/perl-current-diffs',
+    df_pserver  => 'public.activestate.com',
+    df_pdir     => '/pub/apc/perl-current-diffs',
+    df_ftpusr   => 'anonymous',
+    df_ftppwd   => 'smokers@perl.org',
     df_unzip    => $^O eq 'MSWin32' ? 'Compress::Zlib' : 'gzip -dc',
     df_patchbin => 'patch',
     df_cleanup  => 1,
-    snapshot    => [qw( ftp server sdir sfile snapext tar 
+    snapshot    => [qw( ftp server sdir sfile snapext tar ftpusr ftppwd
                        patchup pserver pdir unzip patchbin cleanup )],
 
 # these settings have to do with synctype==copy
@@ -60,11 +62,9 @@ my %CONFIG = (
     forest     => [qw( fsync mdir fdir )],
 
 # these settings have to do with synctype==ftp
-    df_ftphost => 'ftp.linux.activestate.com',
-    df_ftpusr  => 'anonymous',
-    df_ftppwd  => 'smokers@perl.org',
-    df_ftpsdir => '/pub/staff/gsar/APC/perl-current',
-    df_ftpcdir => '/pub/staff/gsar/APC/perl-current-diffs',
+    df_ftphost => 'public.activestate.com',
+    df_ftpsdir => '/pub/apc/perl-current',
+    df_ftpcdir => '/pub/apc/perl-current-diffs',
 
     ftp        => [qw( ftphost ftpusr ftppwd ftpsdir ftpcdir )],
 
@@ -542,8 +542,8 @@ use File::Path;
 This crates the new object. Keys for C<%args>:
 
   * ddir:    destination directory ( ./perl-current )
-  * server:  the server to get the snapshot from ( ftp.funet.fi )
-  * sdir:    server directory ( /pub/languages/perl/snap )
+  * server:  the server to get the snapshot from ( public.activestate.com )
+  * sdir:    server directory ( /pub/apc/perl-current-snap )
   * snapext: the extension used for snapdhots ( tgz )
   * tar:     howto untar ( Archive::Tar or 'gzip -d -c %s | tar x -' )
   * v:       verbose
@@ -606,7 +606,7 @@ sub _fetch_snapshot {
         return undef;
     };
 
-    my @login = ( 'anonymous', 'smokers@perl.org' );
+    my @login = ( $self->{ftpusr}, $self->{ftppwd} );
     $ftp->login( @login ) or do {
         require Carp;
         Carp::carp "[Net:FTP] Can't login( @login )";
@@ -804,7 +804,9 @@ sub _extract_with_Archive_Tar {
     $self->{v} and printf "%d items OK.\n", scalar @files;
 
     ( my $prefix = $files[0] ) =~ s|^([^/]+).+$|$1|;
-    return File::Spec->canonpath( File::Spec->catdir( cwd(), $prefix ) );
+    my $base_dir = File::Spec->canonpath(File::Spec->catdir( cwd(), $prefix ));
+    $self->{v} and print "Snapshot prefix: '$base_dir'\n";
+    return $base_dir;
 }
 
 =item $syncer->_extract_with_external( )
@@ -841,10 +843,12 @@ sub _extract_with_external {
     exists $dirs_post{ $_ } and delete $dirs_post{ $_ }
         foreach @dirs_pre;
     # I'll pick the first one that has 'perl' in it
-    my( $base_dir ) = grep /\bperl/ || /perl\b/ => keys %dirs_post;
-    $base_dir ||= 'perl';
+    my( $prefix ) = grep /\bperl/ || /perl\b/ => keys %dirs_post;
+    $prefix ||= 'perl';
 
-    return File::Spec->canonpath( File::Spec->catdir( cwd(), $base_dir ) );
+    my $base_dir = File::Spec->canonpath(File::Spec->catdir( cwd(), $prefix ));
+    $self->{v} and print "Snapshot prefix: '$base_dir'\n";
+    return $base_dir;
 }
 
 =item __vms_untargz( $untargz, $tgzfile, $verbose )
@@ -888,8 +892,8 @@ You should pass this extra information to
 C<< Test::Smoke::Syncer::Snapshot->new() >>:
 
   * patchup:  should we do this? ( 0 )
-  * pserver:  which FTP server? ( ftp2.activestate.com )
-  * pdir:     directory ( /pub/staff/gsar/APC/perl-current-diffs )
+  * pserver:  which FTP server? ( public.activestate.com )
+  * pdir:     directory ( /pub/apc/perl-current-diffs )
   * unzip:    ( gzip ) [ Compress::Zlib ]
   * patchbin: ( patch )
   * cleanup:  remove patches after applied? ( 1 )
@@ -925,7 +929,7 @@ sub _get_patches {
         return undef;
     };
 
-    my @user_info = qw( anonymous smokers@perl.org );
+    my @user_info = ( $self->{ftpusr}, $self->{ftppwd} );
     $ftp->login( @user_info ) or do {
         require Carp;
         Carp::carp "[Net::FTP] Can't login( @user_info )" ;
@@ -1268,11 +1272,11 @@ use File::Spec::Functions;
 
 Known args for this class:
 
-    * ftphost (ftp.linux.activestate.com)
+    * ftphost (public.activestate.com)
     * ftpusr  (anonymous)
     * ftppwd  (smokers@perl.org)
-    * ftpsdir (/pub/staff/gsar/APC/perl-????)
-    * ftpcdir (/pub/staff/gsar/APC/perl-????-diffs)
+    * ftpsdir (/pub/apc/perl-????)
+    * ftpcdir (/pub/apc/perl-????-diffs)
 
     * ddir
     * v
