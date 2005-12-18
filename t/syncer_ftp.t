@@ -100,6 +100,7 @@ SKIP: { # Here we try for 'Archive::Tar'/'Compress::Zlib'
         sdir     => '/t/snap',
         tar      => 'Archive::Tar',
         unzip    => 'Compress::Zlib',
+        snapext  => 'tgz',
         cleanup  => 3,
         patchbin => $patch,
     } );
@@ -135,6 +136,7 @@ SKIP: { # Here we try for gzip/tar
         sdir     => '/t/snap',
         tar      => $unpack,
         unzip    => $gzip,
+        snapext  => 'tgz',
         cleanup  => 3,
         patchbin => $patch,
     } );

@@ -11,7 +11,7 @@ use_ok( 'Test::Smoke::Syncer' );
 
 my %df_rsync = (
     rsync => 'rsync',
-    source => 'ftp.linux.activestate.com::perl-current',
+    source => 'public.activestate.com::perl-current',
     opts   => '-az --delete',
     ddir   => File::Spec->rel2abs( 'perl-current', File::Spec->curdir ),
 );
