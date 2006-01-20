@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.027';
+$VERSION = '0.028';
 
 use base 'Exporter';
 @EXPORT_OK = qw( &sysinfo &tsuname );
@@ -27,7 +27,7 @@ Test::Smoke::SysInfo - OO interface to system specific information
 or
 
     use Test::Smoke::SysInfo qw( sysinfo );
-    prinft "[%s]\n", sysinfo();
+    printf "[%s]\n", sysinfo();
 
 or
 
@@ -136,9 +136,9 @@ sub __get_os {
             $os .= " [$distro]" if $distro;
             last;
         };
-        $chk_os =~ /solaris|sunos/i && do {
+        $chk_os =~ /solaris|sunos|osf/i && do {
             my( $osn, $osv ) = (POSIX::uname())[0,2];
-            $osv > 5 and do {
+            $chk_os =~ /solaris|sunos/i && $osv > 5 and do {
                 $osn = 'Solaris';
                 $osv = '2.' . (split /\./, $osv, 2)[1];
             };
@@ -495,6 +495,7 @@ sub Linux_ppc {
 =head2 Solaris( )
 
 Use the L<psrinfo> program to get the system information.
+Used also in Tru64 (osf).
 
 =cut
 
