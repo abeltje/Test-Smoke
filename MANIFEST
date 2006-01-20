@@ -16,7 +16,6 @@ perlcurrent.cfg
 vmsperl.cfg
 w32current.cfg
 smoke55x_dfconfig
-smoke562_dfconfig
 smoke58x_dfconfig
 smokeperl.pl
 smokestatus.pl
