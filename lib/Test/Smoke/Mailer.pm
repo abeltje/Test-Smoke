@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION $P5P $NOCC_RE);
-$VERSION = '0.010';
+$VERSION = '0.011';
 
 use Test::Smoke::Util qw( parse_report_Config );
 
@@ -17,6 +17,8 @@ my %CONFIG = (
     df_to            => 'daily-build-reports@perl.org',
     df_from          => '',
     df_cc            => '',
+    df_swcc          => '-c',
+    df_swbcc         => '-b',
     df_bcc           => '',
     df_ccp5p_onfail  => 0,
     df_mserver       => 'localhost',
@@ -24,7 +26,7 @@ my %CONFIG = (
     df_mailbin       => 'mail',
     mail             => [qw( bcc cc mailbin )],
     df_mailxbin      => 'mailx',
-    mailx            => [qw( bcc cc mailxbin )],
+    mailx            => [qw( bcc cc mailxbin swcc swbcc )],
     df_sendmailbin   => 'sendmail',
     sendmail         => [qw( from bcc cc sendmailbin )],
     'Mail::Sendmail' => [qw( from bcc cc mserver )],
@@ -320,8 +322,9 @@ sub mail {
     my $cc = $self->_get_cc( $subject );
 
     my $cmdline = qq|$mailer -s '$subject'|;
-    $cmdline   .= qq| -c '$cc'| if $cc;
-    $cmdline   .= qq| -b '$self->{bcc}'| if $self->{bcc};
+    $self->{swcc}  ||= '-c', $cmdline   .= qq| $self->{swcc} '$cc'| if $cc;
+    $self->{swbcc} ||= '-b', $cmdline   .= qq| $self->{swbcc} '$self->{bcc}'|
+        if $self->{bcc};
     $cmdline   .= qq| $self->{to}|;
 
     $self->{v} > 1 and print "[$cmdline]\n";

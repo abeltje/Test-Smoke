@@ -18,7 +18,7 @@ use Test::Smoke::SysInfo;
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.056';
+$VERSION = '0.057';
 
 use Getopt::Long;
 my %options = ( 
@@ -482,6 +482,15 @@ EOMSG
        nck => '\bperl5-porters@perl.org\b',
     },
 
+    swbcc => {
+        msg => <<EOMSG,
+Specify the switch your mailx uses for bcc addresses.
+\tSome mailx programs use '~b' and not '-b'
+EOMSG
+        alt => [ ],
+        dft => ( $^O =~ /hpux|dec_osf/ ? '~b' : '-b' ),
+    },
+
     cc => {
        msg => <<EOMSG,
 * THIS FEATURE HAS CHANGED IN 1.19! *
@@ -491,6 +500,15 @@ EOMSG
        alt => [ ],
        dft => '',
        nck => '\bperl5-porters@perl.org\b',
+    },
+
+    swcc => {
+        msg => <<EOMSG,
+Specify the switch your mailx uses for cc addresses.
+\tSome mailx programs use '~c' and not '-c'
+EOMSG
+        alt => [ ],
+        dft => ( $^O =~ /hpux|dec_osf/ ? '~c' : '-c' ),
     },
 
     ccp5p_onfail => {
@@ -1082,7 +1100,14 @@ MAIL: {
     MAILER: {
         local $_ = $config{ 'mail_type' };
 
-        /^mailx?$/         && do { last MAILER };
+        /^mailx$/          && do {
+            if ( $config{bcc} ) {
+                $arg = 'swbcc';
+                $config{ $arg } = prompt( $arg );
+            }
+            last MAILER;
+        };
+        /^mail$/           && do { last MAILER };
         /^sendmail$/       && do {
             $arg = 'from';
             $config{ $arg } = prompt( $arg );
@@ -1102,6 +1127,10 @@ MAIL: {
 
     $arg = 'cc';
     $config{ $arg } = prompt( $arg );
+    if ( $config{mail_type} eq 'mailx' && $config{cc} ) {
+        $arg = 'swcc';
+        $config{ $arg } = prompt( $arg );
+    }
 }
 
 =item w32args
