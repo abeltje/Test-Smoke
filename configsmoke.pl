@@ -18,7 +18,7 @@ use Test::Smoke::SysInfo;
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.057';
+$VERSION = '0.058';
 
 use Getopt::Long;
 my %options = ( 
@@ -484,8 +484,8 @@ EOMSG
 
     swbcc => {
         msg => <<EOMSG,
-Specify the switch your mailx uses for bcc addresses.
-\tSome mailx programs use '~b' and not '-b'
+Specify the switch your mailx uses for Blind Carbon Copy (Bcc:) addresses.
+\tSome versions of mailx use '~b' and not '-b'.
 EOMSG
         alt => [ ],
         dft => ( $^O =~ /hpux|dec_osf/ ? '~b' : '-b' ),
@@ -504,8 +504,8 @@ EOMSG
 
     swcc => {
         msg => <<EOMSG,
-Specify the switch your mailx uses for cc addresses.
-\tSome mailx programs use '~c' and not '-c'
+Specify the switch your mailx uses for Carbon Copy (Cc:) addresses.
+\tSome versions of mailx use '~c' and not '-c'.
 EOMSG
         alt => [ ],
         dft => ( $^O =~ /hpux|dec_osf/ ? '~c' : '-c' ),
@@ -1098,7 +1098,7 @@ MAIL: {
     $config{ $arg } = prompt( $arg );
 
     MAILER: {
-        local $_ = $config{ 'mail_type' };
+        local $_ = $config{mail_type};
 
         /^mailx$/          && do {
             if ( $config{bcc} ) {
@@ -1127,7 +1127,9 @@ MAIL: {
 
     $arg = 'cc';
     $config{ $arg } = prompt( $arg );
-    if ( $config{mail_type} eq 'mailx' && $config{cc} ) {
+
+    if ( $config{mail_type} eq 'mailx' && 
+         ( $config{cc} || $config{ccp5p_onfail} ) ) {
         $arg = 'swcc';
         $config{ $arg } = prompt( $arg );
     }
@@ -1511,7 +1513,8 @@ sub sort_configkeys {
         qw( force_c_locale locale defaultenv ),
 
         # Report related
-        qw( mail mail_type mserver from to ccp5p_onfail cc bcc ),
+        qw( mail mail_type mserver from to ccp5p_onfail
+            swcc cc swbcc bcc ),
 
         # Archive reports and logfile
         qw( adir lfile ),
