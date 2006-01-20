@@ -8,7 +8,7 @@ use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
 
 # $Id$
 use vars qw( $VERSION $NOCASE );
-$VERSION = '0.004';
+$VERSION = '0.005';
 
 my %CONFIG = (
     df_fserver  => undef,
@@ -16,11 +16,15 @@ my %CONFIG = (
     df_fpasswd  => 'smokers@perl.org',
     df_v        => 0,
     df_fpassive => 1,
+    df_ftype    => undef,
 
-    valid      => [qw( fuser fpasswd fpassive )],
+    valid      => [qw( fuser fpasswd fpassive ftype )],
 );
+my @sn = qw( B KB MB GB TB );
 
 $NOCASE = $^O eq 'MSWin32' || $^O eq 'VMS';
+
+BEGIN { eval qq[use Time::HiRes qw( time ) ] }
 
 =head1 NAME
 
@@ -61,6 +65,7 @@ Create a new object with option checking:
     * fpasswd
     * v
     * fpassive
+    * ftype
 
 =cut
 
@@ -86,6 +91,7 @@ sub  new {
         ( $_ => $value )
     } ( v => @{ $CONFIG{ valid } } );
     $fields{fserver} = $server;
+    $fields{v} ||= 0;
 
     return bless \%fields, $class;
 
@@ -103,6 +109,7 @@ sub connect {
     $self->{v} and print "Connecting to '$self->{fserver}' ";
     $self->{client} = Net::FTP->new( $self->{fserver},
         Passive => $self->{fpassive},
+        Debug   => ( $self->{v} > 2 ),
     );
     unless ( $self->{client} ) {
         $self->{error} = $@;
@@ -112,9 +119,9 @@ sub connect {
     $self->{v} and print "OK\n";
 
     $self->{v} and print "Authenticating ";
-    unless ( $self->{client}->login( $self->{fuser}, $self->{fpwd} ) ) {
+    unless ( $self->{client}->login( $self->{fuser}, $self->{fpasswd} ) ) {
         $self->{error} = $@ || 
-            "Could not login($self->{fuser}) on $self->{pserver}";
+            "Could not login($self->{fuser}) on $self->{fserver}";
         $self->{v} and print "NOT OK ($self->{error})\n";
         return;
     }
@@ -136,6 +143,7 @@ sub mirror {
     my( $fdir, $ddir, $cleanup ) = @_;
     my $cwd = cwd();
     # Get the local directory sorted
+    $ddir = rel2abs( $ddir );
     mkpath( $ddir, $self->{v} ) unless -d $ddir;
     unless ( chdir $ddir ) {
         $self->{error} = "Cannot chdir($ddir): $!";
@@ -144,9 +152,22 @@ sub mirror {
     my $lroot = catdir( $ddir, updir );
     chdir $lroot and $lroot = cwd() and chdir $cwd;
 
+    if ( $self->{ftype} && $self->{client}->can( $self->{ftype} ) ) {
+        my $ftype = $self->{ftype};
+        $self->{client}->$ftype;
+    }
+    my( $totsize, $tottime ) = ( 0, 0 );
+    $self->{v} and print "Start mirror to: $ddir\n";
+    my $start = time;
     my $ret = __do_mirror( $self->{client}, $fdir, $ddir, $lroot,
-                           $self->{v}, $cleanup );
-
+                           $self->{v}, $cleanup, $totsize, $tottime );
+    my $ttime = time - $start;
+    $tottime or $tottime = 0.001;
+    my $speed = $totsize / $tottime;
+    my $ord = 0;
+    while ( $speed > 1024 ) { $speed /= 1024; $ord++ }
+    $self->{v} and printf "Mirror took %u seconds \@ %.3f %s\n",
+                          $ttime, $speed, $sn[ $ord ];
     chdir $cwd;
     return $ret;
 }
@@ -201,13 +222,14 @@ Recursive sub to mirror a tree from an FTP server.
 {
 my $mirror_ok = 1;
 sub __do_mirror {
-    my( $ftp, $ftpdir, $localdir, $lroot, $verbose, $cleanup ) = @_;
+    my( $ftp, $ftpdir, $localdir, $lroot, $verbose, $cleanup,
+        $totsize, $tottime ) = @_;
     $verbose ||= 0;
 
     $ftp->cwd( $ftpdir );
     $verbose > 1 and printf "Entering %s\n", $ftp->pwd;
 
-    my @list = dirlist( $ftp );
+    my @list = dirlist( $ftp, $verbose );
 
     foreach my $entry ( sort { $a->{type} cmp $b->{type} ||
                                $a->{name} cmp $b->{name} } @list ) {
@@ -221,8 +243,8 @@ sub __do_mirror {
             }
             chdir $new_locald;
             $mirror_ok &&= __do_mirror( $ftp, $entry->{name}, 
-                                        $new_locald, $lroot,
-                                        $verbose, $cleanup );
+                                        $new_locald, $lroot, $verbose,
+                                        $cleanup, $totsize, $tottime );
             $entry->{time} ||= $entry->{date};
             utime $entry->{time}, $entry->{time}, $new_locald;
             $ftp->cwd( '..' );
@@ -244,15 +266,30 @@ sub __do_mirror {
             }
             unless ( $skip ) {
                 1 while unlink $destname;
-                $verbose and printf "%s: ", abs2rel( $destname, $lroot );
+                $verbose and printf "%s: %d/", abs2rel( $destname, $lroot ),
+                                               $entry->{size};
+                my $start = time;
                 my $dest = $ftp->get( $entry->{name}, $destname );
+                my $t_time = time - $start;
                 $dest or $mirror_ok = 0, return;
+
+                $t_time or $t_time = 0.001; # avoid div by zero
+                my $size = -s $dest;
+                $totsize += $size;
+                $tottime += $t_time;
+                my $speed = $size / $t_time;
+                my $ord = 0;
+                while ( $speed > 1024 ) { $speed /= 1024; $ord++ }
+                my $dig = $ord ? '3' : '0';
+
                 chmod $entry->{mode}, $dest;
                 utime $entry->{time}, $entry->{time}, $dest;
-                $verbose and print "($entry->{size})\n";
+                $verbose and printf "$size (%.${dig}f $sn[$ord]/s)\n",
+                                     $speed;
             } else { 
                 $verbose > 1 and
-                    printf "Skip '%s'\n", abs2rel( $destname, $lroot);
+                    printf "%s: %d/skipped\n", abs2rel( $destname, $lroot),
+                                               $entry->{size};
             }
         }
     }
@@ -285,6 +322,7 @@ sub __do_mirror {
             closedir DIR;
         }
     }
+    @_[ -2, -1 ] = ( $totsize, $tottime );
     return $mirror_ok;
 }
 }
@@ -302,7 +340,7 @@ sub __clean_name {
     return $NOCASE ? uc $fname : $fname;
 }
 
-=head2 dirlist( $ftp )
+=head2 dirlist( $ftp, $verbose )
 
 Return a list of entries (hashrefs) with these properties:
 
@@ -315,11 +353,11 @@ Return a list of entries (hashrefs) with these properties:
 =cut
 
 sub dirlist {
-    my $ftp = shift;
-    map __parse_line_from_dir( $_ ) => $ftp->dir;
+    my( $ftp, $verbose ) = @_;
+    map __parse_line_from_dir( $_, $verbose ) => $ftp->dir;
 }
 
-=head2 __parse_line_from_dir( $line )
+=head2 __parse_line_from_dir( $line, $verbose )
 
 The C<dir> command in FTP gives a sort of C<ls -la> output,
 parts of this output are used as remote file-info.
@@ -327,18 +365,31 @@ parts of this output are used as remote file-info.
 =cut
 
 sub __parse_line_from_dir {
-    my $entry = shift;
+    my( $entry, $verbose ) = @_;
     my @field = split " ", $entry;
 
-    ( my $type = substr $field[0], 0, 1 ) =~ tr/-/f/;
-    return {
-        name => $field[-1],
-        type => $type,
-        mode => __get_mode_from_text( substr $field[0], 1 ),
-        size => $field[4],
-        time => 0, 
-        date => __time_from_ls( @field[5, 6, 7] ),
-    };
+    if ( $field[0] =~ /[dwrx-]{7}/ ) { # Unixy dir entry
+
+        ( my $type = substr $field[0], 0, 1 ) =~ tr/-/f/;
+        return {
+            name => $field[-1],
+            type => $type,
+            mode => __get_mode_from_text( substr $field[0], 1 ),
+            size => $field[4],
+            time => 0, 
+            date => __time_from_ls( @field[5, 6, 7] ),
+        }
+    } else { # Windowsy dir entry
+        my $type = $field[2] eq '<DIR>' ? 'd' : 'f';
+        return {
+            name => $field[-1],
+            type => $type,
+            mode => 0777,
+            size => $field[2],
+            time => 0,
+            date => __time_from_windows( @field[0, 1] ),
+        }
+    }
 }
 
 =head2 __get_mode_from_text( $tmode )
@@ -386,15 +437,34 @@ sub __time_from_ls {
     return Time::Local::timelocal( 0, $minutes, $hour, $day, $month, $year );
 }
 
+=head2 __time_from_windows( $date, $time )
+
+This takes the two date/time related columns from the C<dir> output
+and returns a localtime-stamp
+
+=cut
+
+sub __time_from_windows {
+    my( $date, $time ) = @_;
+
+    my( $day, $month, $year ) = split m/-/, $date;
+    $month--;
+    my( $hour, $minutes, $off )     = $time =~ m/(\d+):(\d+)([ap])m/i;
+    $off && lc $off eq 'p' and $hour += 12;
+
+    require Time::Local;
+    return Time::Local::timelocal( 0, $minutes, $hour, $day, $month, $year );
+}
+
 1;
 
 =head1 SEE ALSO
 
 L<Test::Smoke::Syncer>
 
-=head1 COPYRIGHT
+=head1 COPYRIGHT & LICENSE
 
-(c) 2003-2004, Abe Timmerman <abeltje@cpan.org> All rights reserved.
+(c) 2003, 2004, 2005, Abe Timmerman <abeltje@cpan.org> All rights reserved.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
