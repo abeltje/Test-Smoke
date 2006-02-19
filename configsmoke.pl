@@ -2176,7 +2176,9 @@ sub check_buildcfg {
 
     my $uname_s = Test::Smoke::SysInfo::tsuname( 's' );
     my( $os, $osver ) = split /\s+-\s+/, $uname_s;
-    $osver = sprintf "%d.%03d", split m/\D+/, $osver, 3;
+    # May assume much too much about OS version number formats.
+    my( $osvermaj, $osvermin ) = ($osver =~ /^.+?(\d+)\D+(\d+)/);
+    $osver = sprintf "%s%d.%03d", $osvermaj, $osvermin;
 
     print "Checking '$file_name'\n     for $pversion on $uname_s\n";
 
