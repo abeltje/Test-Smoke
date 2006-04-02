@@ -18,7 +18,7 @@ use Test::Smoke::SysInfo;
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.058';
+$VERSION = '0.059';
 
 use Getopt::Long;
 my %options = ( 
@@ -2178,7 +2178,7 @@ sub check_buildcfg {
     my( $os, $osver ) = split /\s+-\s+/, $uname_s;
     # May assume much too much about OS version number formats.
     my( $osvermaj, $osvermin ) = ($osver =~ /^.+?(\d+)\D+(\d+)/);
-    $osver = sprintf "%s%d.%03d", $osvermaj, $osvermin;
+    $osver = sprintf "%d.%03d", $osvermaj, $osvermin;
 
     print "Checking '$file_name'\n     for $pversion on $uname_s\n";
 
