@@ -18,7 +18,7 @@ use Test::Smoke::SysInfo;
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.059';
+$VERSION = '0.060';
 
 use Getopt::Long;
 my %options = ( 
@@ -713,6 +713,9 @@ you will need to confirm your choice.
     local $options{usedft} = $options{usedft};
     BUILDDIR: {
         $arg = 'ddir';
+        my $ddir = chk_dir( $conf->{$arg} || $config{$arg} )
+                || $opt{$arg}->{dft};
+        $conf->{$arg} = $config{$arg} = $ddir;
         $config{ $arg } = prompt_dir( $arg );
         $options{usedft} = $options{oldcfg};
         my $cwd = cwd;
@@ -1781,6 +1784,23 @@ sub prompt {
     return $retval;
 }
 
+sub chk_dir {
+    my( $dir ) = @_;
+    defined $dir or return;
+    my $cwd = cwd();
+    File::Path::mkpath( $dir, 1, 0755 ) unless -d $dir;
+ 
+    if ( ! chdir $dir  ) {
+        warn "Cannot chdir($dir): $!\n";
+        $dir = undef;
+    } else {
+        $dir = File::Spec->canonpath( cwd() );
+    }
+    chdir $cwd or die "Cannot chdir($cwd) back: $!";
+
+    return $dir;
+}
+
 sub prompt_dir {
 
     if ( exists $conf->{ $_[0] } && $conf->{ $_[0] } )  {
@@ -1804,11 +1824,7 @@ sub prompt_dir {
                        ( $ENV{HOME} || $ENV{LOGDIR} || 
                          "$ENV{HOMEDRIVE}$ENV{HOMEPATH}" )}ex;
 
-        my $cwd = cwd();
-        File::Path::mkpath( $dir, 1, 0755 ) unless -d $dir;
-        chdir $dir or warn "Cannot chdir($dir): $!\n" and redo GETDIR;
-        $dir = File::Spec->canonpath( cwd() );
-        chdir $cwd or die "Cannot chdir($cwd) back: $!";
+        defined( $dir = chk_dir( $dir ) ) or redo GETDIR;
 
         print "Got [$dir]\n";
         return $dir;
@@ -2178,7 +2194,9 @@ sub check_buildcfg {
     my( $os, $osver ) = split /\s+-\s+/, $uname_s;
     # May assume much too much about OS version number formats.
     my( $osvermaj, $osvermin ) = ($osver =~ /^.+?(\d+)\D+(\d+)/);
-    $osver = sprintf "%d.%03d", $osvermaj, $osvermin;
+    $osver = sprintf "%s", $osvermaj || '?'; 
+    defined $osvermin and $osver .= sprintf ".%03d", $osvermin;
+
 
     print "Checking '$file_name'\n     for $pversion on $uname_s\n";
 
