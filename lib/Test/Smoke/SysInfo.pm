@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.031';
+$VERSION = '0.032';
 
 use base 'Exporter';
 @EXPORT_OK = qw( &sysinfo &tsuname );
@@ -320,7 +320,8 @@ sub HPUX {
     if (@cpu && $cpu[0] =~ m/^\S+\s+(\d+\.\d+)\s+(\S+)/) {
         my( $arch, $cpu ) = ("PA-$1", $2);
         $hpux->{_cpu} = $cpu;
-        $hpux->{_cpu_type} = $os_r >= 11 && (`getconf HW_32_64_CAPABLE` & 1 )
+        $hpux->{_cpu_type} = $os_r >= 11 &&
+                             ( (0 + `getconf HW_32_64_CAPABLE`) & 1 )
             ? "$arch/64" : "$arch/32";
     }
     return $hpux;
