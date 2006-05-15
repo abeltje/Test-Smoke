@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.029';
+$VERSION = '0.030';
 
 use base 'Exporter';
 @EXPORT_OK = qw( &sysinfo &tsuname );
@@ -18,7 +18,7 @@ Test::Smoke::SysInfo - OO interface to system specific information
 
     my $si = Test::Smoke::SysInfo->new;
 
-    printf "Hostname: %s\n, $si->host;
+    printf "Hostname: %s\n", $si->host;
     printf "Number of CPU's: %s\n", $si->ncpu;
     printf "Processor type: %s\n", $si->cpu_type;   # short
     printf "Processor description: %s\n", $si->cpu; # long
@@ -259,7 +259,11 @@ Use the L<ioscan> program to find information.
 sub HPUX {
     my $hpux = Generic();
     local $ENV{PATH} = "/etc:$ENV{PATH}";
-    my $ncpu = grep /^processor/ => `ioscan -fnkC processor`;
+    my @mi;	# 11.23 has one command for all info
+    -x "/usr/contrib/bin/machinfo" and
+        chomp (@mi = `/usr/contrib/bin/machinfo`);
+    my $ncpu = (grep s/^\s*Number of CPUs\s+=\s+(\d+)/$1/, @mi)[0];
+    $ncpu or $ncpu = grep /^processor/ => `ioscan -fnkC processor`;
     unless ( $ncpu ) {	# not root?
         local *SYSLOG;
         if ( open SYSLOG, "< /var/adm/syslog/syslog.log" ) {
@@ -275,14 +279,15 @@ sub HPUX {
     chomp( my $model = `model` );
     ( my $m = $model ) =~ s:.*/::;
     local *LST;
-    open LST, "< /usr/sam/lib/mo/sched.models" and
+    @cpu = grep s/^\s*processor model:\s+\d+\s+(.*) processor/$1/, @mi;
+    if (@cpu == 0 && open LST, "< /usr/sam/lib/mo/sched.models") {
 	@cpu = grep m/$m/i, <LST>;
-    close LST;
-
-    @cpu == 0 && open LST, "< /opt/langtools/lib/sched.models" and
+	close LST;
+	}
+    if (@cpu == 0 && open LST, "< /opt/langtools/lib/sched.models") {
 	@cpu = grep m/$m/i, <LST>;
-    close LST;
-
+	close LST;
+	}
     if (@cpu == 0 && open LST, "echo 'sc product cpu;il' | /usr/sbin/cstm |") {
         my $line;
         while ( $line = <LST> ) {
@@ -299,7 +304,20 @@ sub HPUX {
        $k64 and $hpux->{_os} .= "/$k64";
     }
 
-    if ($cpu[0] =~ m/^\S+\s+(\d+\.\d+)\s+(\S+)/) {
+    my $arch;
+    if (($arch) = grep s/^\s*machine\s+=\s+(\S+)/$1/, @mi) {
+	my $cpu = $cpu[0];
+	@cpu = ();
+	my $speed = (grep s:^\s*Clock speed =\s+(\d+)\s*([MG])Hz:$1/$2:i, @mi)[0];
+	$speed =~ s:/(\w)::;
+	$1 eq "G" and $speed *= 1024;
+	$cpu .= "/$speed";
+
+	$hpux->{_cpu} = $cpu;
+	$hpux->{_cpu_type} = $arch;
+	}
+
+    if (@cpu && $cpu[0] =~ m/^\S+\s+(\d+\.\d+)\s+(\S+)/) {
         my( $arch, $cpu ) = ("PA-$1", $2);
         $hpux->{_cpu} = $cpu;
         $hpux->{_cpu_type} = $os_r >= 11 && `getconf HW_32_64_CAPABLE` =~ m/^1/

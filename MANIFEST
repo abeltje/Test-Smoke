@@ -20,6 +20,7 @@ smoke58x_dfconfig
 smokeperl.pl
 smokestatus.pl
 synctree.pl
+sysinfo.pl
 W32Configure.pl
 lib/Mail/Sendmail.pm
 lib/Test/Smoke.pm
