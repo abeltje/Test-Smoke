@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.028';
+$VERSION = '0.029';
 
 use base 'Exporter';
 @EXPORT_OK = qw( &sysinfo &tsuname );
@@ -55,7 +55,9 @@ sub new {
 
         $chk_os =~ /aix/i        && return bless AIX(),     $class;
 
-        $chk_os =~ /darwin|bsd/i && return bless BSD(),     $class;
+        $chk_os =~ /bsd/i        && return bless BSD(),     $class;
+
+        $chk_os =~ /darwin/i     && return bless Darwin(),  $class;
 
         $chk_os =~ /hp-?ux/i     && return bless HPUX(),    $class;
 
@@ -337,12 +339,38 @@ sub BSD {
     }
 
     return {
-        _cpu_type => $sysctl{machine} || __get_cpu_type(),
+        _cpu_type => ($sysctl{machine} || __get_cpu_type()),
         _cpu      => $cpu || __get_cpu,
         _ncpu     => $sysctl{ncpu},
         _host     => __get_hostname(),
         _os       => __get_os(),
     };
+}
+
+=head2 Darwin( )
+
+Uses `system_profiler SPHardwareDataType` to get more info on the machine.
+
+=cut
+
+sub Darwin {
+    my $sysinfo = BSD( );
+
+    my @sys_prof = qx/system_profiler SPHardwareDataType/;
+    chomp( @sys_prof );
+
+    my %profile = (
+        cpu   => { match => '^\s*Machine Model:\s+' },
+        speed => { match => '^\s*CPU Speed:\s+' },
+    );
+    for my $key ( keys %profile ) {
+        ( $profile{ $key }{value} ) = map { s/$profile{ $key }{match}//i; $_ }
+            grep m/$profile{ $key }{match}/ => @sys_prof;
+    }
+    $profile{cpu}{value} and
+        $sysinfo->{_cpu} = "$profile{cpu}{value} ($profile{speed}{value})";
+
+    return $sysinfo;
 }
 
 =head2 IRIX( )
