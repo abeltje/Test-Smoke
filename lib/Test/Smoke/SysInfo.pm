@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.032';
+$VERSION = '0.033';
 
 use base 'Exporter';
 @EXPORT_OK = qw( &sysinfo &tsuname );
@@ -368,28 +368,39 @@ sub BSD {
 
 =head2 Darwin( )
 
-Uses `system_profiler SPHardwareDataType` to get more info on the machine.
+If the L<system_profiler> program is accessible (meaning that this is
+Mac OS X), use it to find information; otherwise treat as L</BSD>.
+
+This sub was donated by Dominic Dunlup.
 
 =cut
 
 sub Darwin {
-    my $sysinfo = BSD( );
-
-    my @sys_prof = qx/system_profiler SPHardwareDataType/;
-    chomp( @sys_prof );
-
-    my %profile = (
-        cpu   => { match => '^\s*Machine Model:\s+' },
-        speed => { match => '^\s*CPU Speed:\s+' },
-    );
-    for my $key ( keys %profile ) {
-        ( $profile{ $key }{value} ) = map { s/$profile{ $key }{match}//i; $_ }
-            grep m/$profile{ $key }{match}/ => @sys_prof;
+    my $system_profiler_output;
+    {
+	no warnings 'exec';	# Just in case warnings are turned on ...
+	$system_profiler_output =
+	    `/usr/sbin/system_profiler -detailLevel mini SPHardwareDataType`;
     }
-    $profile{cpu}{value} and
-        $sysinfo->{_cpu} = "$profile{cpu}{value} ($profile{speed}{value})";
+    return BSD() unless $system_profiler_output;
 
-    return $sysinfo;
+    my %system_profiler;
+    $system_profiler{$1} = $2
+	while $system_profiler_output =~ m/^\s*([\w ]+):\s+(.+)$/gm;
+
+    $system_profiler{'CPU Type'} =~ s/PowerPC\s*(\w+).*/macppc$1/;
+    $system_profiler{'CPU Speed'} =~ 
+	s/(\d+(?:\.\d+)?)\s*GHz/sprintf("%d MHz", $1 * 1000)/e;
+
+    my $model = $system_profiler{'Machine Name'} ||
+                $system_profiler{'Machine Model'};
+    return {
+        _cpu_type => ($system_profiler{'CPU Type'} || __get_cpu_type()),
+        _cpu      => ("$model ($system_profiler{'CPU Speed'})" || __get_cpu),
+        _ncpu     => $system_profiler{'Number Of CPUs'},
+        _host     => __get_hostname(),
+        _os       => __get_os() . " (Mac OS X)",
+    };
 }
 
 =head2 IRIX( )
@@ -710,10 +721,10 @@ L<Test::Smoke::Smoker>, L<Test::Smoke::Reporter>
 
 =head1 COPYRIGHT
 
-(c) 2002-2003, Abe Timmerman <abeltje@cpan.org> All rights reserved.
+(c) 2002-2006, Abe Timmerman <abeltje@cpan.org> All rights reserved.
 
 With contributions from Jarkko Hietaniemi, Merijn Brand, Campo
-Weijerman, Alan Burlison, Allen Smith, Alain Barbet.
+Weijerman, Alan Burlison, Allen Smith, Alain Barbet, Dominic Dunlop.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
