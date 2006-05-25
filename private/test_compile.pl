@@ -11,7 +11,7 @@ BEGIN {
     @scripts = qw( smokeperl.pl runsmoke.pl
                    synctree.pl patchtree.pl mailrpt.pl 
                    archiverpt.pl smokestatus.pl W32Configure.pl
-                   Makefile.PL configsmoke.pl chkbcfg.pl sysconfig.pl );
+                   Makefile.PL configsmoke.pl chkbcfg.pl sysinfo.pl );
 
     push @scripts, map File::Spec->catfile(qw( lib Test Smoke ), $_ )
         => qw ( Util.pm Policy.pm SourceTree.pm
