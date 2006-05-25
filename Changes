@@ -10,6 +10,225 @@ The filelists have a short symbolic indicator:
 
 Enjoy!
 ___________________________________________________________________________
+[   974] By: abeltje                          on 2006-05-25 21:31:39 +0200
+        Log: * [CHANGE]
+	       * FIX there should be no directories in MANIFEST
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/MANIFEST
+___________________________________________________________________________
+[   971] By: abeltje                          on 2006-05-25 21:24:21 +0200
+        Log: * [CHANGE]
+	       + ADD new tests for Test::Smoke::Util::grepccmsg() to the
+		 distribution
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/MANIFEST
+___________________________________________________________________________
+[   970] By: abeltje                          on 2006-05-25 21:19:17 +0200
+        Log: * [CHANGE]
+	       + ADD new tests for Test::Smoke::Util::grepccmsg()
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           + /Test-Smoke/t/grepccmsg.t, /Test-Smoke/t/logs,
+	     /Test-Smoke/t/logs/hpux1020.log,
+	     /Test-Smoke/t/logs/hpux1111.log,
+	     /Test-Smoke/t/logs/solaris.log,
+	     /Test-Smoke/t/logs/w32bcc32.log
+___________________________________________________________________________
+[   969] By: abeltje                          on 2006-05-25 21:13:59 +0200
+        Log: * prepare for snapshot 1.19_81
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   968] By: abeltje                          on 2006-05-25 21:13:03 +0200
+        Log: * [CHANGE]
+	       * change the Borland bcc32 regex in grepccmsg() (by Steve
+		 Hay)
+	       - remove /s from the match in grepccmsg()
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Util.pm
+___________________________________________________________________________
+[   967] By: abeltje                          on 2006-05-25 21:09:07 +0200
+        Log: * [CHANGE]
+	       + try harder to get the cpu info for Linux on macppc
+		 (/proc/cpuinfo->'detected as')
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[   966] By: abeltje                          on 2006-05-25 21:07:16 +0200
+        Log: * [CHANGE]
+	       * FIX _extract_with_external() returned the wrong directory
+		 in the case the snapshot was already in {ddir}
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Syncer.pm
+___________________________________________________________________________
+[   965] By: abeltje                          on 2006-05-16 10:24:00 +0200
+        Log: * [CHANGE] by Dominic Dunlop
+	       + use the all the output from system_profiler(1) for darwin
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[   964] By: abeltje                          on 2006-05-15 13:48:52 +0200
+        Log: * [CHANGE] thanks to Merijn!
+	       * more defencive FIX for the /32- /64 bit cpu thing for
+		 hpux
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[   963] By: abeltje                          on 2006-05-15 13:33:54 +0200
+        Log: * [CHANGE] thanks to Merijn!
+	       * FIX the /32- /64 bit cpu thing for hpux
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[   961] By: abeltje                          on 2006-05-15 13:12:48 +0200
+        Log: * [CHANGE] by Merijn
+	       * FIX hpux sysinfo for 11.23
+	       + add new script sysinfo.pl
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           + /Test-Smoke/sysinfo.pl
+           ! /Test-Smoke/MANIFEST, /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[   960] By: abeltje                          on 2006-05-15 12:04:06 +0200
+        Log: * [CHANGE] thanks to Dominic Dunlop
+	       + use the 'Machine Name' from system_profiler for _cpu
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[   958] By: abeltje                          on 2006-05-07 17:53:57 +0200
+        Log: * [CHANGE]
+	       + Fix a bug reported by Jarkko where the BUILDDIR blok was
+		 looping for paths that spring from a symbolic link (cwd
+		 does readlink all the way through the path)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[   940] By: abeltje                          on 2006-04-21 18:22:08 +0200
+        Log: * [CHANGE] by Steve Hay
+	     I found that my bleadperl smoke was taking twice as long as
+	     usual and 
+	     was writing a 100MB+ log file!
+
+	     The reason is that it didn't recognize the new format output
+	     (integer 
+	     milliseconds rather than fractional seconds), so was
+	     re-running every 
+	     test verbosely!
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Util.pm,
+	     /Test-Smoke/t/skip_filter.t
+___________________________________________________________________________
+[   939] By: abeltje                          on 2006-04-03 01:16:06 +0200
+        Log: * [FIX] by Jarkko on his own patch (935)
+	       > Hrmmm, what is that %s doing in there...?
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[   935] By: abeltje                          on 2006-02-19 12:34:16 +0100
+        Log: * [CHANGE] by Jarkko Hietaniemi
+	       * The osver in Tru64 has a letter prefix, e.g. "V5.1".
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[   930] By: abeltje                          on 2006-01-20 18:23:10 +0100
+        Log: * [CHANGE]
+	       + ADD swcc and swbcc to the sortorder of keys
+	       * Rephrase the questions for swcc and swbcc a bit
+	       + Also check for ccp5p_onfail with mailx
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[   928] By: abeltje                          on 2006-01-20 17:57:22 +0100
+        Log: [FIX]
+	       * I removed support for 5.6.2, so bye bye smoke562_dfconfig
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/MANIFEST
+___________________________________________________________________________
+[   926] By: abeltje                          on 2006-01-20 17:45:50 +0100
+        Log: * [CHANGE]
+	       - REMOVE smoke562_config; configsmoke.pl doesn't support
+		 that version anymore
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           - /Test-Smoke/smoke562_dfconfig
+___________________________________________________________________________
+[   925] By: abeltje                          on 2006-01-20 17:34:28 +0100
+        Log: * We should prepare for 1.20
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   924] By: abeltje                          on 2006-01-20 17:31:42 +0100
+        Log: * [CHANGE] thanks to Jarkko Hietaniemi for finding this
+	       * make the switches for CC: and BCC: addresses configurable
+		 for mailx
+		 + ADD swcc (-c or ~c on hpux/Tru64)
+		 + ADD swbcc (-b or ~b on hpux/True64)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl,
+	     /Test-Smoke/lib/Test/Smoke/Mailer.pm
+___________________________________________________________________________
+[   923] By: abeltje                          on 2006-01-20 17:13:32 +0100
+        Log: * [CHANGE] to help more general mirroring
+	       * FIX support for non-anonymous access
+	       + ADD support for M$ ftp servers (in NT mode)
+	       + ADD support for transfer mode (ftype 'binary'/'ascii')
+	       + ADD speed info for verbose >= 1
+	       + ADD Debug to Net::FTP for verbose > 2
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/FTPClient.pm
+___________________________________________________________________________
+[   922] By: abeltje                          on 2006-01-20 14:06:08 +0100
+        Log: * [CHANGE] by Jarkko Hietaniemi
+	       + also use POSIX::uname on True64 (dec_osf) for more os
+		 info (like solaris)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[   921] By: abeltje                          on 2005-12-18 12:27:57 +0100
+        Log: * [CHANGE]
+	       * Some patches also need to run 'regen_perly.pl', but Bison
+		 2 is not everywhere, so we fix the patches-info-file to
+		 signal this by specifying '!perly' on a single line
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl,
+	     /Test-Smoke/lib/Test/Smoke/Patcher.pm,
+	     /Test-Smoke/t/patcher.t
+___________________________________________________________________________
+[   920] By: abeltje                          on 2005-12-18 11:34:58 +0100
+        Log: * [FIX]
+	       * change 919 changed some defaults; ajust the tests
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/t/syncer_ftp.t, /Test-Smoke/t/syncer_rsync.t
+___________________________________________________________________________
+[   919] By: abeltje                          on 2005-12-18 11:06:39 +0100
+        Log: * [CHANGE]
+	       * Activestate has moved the APC to a new server
+	       * Activestate has added snapshots to the APC
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl,
+	     /Test-Smoke/lib/Test/Smoke/Syncer.pm, /Test-Smoke/synctree.pl
+___________________________________________________________________________
+[   918] By: abeltje                          on 2005-12-04 10:53:06 +0100
+        Log: * [CHANGE] by Jim Cromie
+	       * make the basic patchinfo available with v == 1
+	       * add the patch-filename to the description (in
+		 patchlevel.h)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Patcher.pm
+___________________________________________________________________________
+[   917] By: abeltje                          on 2005-11-14 23:00:39 +0100
+        Log: * [CHANGE] request from Yitzchak Scott-Thoennes/Steve Hay
+	       + add support for the new PERL_PATCHNUM in patchlevel.h
+		 * Test::Smoke::Util::get_patch()
+		 * Test::Smoke::Util::get_local_patches()
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           + /Test-Smoke/t/ftppub/pl_with_pn.h
+           ! /Test-Smoke/MANIFEST, /Test-Smoke/lib/Test/Smoke/Util.pm,
+	     /Test-Smoke/t/get_patch.t, /Test-Smoke/t/lpatches.t
+___________________________________________________________________________
+[   915] By: abeltje                          on 2005-10-16 23:07:00 +0200
+        Log: * [AUTOCOMMIT]
+	       * Regenerate 'Changes'
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Changes
+___________________________________________________________________________
 [   914] By: abeltje                          on 2005-10-16 23:01:03 +0200
         Log: * [SNAPSHOT]
 	       * prepare for another snapshot
