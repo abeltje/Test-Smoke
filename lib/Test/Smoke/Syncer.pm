@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.018';
+$VERSION = '0.019';
 
 use Config;
 use Cwd;
@@ -289,7 +289,7 @@ sub _relocate_tree {
 	File::Path::rmtree( $source_dir, $self->{v} > 1 );
         $ok = ! -d $source_dir;
     }
-    die "Can't move '$source_dir' to $self->{ddir}'" unless $ok;
+    die "Can't move '$source_dir' to $self->{ddir}' ($!)" unless $ok;
     $self->{v} and print "OK\n";
 }
 
@@ -844,7 +844,7 @@ sub _extract_with_external {
         foreach @dirs_pre;
     # I'll pick the first one that has 'perl' in it
     my( $prefix ) = grep /\bperl/ || /perl\b/ => keys %dirs_post;
-    $prefix ||= 'perl';
+    $prefix ||= File::Spec->abs2rel( $self->{ddir}, cwd() );
 
     my $base_dir = File::Spec->canonpath(File::Spec->catdir( cwd(), $prefix ));
     $self->{v} and print "Snapshot prefix: '$base_dir'\n";
