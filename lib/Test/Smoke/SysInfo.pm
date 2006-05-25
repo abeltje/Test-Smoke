@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.033';
+$VERSION = '0.034';
 
 use base 'Exporter';
 @EXPORT_OK = qw( &sysinfo &tsuname );
@@ -536,6 +536,11 @@ sub Linux_ppc {
         my %info = map {
             ( $_ => __from_proc_cpuinfo( $_, \@cpu_info ) );
         } @parts;
+        if ($info{detected} = __from_proc_cpuinfo( 'detected as', \@cpu_info )){
+            $info{detected} =~ s/.*(\b.+Mac G\d).*/$1/;
+            $info{machine} = $info{detected};
+        }
+        
         $cpu = sprintf "%s %s (%s)", map $info{ $_ } => @parts;
     } else {
         $cpu = __get_cpu();
