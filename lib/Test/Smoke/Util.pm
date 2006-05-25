@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.46';
+$VERSION = '0.47';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -447,7 +447,7 @@ sub grepccmsg {
         'bcc32' => # BORLAND 5.5 on MSWin32
             # Warning Wnnn filename line: warning description
             # Error Ennn:: error description
-            '(^(?:(?:Warning W\d+ .+? \d+)|(?:Error E\d+)): .+?$)',
+            '(^(?:(?:Warning W)|(?:Error E))\d+ .+? \d+: .+?$)',
     );
     exists $OS2PAT{ lc $cc } or $cc = 'gcc';
     my $pat = $OS2PAT{ lc $cc };
@@ -466,7 +466,7 @@ sub grepccmsg {
         $error{ "Couldn't examine '$logfile' for compiler warnings." } = 1;
     }
 
-    $error{ $1 } ||= $indx++ while $smokelog =~ /$pat/smg;
+    $error{ $1 } ||= $indx++ while $smokelog =~ /$pat/mg;
 
     # I need to think about this IRIX/$Config{cc} thing
 #    if ($cc eq 'irix') {
