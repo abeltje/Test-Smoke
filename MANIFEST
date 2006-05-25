@@ -69,7 +69,6 @@ t/vms_rl.t
 t/gccmsg.log
 t/gccmsg.out
 t/grepccmsg.t
-t/logs
 t/logs/hpux1020.log
 t/logs/hpux1111.log
 t/logs/solaris.log
