@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.027';
+$VERSION = '0.028';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -40,6 +40,9 @@ my %CONFIG = (
 sub BUILD_MINIPERL() { -1 } # but no perl
 sub BUILD_PERL    () {  1 } # ok
 sub BUILD_NOTHING () {  0 } # not ok
+
+sub HARNESS_RE1 () { '(\S+\.t)\s+.+\s+([\d?]+(?:[-\s]+\d+)*)$' }
+
 
 =head1 NAME
 
@@ -539,6 +542,7 @@ sub extend_with_harness {
     my $self = shift;
     my %inconsistent = $self->_transform_testnames( @_ );
     my @harness = sort keys %inconsistent;
+    my $harness_re1 = HARNESS_RE1();
     if ( @harness ) {
         # @20051016 By request of Nicholas Clark
         local $ENV{PERL_DESTRUCT_LEVEL} = $self->{harness_destruct};
@@ -557,7 +561,7 @@ sub extend_with_harness {
         my $verbose = $self->{v} > 1 ? "-v" : "";
         my $harness_out = join "", map {
             my( $name, $fail ) = 
-                m/(\S+\.t)\s+.+%\s+([\d?]+(?:[-\s]+\d+)*)/;
+                m/$harness_re1/;
             if ( $name ) {
                 delete $inconsistent{ $name };
                 my $dots = '.' x (40 - length $name );
@@ -567,7 +571,7 @@ sub extend_with_harness {
                 " " x 51 . "$fail\n";
             }
         } grep m/^\s+\d+(?:[-\s]+\d+)*/ ||
-               m/\S+\.t\s+.+%\s+[\d?]+(?:[-\s+]\d+)*/ => map {
+               m/$harness_re1/ => map {
             /All tests successful/ && $harness_all_ok++;
             $self->{v} and $self->tty( $_ );
             $_;
