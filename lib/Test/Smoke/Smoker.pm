@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.028';
+$VERSION = '0.029';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -41,8 +41,10 @@ sub BUILD_MINIPERL() { -1 } # but no perl
 sub BUILD_PERL    () {  1 } # ok
 sub BUILD_NOTHING () {  0 } # not ok
 
-sub HARNESS_RE1 () { '(\S+\.t)\s+.+\s+([\d?]+(?:[-\s]+\d+)*)$' }
-
+sub HARNESS_RE1 () {
+     '(\S+\.t)(?:\s+[\d?]+){0,4}(?:\s+[\d?.]*%)?\s+([\d?]+(?:[-\s]+\d+-?)*)$'
+}
+sub HARNESS_RE2() { '^\s+(\d+(?:[-\s]+\d+)*-?)$' }
 
 =head1 NAME
 
@@ -543,10 +545,13 @@ sub extend_with_harness {
     my %inconsistent = $self->_transform_testnames( @_ );
     my @harness = sort keys %inconsistent;
     my $harness_re1 = HARNESS_RE1();
+    my $harness_re2 = HARNESS_RE2();
     if ( @harness ) {
+
         # @20051016 By request of Nicholas Clark
         local $ENV{PERL_DESTRUCT_LEVEL} = $self->{harness_destruct};
         local $ENV{PERL_SKIP_TTY_TEST} = 1;
+
         # I'm not happy with this PERLSHR approach for VMS
         local $ENV{PERLSHR} = $ENV{PERLSHR} || "";
         $self->{is_vms} and
@@ -556,30 +561,17 @@ sub extend_with_harness {
         $self->tty( "\nExtending failures with harness:\n\t$harness\n" );
         my $changed_dir;
         chdir 't' and $changed_dir = 1;
-        my $harness_all_ok = 0;
+        my $all_ok = 0;
         my $tst_perl = catfile( curdir(), 'perl' );
         my $verbose = $self->{v} > 1 ? "-v" : "";
-        my $harness_out = join "", map {
-            my( $name, $fail ) = 
-                m/$harness_re1/;
-            if ( $name ) {
-                delete $inconsistent{ $name };
-                my $dots = '.' x (40 - length $name );
-                "    $name${dots}FAILED $fail\n";
-            } else {
-                ( $fail ) = m/^\s+(\d+(?:[-\s]+\d+)*)/;
-                " " x 51 . "$fail\n";
-            }
-        } grep m/^\s+\d+(?:[-\s]+\d+)*/ ||
-               m/$harness_re1/ => map {
-            /All tests successful/ && $harness_all_ok++;
-            $self->{v} and $self->tty( $_ );
-            $_;
-        } $self->_run( "$tst_perl harness $verbose $harness" );
+        my @run_harness = $self->_run( "$tst_perl harness $verbose $harness" );
+        my $harness_out = $self->_parse_harness( \%inconsistent, $all_ok,
+                                                 @run_harness );
+
         # safeguard against empty results
         $inconsistent{ $_ } ||= 'FAILED' for keys %inconsistent;
         $harness_out =~ s/^\s*$//;
-        if ( $harness_all_ok ) {
+        if ( $all_ok ) {
             $harness_out .= scalar keys %inconsistent
                 ? "Inconsistent test results (between TEST and harness):\n" . 
                   join "", map {
@@ -711,6 +703,38 @@ sub make_minitest {
     $self->tty( "\nOK, archive results ..." );
     $self->tty( "\n" );
     return 1;
+}
+
+=item $self->_parse_harness_output( $\%notok, $all_ok, @lines )
+
+Fator out the parsing of the Test::Harness output, as it seems subject
+to change.
+
+=cut
+
+sub _parse_harness {
+    my( $self, $notok, $all_ok, @lines ) = @_;
+    my $harness_re1 = HARNESS_RE1();
+    my $harness_re2 = HARNESS_RE2();
+
+    my $output = join "", map {
+        my( $name, $fail ) = m/$harness_re1/;
+        if ( $name ) {
+            delete $notok->{ $name };
+            my $dots = '.' x (40 - length $name );
+            "    $name${dots}FAILED $fail\n";
+        } else {
+            ( $fail ) = m/$harness_re2/;
+            " " x 51 . "$fail\n";
+        }
+    } grep m/$harness_re2/ || m/$harness_re1/ => map {
+        /All tests successful/ && $all_ok++;
+        $self->{v} and $self->tty( $_ );
+        $_;
+    } @lines;
+
+    $_[2] = $all_ok;
+    return $output;
 }
 
 =item $self->_trasnaform_testnames( @notok )
