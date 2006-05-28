@@ -10,6 +10,58 @@ The filelists have a short symbolic indicator:
 
 Enjoy!
 ___________________________________________________________________________
+[   984] By: abeltje                          on 2006-05-28 11:04:14 +0200
+        Log: * prepare for a snapshot of 1.19_84
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   983] By: abeltje                          on 2006-05-28 11:01:43 +0200
+        Log: * [CHANGE]
+	       * move whereis() and vms_whereis() from t/Testlib.pm and
+		 configsmoke.pl to Test::Smoke::Util because
+		 Test::Smoke::Smoker uses them for VMS
+	       * tweak the tests and t/Testlib.pm to reflect this move
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl,
+	     /Test-Smoke/lib/Test/Smoke/Util.pm, /Test-Smoke/t/TestLib.pm,
+	     /Test-Smoke/t/patcher.t, /Test-Smoke/t/syncer_link.t
+___________________________________________________________________________
+[   982] By: abeltje                          on 2006-05-28 10:58:24 +0200
+        Log: * [CHANGE]
+	       * FIX mmk_test_harness() to also use the new Test::Harness
+		 output parsing regexen (from change 979)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm
+___________________________________________________________________________
+[   980] By: abeltje                          on 2006-05-26 15:04:25 +0200
+        Log: * Prepare a new snapshot 1.19_83
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   979] By: abeltje                          on 2006-05-26 15:01:10 +0200
+        Log: * [CHANGE]
+	       * FIX pasring Test::Harness output (2.60 +)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm, /Test-Smoke/t/smoker.t
+___________________________________________________________________________
+[   978] By: abeltje                          on 2006-05-26 00:30:35 +0200
+        Log: * prepare a snapshot for 1.19_82
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[   977] By: abeltje                          on 2006-05-26 00:29:38 +0200
+        Log: * [CHANGE]
+	       * FIX parsing output of Test::Harsess; 2.60 changed it :-(
+	       + add tests for the new regex
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm, /Test-Smoke/t/smoker.t
+___________________________________________________________________________
+[   975] By: abeltje                          on 2006-05-25 21:36:12 +0200
+        Log: * [AUTOCOMMIT]
+	       * Regenerate 'Changes'
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Changes
+___________________________________________________________________________
 [   974] By: abeltje                          on 2006-05-25 21:31:39 +0200
         Log: * [CHANGE]
 	       * FIX there should be no directories in MANIFEST
