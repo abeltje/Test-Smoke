@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.029';
+$VERSION = '0.030';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -613,6 +613,8 @@ sub mmk_test_harness {
     my $seenheader = 0;
     my @failed = ( );
 
+    my $harness_re1 = HARNESS_RE1();
+    my $harness_re2 = HARNESS_RE2();
     my $cmd = "$self->{testmake}$debugging test_harness";
         
     local *TST;
@@ -626,12 +628,12 @@ sub mmk_test_harness {
         /Failed Test\s+Stat/ and $seenheader = 1, next;
         $seenheader or next;
     
-        my( $name, $fail ) = m/(\S+\.t)\s+.+%\s+([\d?]+(?:[-\s]+\d+)*)/;
+        my( $name, $fail ) = m/$harness_re1/;
         if ( $name ) {
             my $dots = '.' x (40 - length $name );
             push @failed, "    $name${dots}FAILED $fail\n";
         } else {
-            ( $fail ) = m/^\s+(\d+(?:[-\s]+\d+)*)/;
+            ( $fail ) = m/$harness_re2/;
             next unless $fail;
             push @failed, " " x 51 . "$fail\n";
         }
