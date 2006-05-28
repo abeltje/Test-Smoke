@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.48';
+$VERSION = '0.49';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -1055,14 +1055,14 @@ sub vms_whereis {
     require Config;
     my $dclp_env = 'DCL$PATH';
     my $p_sep = $Config::Config{path_sep} || '|';
-    my @path = split /$p_sep/, $ENV{ $dclp_env }||"";
+    my @path = split /\Q$p_sep\E/, $ENV{ $dclp_env }||"";
     my @pext = ( $Config::Config{exe_ext} || $Config::Config{_exe}, '.COM' );
 
     foreach my $dir ( @path ) {
         foreach my $ext ( @pext ) {
             my $fname = File::Spec->catfile( $dir, "$prog$ext" );
             if ( -x $fname ) {
-                return $ext eq '.COM' ? "\@$fname" : "$fname";
+                return $ext eq '.COM' ? "\@$fname" : "MCR $fname";
             }
         }
     }

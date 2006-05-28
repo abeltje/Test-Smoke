@@ -18,7 +18,7 @@ use Test::Smoke::SysInfo;
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.060';
+$VERSION = '0.061';
 
 use Getopt::Long;
 my %options = ( 
@@ -2052,7 +2052,7 @@ sub get_avail_w32compilers {
 sub get_avail_vms_make {
 
     return map +( $_ => undef ) => grep defined $_ && length( $_ ) 
-        => map vms_whereis( $_ ) => qw( MMK MMS );
+        => map whereis( $_ ) => qw( MMK MMS );
  
     local *QXERR; open *QXERR, ">&STDERR"; close STDERR;
 
