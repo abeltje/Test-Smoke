@@ -7,6 +7,7 @@ use Config;
 use File::Spec;
 use lib File::Spec->rel2abs( 't' );
 use TestLib;
+
 use Test::More tests => 12;
 
 use_ok( 'Test::Smoke::Syncer' );

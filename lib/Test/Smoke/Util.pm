@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.47';
+$VERSION = '0.48';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -17,6 +17,7 @@ use base 'Exporter';
     &grepccmsg &get_local_patches &set_local_patch
     &get_ncpu &get_smoked_Config &parse_report_Config 
     &get_regen_headers &run_regen_headers
+    &whereis
     &calc_timeout &time_in_hhmm
     &do_pod2usage
     &set_vms_rooted_logical
@@ -994,6 +995,78 @@ sub run_regen_headers {
         return;
     }
     return 1;
+}
+
+=item whereis( $prog )
+
+Try to find an executable instance of C<$prog> in $ENV{PATH}.
+
+Rreturns a full file-path (with extension) to it.
+
+=cut
+
+sub whereis {
+    my $prog = shift;
+    return undef unless $prog; # you shouldn't call it '0'!
+    $^O eq 'VMS' and return vms_whereis( $prog );
+
+    my $p_sep = $Config::Config{path_sep};
+    my @path = split /\Q$p_sep\E/, $ENV{PATH};
+    my @pext = split /\Q$p_sep\E/, $ENV{PATHEXT} || '';
+    unshift @pext, '';
+
+    foreach my $dir ( @path ) {
+        foreach my $ext ( @pext ) {
+            my $fname = File::Spec->catfile( $dir, "$prog$ext" );
+            return $fname if -x $fname;
+        }
+    }
+    return '';
+}
+
+=item vms_whereis( $prog )
+
+First look in the SYMBOLS to see if C<$prog> is there.
+Next look in the KFE-table C<INSTALL LIST> if it is there.
+As a last resort we can scan C<DCL$PATH> like we do on *nix/Win32
+
+=cut
+
+sub vms_whereis {
+    my $prog = shift;
+
+    # Check SYMBOLS
+    eval { require VMS::DCLsym };
+    if ( $@ ) {
+        require Carp;
+        Carp::carp "Oops, cannot load VMS::DCLsym: $@";
+    } else {
+        my $syms = VMS::DCLsym->new;
+        return $prog if scalar $syms->getsym( $prog );
+    }
+    # Check Known File Entry table (INSTALL LIST)
+    my $img_re = '^\s+([\w\$]+);\d+';
+    my %kfe = map {
+        my $img = /$img_re/ ? $1 : '';
+        ( uc $img => undef )
+    } grep /$img_re/ => qx/INSTALL LIST/;
+    return $prog if exists $kfe{ uc $prog };
+
+    require Config;
+    my $dclp_env = 'DCL$PATH';
+    my $p_sep = $Config::Config{path_sep} || '|';
+    my @path = split /$p_sep/, $ENV{ $dclp_env }||"";
+    my @pext = ( $Config::Config{exe_ext} || $Config::Config{_exe}, '.COM' );
+
+    foreach my $dir ( @path ) {
+        foreach my $ext ( @pext ) {
+            my $fname = File::Spec->catfile( $dir, "$prog$ext" );
+            if ( -x $fname ) {
+                return $ext eq '.COM' ? "\@$fname" : "$fname";
+            }
+        }
+    }
+    return '';
 }
 
 =item calc_timeout( $killtime[, $from] )

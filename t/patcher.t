@@ -8,6 +8,7 @@ my $findbin;
 use File::Basename;
 BEGIN { $findbin = dirname $0; }
 use lib $findbin;
+#use lib File::Spec->catdir( $findbin, File::Spec->updir, 'lib' );
 use TestLib;
 use Cwd;
 
@@ -187,9 +188,10 @@ EOF
     my $rhd = File::Spec->catfile( $ddir, 'regen.pl' );
     put_file( <<EOF, $rhd );
 #! perl -w
-use File::Spec::Functions;
+use File::Spec::Functions qw( :DEFAULT rel2abs );
 my \$lib;
-BEGIN { \$lib = updir }
+BEGIN { \$lib = rel2abs updir }
+use lib catdir \$lib, updir(), 'lib';
 use lib \$lib;
 use TestLib;
 my \$rhd = 'regen_pl.out';
@@ -201,9 +203,10 @@ EOF
 
     put_file( <<EOF, $rpy );
 #! perl -w
-use File::Spec::Functions;
+use File::Spec::Functions qw( :DEFAULT rel2abs );
 my \$lib;
-BEGIN { \$lib = updir }
+BEGIN { \$lib = rel2abs updir }
+use lib catdir \$lib, updir(), 'lib';
 use lib \$lib;
 use TestLib;
 my \@files = qw( @yfiles );

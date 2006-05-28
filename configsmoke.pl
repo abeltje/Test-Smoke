@@ -13,7 +13,7 @@ my $findbin;
 BEGIN { $findbin = dirname $0 }
 use lib File::Spec->catdir( $findbin, 'lib' );
 use lib $findbin;
-use Test::Smoke::Util qw( do_pod2usage );
+use Test::Smoke::Util qw( do_pod2usage whereis );
 use Test::Smoke::SysInfo;
 
 # $Id$
@@ -1867,75 +1867,6 @@ sub prompt_yn {
     print "Got [$yesno]\n";
     ( my $retval = $yesno ) =~ tr/ny/01/;
     return $retval;
-}
-
-sub whereis {
-    my( $prog, $find_all ) = @_;
-    return '' unless $prog; # you shouldn't call it '0'!
-    is_vms and return vms_whereis( $prog, $find_all );
-
-    $ENV{PATH} or return wantarray ? ( ) : [ ];
-
-    my $p_sep = $Config::Config{path_sep};
-    my @path = split /\Q$p_sep\E/, $ENV{PATH};
-    my @pext = split /\Q$p_sep\E/, $ENV{PATHEXT} || '';
-    unshift @pext, '';
-
-    my @fnames;
-    foreach my $dir ( @path ) {
-        foreach my $ext ( @pext ) {
-            my $fname = File::Spec->catfile( $dir, "$prog$ext" );
-            if ( -x $fname ) {
-                return $fname unless $find_all;
-                push @fnames, $fname;
-            }
-        }
-    }
-    return @fnames ? wantarray ? @fnames : \@fnames : '';
-}
-
-=item vms_whereis( $prog )
-
-First look in the SYMBOLS to see if C<$prog> is there.
-Next look in the KFE-table C<INSTALL LIST> if it is there.
-As a last resort we can scan C<DCL$PATH> like we do on *nix/Win32
-
-=cut
-
-sub vms_whereis {
-    my( $prog, $find_all ) = @_;
-
-    # Check SYMBOLS
-    eval { require VMS::DCLsym };
-    if ( $@ ) {
-        carp "Oops, cannot load VMS::DCLsym: $@";
-    } else {
-        VMS::DCLsym->import;
-        my $syms = VMS::DCLsym->new;
-        return $prog if scalar $syms->getsym( uc $prog );
-    }
-    # Check Known File Entry table (INSTALL LIST)
-    my $img_re = '^\s+([\w\$]+);\d+';
-    my %kfe = map {
-        my $img = /$img_re/ ? $1 : '';
-        ( uc $img => undef )
-    } grep /$img_re/ => qx/INSTALL LIST/;
-    return $prog if exists $kfe{ uc $prog };
-
-    my $dclp_env = 'DCL$PATH';
-    my @path = $ENV{ $dclp_env }
-        ?split /$Config{path_sep}/, $ENV{ $dclp_env } : ();
-    my @pext = ( $Config{exe_ext} || $Config{_exe}, '.COM' );
-
-    foreach my $dir ( @path ) {
-        foreach my $ext ( @pext ) {
-            my $fname = File::Spec->catfile( $dir, "$prog$ext" );
-            if ( -x $fname ) {
-                return $ext eq '.COM' ? "\@$fname" : "$fname";
-            }
-        }
-    }
-    return '';
 }
 
 sub find_a_patch {
