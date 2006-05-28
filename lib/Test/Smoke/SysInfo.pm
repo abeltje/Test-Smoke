@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.034';
+$VERSION = '0.035';
 
 use base 'Exporter';
 @EXPORT_OK = qw( &sysinfo &tsuname );
@@ -378,7 +378,7 @@ This sub was donated by Dominic Dunlup.
 sub Darwin {
     my $system_profiler_output;
     {
-	no warnings 'exec';	# Just in case warnings are turned on ...
+        local $^W = 0;
 	$system_profiler_output =
 	    `/usr/sbin/system_profiler -detailLevel mini SPHardwareDataType`;
     }
