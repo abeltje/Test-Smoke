@@ -18,7 +18,7 @@ use Test::Smoke::SysInfo;
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.061';
+$VERSION = '0.062';
 
 use Getopt::Long;
 my %options = ( 
@@ -1583,8 +1583,8 @@ EO_DIE
 # $cronline
 @{[ renice( $config{renice} ) ]}
 cd $cwd
-CFGNAME=$options{config}
-LOCKFILE=$options{prefix}.lck
+CFGNAME=\${CFGNAME:-$options{config}}
+LOCKFILE=\${LOCKFILE:-$options{prefix}.lck}
 continue=''
 if test -f "\$LOCKFILE" && test -s "\$LOCKFILE" ; then
 $handle_lock
@@ -1662,8 +1662,8 @@ set WD=$cwd\\
 rem Change drive-Letter
 for \%\%L in ( "\%WD\%" ) do \%\%~dL
 cd "\%WD\%"
-set CFGNAME=$options{config}
-set LOCKFILE=$options{prefix}.lck
+if "\%CFGNAME\%"  == "" set CFGNAME=$options{config}
+if "\%LOCKFILE\%" == "" set LOCKFILE=$options{prefix}.lck
 if NOT EXIST \%LOCKFILE\% goto START_SMOKE
     FIND "\%CFGNAME\%" \%LOCKFILE\% > NUL:
     if ERRORLEVEL 1 goto START_SMOKE
