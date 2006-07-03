@@ -73,7 +73,8 @@ foreach ( keys %$defaults ) {
 
 # Find the config to resmoke
 my $rscfg = find_config( $opt{status}, $opt{n} );
-defined $rscfg or die "Cannot find a matching build configuration!\n";
+defined $rscfg or
+    die "Cannot find a matching build configuration ($opt{status})!\n";
 
 my $cwd = cwd();
 {
@@ -110,6 +111,7 @@ sub find_config {
         --$cnt == 0 and
             return $bstat->{cfg};
     }
+    return;
 }
 
 sub _get_config_states {
