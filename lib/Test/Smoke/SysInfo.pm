@@ -252,77 +252,76 @@ sub AIX {
 
 =head2 HPUX( )
 
-Use the L<ioscan> program to find information.
+Use the L<ioscan>, L<getconf> and L<machinfo> programs to find information.
+
+This routine was contributed by Rich Rauenzahn.
 
 =cut
 
 sub HPUX {
     my $hpux = Generic();
-    local $ENV{PATH} = "/etc:$ENV{PATH}";
-    my @mi;	# 11.23 has one command for all info
-    -x "/usr/contrib/bin/machinfo" and
-        chomp (@mi = `/usr/contrib/bin/machinfo`);
-    my $ncpu = (grep s/^\s*Number of CPUs\s+=\s+(\d+)/$1/, @mi)[0];
-    $ncpu or $ncpu = grep /^processor/ => `ioscan -fnkC processor`;
-    unless ( $ncpu ) {	# not root?
-        local *SYSLOG;
-        if ( open SYSLOG, "< /var/adm/syslog/syslog.log" ) {
-            my $line;
-            while ( $line = <SYSLOG> ) {
-                $line =~ m/\bprocessor$/ and $ncpu++;
+    my $parisc = 0;
+
+    $hpux->{_os} =~ s/hp-ux/HP-UX/;
+
+    # ioscan is always available
+    $hpux->{_ncpu} = grep /^processor/ => `/usr/sbin/ioscan -knfCprocessor`;
+
+    chomp(my $k64 = `/usr/bin/getconf KERNEL_BITS 2>/dev/null`);
+    $hpux->{_os} .= "/$k64" if(length $k64);
+
+    # For now, unknown cpu_types are set as the Generic
+    chomp(my $cv = `/usr/bin/getconf CPU_VERSION 2>/dev/null`);
+    # see /usr/include/sys/unistd.h for hex values
+    if($cv < 0x20B) {
+#        $hpux->{_cpu_type} = sprintf("Unknown CPU_VERSION 0x%x", $cv);
+    } elsif($cv >= 0x20C && $cv <= 0x20E) {
+        $hpux->{_cpu_type} = "Motorola"; # You have an antique
+    } elsif($cv <= 0x2FF) {
+        $hpux->{_cpu_type} = "PA-RISC";
+        $hpux->{_cpu_type} = "PA-RISC1.0" if $cv == 0x20B;
+        $hpux->{_cpu_type} = "PA-RISC1.1" if $cv == 0x210;
+        $hpux->{_cpu_type} = "PA-RISC1.2" if $cv == 0x211;
+        $hpux->{_cpu_type} = "PA-RISC2.0" if $cv == 0x214;
+        $parisc++;
+    } elsif($cv == 0x300) {
+#        $hpux->{_cpu_type} = "Itanium,archrev0";
+        $hpux->{_cpu_type} = "ia64";
+    } else {
+#        $hpux->{_cpu_type} = sprintf("Unknown CPU_VERSION 0x%x", $cv);
+    }
+
+    if ( $parisc ) {
+        my( @cpu, $lst );
+        chomp( my $model = `model` );
+        ( my $m = $model ) =~ s:.*/::;
+        local *LST; my $f;
+        foreach $f (qw( /usr/sam/lib/mo/sched.models
+                        /opt/langtools/lib/sched.models )) {
+            if ( open LST, "<$f" ) {
+                @cpu = grep m/$m/i => <LST>;
+                close LST;
+                @cpu and last;
+             }
+        }
+        if ($cpu[0] =~ m/^\S+\s+(\d+\.\d+[a-z]?)\s+(\S+)/) {
+            my( $arch, $cpu ) = ( "PA-RISC$1", $2 );
+            $hpux->{_cpu} = $cpu;
+            chomp(my $hw3264 = `/usr/bin/getconf HW_32_64_CAPABLE 2>/dev/null`);
+            if ( $hw3264 == 1 ) {
+                $hpux->{_cpu_type} = $arch . "/64";
+            } elsif ( $hw3264 == 0 ) {
+                $hpux->{_cpu_type} = $arch . "/32";
             }
         }
-    }
-    $hpux->{_ncpu} = $ncpu;
-    # http://wtec.cup.hp.com/~cpuhw/hppa/hversions.html
-    my( @cpu, $lst );
-    chomp( my $model = `model` );
-    ( my $m = $model ) =~ s:.*/::;
-    local *LST;
-    @cpu = grep s/^\s*processor model:\s+\d+\s+(.*) processor/$1/, @mi;
-    if (@cpu == 0 && open LST, "< /usr/sam/lib/mo/sched.models") {
-	@cpu = grep m/$m/i, <LST>;
-	close LST;
-	}
-    if (@cpu == 0 && open LST, "< /opt/langtools/lib/sched.models") {
-	@cpu = grep m/$m/i, <LST>;
-	close LST;
-	}
-    if (@cpu == 0 && open LST, "echo 'sc product cpu;il' | /usr/sbin/cstm |") {
-        my $line;
-        while ( $line = <LST> ) {
-            $line =~ s/^\s*(PA)\s*(\d+)\s+CPU Module.*/$m 1.1 $1$2/ or next;
-            $2 =~ m/^8/ and $line =~ s/ 1.1 / 2.0 /;
-            push @cpu, $line;
+    } else {
+        my $machinfo = `/usr/contrib/bin/machinfo`;
+        if( $machinfo =~ m/processor model:\s+(\d+)\s+(.*)/ ) {
+            $hpux->{_cpu} = $2;
         }
-    }
-    $hpux->{_os} =~ s/ B\.(\d+)/ $1/;
-    my $os_r = $1;
-
-    if ($os_r >= 11) {
-       chomp( my $k64 = `getconf KERNEL_BITS` );
-       $k64 and $hpux->{_os} .= "/$k64";
-    }
-
-    my $arch;
-    if (($arch) = grep s/^\s*machine\s+=\s+(\S+)/$1/, @mi) {
-	my $cpu = $cpu[0];
-	@cpu = ();
-	my $speed = (grep s:^\s*Clock speed =\s+(\d+)\s*([MG])Hz:$1/$2:i, @mi)[0];
-	$speed =~ s:/(\w)::;
-	$1 eq "G" and $speed *= 1024;
-	$cpu .= "/$speed";
-
-	$hpux->{_cpu} = $cpu;
-	$hpux->{_cpu_type} = $arch;
-	}
-
-    if (@cpu && $cpu[0] =~ m/^\S+\s+(\d+\.\d+)\s+(\S+)/) {
-        my( $arch, $cpu ) = ("PA-$1", $2);
-        $hpux->{_cpu} = $cpu;
-        $hpux->{_cpu_type} = $os_r >= 11 &&
-                             ( (0 + `getconf HW_32_64_CAPABLE`) & 1 )
-            ? "$arch/64" : "$arch/32";
+        if( $machinfo =~ m/Clock\s+speed\s+=\s+(.*)/ ) {
+            $hpux->{_cpu} .= "/$1";
+        }
     }
     return $hpux;
 }
@@ -729,7 +728,8 @@ L<Test::Smoke::Smoker>, L<Test::Smoke::Reporter>
 (c) 2002-2006, Abe Timmerman <abeltje@cpan.org> All rights reserved.
 
 With contributions from Jarkko Hietaniemi, Merijn Brand, Campo
-Weijerman, Alan Burlison, Allen Smith, Alain Barbet, Dominic Dunlop.
+Weijerman, Alan Burlison, Allen Smith, Alain Barbet, Dominic Dunlop,
+Rich Rauenzahn.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
