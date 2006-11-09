@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.020';
+$VERSION = '0.021';
 
 use Config;
 use Cwd;
@@ -537,7 +537,7 @@ package Test::Smoke::Syncer::Snapshot;
 
 use Cwd;
 use File::Path;
-use Test::Smoke::Util qw( whereis );
+use Test::Smoke::Util qw( whereis clean_filename );
 
 =item Test::Smoke::Syncer::Snapshot->new( %args )
 
@@ -635,7 +635,8 @@ sub _fetch_snapshot {
     my $snap_size = $ftp->size( $snap_name );
     my $ddir_var = $self->{vms_ddir} ? 'vms_ddir' : 'ddir';
     my $local_snap = File::Spec->catfile( $self->{ $ddir_var },
-                                          File::Spec->updir, $snap_name );
+                                          File::Spec->updir,
+                                          clean_filename( $snap_name ) );
     $local_snap = File::Spec->canonpath( $local_snap );
 
     if ( -f $local_snap && $snap_size == -s $local_snap ) {

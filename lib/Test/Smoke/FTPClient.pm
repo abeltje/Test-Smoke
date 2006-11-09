@@ -5,10 +5,11 @@ use Net::FTP;
 use Cwd;
 use File::Path;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
+use Test::Smoke::Util qw( clean_filename );
 
 # $Id$
-use vars qw( $VERSION $NOCASE );
-$VERSION = '0.005';
+use vars qw( $VERSION );
+$VERSION = '0.006';
 
 my %CONFIG = (
     df_fserver  => undef,
@@ -22,9 +23,7 @@ my %CONFIG = (
 );
 my @sn = qw( B KB MB GB TB );
 
-$NOCASE = $^O eq 'MSWin32' || $^O eq 'VMS';
-
-BEGIN { eval qq[use Time::HiRes qw( time ) ] }
+BEGIN { eval qq/use Time::HiRes qw( time ) / }
 
 =head1 NAME
 
@@ -252,7 +251,7 @@ sub __do_mirror {
             $verbose > 1 and print "Leaving '$entry->{name}' [$new_locald]\n";
         } else {
             $entry->{time}  = $ftp->mdtm( $entry->{name} ); #slow down
-            my $fname = __clean_name( $entry->{name} );
+            my $fname = clean_filename( $entry->{name} );
 
             my $destname = catfile( $localdir, canonpath($fname) );
 
@@ -296,12 +295,12 @@ sub __do_mirror {
     if ( $cleanup ) {
         $verbose > 1 and print "Cleanup '$localdir'\n";
         my %ok_file = map {
-            ( __clean_name( $_->{name} ) => $_->{type} )
+            ( clean_filename( $_->{name} ) => $_->{type} )
         } @list;
         local *DIR;
         if ( opendir DIR, '.' ) {
             foreach ( readdir DIR ) {
-                my $cmpname = __clean_name( $_ );
+                my $cmpname = clean_filename( $_ );
                 $^O eq 'VMS' and $cmpname =~ s/\.$//;
                 if( -f $cmpname ) {
                     unless ( exists $ok_file{ $cmpname } && 
@@ -325,19 +324,6 @@ sub __do_mirror {
     @_[ -2, -1 ] = ( $totsize, $tottime );
     return $mirror_ok;
 }
-}
-
-sub __clean_name {
-    my $fname = shift;
-
-    if ( $^O eq 'VMS' ) {
-        my @parts = split /[.@#]/, $fname;
-       	if ( @parts > 1 ) {
-            my $ext = ( pop @parts ) || '';
-            $fname = join( "_", @parts ) . ".$ext";
-        }
-    }
-    return $NOCASE ? uc $fname : $fname;
 }
 
 =head2 dirlist( $ftp, $verbose )

@@ -2,8 +2,8 @@ package Test::Smoke::Util;
 use strict;
 
 # $Id$
-use vars qw( $VERSION @EXPORT @EXPORT_OK );
-$VERSION = '0.49';
+use vars qw( $VERSION @EXPORT @EXPORT_OK $NOCASE );
+$VERSION = '0.51';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -17,7 +17,7 @@ use base 'Exporter';
     &grepccmsg &get_local_patches &set_local_patch
     &get_ncpu &get_smoked_Config &parse_report_Config 
     &get_regen_headers &run_regen_headers
-    &whereis
+    &whereis &clean_filename
     &calc_timeout &time_in_hhmm
     &do_pod2usage
     &set_vms_rooted_logical
@@ -27,6 +27,8 @@ use Text::ParseWords;
 use File::Spec::Functions;
 use File::Find;
 use Cwd;
+
+$NOCASE = $^O eq 'VMS';
 
 =head1 NAME
 
@@ -172,6 +174,7 @@ sub Configure_win32 {
 	"-Uuseimpsys"		=> "USE_IMP_SYS",
         "-Dusemymalloc"         => "PERL_MALLOC",
         "-Duselargefiles"       => "USE_LARGE_FILES",
+        "-Uuseshrplib"          => "BUILD_STATIC",
 	"-DDEBUGGING"		=> "USE_DEBUGGING",
         "-DINST_DRV"            => "INST_DRV",
         "-DINST_TOP"            => "INST_TOP",
@@ -198,6 +201,7 @@ sub Configure_win32 {
 	USE_PERLIO	=> 1, # useperlio should be the default!
         PERL_MALLOC     => 0,
         USE_LARGE_FILES => 0,
+        BUILD_STATIC    => 0,
 	USE_DEBUGGING	=> 0,
         INST_DRV        => undef,
         INST_TOP        => undef,
@@ -289,6 +293,11 @@ sub Configure_win32 {
             $_ = ($opts{$1} ? "" : "#") . $1 . $2 . "\n";
         } elsif (m/^\s*#?\s*(CFG\s*\*?=\s*Debug)$/) {
             $_ = ($opts{USE_DEBUGGING} ? "" : "#") . $1 . "\n";
+        } elsif (m/^\s*#?\s*(BUILD_STATIC)\s*=\s*(.*)$/) {
+            my( $macro, $mval ) = ( $1, $2 );
+            if ( $config_args =~ /-([UD])useshrplib\b/ ) {
+                $_ = ( $1 eq 'D' ? "#" : "" ) . "$macro = $mval\n";
+            }
         } else {
             foreach my $cfg_var ( grep defined $opts{ $_ }, @w32_opts ) {
                 if (  m/^\s*#?\s*($cfg_var\s*\*?=)\s*(.*)$/ ) {
@@ -1067,6 +1076,26 @@ sub vms_whereis {
         }
     }
     return '';
+}
+
+=item clean_filename( $fname )
+
+C<clean_filename()> basically returns a vmsify() type of filename for
+VMS, and returns an upcase filename for case-ignorant filesystems.
+
+=cut
+
+sub clean_filename {
+    my $fname = shift;
+
+    if ( $^O eq 'VMS' ) {
+        my @parts = split /[.@#]/, $fname;
+        if ( @parts > 1 ) {
+            my $ext = ( pop @parts ) || '';
+            $fname = join( "_", @parts ) . ".$ext";
+        }
+    }
+    return $NOCASE ? uc $fname : $fname;
 }
 
 =item calc_timeout( $killtime[, $from] )

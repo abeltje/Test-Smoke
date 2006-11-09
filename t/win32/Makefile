@@ -22,6 +22,9 @@ USE_PERLIO	= define
 # Not touched by default
 USE_LARGE_FILES	= define
 
+# To be introduced: BUILD_STATIC as -Uuseshrplib
+#BUILD_STATIC   = define
+
 # CCTYPE has no visible default in Makefile
 #CCTYPE		= MSVC20
 #CCTYPE		= MSVC60

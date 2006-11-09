@@ -5,7 +5,7 @@ use strict;
 
 use File::Spec;
 
-use Test::More tests => 67;
+use Test::More tests => 71;
 BEGIN { use_ok( 'Test::Smoke::Util' ); }
 END { 
     1 while unlink 'win32/smoke.mk';
@@ -80,6 +80,7 @@ SKIP: {
     like( $makefile, '/^#USE_MULTI\s*= define\n/m', '#$(USE_MULTI)' );
     like( $makefile, '/^#USE_ITHREADS\s*= define\n/m', '#$(USE_ITHREADS)' );
     like( $makefile, '/^#USE_IMP_SYS\s*= define\n/m', '#$(USE_IMP_SYS)' );
+    like( $makefile, '/^#BUILD_STATIC\s*= define\n/m', '#$(BUILD_STATIC)' );
 }
 
 # Check that all three are set for -Duseithreads
@@ -272,6 +273,21 @@ SKIP: {
     like( $makefile, '/^USE_MULTI\s*= define\n/m', '$(USE_MULTI)' );
     like( $makefile, '/^USE_ITHREADS\s*= define\n/m', '$(USE_ITHREADS)' );
     like( $makefile, '/^#USE_IMP_SYS\s*= define\n/m', '#$(USE_IMP_SYS)' );
+}
+
+# Testing: -Uuseshrplib
+$config = $dft_args . " -Uuseshrplib";
+Configure_win32( './Configure ' . $config, 'nmake' );
+ok( -f $smoke_mk, "New makefile ($config)" );
+SKIP: {
+    local *MF;
+    ok open(MF, "< $smoke_mk"), "Opening makefile" or
+        skip "Cannot read from '$smoke_mk': $!", 1;
+    my $makefile = do { local $/; <MF> };
+    close MF;
+
+    #These should be unset
+    like( $makefile, '/^BUILD_STATIC\s*= define\n/m', '$(BUILD_STATIC)' );
 }
 
 ok( my_unlink( $smoke_mk ), "Remove makefile" );
