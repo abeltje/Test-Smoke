@@ -73,6 +73,7 @@ t/logs/hpux1020.log
 t/logs/hpux1111.log
 t/logs/solaris.log
 t/logs/w32bcc32.log
+t/logs/gcc2722.log
 t/win32/Makefile
 t/win32/makefile.mk
 t/ftppub/bugtst01.out
