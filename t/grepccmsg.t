@@ -4,6 +4,12 @@ $| = 1;
 
 # $Id$
 
+my $findbin;
+use File::Basename;
+BEGIN { $findbin = dirname $0; }
+use lib $findbin;
+use TestLib;
+
 use File::Spec::Functions;
 use Test::More;
 
@@ -16,7 +22,7 @@ BEGIN {
         { file => 'hpux1111.log', type => 'hpux',    wcnt =>  2, ecnt => 0 },
     );
 
-    plan tests => 1 + 3 * @logs;
+    plan tests => 1 + 3 * @logs + 1;
 
     use_ok 'Test::Smoke::Util', 'grepccmsg';
 }
@@ -36,4 +42,13 @@ for my $log ( @logs ) {
     my $ecnt = grep /\berror\b/i => @errors;
     is $ecnt, $log->{ecnt},
        "Number of errors: $log->{ecnt}";
+}
+
+{
+    my $log = catfile 't', 'logs', 'gcc2722.log';
+    my @errors = grepccmsg( 'gcc', $log, $verbose );
+    my $report = join "\n", @errors;
+
+    ( my $orig = get_file( $log ) ) =~ s/\n$//;
+    is $report, $orig, "Got all the gcc-2.7.2.2 messages";
 }

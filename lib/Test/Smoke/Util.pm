@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK $NOCASE );
-$VERSION = '0.51';
+$VERSION = '0.52';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -446,7 +446,7 @@ sub grepccmsg {
             # foo.c: In function `foo':
             # foo.c:nnn: error: ...
             '(^(?-s:.+?):(?: In function .+?:$|\d+(?:\:\d+)?: ' .
-            '(?:warning|error): .+?$))',
+            '(?:warning:|error:|invalid) .+?$))',
 
         'mswin32' => # MSVC(?:60)*
             # foo.c : error LNKnnn: error description
