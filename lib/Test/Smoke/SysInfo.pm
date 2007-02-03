@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.035';
+$VERSION = '0.036';
 
 use base 'Exporter';
 @EXPORT_OK = qw( &sysinfo &tsuname );
@@ -298,16 +298,25 @@ sub HPUX {
         local *LST; my $f;
         foreach $f (qw( /usr/sam/lib/mo/sched.models
                         /opt/langtools/lib/sched.models )) {
-            if ( open LST, "<$f" ) {
+            if ( open LST, "< $f" ) {
                 @cpu = grep m/$m/i => <LST>;
                 close LST;
                 @cpu and last;
-             }
+            }
         }
-        if ($cpu[0] =~ m/^\S+\s+(\d+\.\d+[a-z]?)\s+(\S+)/) {
-            my( $arch, $cpu ) = ( "PA-RISC$1", $2 );
-            $hpux->{_cpu} = $cpu;
-            chomp(my $hw3264 = `/usr/bin/getconf HW_32_64_CAPABLE 2>/dev/null`);
+        if (@cpu == 0 && open my $lst,
+                              "echo 'sc product cpu;il' | /usr/sbin/cstm |") {
+            while (<$lst>) {
+                s/^\s*(PA)\s*(\d+)\s+CPU Module.*/$m 1.1 $1$2/ or next;
+                $2 =~ m/^8/ and s/ 1.1 / 2.0 /;
+                push @cpu, $_;
+            }
+        }
+        if (@cpu and $cpu[0] =~ m/^\S+\s+(\d+\.\d+[a-z]?)\s+(\S+)/) {
+             my( $arch, $cpu ) = ( "PA-RISC$1", $2 );
+             $hpux->{_cpu} = $cpu;
+             chomp( my $hw3264 = 
+                    `/usr/bin/getconf HW_32_64_CAPABLE 2>/dev/null` );
             if ( $hw3264 == 1 ) {
                 $hpux->{_cpu_type} = $arch . "/64";
             } elsif ( $hw3264 == 0 ) {
