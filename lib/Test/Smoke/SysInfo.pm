@@ -317,6 +317,8 @@ sub HPUX {
              $hpux->{_cpu} = $cpu;
              chomp( my $hw3264 = 
                     `/usr/bin/getconf HW_32_64_CAPABLE 2>/dev/null` );
+            (my $osvers = $hpux->{_os}) =~ s/.*[AB]\.//;
+            $osvers <= 10.20 and $hw3264 = 0;
             if ( $hw3264 == 1 ) {
                 $hpux->{_cpu_type} = $arch . "/64";
             } elsif ( $hw3264 == 0 ) {
