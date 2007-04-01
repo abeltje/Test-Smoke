@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION $REVISION $conf @EXPORT );
-$VERSION  = '1.19_85';
+$VERSION  = '1.19_86';
 $REVISION = __get_ts_patchlevel();
 
 use base 'Exporter';
@@ -153,6 +153,9 @@ sub run_smoke {
 
     $conf->{v} && $conf->{defaultenv} and
         $smoker->tty( "Running smoke tests without \$ENV{PERLIO}\n" );
+
+    $conf->{v} && $conf->{harnessonly} and
+        $smoker->tty( "Running smoke tests only with harness.\n" );
 
     chdir $conf->{ddir} or die "Cannot chdir($conf->{ddir}): $!";
     unless ( $continue ) {

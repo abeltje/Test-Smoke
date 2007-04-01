@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.030';
+$VERSION = '0.031';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -388,6 +388,10 @@ sub make_ {
     my $make_args = "";
     $self->{is_vms} && $config->has_arg( '-Dusevmsdebug' ) and
         $make_args = qq[/macro=("__DEBUG__=1")];
+
+    $self->{is_win32} && $config->has_arg( '-Uuseshrplib' ) and
+        $make_args = "static";
+
     my $make_output = $self->_make( $make_args );
 
     if ( $self->{is_win32} ) { # Win32 creates config.sh during make
@@ -404,7 +408,14 @@ sub make_ {
     my $exe_ext  = $Config{_exe} || $Config{exe_ext};
     my $miniperl = "miniperl$exe_ext";
     my $perl     = "perl$exe_ext";
-    $perl = "ndbg$perl" if $self->{is_vms} && $config->has_arg('-Dusevmsdebug');
+    $perl = "ndbg$perl"
+        if $self->{is_vms} && $config->has_arg( '-Dusevmsdebug' );
+    $perl = "perl-static$exe_ext"
+        if $self->{is_win32} && $config->has_arg( '-Uuseshrplib' );
+
+    $self->{_miniperl_bin} = $miniperl;
+    $self->{_perl_bin}     = $perl;
+
     -x $miniperl or return BUILD_NOTHING;
     return -x $perl 
         ? $self->{_run_exit} ? BUILD_MINIPERL : BUILD_PERL
@@ -421,8 +432,7 @@ sub make_test_prep {
     my $self = shift;
     $self->{harnessonly} and return 1; # no test-prep target
 
-    my $exe_ext = $Config{_exe} || $Config{exe_ext};
-    my $perl = catfile( "t", "perl$exe_ext" );
+    my $perl = catfile( "t", $self->{_perl_bin} );
 
     $self->{run} and unlink $perl;
     $self->_make( "test-prep" );
@@ -476,26 +486,29 @@ sub make_test {
             next;
 	}
 
-        my $test_target = $self->{is_vms}
-            ? 'test' : $self->{is56x} ? 'test-notty' : '_test';
-        local *TST;
-        # MSWin32 builds from its own directory
-        if ( $self->{is_win32} ) {
-            chdir "win32" or die "unable to chdir () into 'win32'";
-            # Same as in make ()
-            open TST, "$self->{w32make} -f smoke.mk $test_target |";
-            chdir ".." or die "unable to chdir () out of 'win32'";
-        } elsif ( !$self->{harnessonly} ) {
-            local $ENV{PERL} = "./perl";
-            open TST, "$self->{testmake} $test_target |" or do {
-                use Carp;
-                Carp::carp "Cannot fork '$self->{testmake} $test_target': $!";
-                next;
-            };
-        }
-
         my @nok = ();
-        unless ( $self->{harnessonly} ) {
+	unless ( $self->{harnessonly} ) {
+            my $test_target = $self->{is_vms}
+                ? 'test' : $self->{is56x} ? 'test-notty' : '_test';
+            local *TST;
+            # MSWin32 builds from its own directory
+            if ( $self->{is_win32} ) {
+                $config->has_arg( '-Uuseshrplib' )
+                    and $test_target = 'static-test';
+                chdir "win32" or die "unable to chdir () into 'win32'";
+                # Same as in make ()
+                open TST, "$self->{w32make} -f smoke.mk $test_target |";
+                chdir ".." or die "unable to chdir () out of 'win32'";
+            } else {
+                local $ENV{PERL} = "./perl";
+                open TST, "$self->{testmake} $test_target |" or do {
+                    use Carp;
+                    Carp::carp "Cannot fork '$self->{testmake} $test_target':" .
+                               " $!";
+                    next;
+                };
+            }
+
             select ((select (TST), $| = 1)[0]);
             while (<TST>) {
                 $self->{v} > 1 and $self->tty( $_ );
@@ -528,7 +541,7 @@ sub make_test {
             }
             $self->tty( "\n" );
         } else {
-            @nok = $self->mmk_test_harness( $config );
+            @nok = $self->make_test_harness( $config );
         }
         !$had_LC_ALL && exists $ENV{LC_ALL} and delete $ENV{LC_ALL};
     }
@@ -593,7 +606,25 @@ sub extend_with_harness {
     }
 }
 
-=item $self->mmk_test_harness
+=item $moker->make_test_harness
+
+Use Test::Harness (the test_harness target) to get the failing test
+information and do not bother with TEST.
+
+=cut
+
+sub make_test_harness {
+    my( $self, $config ) = @_;
+
+    $self->{is_vms} and return $self->mmk_test_harness( $config );
+
+    my $target   = $self->{is_win32} ? 'test' : 'test_harness';
+    my $makefile = $self->{is_win32} ? '-f smoke.mk' : '';
+    my $cmd      = "$self->{testmake} $makefile $target";
+    $self->_run_harness_only( $cmd );
+}
+
+=item $smoker->mmk_test_harness
 
 The VMS test-output is different from other platforms, but
 Test::Harness knows how to deal with it. On VMS we only run C<mmk
@@ -604,18 +635,31 @@ This might be useful for all platforms...
 =cut
 
 sub mmk_test_harness {
-    my $self = shift;
-    my( $config ) = @_;
+    my( $self, $config ) = @_;
 
     my $debugging = $self->{is_vms} && $config->has_arg( '-Dusevmsdebug' )
         ? qq[/macro=("__DEBUG__=1")] : "";
+
+    my $cmd = "$self->{testmake}$debugging test_harness";
+
+    $self->_run_harness_only( $cmd );        
+}
+
+=item $smoker->_run_harness_only( $cmd )
+
+The command to run C<make test_harness> differs based on platform, so
+it has to be passed into general routine.
+
+=cut
+
+sub _run_harness_only {
+    my( $self, $cmd ) = @_;
 
     my $seenheader = 0;
     my @failed = ( );
 
     my $harness_re1 = HARNESS_RE1();
     my $harness_re2 = HARNESS_RE2();
-    my $cmd = "$self->{testmake}$debugging test_harness";
         
     local *TST;
     open TST, "$cmd |" or die "Cannot spawn($cmd): $!";
@@ -639,12 +683,16 @@ sub mmk_test_harness {
         }
     
     }
+
     $self->ttylog( "\n", join( "", @failed ), "\n" );
+
     close TST or do {
         my $error = $! || ( $? >> 8);
         require Carp;
         Carp::carp "\nError while reading test_harness-results: $error";
     };
+
+    $self->tty( "Archived results...\n" );
 }
 
 =item $self->make_minitest( $cfgargs )
