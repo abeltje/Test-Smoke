@@ -53,19 +53,19 @@ SKIP: {
 
     my $syncer = Test::Smoke::Syncer->new( forest => %config );
     ok my $pl = $syncer->sync, "Forest planted" or
-        skip "No source forest", $to_skip -= 3;
+        skip "No source forest", $to_skip -= 4;
     is $pl, '20000', "patchlevel $pl";
     $has_forest = 1;
 
     local *PINFO;
     my $relpatch = catfile updir, '20005';
     open PINFO, "> " . catfile(qw( t 20005 )) or
-        skip "Cannot write patch: $!", $to_skip -= 4;
+        skip "Cannot write patch: $!", $to_skip -= 1;
     print PINFO $p_content;
     ok close PINFO, "patch written";
 
     my $pinfo = catfile( 't', 'test.patches' );
-    open PINFO, "> $pinfo" or skip "Cannot open '$pinfo': $!", $to_skip -= 6;
+    open PINFO, "> $pinfo" or skip "Cannot open '$pinfo': $!", $to_skip -= 2;
     select( (select(PINFO), $|++)[0] );
     print PINFO <<EOPINFO;
 $relpatch;-p1
