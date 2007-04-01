@@ -18,7 +18,7 @@ use Test::Smoke::SysInfo;
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.062';
+$VERSION = '0.063';
 
 use Getopt::Long;
 my %options = ( 
@@ -531,8 +531,8 @@ EOMSG
     },
     defaultenv => {
         msg => "Run the test-suite without \$ENV{PERLIO}?",
-        alt => [qw( N y )],
-        dft => 'n',
+        alt => ( is_win32 ? [qw( n Y )] : [qw( N y )] ),
+        dft => ( is_win32 ? 'y' : 'n' ),
     },
     locale => {
         msg => 'What locale should be used for extra testing ' .
@@ -724,6 +724,12 @@ you will need to confirm your choice.
             redo BUILDDIR;
         }
         my $bdir = $config{ $arg } = cwd;
+        if ( is_win32 && Win32::FsType() ne 'NTFS' ) {
+            print "*** WHOA THERE!!! ***\n";
+            print "\tYou are on MSWin32, ";
+            print "but do not use a NTFS filesystem to build perl.\n"
+        }
+
         chdir $cwd or die "Can't chdir($cwd) back: $!\n";
         if ( $cwd eq $bdir ) {
             print "The current directory *cannot* be used for smoke testing\n";
@@ -1045,6 +1051,10 @@ if ( $config{is56x} ) {
     $config{ $arg } = 1;
 } else {
     $config{ $arg } = prompt_yn( $arg );
+    if ( is_win32 && ! $config{ $arg } ) {
+        print "*** WHOA THERE!!! ***\n";
+        print "\tYou should not try to use PERLIIO=stdio on MSWin332!\n";
+    }
 }
 =item locale
 
@@ -1918,7 +1928,7 @@ sub get_avail_tar {
     my $use_modules = 0;
     eval { require Archive::Tar };
     unless ( $@ ) {
-        if ( $Archive::Tar::VERSION >= 0.99 ) {
+        if ( eval "$Archive::Tar::VERSION" >= 0.99 ) {
             eval { require IO::Zlib };
         } else {
             eval { require Compress::Zlib };
