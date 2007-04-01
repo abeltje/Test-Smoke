@@ -10,6 +10,156 @@ The filelists have a short symbolic indicator:
 
 Enjoy!
 ___________________________________________________________________________
+[  1032] By: abeltje                          on 2007-04-01 22:09:02 +0200
+        Log: * [CHANGE]
+	       + ADD: harnessonly question
+	       - REM: no more use for the 5.005 defaults
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[  1031] By: abeltje                          on 2007-04-01 21:36:13 +0200
+        Log: * [CHANGE] prompted by Yves Orton
+	       * change the continue switch to continue! so it has a
+		 --nocontinue
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/smokeperl.pl
+___________________________________________________________________________
+[  1030] By: abeltje                          on 2007-04-01 21:30:23 +0200
+        Log: * [CHANGE] prompted by Yves Orton
+	       * harnessonly feature now available fore all platforms
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm,
+	     /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[  1029] By: abeltje                          on 2007-04-01 15:57:13 +0200
+        Log: * [CHANGE] prompted by Yves Orton
+	       * skip_all when non NTFS filesystems on MSWin32
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/t/patcher_forest.t, /Test-Smoke/t/syncer_link.t
+___________________________________________________________________________
+[  1028] By: abeltje                          on 2007-04-01 15:28:56 +0200
+        Log: * [CHANGE] prompted by Yves Orton
+	       * WARN about non NTFS filesystems on MSWin32
+	       * FIX: defaultenv default setting on MSWin32
+	       * WARN about not using defaultenv on MSWin32
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[  1027] By: abeltje                          on 2007-04-01 12:29:50 +0200
+        Log: * [CHANGE] by Yves Orton
+	       * FIX: to_skip count was not right
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/t/patcher_forest.t
+___________________________________________________________________________
+[  1026] By: abeltje                          on 2007-03-09 15:14:35 +0100
+        Log: * [CHANGE] by H.Merijn Brand
+	       * FIX: remove /(?:32|64) from os version to avoid warning
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[  1025] By: abeltje                          on 2007-03-09 15:02:19 +0100
+        Log: * [CHANGE] thanks Merijn for pointing this out
+	       * FIX: MakeMaker 6.30_01 introduced INSTALLSITESCRIPT and
+		 doesn't use INSTALLSCRIPT anymore
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Makefile.PL, /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[  1023] By: abeltje                          on 2007-02-23 15:26:01 +0100
+        Log: * [CHANGE] by H.Merijn Brand
+	       + no use testing for 64bit on os <= 10.20
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[  1022] By: abeltje                          on 2007-02-03 13:31:03 +0100
+        Log: * [CHANGE] by H.Merijn Brand
+	       * more HP-UX stuff
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[  1019] By: abeltje                          on 2007-01-13 21:16:03 +0100
+        Log: * [CHANGE]
+	       + ADD: the new gcc2722 messages file
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/MANIFEST
+___________________________________________________________________________
+[  1018] By: abeltje                          on 2007-01-13 21:13:45 +0100
+        Log: * [CHANGE]
+	       + FIX: new message from gcc-2.7.2.2 (invalid use of)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           + /Test-Smoke/t/logs/gcc2722.log
+           ! /Test-Smoke/lib/Test/Smoke/Util.pm, /Test-Smoke/t/grepccmsg.t
+___________________________________________________________________________
+[  1008] By: abeltje                          on 2006-11-09 23:40:10 +0100
+        Log: [CHANGE]
+	       * Help the FTP-sync on VMS
+		 * move clean_filename() to Test::Smoke::Util
+		 * set the right snapshotname on VMS (using
+		   clean_filename)
+	       + Introduce -Uuseshrplib for MSWin32 to set BUILD_STATIC
+		 (no effect on smoke yet)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/FTPClient.pm,
+	     /Test-Smoke/lib/Test/Smoke/Syncer.pm,
+	     /Test-Smoke/lib/Test/Smoke/Util.pm,
+	     /Test-Smoke/t/for_nmake.t, /Test-Smoke/t/win32/Makefile
+___________________________________________________________________________
+[  1006] By: abeltje                          on 2006-08-05 11:18:15 +0200
+        Log: * [CHANGE] by Rich Rauenzahn
+	       * Rewrite the HPUX() routine
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[  1002] By: abeltje                          on 2006-07-03 14:30:09 +0200
+        Log: * [CHANGE]
+	       * FIX: return undef when no matching config is found
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/resmoke.pl
+___________________________________________________________________________
+[  1001] By: abeltje                          on 2006-07-03 12:56:23 +0200
+        Log: * [ADD]
+	       + a new utility to rerun a smoke for a specific
+		 configuration
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           + /Test-Smoke/resmoke.pl
+___________________________________________________________________________
+[   993] By: abeltje                          on 2006-06-11 13:46:26 +0200
+        Log: * [CHANGE] by Jarkko Hietaniemi
+	       * Use $CFGFILE and $LOCKFILE when already set in the jcl
+		 (Win32/*nix)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl
+___________________________________________________________________________
+[   991] By: abeltje                          on 2006-05-28 15:11:41 +0200
+        Log: * [CHANGE]
+	       * Test::Smoke::Util
+		 * FIX vms_whereis(): {path_sep} eq '|' on VMS so we need
+		   to quote-meta
+		 * FIX vms_whereis(): executable images found in DCL$PATH
+		   need a 'MCR'
+	       * Test::Smoke::Syncer
+		 * FIX _extract_snapshot() and friends: more work on the
+		   VMS side; test-suite now passes (on testdrive)
+	       * configsmoke.pl
+		 * FIX: don't call vms_whereis() directly it is not
+		   exported; use whereis()
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/configsmoke.pl,
+	     /Test-Smoke/lib/Test/Smoke/Syncer.pm,
+	     /Test-Smoke/lib/Test/Smoke/Util.pm
+___________________________________________________________________________
+[   987] By: abeltje                          on 2006-05-28 11:25:55 +0200
+        Log: * [CHANGE]
+	       - FIX we cannot use() or no() 'warnings'; need to support
+		 5.005004
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/SysInfo.pm
+___________________________________________________________________________
+[   985] By: abeltje                          on 2006-05-28 11:06:58 +0200
+        Log: * [AUTOCOMMIT]
+	       * Regenerate 'Changes'
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Changes
+___________________________________________________________________________
 [   984] By: abeltje                          on 2006-05-28 11:04:14 +0200
         Log: * prepare for a snapshot of 1.19_84
         Url: http://source.Test-Smoke.org/svn/Test-Smoke
