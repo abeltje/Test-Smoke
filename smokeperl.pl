@@ -41,7 +41,7 @@ GetOptions( \%options,
     'archive!',
     'is56x',
     'defaultenv!',
-    'continue',
+    'continue!',
     'smartsmoke!',
     'snapshot|s=i',
     'killtime=s',
@@ -80,7 +80,7 @@ It can take these options
   --[no]ccp5p_onfail       Do (not) send failure reports to perl5-porters
   --[no]delay_report       Do (not) create the report now
 
-  --continue               Try to continue an interrupted smoke
+  --[no]continue           Try to continue an interrupted smoke
   --is56x                  This is a perl-5.6.x smoke
   --defaultenv             Run a smoke in the default environment
   --[no]smartsmoke         Don't smoke unless patchlevel changed
