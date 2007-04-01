@@ -18,7 +18,7 @@ use Test::Smoke::SysInfo;
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.063';
+$VERSION = '0.064';
 
 use Getopt::Long;
 my %options = ( 
@@ -124,16 +124,16 @@ my %vdirs = map {
 } qw( 5.5.x 5.8.x ); # unsupported: 5.6.2
 
 my %versions = (
-    '5.5.x' => { source => 'public.activestate.com::perl-5.005xx',
-                 server => 'public.activestate.com',
-                 sdir   => '/pub/apc/perl-5.005xx-snap',
-                 sfile  => '',
-                 pdir   => '/pub/apc/perl-5.005xx-diffs',
-                 cfg    => 'perl55x.cfg',
-                 ddir   => File::Spec->catdir( cwd(), File::Spec->updir,
-                                               "perl-$vdirs{'5.5.x'}" ),
-                 text   => 'Perl 5.005 MAINT',
-                 is56x  => 1},
+#    '5.5.x' => { source => 'public.activestate.com::perl-5.005xx',
+#                 server => 'public.activestate.com',
+#                 sdir   => '/pub/apc/perl-5.005xx-snap',
+#                 sfile  => '',
+#                 pdir   => '/pub/apc/perl-5.005xx-diffs',
+#                 cfg    => 'perl55x.cfg',
+#                 ddir   => File::Spec->catdir( cwd(), File::Spec->updir,
+#                                               "perl-$vdirs{'5.5.x'}" ),
+#                 text   => 'Perl 5.005 MAINT',
+#                 is56x  => 1},
 
 #    '5.6.2' => { source => 'public.activestate.com::perl-5.6.2',
 #                 server => 'public.activestate.com',
@@ -441,6 +441,11 @@ Specify a different make program for "make _test".
 EOT
         alt => [ ],
         dft => ( $Config{make} ? $Config{make} : 'make' ),
+    },
+    harnessonly => {
+        msg => 'Use harness only (skip TEST)?',
+        alt => [qw( y N )],
+        dft => ( $^O =~ /VMS/i ? 'y' : 'n' ),
     },
 
     # mail stuff
@@ -1239,6 +1244,16 @@ unless ( is_win32 || is_vms ) {
     $config{ $arg } = prompt( $arg ) || 'make';
 }
 
+=item harnessonly
+
+C<harnessonly> indicates that C<make test> is replaced by C<make
+test_harness>.
+
+=cut
+
+$arg = 'harnessonly';
+$config{ $arg } = prompt_yn( $arg );
+
 =item umask
 
 C<umask> will be set in the shell-script that starts the smoke.
@@ -1533,7 +1548,7 @@ sub sort_configkeys {
         qw( adir lfile ),
 
         # make fine-tuning
-        qw( makeopt testmake ),
+        qw( makeopt testmake harnessonly ),
 
         # ENV stuff
         qw( perl5lib delay_report ),
