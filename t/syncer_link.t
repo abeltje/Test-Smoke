@@ -8,7 +8,12 @@ use File::Spec;
 use lib File::Spec->rel2abs( 't' );
 use TestLib;
 
-use Test::More tests => 12;
+my $win32_fat;
+BEGIN { $win32_fat = $^O eq 'MSWin32' && Win32::FsType() ne 'NTFS' }
+
+use Test::More $win32_fat
+    ? ( skip_all => 'Win32 fat filesystem not supported' )
+    : ( tests => 12 );
 
 use_ok( 'Test::Smoke::Syncer' );
 

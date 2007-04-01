@@ -11,7 +11,13 @@ use lib $findbin;
 use TestLib;
 use Cwd;
 
-use Test::More tests => 13;
+my $win32_fat;
+BEGIN { $win32_fat = $^O eq 'MSWin32' && Win32::FsType() ne 'NTFS' }
+
+use Test::More $win32_fat
+    ? ( skip_all => 'Win32 fat filesystem not supported' )
+    : ( tests => 13 );
+
 BEGIN {
     use_ok( 'Test::Smoke::Patcher' );
     use_ok( 'Test::Smoke::Syncer' );
