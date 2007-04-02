@@ -3,12 +3,13 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.031';
+$VERSION = '0.032';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
 use Config;
 use Test::Smoke::Util qw( get_smoked_Config skip_filter );
+require Carp;
 BEGIN { eval q{ use Time::HiRes qw( time ) } }
 
 my %CONFIG = (
@@ -95,8 +96,7 @@ sub new {
     my $fh = shift;
 
     unless ( ref $fh eq 'GLOB' ) {
-        require Carp;
-        Carp::croak sprintf "Usage: %s->new( \\*FH, %%args )", __PACKAGE__;
+        Carp::croak( sprintf "Usage: %s->new( \\*FH, %%args )", __PACKAGE__);
     }
 
     my %args_raw = @_ ? UNIVERSAL::isa( $_[0], 'HASH' ) ? %{ $_[0] } : @_ : ();
@@ -138,7 +138,7 @@ sub mark_out {
 
 =item Test::Smoke::Smoker->config( $key[, $value] )
 
-C<config()> is an interface to the package lexical C<%CONFIG>, 
+C<config()> is an interface to the package lexical C<%CONFIG>,
 which holds all the default values for the C<new()> arguments.
 
 With the special key B<all_defaults> this returns a reference
@@ -204,7 +204,7 @@ sub ttylog {
 
 =item $smoker->smoke( $config[, $policy] )
 
-C<smoke()> takes a B<Test::Smoke::BuildCFG::Config> object and runs all 
+C<smoke()> takes a B<Test::Smoke::BuildCFG::Config> object and runs all
 the basic steps as (private) object methods.
 
 =cut
@@ -224,7 +224,7 @@ sub smoke {
     # Log the compiler info now, the last config could fail
     { # can we config.sh without Configure success?
         my %cinfo = get_smoked_Config( $self->{ddir} => qw(
-            cc ccversion gccversion 
+            cc ccversion gccversion
         ));
         my $version = $cinfo{gccversion} || $cinfo{ccversion};
         $self->log( "\nCompiler info: $cinfo{cc} version $version\n" )
@@ -238,19 +238,19 @@ sub smoke {
 
     my %sconf = get_smoked_Config( $self->{ddir} => 'ldlibpthname' );
     exists $sconf{ldlibpthname} or $sconf{ldlibpthname} = "";
-    $sconf{ldlibpthname} and 
+    $sconf{ldlibpthname} and
         local $ENV{ $sconf{ldlibpthname} } = $ENV{ $sconf{ldlibpthname} } || '',
         substr( $ENV{ $sconf{ldlibpthname} }, 0, 0) =
             "$self->{ddir}$Config{path_sep}";
 
     my $build_stat = $self->make_( $config );
-  
+
     $build_stat == BUILD_MINIPERL and do {
         $self->ttylog( "Unable to make anything but miniperl",
                        " in this configuration\n" );
-        return $self->make_minitest( "$config" );
+        return $self->make_minitest;
     };
-       
+
     $build_stat == BUILD_NOTHING and do {
         $self->ttylog( "Unable to make perl in this configuration\n" );
         return 0;
@@ -275,7 +275,7 @@ C<make_distclean()> runs C<< make -i distclean 2>/dev/null >>
 
 sub make_distclean {
     my $self = shift;
-    
+
     $self->tty( "make distclean ..." );
     if ( $self->{fdir} && -d $self->{fdir} ) {
         require Test::Smoke::Syncer;
@@ -319,7 +319,7 @@ sub extra_manicheck {
 
 =item $smoker->handle_policy( $policy, @substs );
 
-C<handle_policy()> will try to apply the substition rules and then 
+C<handle_policy()> will try to apply the substition rules and then
 write the file F<Policy.sh>.
 
 =cut
@@ -358,7 +358,7 @@ sub Configure {
         my $w32_cfg = "$config" =~ /-DCCTYPE=/
             ? "$config" : "$config -DCCTYPE=$self->{w32cc}";
 
-        $makefile = $self->_run( "./Configure $w32_cfg", 
+        $makefile = $self->_run( "./Configure $w32_cfg",
                                  \&Test::Smoke::Util::Configure_win32,
                                  $self->{w32make}, @w32args  );
     } elsif ( $self->{is_vms} ) {
@@ -417,7 +417,7 @@ sub make_ {
     $self->{_perl_bin}     = $perl;
 
     -x $miniperl or return BUILD_NOTHING;
-    return -x $perl 
+    return -x $perl
         ? $self->{_run_exit} ? BUILD_MINIPERL : BUILD_PERL
         : BUILD_MINIPERL;
 }
@@ -456,7 +456,7 @@ sub make_test {
     my @layers = ( ($config_args =~ /-Uuseperlio\b/) || $self->{defaultenv} )
                ? qw( stdio ) : qw( stdio perlio );
 
-    if ( !($config_args =~ /-Uuseperlio\b/ || $self->{defaultenv}) && 
+    if ( !($config_args =~ /-Uuseperlio\b/ || $self->{defaultenv}) &&
          $self->{locale} ) {
         push @layers, 'locale';
     }
@@ -486,62 +486,23 @@ sub make_test {
             next;
 	}
 
-        my @nok = ();
-	unless ( $self->{harnessonly} ) {
+	if  ( $self->{harnessonly} ) {
+
+            $self->make_test_harness( $config );
+
+        } else {
             my $test_target = $self->{is_vms}
                 ? 'test' : $self->{is56x} ? 'test-notty' : '_test';
-            local *TST;
+
             # MSWin32 builds from its own directory
             if ( $self->{is_win32} ) {
                 $config->has_arg( '-Uuseshrplib' )
                     and $test_target = 'static-test';
-                chdir "win32" or die "unable to chdir () into 'win32'";
-                # Same as in make ()
-                open TST, "$self->{w32make} -f smoke.mk $test_target |";
-                chdir ".." or die "unable to chdir () out of 'win32'";
+                $self->_run_harness_target( $test_target );
             } else {
-                local $ENV{PERL} = "./perl";
-                open TST, "$self->{testmake} $test_target |" or do {
-                    use Carp;
-                    Carp::carp "Cannot fork '$self->{testmake} $test_target':" .
-                               " $!";
-                    next;
-                };
-            }
-
-            select ((select (TST), $| = 1)[0]);
-            while (<TST>) {
-                $self->{v} > 1 and $self->tty( $_ );
-                skip_filter( $_ ) and next;
-    
-                # make mkovz.pl's life easier
-                s/(.)(TSTENV\s+=\s+\w+)/$1\n$2/;
-    
-                if (m/^u=.*tests=/) {
-                    s/(\d\.\d*) /sprintf "%.2f ", $1/ge;
-                    $self->log( $_ );
-                } else {
-                    push @nok, $_;
-                }
-                $self->tty( $_ );
-            }
-            close TST or do {
-                my $error = $! || ( $? >> 8);
-                require Carp;
-                Carp::carp "\nError while reading test-results: $error";
-            };
-#            $self->log( map { "    $_" } @nok );
-            if (grep m/^All tests successful/, @nok) {
-                $self->log( "All tests successful.\n" );
-                $self->tty( "\nOK, archive results ..." );
-                $self->{patch} and
-                    $nok[0] =~ s/\./ for .patch = $self->{patch}./;
-            } else {
-                $self->extend_with_harness( @nok );
+                $self->_run_TEST_target( $test_target, 1 );
             }
             $self->tty( "\n" );
-        } else {
-            @nok = $self->make_test_harness( $config );
         }
         !$had_LC_ALL && exists $ENV{LC_ALL} and delete $ENV{LC_ALL};
     }
@@ -586,7 +547,7 @@ sub extend_with_harness {
         $harness_out =~ s/^\s*$//;
         if ( $all_ok ) {
             $harness_out .= scalar keys %inconsistent
-                ? "Inconsistent test results (between TEST and harness):\n" . 
+                ? "Inconsistent test results (between TEST and harness):\n" .
                   join "", map {
                       my $dots = '.' x (40 - length $_ );
                       "    $_${dots}$inconsistent{ $_ }\n";
@@ -594,7 +555,7 @@ sub extend_with_harness {
                 : $harness_out ? "" : "All tests successful.";
         } else {
             $harness_out .= scalar keys %inconsistent
-                ? "Inconsistent test results (between TEST and harness):\n" . 
+                ? "Inconsistent test results (between TEST and harness):\n" .
                   join "", map {
                       my $dots = '.' x (40 - length $_ );
                       "    $_${dots}$inconsistent{ $_ }\n";
@@ -616,62 +577,50 @@ information and do not bother with TEST.
 sub make_test_harness {
     my( $self, $config ) = @_;
 
-    $self->{is_vms} and return $self->mmk_test_harness( $config );
+    my $target= "test_harness";
+    my $debugging = "";
 
-    my $target   = $self->{is_win32} ? 'test' : 'test_harness';
-    my $makefile = $self->{is_win32} ? '-f smoke.mk' : '';
-    my $cmd      = "$self->{testmake} $makefile $target";
-    $self->_run_harness_only( $cmd );
+    if ( $self->{is_vms} ) {
+
+        $debugging = $config->has_arg( '-Dusevmsdebug' )
+            ? qq[/macro=("__DEBUG__=1")]
+            : "";
+
+    } elsif ($self->{is_win32}) {
+        $target = $config->has_arg( '-Uuseshrplib' ) ? "static-test" : "test";
+    }
+
+    $self->_run_harness_target( $target, $debugging );
 }
 
-=item $smoker->mmk_test_harness
-
-The VMS test-output is different from other platforms, but
-Test::Harness knows how to deal with it. On VMS we only run C<mmk
-test_harness> and take the summary.
-
-This might be useful for all platforms...
-
-=cut
-
-sub mmk_test_harness {
-    my( $self, $config ) = @_;
-
-    my $debugging = $self->{is_vms} && $config->has_arg( '-Dusevmsdebug' )
-        ? qq[/macro=("__DEBUG__=1")] : "";
-
-    my $cmd = "$self->{testmake}$debugging test_harness";
-
-    $self->_run_harness_only( $cmd );        
-}
-
-=item $smoker->_run_harness_only( $cmd )
+=item $smoker->_run_harness_target( $target, $extra )
 
 The command to run C<make test_harness> differs based on platform, so
-it has to be passed into general routine.
+the arguments have to be passed into general routine. C<$target>
+specifies the makefile-target, C<$makeopt> specifies the extra options
+for the make program.
 
 =cut
 
-sub _run_harness_only {
-    my( $self, $cmd ) = @_;
+sub _run_harness_target {
+    my( $self, $target, $extra ) = @_;
 
     my $seenheader = 0;
     my @failed = ( );
 
     my $harness_re1 = HARNESS_RE1();
     my $harness_re2 = HARNESS_RE2();
-        
-    local *TST;
-    open TST, "$cmd |" or die "Cannot spawn($cmd): $!";
-    
-    while ( <TST> ) {
+
+    my $tst = $self->_make_fork( $target, $extra );
+
+    while ( <$tst> ) {
         $self->{v} > 1 and $self->tty( $_ );
 
         /All tests successful/ and push( @failed, $_ ), last;
 
         /Failed Test\s+Stat/ and $seenheader = 1, next;
         $seenheader or next;
-    
+
         my( $name, $fail ) = m/$harness_re1/;
         if ( $name ) {
             my $dots = '.' x (40 - length $name );
@@ -681,21 +630,60 @@ sub _run_harness_only {
             next unless $fail;
             push @failed, " " x 51 . "$fail\n";
         }
-    
     }
 
-    $self->ttylog( "\n", join( "", @failed ), "\n" );
-
-    close TST or do {
+    close $tst or do {
         my $error = $! || ( $? >> 8);
-        require Carp;
-        Carp::carp "\nError while reading test_harness-results: $error";
+        Carp::carp( "\nerror while running harness target '$target': $error" );
     };
 
+    $self->ttylog( "\n", join( "", @failed ), "\n" );
     $self->tty( "Archived results...\n" );
 }
 
-=item $self->make_minitest( $cfgargs )
+sub _run_TEST_target {
+    my( $self, $target, $extend ) = @_;
+    !$target and Carp::Confess( "No target in _run_TEST_target" );
+
+    my @nok;
+    my $tst = $self->_make_fork( $target );
+    my $ok;
+
+    while (<$tst>) {
+        $self->{v} > 1 and $self->tty( $_ );
+        skip_filter( $_ ) and next;
+
+        # make mkovz.pl's life easier
+        s/(.)(TSTENV\s+=\s+\w+)/$1\n$2/;
+
+        if (m/^u=.*tests=/) {
+            s/(\d\.\d*) /sprintf "%.2f ", $1/ge;
+            $self->log( $_ );
+        } else {
+            $ok ||= m/^All tests successful/;
+            push @nok, $_;
+        }
+        $self->tty( $_ );
+    }
+    close $tst or do {
+        my $error = $! || ( $? >> 8);
+        Carp::carp("\nError while reading test-results: $error");
+    };
+
+#    $self->log( map { "    $_" } @nok );
+    if ( grep m/^All tests successful/, @nok ) {
+        $self->log( "All tests successful.\n" );
+        $self->tty( "\nOK, archive results ..." );
+        $self->{patch} and
+            $nok[0] =~ s/\./ for .patch = $self->{patch}./;
+    } elsif ( !$extend ) {
+        $self->ttylog( map { "    $_" } @nok );
+    } else {
+        $self->extend_with_harness( @nok );
+    }
+}
+
+=item $self->make_minitest
 
 C<make> was unable to build a I<perl> executable, but managed to build
 I<miniperl>, so we do C<< S<make minitest> >>.
@@ -706,51 +694,13 @@ sub make_minitest {
     my $self = shift;
 
     $self->ttylog( "TSTENV = minitest\t" );
-    local *TST;
-    # MSWin32 builds from its own directory
-    if ( $self->{is_win32} ) {
-        chdir "win32" or die "unable to chdir () into 'win32'";
-        # Same as in make ()
-        open TST, "$self->{w32make} -f smoke.mk minitest |";
-        chdir ".." or die "unable to chdir () out of 'win32'";
-    } elsif ( $self->{is_vms} ) {
-        open TST, "$self->{vmsmaker} minitest |" or do {
-            use Carp;
-            Carp::carp "Cannot fork '$self->{vmsmaker} minitest': $!";
-            return 0;
-        };
+
+    if ($self->{is_win32}) {
+        $self->_run_harness_target( "minitest" );
     } else {
-        local $ENV{PERL} = "./perl";
-        open TST, "make minitest |" or do {
-            use Carp;
-            Carp::carp "Cannot fork 'make minitest': $!";
-            return 0;
-        };
+        $self->_run_TEST_target( "minitest", 0 );
     }
 
-    my @nok = ();
-    select ((select (TST), $| = 1)[0]);
-    while (<TST>) {
-        $self->{v} >= 2 and $self->tty( $_ );
-        skip_filter( $_ ) and next;
-        # make mkovz.pl's life easier
-        s/(.)(PERLIO\s+=\s+\w+)/$1\n$2/;
-
-        if (m/^u=.*tests=/) {
-            s/(\d\.\d*) /sprintf "%.2f ", $1/ge;
-            $self->log( $_ );
-        } else {
-            push @nok, $_;
-        }
-        $self->tty( $_ );
-    }
-    close TST or do {
-        require Carp;
-        Carp::carp "Error while reading pipe: $!";
-    };
-    $self->ttylog( map { "    $_" } @nok );
-
-    $self->tty( "\nOK, archive results ..." );
     $self->tty( "\n" );
     return 1;
 }
@@ -865,13 +815,48 @@ sub _make {
     } else {
         $cmd = "$maker $cmd";
     }
-    my @output = $self->_run( 
+    my @output = $self->_run(
         $kill_err ? qq{$^X -e "close STDERR; system '$cmd'"} : $cmd
     );
     if ( $self->{is_win32} ) {
         chdir ".." or die "unable to chdir() out of 'win32'";
     }
     return wantarray ? @output : join "", @output;
+}
+
+=item $smoker->_make_fork( $target, $extra )
+
+C<_make_fork()> opens a read pipe to the make command with C<$target>
+and C<$extra> arguments for the make command.
+
+=cut
+
+sub _make_fork {
+    my( $self, $target, $extra ) = @_;
+
+    !defined $extra and $extra = "";
+
+    my( $ok, $err, $cmd );
+    local *TST;
+
+    # MSWin32 builds from its own directory
+    if ( $self->{is_win32} ) {
+        chdir "win32" or die "unable to chdir () into 'win32'";
+        # Same as in make ()
+        $cmd = "$self->{testmake}$extra -f smoke.mk $target |";
+        $ok = open TST, $cmd  or $err = $!;
+        chdir ".." or die "unable to chdir () out of 'win32'";
+    } else {
+        local $ENV{PERL} = "./perl";
+        $cmd = "$self->{testmake}$extra $target |";
+        $ok = open TST, $cmd or $err = $!;
+    }
+    $ok or do {
+        Carp::carp("Cannot fork '$cmd': $err");
+        return 0;
+    };
+    select ((select (*TST), $| = 1)[0]);
+    return *TST;
 }
 
 =item $smoker->_vms__rooted_logical
