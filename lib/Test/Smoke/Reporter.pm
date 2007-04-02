@@ -173,7 +173,7 @@ sub _read {
                 $vmsg = "from $nameorref";
             } else {
                 require Carp;
-                Carp::carp "Cannot read smokeresults ($nameorref): $!";
+                Carp::carp( "Cannot read smokeresults ($nameorref): $!" );
                 $self->{_outfile} = undef;
                 $vmsg = "did fail";
             }
@@ -457,13 +457,13 @@ sub write_to_file {
     local *RPT;
     open RPT, "> $name" or do {
         require Carp;
-        Carp::carp "Error creating '$name': $!";
+        Carp::carp( "Error creating '$name': $!" );
         return;
     };
     print RPT $self->report;
     close RPT or do {
         require Carp;
-        Carp::carp "Error writing to '$name': $!";
+        Carp::carp( "Error writing to '$name': $!" );
         return;
     };
     $self->{v} and print " OK\n";
