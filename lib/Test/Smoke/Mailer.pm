@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION $P5P $NOCC_RE);
-$VERSION = '0.011';
+$VERSION = '0.012';
 
 use Test::Smoke::Util qw( parse_report_Config );
 
@@ -127,7 +127,7 @@ sub fetch_report {
         close REPORT;
     } else {
         require Carp;
-        Carp::croak "Cannot read '$report_file': $!";
+        Carp::croak( "Cannot read '$report_file': $!" );
     }
 
     my @config = parse_report_Config( $self->{body} );

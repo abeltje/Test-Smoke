@@ -9,7 +9,7 @@ use Test::Smoke::Util qw( clean_filename );
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.006';
+$VERSION = '0.007';
 
 my %CONFIG = (
     df_fserver  => undef,
@@ -153,7 +153,7 @@ sub mirror {
 
     if ( $self->{ftype} && $self->{client}->can( $self->{ftype} ) ) {
         my $ftype = $self->{ftype};
-        $self->{client}->$ftype;
+        eval '$self->{client}->$ftype';
     }
     my( $totsize, $tottime ) = ( 0, 0 );
     $self->{v} and print "Start mirror to: $ddir\n";

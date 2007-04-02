@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.021';
+$VERSION = '0.022';
 
 use Config;
 use Cwd;
@@ -157,7 +157,7 @@ sub new {
 
     unless ( exists $CONFIG{valid_type}->{$sync_type} ) {
         require Carp;
-        Carp::croak "Invalid sync_type '$sync_type'";
+        Carp::croak( "Invalid sync_type '$sync_type'" );
     };
 
     my %args_raw = @_ ? UNIVERSAL::isa( $_[0], 'HASH' ) ? %{ $_[0] } : @_ : ();
@@ -187,7 +187,7 @@ sub new {
         /^forest$/   && return Test::Smoke::Syncer::Forest->new( %fields );
 
         require Carp;
-        Carp::croak "Synctype '$_', not yet implemented.";
+        Carp::croak( "Synctype '$_', not yet implemented." );
     }
 
 }
@@ -427,7 +427,7 @@ sub pre_sync {
 # Set skeleton-sub
 sub sync { 
     require Carp; 
-    Carp::croak ref( $_[0] ) . "->sync() not yet implemented.";
+    Carp::croak( ref( $_[0] ) . "->sync() not yet implemented." );
 }
 
 =item $syncer->post_sync
@@ -511,7 +511,7 @@ sub sync {
     if ( system $command ) {
         my $err = $? >> 8;
         require Carp;
-        Carp::carp "Problem during rsync ($err)";
+        Carp::carp( "Problem during rsync ($err)" );
     }
 
     my $plevel = $self->check_dot_patch;
@@ -604,21 +604,21 @@ sub _fetch_snapshot {
     require Net::FTP;
     my $ftp = Net::FTP->new($self->{server}, Debug => 0, Passive => 1) or do {
         require Carp;
-        Carp::carp "[Net::FTP] Can't open $self->{server}: $@";
+        Carp::carp( "[Net::FTP] Can't open $self->{server}: $@" );
         return undef;
     };
 
     my @login = ( $self->{ftpusr}, $self->{ftppwd} );
     $ftp->login( @login ) or do {
         require Carp;
-        Carp::carp "[Net:FTP] Can't login( @login )";
+        Carp::carp( "[Net:FTP] Can't login( @login )" );
         return undef;
     };
 
     $self->{v} and print "Connected to $self->{server}\n";
     $ftp->cwd( $self->{sdir} ) or do {
         require Carp;
-        Carp::carp "[Net::FTP] Can't chdir '$self->{sdir}'";
+        Carp::carp( "[Net::FTP] Can't chdir '$self->{sdir}'" );
         return undef;
     };
 
@@ -627,7 +627,7 @@ sub _fetch_snapshot {
 
     unless ( $snap_name ) {
         require Carp;
-        Carp::carp "Couldn't find a snapshot at $self->{server}$self->{sdir}";
+        Carp::carp("Couldn't find a snapshot at $self->{server}$self->{sdir}");
         return undef;
     }
 
@@ -669,7 +669,7 @@ sub _fetch_snapshot_HTTP {
 
     unless ( $snap_name ) {
         require Carp;
-        Carp::carp "No snapshot specified for $self->{server}$self->{sdir}";
+        Carp::carp( "No snapshot specified for $self->{server}$self->{sdir}" );
         return undef;
     }
 
@@ -735,7 +735,7 @@ sub _extract_snapshot {
 
     unless ( $self->{snapshot} && -f $self->{snapshot} ) {
         require Carp;
-        Carp::carp "No snapshot to be extracted!";
+        Carp::carp( "No snapshot to be extracted!" );
         return undef;
     }
 
@@ -748,7 +748,7 @@ sub _extract_snapshot {
     my $extract_base = File::Spec->catdir( $ddir, File::Spec->updir );
     chdir $extract_base or do {
         require Carp;
-        Carp::croak "Can't chdir '$extract_base': $!";
+        Carp::croak( "Can't chdir '$extract_base': $!" );
     };
 
     my $snap_base;
@@ -768,7 +768,7 @@ sub _extract_snapshot {
 
     chdir $cwd or do {
         require Carp;
-        Carp::croak "Can't chdir($extract_base) back: $!";
+        Carp::croak( "Can't chdir($extract_base) back: $!" );
     };
 
     if ( $self->{cleanup} & 1 ) {
@@ -791,7 +791,7 @@ sub _extract_with_Archive_Tar {
 
     my $archive = Archive::Tar->new() or do {
         require Carp;
-        Carp::carp "Can't Archive::Tar->new: " . $Archive::Tar::error;
+        Carp::carp( "Can't Archive::Tar->new: " . $Archive::Tar::error );
         return undef;
     };
 
@@ -799,7 +799,7 @@ sub _extract_with_Archive_Tar {
     $archive->read( $self->{snapshot}, 1 );
     $Archive::Tar::error and do {
         require Carp;
-        Carp::carp "Error reading '$self->{snapshot}': ".$Archive::Tar::error;
+        Carp::carp("Error reading '$self->{snapshot}': ".$Archive::Tar::error);
         return undef;
     };
     my @files = $archive->list_files;
@@ -832,7 +832,7 @@ sub _extract_with_external {
         if ( system $command ) {
             my $error = $? >> 8;
             require Carp;
-            Carp::carp "Error in command: $error";
+            Carp::carp( "Error in command: $error" );
             return undef;
         };
         $self->{v} and print "OK\n";
@@ -930,20 +930,20 @@ sub _get_patches {
 
     my $ftp = Net::FTP->new($self->{pserver}, Debug => 0, Passive => 1) or do {
         require Carp;
-        Carp::carp "[Net::FTP] Can't open '$self->{pserver}': $@";
+        Carp::carp( "[Net::FTP] Can't open '$self->{pserver}': $@" );
         return undef;
     };
 
     my @user_info = ( $self->{ftpusr}, $self->{ftppwd} );
     $ftp->login( @user_info ) or do {
         require Carp;
-        Carp::carp "[Net::FTP] Can't login( @user_info )" ;
+        Carp::carp( "[Net::FTP] Can't login( @user_info )" );
         return undef;
     };
 
     $ftp->cwd( $self->{pdir} ) or do {
         require Carp;
-        Carp::carp "[Net::FTP] Can't cd '$self->{pdir}'";
+        Carp::carp( "[Net::FTP] Can't cd '$self->{pdir}'" );
         return undef;
     };
 
@@ -998,7 +998,7 @@ sub _apply_patches {
     my $cwd = cwd();
     chdir $self->{ddir} or do {
         require Carp;
-        Carp::croak "Cannot chdir($self->{ddir}): $!";
+        Carp::croak( "Cannot chdir($self->{ddir}): $!" );
     };
 
     require Test::Smoke::Patcher;
@@ -1015,7 +1015,7 @@ sub _apply_patches {
         eval { $patcher->patch };
         if ( $@ ) {
              require Carp;
-	     Carp::carp "Error while patching:\n\t$@";
+	     Carp::carp( "Error while patching:\n\t$@" );
              next;
         }
 
@@ -1027,7 +1027,7 @@ sub _apply_patches {
     }
     chdir $cwd or do {
         require Carp;
-        Carp::croak "Cannot chdir($cwd) back: $!";
+        Carp::croak( "Cannot chdir($cwd) back: $!" );
     };
 }
 
@@ -1047,7 +1047,7 @@ sub _read_patch {
         require Compress::Zlib;
         my $unzip = Compress::Zlib::gzopen( $file, 'rb' ) or do {
             require Carp;
-            Carp::carp "Can't open '$file': $Compress::Zlib::gzerrno";
+            Carp::carp( "Can't open '$file': $Compress::Zlib::gzerrno" );
             return undef;
         };
 
@@ -1056,7 +1056,7 @@ sub _read_patch {
  
         unless ( $Compress::Zlib::gzerrno == Compress::Zlib::Z_STREAM_END() ) {
             require Carp;
-            Carp::carp "Error reading '$file': $Compress::Zlib::gzerrno" ;
+            Carp::carp( "Error reading '$file': $Compress::Zlib::gzerrno" );
         }
 
         $unzip->gzclose;
@@ -1211,7 +1211,7 @@ sub new {
     my %args = @_;
     unless ( $args{hdir} ) {
         require Carp;
-        Carp::croak "No source-directory (hdir) specified for " . __PACKAGE__;
+        Carp::croak("No source-directory (hdir) specified for " . __PACKAGE__);
     }
     return bless \%args, $class;
 }
@@ -1431,15 +1431,15 @@ sub sync {
         my $cwd = Cwd::cwd();
         chdir $self->{fdir} or do {
             require Carp;
-            Carp::croak "Cannot chdir($self->{fdir}) in forest: $!";
+            Carp::croak( "Cannot chdir($self->{fdir}) in forest: $!" );
         };
         system( "$^X regen_headers.pl" ) == 0 or do {
             require Carp;
-            Carp::carp "Error while running 'regen_headers.pl'";
+            Carp::carp( "Error while running 'regen_headers.pl'" );
         };
         chdir $cwd or do {
             require Carp;
-            Carp::croak "Cannot chdir($cwd) back: $!";
+            Carp::croak( "Cannot chdir($cwd) back: $!" );
         };
     }
 
