@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK $NOCASE );
-$VERSION = '0.52';
+$VERSION = '0.53';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -573,7 +573,7 @@ sub set_local_patch {
     }
     unless ( rename $pln, $plh ) {
         require Carp;
-        carp( "Could not rename '$pln' to '$plh' : $!" );
+        Carp::carp( "Could not rename '$pln' to '$plh' : $!" );
         return 0;
     }
 
@@ -1048,7 +1048,7 @@ sub vms_whereis {
     eval { require VMS::DCLsym };
     if ( $@ ) {
         require Carp;
-        Carp::carp "Oops, cannot load VMS::DCLsym: $@";
+        Carp::carp( "Oops, cannot load VMS::DCLsym: $@" );
     } else {
         my $syms = VMS::DCLsym->new;
         return $prog if scalar $syms->getsym( $prog );
