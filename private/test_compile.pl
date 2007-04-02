@@ -1,5 +1,4 @@
-#! /usr/bin/perl
-use warnings FATAL => 'all';
+#! /usr/bin/perl -w
 use strict;
 
 # $Id$

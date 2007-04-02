@@ -28,7 +28,7 @@ unless ( defined $opt{perl} ) {
             last MACHINE;
         };
         /snowy/ && do {
-            $opt{perl} = [qw( 554 562 585 592 )];
+            $opt{perl} = [qw( 554 562 588 594 )];
             last MACHINE;
         };
      }
@@ -43,7 +43,7 @@ my @tests = sort map {
     $mask !~ /\*\.t$/ and $mask = catfile $mask, '*.t';
     glob $mask;
 } @{ $opt{dir} };
-@tests = sort @tests;
+@tests = ( 'private/test_compile.pl', sort @tests );
 
 my $harness = qq/-MTest::Harness -e 'runtests(\@ARGV)'/;
 my $devnull = devnull();
