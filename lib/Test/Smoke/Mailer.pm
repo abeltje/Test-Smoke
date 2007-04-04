@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION $P5P $NOCC_RE);
-$VERSION = '0.012';
+$VERSION = '0.013';
 
 use Test::Smoke::Util qw( parse_report_Config );
 
@@ -472,7 +472,9 @@ sub mail {
     $message{Cc}   = $cc  if $cc;
     $message{Bcc}   = $self->{bcc} if $self->{bcc};
     $message{From} = $self->{from} if $self->{from};
-    MIME::Lite->send( smtp => $self->{mserver} ) if $self->{mserver};
+
+    MIME::Lite->send( smtp => $self->{mserver}, Debug => ( $self->{v} > 1 ) )
+        if $self->{mserver};
 
     my $ml_msg = MIME::Lite->new( %message );
 
