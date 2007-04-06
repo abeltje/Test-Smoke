@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK $NOCASE );
-$VERSION = '0.53';
+$VERSION = '0.54';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -445,8 +445,10 @@ sub grepccmsg {
                 # Sometimes also the column is mentioned.
             # foo.c: In function `foo':
             # foo.c:nnn: error: ...
-            '(^(?-s:.+?):(?: In function .+?:$|\d+(?:\:\d+)?: ' .
-            '(?:warning:|error:|invalid) .+?$))',
+            # foo.c(:nn)?: undefined reference to ...
+            '(^(?-s:.+?):(?: In function .+?:$|' .
+               '(?: undefined reference to .+?$)|' .
+               '\d+(?:\:\d+)?: ' . '(?:warning:|error:|invalid) .+?$))',
 
         'mswin32' => # MSVC(?:60)*
             # foo.c : error LNKnnn: error description

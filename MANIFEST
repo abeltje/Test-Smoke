@@ -71,6 +71,7 @@ t/gccmsg.out
 t/grepccmsg.t
 t/logs/hpux1020.log
 t/logs/hpux1111.log
+t/logs/mingw.log
 t/logs/solaris.log
 t/logs/w32bcc32.log
 t/logs/gcc2722.log
