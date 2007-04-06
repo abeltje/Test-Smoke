@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION $P5P $NOCC_RE);
-$VERSION = '0.013';
+$VERSION = '0.014';
 
 use Test::Smoke::Util qw( parse_report_Config );
 
@@ -402,6 +402,9 @@ sub mail {
     $message{from} = $self->{from} if $self->{from};
     $message{smtp} = $self->{mserver} if $self->{mserver};
 
+    $message{ 'Content-type' } = qq!text/plain; charset="UTF8"!
+        if exists $ENV{LANG} && $ENV{LANG} =~ /utf-?8$/i;
+
     $self->{v} > 1 and print "[Mail::Sendmail]\n";
     $self->{v} and print "Sending report to $self->{to} ";
 
@@ -477,6 +480,8 @@ sub mail {
         if $self->{mserver};
 
     my $ml_msg = MIME::Lite->new( %message );
+    $ml_msg->attr( 'content-type.charset' => 'UTF8' )
+        if exists $ENV{LANG} && $ENV{LANG} =~ /utf-?8$/i;
 
     $self->{v} > 1 and print "[MIME::Lite]\n";
     $self->{v} and print "Sending report to $self->{to} ";
