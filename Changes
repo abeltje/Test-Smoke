@@ -10,6 +10,74 @@ The filelists have a short symbolic indicator:
 
 Enjoy!
 ___________________________________________________________________________
+[  1047] By: abeltje                          on 2007-05-05 13:44:58 +0200
+        Log: * Prepare snapshot 1.19_87
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[  1044] By: abeltje                          on 2007-04-07 00:01:03 +0200
+        Log: * [CHANGE]
+	       * set 'charset="UTF8"' in the Content-Type header for
+		 Mail::Sendmail and MIME::Lite when $ENV{LANG} is set to
+		 something UTF-8
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Mailer.pm
+___________________________________________________________________________
+[  1041] By: abeltje                          on 2007-04-06 13:59:32 +0200
+        Log: * [CHANGE]
+	       * FIX: Steve Hay found unreported stuff in his MinGW
+		 smokelog
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           + /Test-Smoke/t/logs/mingw.log
+           ! /Test-Smoke/MANIFEST, /Test-Smoke/lib/Test/Smoke/Util.pm,
+	     /Test-Smoke/t/grepccmsg.t
+___________________________________________________________________________
+[  1040] By: abeltje                          on 2007-04-05 00:04:59 +0200
+        Log: * [CHANGE] feature request by Yves Orton
+	       + set Debug => 1 for {v} > 1 and MIME::Lite with smtp
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Mailer.pm
+___________________________________________________________________________
+[  1039] By: abeltje                          on 2007-04-02 23:40:38 +0200
+        Log: * [CHANGE] by Yves Orton
+	       * big change to sort the harnessonly stuff and do some
+		 refactoring
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Smoker.pm
+___________________________________________________________________________
+[  1037] By: abeltje                          on 2007-04-02 23:17:19 +0200
+        Log: * [CHANGE]
+	       * FIX: some more Carp::carp stuff (found by 5.9.4 and
+		 5.005_04)
+	       * Bump versions for 1036
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/BuildCFG.pm,
+	     /Test-Smoke/lib/Test/Smoke/FTPClient.pm,
+	     /Test-Smoke/lib/Test/Smoke/Mailer.pm,
+	     /Test-Smoke/lib/Test/Smoke/Policy.pm,
+	     /Test-Smoke/lib/Test/Smoke/Reporter.pm,
+	     /Test-Smoke/lib/Test/Smoke/Syncer.pm
+___________________________________________________________________________
+[  1036] By: abeltje                          on 2007-04-02 22:44:31 +0200
+        Log: * [CHANGE]
+	       * FIX: some more Carp::carp stuff (found by 5.9.4)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/BuildCFG.pm,
+	     /Test-Smoke/lib/Test/Smoke/Policy.pm,
+	     /Test-Smoke/lib/Test/Smoke/Reporter.pm
+___________________________________________________________________________
+[  1035] By: abeltje                          on 2007-04-02 22:22:41 +0200
+        Log: * [CHANGE]
+	       * FIX: some Carp::carp stuff (found by 5.9.4)
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke/Util.pm
+___________________________________________________________________________
+[  1033] By: abeltje                          on 2007-04-01 22:17:51 +0200
+        Log: * [AUTOCOMMIT]
+	       * Regenerate 'Changes'
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Changes
+___________________________________________________________________________
 [  1032] By: abeltje                          on 2007-04-01 22:09:02 +0200
         Log: * [CHANGE]
 	       + ADD: harnessonly question
