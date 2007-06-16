@@ -43,6 +43,7 @@ GetOptions( \%options,
     'defaultenv!',
     'continue!',
     'smartsmoke!',
+    'patchlevel=i',
     'snapshot|s=i',
     'killtime=s',
     'pfile=s',
@@ -84,6 +85,7 @@ It can take these options
   --is56x                  This is a perl-5.6.x smoke
   --defaultenv             Run a smoke in the default environment
   --[no]smartsmoke         Don't smoke unless patchlevel changed
+  --patchlevel <plevel>    Set old patchlevel for --smartsmoke --nofetch
   --snapshot <patchlevel>  Set a new patchlevel for snapshot smokes
   --killtime (+)hh::mm     (Re)set the guard-time for this smoke
 
@@ -145,8 +147,10 @@ chdir $cwd;
 archiverpt();
 
 sub synctree {
-    my $was_patchlevel = get_patch( $conf->{ddir} ) || -1;
-    my $now_patchlevel = $was_patchlevel;
+    my $now_patchlevel = get_patch( $conf->{ddir} ) || -1;
+    my $was_patchlevel = $options{smartsmoke} && $options{patchlevel}
+        ? $options{patchlevel}
+        : $now_patchlevel;
     FETCHTREE: {
         unless ( $options{fetch} && $options{run} ) {
             $conf->{v} and print "Skipping synctree\n";
