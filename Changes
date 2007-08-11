@@ -10,6 +10,36 @@ The filelists have a short symbolic indicator:
 
 Enjoy!
 ___________________________________________________________________________
+[  1055] By: abeltje                          on 2007-08-11 13:32:32 +0200
+        Log: * [CHANGE]
+	       * prepare for release 1.20
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[  1054] By: abeltje                          on 2007-08-11 13:29:07 +0200
+        Log: * [CHANGE]
+	       * updated the text
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/roadmap.pod
+___________________________________________________________________________
+[  1053] By: abeltje                          on 2007-08-11 13:17:47 +0200
+        Log: * [CHANGE] found by cpantesters
+	       * FIX: some Carp::carp without parentheses
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/t/TestLib.pm
+___________________________________________________________________________
+[  1052] By: abeltje                          on 2007-06-16 11:22:14 +0200
+        Log: * [CHANGE] request by Merijn
+	       + ADD: --patchlevel=i to support --smartsmoke --nofetch
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm, /Test-Smoke/smokeperl.pl
+___________________________________________________________________________
+[  1048] By: abeltje                          on 2007-05-05 13:58:51 +0200
+        Log: * [AUTOCOMMIT]
+	       * Regenerate 'Changes'
+        Url: http://source.Test-Smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Changes
+___________________________________________________________________________
 [  1047] By: abeltje                          on 2007-05-05 13:44:58 +0200
         Log: * Prepare snapshot 1.19_87
         Url: http://source.Test-Smoke.org/svn/Test-Smoke
