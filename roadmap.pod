@@ -36,6 +36,21 @@ The intention for version 1.19 is to untangle the reports
 mess and clean up F<mkovz.pl>. Development (alpha) releases will
 start at version 1.18_50.
 
+=head2 Test::Smoke 1.20
+
+1.20 had some features added (compiler messages, VMS support) and bugs
+fixed.
+
+=head2 Test::Smoke 1.21
+
+I want to release more often and increase versions more often, so that
+CPAN will install the latest version.
+
+=head2 Test::Smoke 2.00
+
+The intention for 2.00 is to restructure the configuration
+stuff. Development releases will start at version 1.99.
+
 =head1 Test::Smoke repository
 
 The Test::Smoke sources are kept in a publicly accessable
@@ -45,17 +60,25 @@ Subversion repository from which anyone can check them out.
 
 =item The main trunk can be checked out
 
-    svn co http://145.81.96.100/svn/Test-Smoke
+    svn co http://source.test-smoke.org/svn/Test-Smoke
 
-=item The 1.17 MAINT branch can be checked out
+=item The 1.20 MAINT branch can be checked out
 
-    svn co http://145.81.96.100/svn/Test-Smoke-1.17.xx
+    svn co http://source.test-smoke.org/svn/Test-Smoke-1.20.xx
 
 =item Snapshots get there own branche:
 
-This means that version 1.17.06 can be found here:
+This means that (development) version 1.19_86 can be found here:
 
-    svn co http://145.81.96.100/svn/snapshots/Test-Smoke-1.17.06
+    svn co http://source.test-smoke.org/svn/snapshots/Test-Smoke-1.19_86
+
+=item rsync archive
+
+Both development track and maintenance track have their own rsync archive:
+
+    rsync://source.test-smoke.org/ts-current
+
+    rsync://source.test-smoke.org/ts-maint
 
 =back
 
@@ -65,7 +88,7 @@ $Id: roadmap.pod 243 2003-07-18 13:39:42Z abeltje $
 
 =head1 COPYRIGHT
 
-(c) 2002-2003, All rights reserved.
+(c) MMII, MMVII, All rights reserved.
 
   * Abe Timmerman <abeltje@cpan.org>
 
