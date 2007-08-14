@@ -3,9 +3,10 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.036';
+$VERSION = '0.037';
 
-use base 'Exporter';
+#use base 'Exporter';
+use Exporter 'import';
 @EXPORT_OK = qw( &sysinfo &tsuname );
 
 =head1 NAME
@@ -399,9 +400,23 @@ sub Darwin {
     $system_profiler{$1} = $2
 	while $system_profiler_output =~ m/^\s*([\w ]+):\s+(.+)$/gm;
 
+    # convert newer output from Intel core duo
+    my %keymap = (
+        'Processor Name'       => 'CPU Type',
+        'Processor Speed'      => 'CPU Speed',
+        'Model Name'           => 'Machine Name',
+        'Model Identifier'     => 'Machine Model',
+        'Number Of Processors' => 'Number Of CPUs',
+    );
+    for my $newkey ( keys %keymap ) {
+        my $oldkey = $keymap{ $newkey };
+        exists $system_profiler{ $newkey} and
+            $system_profiler{ $oldkey } = delete $system_profiler{ $newkey };
+    }
+
     $system_profiler{'CPU Type'} =~ s/PowerPC\s*(\w+).*/macppc$1/;
     $system_profiler{'CPU Speed'} =~ 
-	s/(\d+(?:\.\d+)?)\s*GHz/sprintf("%d MHz", $1 * 1000)/e;
+	s/(0(?:\.\d+)?)\s*GHz/sprintf("%d MHz", $1 * 1000)/e;
 
     my $model = $system_profiler{'Machine Name'} ||
                 $system_profiler{'Machine Model'};
@@ -713,6 +728,8 @@ version. Takes almost the same arguments:
 =cut
 
 sub tsuname {
+    my $si;
+    ref $_[0] eq __PACKAGE__ and $si = shift;
     my @args = map split() => @_;
 
     my @sw = qw( n s m c p );
@@ -725,7 +742,7 @@ sub tsuname {
     my %show = map +( $_ => undef ) => grep exists $sw{ $_ } => @args;
     @args = grep exists $show{ $_ } => @sw;
 
-    my $si = Test::Smoke::SysInfo->new;
+    defined $si or $si = Test::Smoke::SysInfo->new;
     return join " ", @{ $si }{ @sw{ @args } };
 }
 
@@ -741,7 +758,7 @@ L<Test::Smoke::Smoker>, L<Test::Smoke::Reporter>
 
 With contributions from Jarkko Hietaniemi, Merijn Brand, Campo
 Weijerman, Alan Burlison, Allen Smith, Alain Barbet, Dominic Dunlop,
-Rich Rauenzahn.
+Rich Rauenzahn, David Cantrell.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
