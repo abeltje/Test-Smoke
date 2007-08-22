@@ -18,7 +18,7 @@ use Test::Smoke::SysInfo;
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.064';
+$VERSION = '0.065';
 
 use Getopt::Long;
 my %options = ( 
@@ -1899,7 +1899,7 @@ sub find_a_patch {
     my $patch_bin;
     foreach my $patch (qw( gpatch npatch patch )) {
         $patch_bin = whereis( $patch ) or next;
-        my $version = `$patch_bin --version`;
+        my $version = `$patch_bin -version`;
         $? or return $patch_bin;
     }
 }
