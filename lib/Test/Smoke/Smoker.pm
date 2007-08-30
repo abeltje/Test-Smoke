@@ -456,9 +456,10 @@ sub make_test {
     my @layers = ( ($config_args =~ /-Uuseperlio\b/) || $self->{defaultenv} )
                ? qw( stdio ) : qw( stdio perlio );
 
+    my @locales = split ' ', $self->{locale};
     if ( !($config_args =~ /-Uuseperlio\b/ || $self->{defaultenv}) &&
          $self->{locale} ) {
-        push @layers, 'locale';
+        push @layers, ( 'locale' ) x @locales;
     }
 
     foreach my $perlio ( @layers ) {
@@ -477,7 +478,7 @@ sub make_test {
         } else {
             $ENV{PERL_UNICODE} = ""; # See -C in perlrun
             $ENV{LC_ALL} = $self->{locale};
-            $perlio_logmsg .= ":$self->{locale}";
+            $perlio_logmsg .= ":" . pop @locales;
         }
         $self->ttylog( "TSTENV = $perlio_logmsg\t" );
 

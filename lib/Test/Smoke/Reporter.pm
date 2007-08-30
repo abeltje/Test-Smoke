@@ -363,7 +363,7 @@ sub _post_process {
                 next if $tstenv eq 'minitest' && ! exists $status->{ $tstenv };
 
                 ( my $showenv = $tstenv ) =~ s/^locale://;
-                $self->{_locale} ||= $showenv if $tstenv =~ /^locale:/;
+                $tstenv =~ /^locale:/ and push @{ $self->{_locale} }, $showenv;
                 $showenv = 'default' 
                     if $self->{defaultenv} && $showenv eq 'stdio';
 
@@ -390,15 +390,20 @@ sub _post_process {
             }
             unless ( $self->{defaultenv} ) {
                 exists $status->{perlio} or $status->{perlio} = '-';
-                exists $status->{ "locale:$self->{locale}" } or 
-                    $status->{ "locale:$self->{locale}" } = '-'
-                        if $self->{locale};
+                my @locales = split ' ', $self->{locale};
+                for my $locale ( @locales ) {
+                    exists $status->{ "locale:$locale" } or 
+                        $status->{ "locale:$locale" } = '-'
+                }
             }
 
             $count{ $_ }++ for map {
                 m/[cmMtFXO]/ ? $_ : m/-/ ? 'O' : 'o' 
             } map $status->{ $_ } => keys %$status;
         }
+    }
+    { local $, = $" = "', '"; 
+    $self->{v} and print "Found locale: '@{ $self->{_locale}}'\n";
     }
     my @failures = map {
         { tests => $_,
@@ -704,11 +709,38 @@ Returns a string with the legend for build-environments
 
 sub bldenv_legend {
     my $self = shift;
-    my $locale = $self->{_locale};
     $self->{defaultenv} = ( @{ $self->{_tstenv} } == 1 )
         unless defined $self->{defaultenv};
     my $debugging = $self->{_rpt}{dbughow} || '-DDEBUGGING';
 
+    if ( @{ $self->{_locale} } ) {
+        my $lcnt = @{ $self->{_locale} };
+        my $half = int(( 4 +  $lcnt ) / 2 );
+        my $cnt = 2 * $half;
+        my @locale = @{ $self->{_locale} };
+
+        my $line = '';
+        for my $i ( 0 .. $cnt-1 ) {
+            $line .= '| ' x ( $cnt - 1 - $i );
+            $line .= '+';
+            $line .= '-' x (2 * $i);
+            $line .= '- ';
+
+            if ( ($i % $half) < ($lcnt / 2) ) {
+                my $locale = shift @locale;     # XXX: perhaps pop()
+                $line .= "LC_ALL = $locale"
+            } else {
+                $line .= ( $i % 2 == 0 )
+                    ? "PERLIO = perlio"
+                    : "PERLIO = stdio";
+            }
+            $i < $half and $line .= " $debugging";
+            $line .= "\n";
+        }
+        return $line;
+    }
+
+    my $locale = ''; # XXX
     return  $locale ? <<EOL : $self->{defaultenv} ? <<EOS : <<EOE;
 | | | | | +- LC_ALL = $locale $debugging
 | | | | +--- PERLIO = perlio $debugging
