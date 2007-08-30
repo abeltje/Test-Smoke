@@ -18,7 +18,7 @@ use Test::Smoke::SysInfo;
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.065';
+$VERSION = '0.066';
 
 use Getopt::Long;
 my %options = ( 
@@ -963,6 +963,11 @@ SYNCER: {
     /^copy$/ && do {
         $arg = 'cdir';
         $config{ $arg } = prompt( $arg );
+        while ( $config{ $arg } eq $config{ddir} ) {
+            print "Source and destination directory cannot be the same!\n";
+            $config{ $arg } = '';
+            $config{ $arg } = prompt( $arg );
+        }
 
         last SYNCER;
     };
