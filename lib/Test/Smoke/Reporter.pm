@@ -390,7 +390,7 @@ sub _post_process {
             }
             unless ( $self->{defaultenv} ) {
                 exists $status->{perlio} or $status->{perlio} = '-';
-                my @locales = split ' ', $self->{locale};
+                my @locales = split ' ', ($self->{locale} || '');
                 for my $locale ( @locales ) {
                     exists $status->{ "locale:$locale" } or 
                         $status->{ "locale:$locale" } = '-'
@@ -402,6 +402,7 @@ sub _post_process {
             } map $status->{ $_ } => keys %$status;
         }
     }
+    defined $self->{_locale} or $self->{_locale} = [ ];
     { local $, = $" = "', '"; 
     $self->{v} and print "Found locale: '@{ $self->{_locale}}'\n";
     }
@@ -713,7 +714,7 @@ sub bldenv_legend {
         unless defined $self->{defaultenv};
     my $debugging = $self->{_rpt}{dbughow} || '-DDEBUGGING';
 
-    if ( @{ $self->{_locale} } ) {
+    if ( $self->{_locale} && @{ $self->{_locale} } ) {
         my $lcnt = @{ $self->{_locale} };
         my $half = int(( 4 +  $lcnt ) / 2 );
         my $cnt = 2 * $half;
