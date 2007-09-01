@@ -3,10 +3,9 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.037';
+$VERSION = '0.038';
 
-#use base 'Exporter';
-use Exporter 'import';
+use base 'Exporter';
 @EXPORT_OK = qw( &sysinfo &tsuname );
 
 =head1 NAME
