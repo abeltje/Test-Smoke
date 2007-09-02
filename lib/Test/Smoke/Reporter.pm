@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.027';
+$VERSION = '0.028';
 
 use Cwd;
 use File::Spec::Functions;
@@ -363,7 +363,10 @@ sub _post_process {
                 next if $tstenv eq 'minitest' && ! exists $status->{ $tstenv };
 
                 ( my $showenv = $tstenv ) =~ s/^locale://;
-                $tstenv =~ /^locale:/ and push @{ $self->{_locale} }, $showenv;
+                if ( $tstenv =~ /^locale:/ ) {
+                    $self->{_locale_keys}{ $showenv }++
+                        or push @{ $self->{_locale} }, $showenv;
+                }
                 $showenv = 'default' 
                     if $self->{defaultenv} && $showenv eq 'stdio';
 
@@ -403,9 +406,7 @@ sub _post_process {
         }
     }
     defined $self->{_locale} or $self->{_locale} = [ ];
-    { local $, = $" = "', '"; 
-    $self->{v} and print "Found locale: '@{ $self->{_locale}}'\n";
-    }
+
     my @failures = map {
         { tests => $_,
           cfgs  => [ map {
@@ -715,10 +716,10 @@ sub bldenv_legend {
     my $debugging = $self->{_rpt}{dbughow} || '-DDEBUGGING';
 
     if ( $self->{_locale} && @{ $self->{_locale} } ) {
-        my $lcnt = @{ $self->{_locale} };
+        my @locale = ( @{ $self->{_locale} }, @{ $self->{_locale} } );
+        my $lcnt = @locale;
         my $half = int(( 4 +  $lcnt ) / 2 );
         my $cnt = 2 * $half;
-        my @locale = @{ $self->{_locale} };
 
         my $line = '';
         for my $i ( 0 .. $cnt-1 ) {

@@ -15,7 +15,7 @@ use File::Copy;
 my $verbose = exists $ENV{SMOKE_VERBOSE} ? $ENV{SMOKE_VERBOSE} : 0;
 my $showcfg = 0;
 
-use Test::More tests => 69;
+use Test::More tests => 73;
 
 use_ok 'Test::Smoke::Reporter';
 
@@ -589,6 +589,72 @@ __EOCFG__
          "Found patches section";
 
     rmtree $testdir, $verbose;
+}
+
+{
+    my $bcfg = "";
+    my $plhsrc = catdir( $findbin, qw( ftppub perl-current ) );
+    copy( catfile( $plhsrc, 'patchlevel.h' ),
+          catfile( $findbin, 'patchlevel.h' ) );
+    my $report = Test::Smoke::Reporter->new(
+        ddir       => $findbin,
+        outfile    => 'multilocale.out',
+        verbose    => $verbose,
+        defaultenv => 0,
+        cfg        => \$bcfg,
+    );
+    isa_ok $report, 'Test::Smoke::Reporter';
+
+    is $report->bldenv_legend, <<__EOL__, "legend ok";
+| | | | | | | +- LC_ALL = nl_NL.UTF-8 -DDEBUGGING
+| | | | | | +--- LC_ALL = be_BY.UTF-8 -DDEBUGGING
+| | | | | +----- PERLIO = perlio -DDEBUGGING
+| | | | +------- PERLIO = stdio -DDEBUGGING
+| | | +--------- LC_ALL = nl_NL.UTF-8
+| | +----------- LC_ALL = be_BY.UTF-8
+| +------------- PERLIO = perlio
++--------------- PERLIO = stdio
+__EOL__
+
+    1 while unlink catfile( $findbin, 'patchlevel.h' );
+}
+
+{
+    my $bcfg = <<__EOC__;
+
+-Duse64bit
+-Duselongdouble
+-Dusemorebits
+=
+
+-Duseithreads
+=
+/-DDEBUGGING/
+
+-DDEBUGGING
+__EOC__
+    my $plhsrc = catdir( $findbin, qw( ftppub perl-current ) );
+    copy( catfile( $plhsrc, 'patchlevel.h' ),
+          catfile( $findbin, 'patchlevel.h' ) );
+    my $report = Test::Smoke::Reporter->new(
+        ddir       => $findbin,
+        outfile    => 'pc09.out',
+        verbose    => $verbose,
+        defaultenv => 0,
+        cfg        => \$bcfg,
+    );
+    isa_ok $report, 'Test::Smoke::Reporter';
+
+    is $report->bldenv_legend, <<__EOL__, "legend ok";
+| | | | | +- LC_ALL = en_US.utf8 -DDEBUGGING
+| | | | +--- PERLIO = stdio -DDEBUGGING
+| | | +----- PERLIO = perlio -DDEBUGGING
+| | +------- LC_ALL = en_US.utf8
+| +--------- PERLIO = perlio
++----------- PERLIO = stdio
+__EOL__
+
+    1 while unlink catfile( $findbin, 'patchlevel.h' );
 }
 
 sub create_config_sh {
