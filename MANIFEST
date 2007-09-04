@@ -45,9 +45,11 @@ t/get_cpus.t
 t/get_patch.t
 t/lpatches.t
 t/mailer.t
+t/multilocale.out
 t/patcher.t
 t/patcher_forest.t
 t/parse_report.t
+t/pc09.out
 t/policy.t
 t/reporter.t
 t/regenstuff.t
