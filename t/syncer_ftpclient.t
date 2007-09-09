@@ -75,7 +75,7 @@ sub Net::FTP::ls {
         my $fname = $_;
         $^O eq 'VMS' and $fname =~ s/\.(?:DIR)?$//i;
         $fname;
-    } grep ! /^\.{1,2}$/ && ! /.svn\b/  => readdir DLDIR;
+    } grep ! /.svn\b/  => readdir DLDIR;
 }
 sub Net::FTP::dir {
     my $self = shift;

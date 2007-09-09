@@ -9,7 +9,7 @@ use Test::Smoke::Util qw( clean_filename );
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.007';
+$VERSION = '0.008';
 
 my %CONFIG = (
     df_fserver  => undef,
@@ -234,6 +234,7 @@ sub __do_mirror {
                                $a->{name} cmp $b->{name} } @list ) {
         
         if ( $entry->{type} eq 'd' ) {
+            $entry->{name} =~ m/^\.\.?$/ and next;
             my $new_locald = File::Spec->catdir( $localdir, $entry->{name} );
             unless ( -d $new_locald ) {
                 eval { mkpath( $new_locald, $verbose, $entry->{mode} ) } or
