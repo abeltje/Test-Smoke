@@ -5,11 +5,11 @@ use Net::FTP;
 use Cwd;
 use File::Path;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
-use Test::Smoke::Util qw( clean_filename );
+use Test::Smoke::Util qw( clean_filename time_in_hhmm );
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.009';
+$VERSION = '0.010';
 
 my %CONFIG = (
     df_fserver  => undef,
@@ -165,8 +165,8 @@ sub mirror {
     my $speed = $totsize / $tottime;
     my $ord = 0;
     while ( $speed > 1024 ) { $speed /= 1024; $ord++ }
-    $self->{v} and printf "Mirror took %u seconds \@ %.3f %s\n",
-                          $ttime, $speed, $sn[ $ord ];
+    $self->{v} and printf "Mirror took %s \@ %.3f %s\n",
+                          time_in_hhmm( $ttime ), $speed, $sn[ $ord ];
     chdir $cwd;
     return $ret;
 }
