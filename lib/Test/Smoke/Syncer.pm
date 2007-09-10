@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.023';
+$VERSION = '0.024';
 
 use Config;
 use Cwd;
@@ -65,8 +65,9 @@ my %CONFIG = (
     df_ftphost => 'public.activestate.com',
     df_ftpsdir => '/pub/apc/perl-current',
     df_ftpcdir => '/pub/apc/perl-current-diffs',
+    df_ftype   => undef,
 
-    ftp        => [qw( ftphost ftpusr ftppwd ftpsdir ftpcdir )],
+    ftp        => [qw( ftphost ftpusr ftppwd ftpsdir ftpcdir ftype )],
 
 # misc.
     valid_type => { rsync => 1, snapshot => 1,
@@ -1287,6 +1288,7 @@ Known args for this class:
     * ftppwd  (smokers@perl.org)
     * ftpsdir (/pub/apc/perl-????)
     * ftpcdir (/pub/apc/perl-????-diffs)
+    * ftype (undef|binary|ascii)
 
     * ddir
     * v
@@ -1319,6 +1321,7 @@ sub sync {
         passive => $self->{ftppassive},
         fuser   => $self->{ftpusr},
         fpwd    => $self->{ftppwd},
+        ftype   => $self->{ftype},
     } );
 
     $fc->connect;
