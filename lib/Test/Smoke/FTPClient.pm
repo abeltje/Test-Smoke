@@ -9,7 +9,7 @@ use Test::Smoke::Util qw( clean_filename );
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.008';
+$VERSION = '0.009';
 
 my %CONFIG = (
     df_fserver  => undef,
@@ -282,8 +282,8 @@ sub __do_mirror {
                 while ( $speed > 1024 ) { $speed /= 1024; $ord++ }
                 my $dig = $ord ? '3' : '0';
 
-                chmod $entry->{mode}, $dest;
                 utime $entry->{time}, $entry->{time}, $dest;
+                chmod $entry->{mode}, $dest;
                 $verbose and printf "$size (%.${dig}f $sn[$ord]/s)\n",
                                      $speed;
             } else { 
