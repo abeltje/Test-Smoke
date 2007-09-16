@@ -23,9 +23,13 @@ use Test::Smoke::Util 'parse_report_Config';
 
 SKIP: {
     my $mhowto = 'Mail::Sendmail';
-    eval "require $mhowto";
-    $@ and skip "Cannot load 'Mail::Sendmail' ($@)", 5;
-    write_report( $eg_config ) or skip "Cannot write report", 5;
+    local $@;
+    my $load_error = do {
+        eval "require $mhowto";
+        $@;
+    };
+    $load_error and skip "Cannot load 'Mail::Sendmail'", 7;
+    write_report( $eg_config ) or skip "Cannot write report", 7;
 
     my $mailer = Test::Smoke::Mailer->new( $mhowto => {
         ddir => 't',
@@ -59,9 +63,13 @@ SKIP: {
 
 SKIP: {
     my $mhowto = 'Mail::Sendmail';
-    eval "require $mhowto";
-    $@ and skip "Cannot load 'Mail::Sendmail' ($@)", 5;
-    write_report( $fail_cfg ) or skip "Cannot write report", 5;
+    local $@;
+    my $load_error = do {
+        eval "require $mhowto";
+        $@;
+    };
+    $load_error and skip "Cannot load 'Mail::Sendmail'", 9;
+    write_report( $fail_cfg ) or skip "Cannot write report", 9;
 
     my $mailer = Test::Smoke::Mailer->new( $mhowto => {
         ddir => 't',
