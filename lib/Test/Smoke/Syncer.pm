@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.024';
+$VERSION = '0.025';
 
 use Config;
 use Cwd;
@@ -506,7 +506,12 @@ sub sync {
     $command .= " -v" if $self->{v};
     my $redir = $self->{v} ? "" : " >" . File::Spec->devnull;
 
-    $command .= " $self->{source} $self->{ddir}$redir";
+    my $cwd = cwd();
+    chdir $self->{ddir} or do {
+        require Carp;
+        Carp::croak( "[rsync] Cannot chdir($self->{ddir}): $!" );
+    };
+    $command .= " $self->{source} .$redir";
 
     $self->{v} > 1 and print "[$command]\n";
     if ( system $command ) {
@@ -514,6 +519,8 @@ sub sync {
         require Carp;
         Carp::carp( "Problem during rsync ($err)" );
     }
+
+    chdir $cwd;
 
     my $plevel = $self->check_dot_patch;
     $self->post_sync;
