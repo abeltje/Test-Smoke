@@ -7,11 +7,12 @@ use File::Spec::Functions;
 use Cwd;
 
 use Test::More;
-plan $^O eq 'VMS'
-    ? ( tests    => 16 )
-    : ( skip_all => "This ($^O) is not VMS!" );
 
 BEGIN {
+    plan $^O eq 'VMS'
+        ? ( tests    => 16 )
+        : ( skip_all => "This ($^O) is not VMS!" );
+
     use_ok( 'Test::Smoke::Util', 'set_vms_rooted_logical' );
 }
 
