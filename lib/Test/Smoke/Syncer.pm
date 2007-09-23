@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.025';
+$VERSION = '0.026';
 
 use Config;
 use Cwd;
@@ -467,6 +467,8 @@ user-calls on this.
 package Test::Smoke::Syncer::Rsync;
 
 @Test::Smoke::Syncer::Rsync::ISA = qw( Test::Smoke::Syncer );
+
+use Cwd;
 
 =item Test::Smoke::Syncer::Rsync->new( %args )
 
