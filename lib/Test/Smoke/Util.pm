@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK $NOCASE );
-$VERSION = '0.54';
+$VERSION = '0.55';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -781,7 +781,7 @@ Thanks to Jarkko Hietaniemi for donating this!
 
 sub get_ncpu {
     # Only *nixy osses need this, so use ':'
-    local $ENV{PATH} = "$ENV{PATH}:/usr/sbin";
+    local $ENV{PATH} = "$ENV{PATH}:/usr/sbin:/sbin";
 
     my $cpus = "?";
     OS_CHECK: {
