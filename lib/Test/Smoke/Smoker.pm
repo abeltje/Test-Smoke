@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.032';
+$VERSION = '0.033';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -34,6 +34,8 @@ my %CONFIG = (
 
     df_makeopt        => "",
     df_testmake       => undef,
+
+    df_skip_tests     => undef,
 );
 
 # Define some constants that we can use for
@@ -446,6 +448,9 @@ sub make_test_prep {
 
 sub make_test {
     my $self = shift;
+
+    $self->set_skip_tests;
+
     my( $config ) = @_;
     my $config_args = "$config";
 
@@ -507,6 +512,8 @@ sub make_test {
         }
         !$had_LC_ALL && exists $ENV{LC_ALL} and delete $ENV{LC_ALL};
     }
+
+    $self->unset_skip_tests;
 
     return 1;
 }
@@ -768,6 +775,50 @@ sub _transform_testnames {
     }
     return %inconsistent;
 }
+
+=item set_skip_tests( [$unset] )
+
+Read from a MANIFEST like file, set in C<< $self->{skip_tests} >>, and
+rename the files in it with the extension F<.tskip>. If C<$unset> is
+set, they will be renamed back.
+
+=item unset_skip_tests
+
+Calls C<< $self->set_skip_tests( 1 ) >>.
+
+=cut
+
+sub set_skip_tests {
+    my( $self, $unset ) = @_;
+
+    $self->{skip_tests} or return;
+    local *SKIPTESTS;
+
+    if ( open SKIPTESTS, "< $self->{skip_tests}" ) {
+        my $action = $unset ? 'Unskip' : 'Skip';
+        $self->{v} and
+            $self->tty( "$action tests from '$self->{skip_tests}'\n" );
+        my $raw;
+        while ( $raw = <SKIPTESTS> ) {
+            $raw =~ m/^\s*#/ and next;
+            $raw =~ s/(\S+).*/$1/s;
+            $raw =~ m/\.t$/ or next;
+            my $tsrc = File::Spec->catfile( $self->{ddir}, $raw );
+            my $tdst = $tsrc . "skip";
+            $unset and ( $tsrc, $tdst ) = ( $tdst, $tsrc );
+            -f $tsrc or next;
+            my $did_mv = rename $tsrc, $tdst;
+            $self->{v} and
+                $self->tty( sprintf "\t$raw: %sok\n", $did_mv ?  'not ' : '' );
+        }
+        close SKIPTESTS;
+    } else {
+        require Carp;
+        Carp::carp( "Cannot open($self->{skip_tests}): $!" );
+    }
+}
+
+sub unset_skip_tests { $_[0]->set_skip_tests( 1 ) }
 
 =item $self->_run( $command[, $sub[, @args]] )
 
