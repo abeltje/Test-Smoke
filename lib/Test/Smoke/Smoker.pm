@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.033';
+$VERSION = '0.034';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -807,9 +807,14 @@ sub set_skip_tests {
             my $tdst = $tsrc . "skip";
             $unset and ( $tsrc, $tdst ) = ( $tdst, $tsrc );
             -f $tsrc or next;
+            my $perms = (stat $tsrc)[2] & 07777;
+            chmod 0755, $tsrc;
             my $did_mv = rename $tsrc, $tdst;
+            my $error = $did_mv ? "" : " ($!)";
             $self->{v} and
-                $self->tty( sprintf "\t$raw: %sok\n", $did_mv ?  'not ' : '' );
+                $self->tty( sprintf "\t$raw: %sok\n", $did_mv ?  'not ' : '',
+                                    $error );
+            -f $tdst and chmod $perms, $tdst;
         }
         close SKIPTESTS;
     } else {
