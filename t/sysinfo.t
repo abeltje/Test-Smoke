@@ -54,54 +54,82 @@ ok defined &tsuname, "tsuname() imported";
     my $tsuname = join " ", map $si->{ "_$_" } => qw(
         host os cpu ncpu cpu_type
     );
-    is tsuname(), $tsuname,       "tsuname()";
-    is tsuname(), tsuname( 'a' ), "tsuname(a)";
-    is tsuname( 'rubbish' ), $tsuname, "tsuname( rubbish )";
+    is $si->tsuname(), $tsuname,       "tsuname()";
+    is $si->tsuname(), $si->tsuname( 'a' ), "tsuname(a)";
+    is $si->tsuname( 'rubbish' ), $tsuname, "tsuname( rubbish )";
 
 
-    is tsuname( 'n' ), $si->{_host},     "tsuname(n)";
-    is tsuname( 's' ), $si->{_os},       "tsuname(s)";
-    is tsuname( 'm' ), $si->{_cpu},      "tsuname(m)";
-    is tsuname( 'c' ), $si->{_ncpu},     "tsuname(c)";
-    is tsuname( 'p' ), $si->{_cpu_type}, "tsuname(p)";
+    is $si->tsuname( 'n' ), $si->{_host},     "tsuname(n)";
+    is $si->tsuname( 's' ), $si->{_os},       "tsuname(s)";
+    is $si->tsuname( 'm' ), $si->{_cpu},      "tsuname(m)";
+    is $si->tsuname( 'c' ), $si->{_ncpu},     "tsuname(c)";
+    is $si->tsuname( 'p' ), $si->{_cpu_type}, "tsuname(p)";
 
-    is tsuname(qw( n s )), "$si->{_host} $si->{_os}", "tsuname(  n, s )";
-    is tsuname(qw( n s )), tsuname( 'n s' ),          "tsuname( 'n s' )";
-    is tsuname(qw( s n )), tsuname( 'n s' ),          "tsuname( 's n' )";
+    is $si->tsuname(qw( n s )), "$si->{_host} $si->{_os}", "tsuname(  n, s )";
+    is $si->tsuname(qw( n s )), $si->tsuname( 'n s' ),
+       "tsuname( 'n s' )";
+    is $si->tsuname(qw( s n )), $si->tsuname( 'n s' ),
+       "tsuname( 's n' )";
 
-    is tsuname(qw( n m )), "$si->{_host} $si->{_cpu}", "tsuname(  n, m )";
-    is tsuname(qw( n m )), tsuname( 'n m' ),           "tsuname( 'n m' )";
-    is tsuname(qw( m n )), tsuname( 'n m' ),           "tsuname( 'm n' )";
+    is $si->tsuname(qw( n m )), "$si->{_host} $si->{_cpu}", "tsuname(  n, m )";
+    is $si->tsuname(qw( n m )), $si->tsuname( 'n m' ),
+       "tsuname( 'n m' )";
+    is $si->tsuname(qw( m n )), $si->tsuname( 'n m' ),
+       "tsuname( 'm n' )";
 
-    is tsuname(qw( n c )), "$si->{_host} $si->{_ncpu}", "tsuname(  n, c )";
-    is tsuname(qw( n c )), tsuname( 'n c' ),            "tsuname( 'n c' )";
-    is tsuname(qw( c n )), tsuname( 'n c' ),            "tsuname( 'c n' )";
+    is $si->tsuname(qw( n c )), "$si->{_host} $si->{_ncpu}",
+       "tsuname(  n, c )";
+    is $si->tsuname(qw( n c )), $si->tsuname( 'n c' ),
+       "tsuname( 'n c' )";
+    is $si->tsuname(qw( c n )), $si->tsuname( 'n c' ),
+       "tsuname( 'c n' )";
 
-    is tsuname(qw( n p )), "$si->{_host} $si->{_cpu_type}", "tsuname(  n, p )";
-    is tsuname(qw( n p )), tsuname( 'n p' ),                "tsuname( 'n p' )";
-    is tsuname(qw( p n )), tsuname( 'n p' ),                "tsuname( 'p n' )";
+    is $si->tsuname(qw( n p )), "$si->{_host} $si->{_cpu_type}",
+       "tsuname(  n, p )";
+    is $si->tsuname(qw( n p )), $si->tsuname( 'n p' ),
+       "tsuname( 'n p' )";
+    is $si->tsuname(qw( p n )), $si->tsuname( 'n p' ),
+       "tsuname( 'p n' )";
 
-    is tsuname(qw( s m )), "$si->{_os} $si->{_cpu}", "tsuname(  s, m )";
-    is tsuname(qw( s m )), tsuname( 's m' ),         "tsuname( 's m' )";
-    is tsuname(qw( m s )), tsuname( 's m' ),         "tsuname( 'm s' )";
+    is $si->tsuname(qw( s m )), "$si->{_os} $si->{_cpu}",
+       "tsuname(  s, m )";
+    is $si->tsuname(qw( s m )), $si->tsuname( 's m' ),
+       "tsuname( 's m' )";
+    is $si->tsuname(qw( m s )), $si->tsuname( 's m' ),
+       "tsuname( 'm s' )";
 
-    is tsuname(qw( s c )), "$si->{_os} $si->{_ncpu}", "tsuname(  s, c )";
-    is tsuname(qw( s c )), tsuname( 's c' ),          "tsuname( 's c' )";
-    is tsuname(qw( c s )), tsuname( 's c' ),          "tsuname( 'c s' )";
+    is $si->tsuname(qw( s c )), "$si->{_os} $si->{_ncpu}",
+       "tsuname(  s, c )";
+    is $si->tsuname(qw( s c )), $si->tsuname( 's c' ),
+       "tsuname( 's c' )";
+    is $si->tsuname(qw( c s )), $si->tsuname( 's c' ),
+       "tsuname( 'c s' )";
 
-    is tsuname(qw( s p )), "$si->{_os} $si->{_cpu_type}", "tsuname(  s, p )";
-    is tsuname(qw( s p )), tsuname( 's p' ),              "tsuname( 's p' )";
-    is tsuname(qw( p s )), tsuname( 's p' ),               "tsuname( 'p s' )";
+    is $si->tsuname(qw( s p )), "$si->{_os} $si->{_cpu_type}",
+       "tsuname(  s, p )";
+    is $si->tsuname(qw( s p )), $si->tsuname( 's p' ),
+       "tsuname( 's p' )";
+    is $si->tsuname(qw( p s )), $si->tsuname( 's p' ),
+       "tsuname( 'p s' )";
 
-    is tsuname(qw( m c )), "$si->{_cpu} $si->{_ncpu}", "tsuname(  m, c )";
-    is tsuname(qw( m c )), tsuname( 'm c' ),           "tsuname( 'm c' )";
-    is tsuname(qw( c m )), tsuname( 'm c' ),           "tsuname( 'c m' )";
+    is $si->tsuname(qw( m c )), "$si->{_cpu} $si->{_ncpu}",
+       "tsuname(  m, c )";
+    is $si->tsuname(qw( m c )), $si->tsuname( 'm c' ),
+       "tsuname( 'm c' )";
+    is $si->tsuname(qw( c m )), $si->tsuname( 'm c' ),
+       "tsuname( 'c m' )";
 
-    is tsuname(qw( m p )), "$si->{_cpu} $si->{_cpu_type}", "tsuname(  m, p )";
-    is tsuname(qw( m p )), tsuname( 'm p' ),               "tsuname( 'm p' )";
-    is tsuname(qw( p m )), tsuname( 'm p' ),               "tsuname( 'p m' )";
+    is $si->tsuname(qw( m p )), "$si->{_cpu} $si->{_cpu_type}",
+        "tsuname(  m, p )";
+    is $si->tsuname(qw( m p )), $si->tsuname( 'm p' ),
+       "tsuname( 'm p' )";
+    is $si->tsuname(qw( p m )), $si->tsuname( 'm p' ),
+       "tsuname( 'p m' )";
 
-    is tsuname(qw( c p )), "$si->{_ncpu} $si->{_cpu_type}", "tsuname(  c, p )";
-    is tsuname(qw( c p )), tsuname( 'c p' ),                "tsuname( 'c p' )";
-    is tsuname(qw( p c )), tsuname( 'c p' ),                "tsuname( 'c p' )";
+    is $si->tsuname(qw( c p )), "$si->{_ncpu} $si->{_cpu_type}",
+       "tsuname(  c, p )";
+    is $si->tsuname(qw( c p )), $si->tsuname( 'c p' ),
+       "tsuname( 'c p' )";
+    is $si->tsuname(qw( p c )), $si->tsuname( 'c p' ),
+       "tsuname( 'c p' )";
 }
