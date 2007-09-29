@@ -6,7 +6,10 @@ use Data::Dumper;
 use File::Spec::Functions qw( :DEFAULT devnull abs2rel rel2abs );
 use Cwd;
 
-use Test::More tests => 19;
+use lib 't';
+use TestLib;
+
+use Test::More tests => 30;
 use_ok( 'Test::Smoke::Smoker' );
 
 my $debug   = exists $ENV{SMOKE_DEBUG} && $ENV{SMOKE_DEBUG};
@@ -212,6 +215,74 @@ EOHO
 EOOUT
 
     is keys %inconsistent, 1, "One inconssistent test result";
+}
+
+{ # test the set_skip_tests(), unset_skip_tests()
+    my $src = catdir qw/ t ftppub perl-current /;
+    my $dst = catdir qw/ t perl-current /;
+    require_ok "Test::Smoke::Syncer";
+    my $syncer = Test::Smoke::Syncer->new( copy => {
+        v    => $verbose,
+        cdir => $src,
+        ddir => $dst,
+    } );
+    isa_ok $syncer, 'Test::Smoke::Syncer::Copy';
+    my $patch = $syncer->sync;
+    is $patch, '20000', "Patchlevel: $patch";
+
+    my $skip_tests = catfile 't', 'MANIFEST.NOTEST';
+    my %config = (
+        v          => $verbose,
+        ddir       => $dst,
+        defaultenv => 1,
+        testmake   => 'make',
+        skip_tests => $skip_tests,
+    );
+
+    my $smoker = Test::Smoke::Smoker->new( \*LOG, %config );
+    isa_ok( $smoker, 'Test::Smoke::Smoker' );
+
+SKIP: {
+    local *NOTESTS;
+    open NOTESTS, "> $skip_tests" or skip "Cannot create($skip_tests): $!", 7;
+    my @notest = qw{ t/op/skip.t lib/t/skip.t ext/t/skip.t };
+    print NOTESTS "$_\n" for @notest;
+    close NOTESTS;
+
+    ok -f $skip_tests, "skip_tests file exists";
+
+    $smoker->set_skip_tests;
+    ok -f catfile( $dst, 'MANIFEST.ORG'), "MANIFEST was copied";
+
+    ok ! -f catfile( $dst, 't', 'op', 'skip.t' ) &&
+       -f catfile( $dst, 't', 'op', 'skip.tskip' ),
+       "t/op/skip.t was renamed";
+
+    my @libext = grep m{^(?:lib|ext)/} => @notest;
+    my $manifest = catfile $dst, 'MANIFEST';
+    my $manifiles = get_file( $manifest );
+
+    my $ok = 1;
+    $ok &&= ! grep $manifiles =~ /^\Q$_\E/m => @libext;
+    ok $ok, "files removed from MANIFEST";
+
+    $smoker->unset_skip_tests();
+
+    ok ! -f catfile( $dst, 'MANIFEST.ORG'), "MANIFEST.ORG was removed";
+
+    ok -f catfile( $dst, 't', 'op', 'skip.t' ) &&
+       ! -f catfile( $dst, 't', 'op', 'skip.tskip' ),
+       "t/op/skip.t was renamed back";
+
+    my $files = get_file( $manifest );
+
+    $ok = 1;
+    $ok &&= grep $files =~ /^\Q$_\E/m => @libext;
+    ok $ok, "files back in MANIFEST";
+
+    1 while unlink $skip_tests;    
+}
+    rmtree $dst, $verbose;
 }
 
 sub mkargs {

@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.034';
+$VERSION = '0.035';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -798,11 +798,16 @@ sub set_skip_tests {
         my $action = $unset ? 'Unskip' : 'Skip';
         $self->{v} and
             $self->tty( "$action tests from '$self->{skip_tests}'\n" );
+        my @libext;
         my $raw;
         while ( $raw = <SKIPTESTS> ) {
             $raw =~ m/^\s*#/ and next;
             $raw =~ s/(\S+).*/$1/s;
             $raw =~ m/\.t$/ or next;
+            if ( $raw =~ m{^(?:lib|ext)/} ) {
+                push @libext, $raw;
+                next;
+            }
             my $tsrc = File::Spec->catfile( $self->{ddir}, $raw );
             my $tdst = $tsrc . "skip";
             $unset and ( $tsrc, $tdst ) = ( $tdst, $tsrc );
@@ -817,6 +822,7 @@ sub set_skip_tests {
             -f $tdst and chmod $perms, $tdst;
         }
         close SKIPTESTS;
+        @libext and $self->change_manifest( \@libext, $unset );
     } else {
         require Carp;
         Carp::carp( "Cannot open($self->{skip_tests}): $!" );
@@ -824,6 +830,49 @@ sub set_skip_tests {
 }
 
 sub unset_skip_tests { $_[0]->set_skip_tests( 1 ) }
+
+=item $self->change_manifest( \@tests, $unset )
+
+=cut
+
+sub change_manifest {
+    my( $self, $tests, $unset ) = @_;
+
+    my $mani_org = catfile $self->{ddir}, 'MANIFEST';
+    my $mani_new = catfile $self->{ddir}, 'MANIFEST.ORG';
+    if ( $unset ) {
+        if ( -f $mani_new ) {
+            my $perms = (stat $mani_new)[2] & 07777;
+            chmod 0755, $mani_new;
+            unlink $mani_org;
+            rename $mani_new, $mani_org;
+            chmod $perms, $mani_org;
+	}
+    } else {
+        my $perms = (stat $mani_org)[2] & 07777;
+        chmod 0755, $mani_org;
+        rename $mani_org, $mani_new or do {
+            chmod $perms, $mani_org;
+            require Carp;
+	    Carp::carp("No skip of lib or ext tests [rename($mani_new): $!]");
+            return;
+        };
+        local( *MANIO, *MANIN );
+        if ( open MANIO, "< $mani_new" ) {
+            if ( open MANIN, "> $mani_org" ) {
+                my $mline;
+                while ( $mline = <MANIO> ) {
+                    chomp $mline;
+                    ( my $fn = $mline ) =~ s/^(\S+).*/$1/;
+                    grep /\Q$fn\E/ => @$tests or print MANIN "$fn\n";
+                }
+                close MANIN;
+            }
+            close MANIO;
+            chmod $perms, $mani_new;
+        }
+    }
+}
 
 =item $self->_run( $command[, $sub[, @args]] )
 
