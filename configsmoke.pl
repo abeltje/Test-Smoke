@@ -18,7 +18,7 @@ use Test::Smoke::SysInfo;
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.066';
+$VERSION = '0.067';
 
 use Getopt::Long;
 my %options = ( 
@@ -426,6 +426,15 @@ Examples:$untarmsg",
         dft => ''
     },
 
+    # skip_tests
+    skip_tests => {
+        msg => "What file is used for specifying tests to skip " .
+               "(leave empty for none)?
+\tPlease read the documentation.",
+        alt => [ ],
+        dft => ''
+    },
+
     # make fine-tuning
     makeopt => {
         msg => <<EOT,
@@ -498,7 +507,6 @@ EOMSG
 
     cc => {
        msg => <<EOMSG,
-* THIS FEATURE HAS CHANGED IN 1.19! *
 To which address(es) should the report be CCed *on fail*?
 \t(comma separated list, *please* do not include perl5-porters!)
 EOMSG
@@ -603,6 +611,7 @@ in case you do not understand a question.
 * Values in angled-brackets (<>) are alternatives (none other allowed)
 * Values in square-brackets ([]) are default values (<Enter> confirms)
 * Use single space to clear a value
+* Answer '&-d' to continue with all default answers
 
 EOMSG
 
@@ -1037,6 +1046,21 @@ EOMSG
     }
 }
 
+=item skip_tests
+
+This is a MANIFEST-like file with the paths to tests that should be
+skipped for this smoke.
+
+The process involves on the fly modification of F<MANIFEST> for tests
+in F<lib/> and F<ext/> and renaming of core-tests in F<t/>.
+
+=cut
+
+{
+    $arg = 'skip_tests';
+    $config{ $arg } = prompt_file( $arg, 1 );
+}
+
 =item force_c_locale
 
 C<force_c_locale> is passed as a switch to F<mktest.pl> to indicate that
@@ -1111,14 +1135,13 @@ $opt{ $arg }{dft} = ! $options{usedft};
 $config{ $arg } = prompt_yn( $arg );
 MAIL: {
     last MAIL unless $config{mail};
+    print "The order of the mail questions has been changed!\n";
+
     $arg = 'mail_type';
     $config{ $arg } = prompt( $arg );
 
     $arg = 'to';
     while ( !$config{ $arg } ) { $config{ $arg } = prompt( $arg ) }
-
-    $arg = 'bcc';
-    $config{ $arg } = prompt( $arg );
 
     MAILER: {
         local $_ = $config{mail_type};
@@ -1149,6 +1172,9 @@ MAIL: {
     $config{ $arg } = prompt_yn( $arg );
 
     $arg = 'cc';
+    $config{ $arg } = prompt( $arg );
+
+    $arg = 'bcc';
     $config{ $arg } = prompt( $arg );
 
     if ( $config{mail_type} eq 'mailx' && 
@@ -1791,6 +1817,10 @@ sub prompt {
         if ( $input eq " " ) {
             $input = "";
             $clear = 1;
+        } elsif ( $input eq '&-d' ) {
+            $options{usedft} = 1;
+            print "(OK, We'll run with --des from now on.)\n";
+            redo INPUT; 
         } else {
             $input =~ s/^\s+//;
             $input =~ s/\s+$//;
