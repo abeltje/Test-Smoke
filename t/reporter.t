@@ -15,7 +15,7 @@ use File::Copy;
 my $verbose = exists $ENV{SMOKE_VERBOSE} ? $ENV{SMOKE_VERBOSE} : 0;
 my $showcfg = 0;
 
-use Test::More tests => 73;
+use Test::More tests => 77;
 
 use_ok 'Test::Smoke::Reporter';
 
@@ -549,6 +549,7 @@ re_comp.c: In function `S_study_chunk':
 re_comp.c:1618: warning: comparison is always false due to limited range of data type
 EOCCMSG
 
+    # `stupid emacs
     ok my $ccmsg = $reporter->ccmessages, "Got compiler messages";
     for my $line ( @ccmsg ) {
         like $ccmsg, "/\Q$line\E/ms", "$line";
@@ -588,7 +589,50 @@ __EOCFG__
                  \\ \\ \\ \\ \\[PATCH\\]\\ Just\\ testing/x",
          "Found patches section";
 
+    unlike $rpt, "/^Tests skipped on user request:\n/m",
+         "Report does not contain user_skipped_tests()";
+
     rmtree $testdir, $verbose;
+}
+
+{ # Test the user_skipped_tests() feature
+    my $testdir = catdir $findbin, 'perl-current';
+    mkpath $testdir;
+    copy( catfile( $findbin, 'gccmsg.out'), catfile( $testdir, 'mktest.out' ) );
+    my $plhsrc = catdir( $findbin, qw( ftppub perl-current ) );
+    copy( catfile( $plhsrc, 'patchlevel.h' ),
+          catfile( $testdir, 'patchlevel.h' ) );
+
+    my $skip_tests = catfile $findbin, 'tests.skip';
+    put_file( (my $no_tests = <<__EOSKIP__), $skip_tests );
+lib/Benchmark.t 
+__EOSKIP__
+
+    ok( my $reporter = Test::Smoke::Reporter->new(
+        ddir       => $testdir,
+        is56x      => 0,
+        defaultenv => 0,
+        lfile      => catfile( $findbin, 'gccmsg.log' ),
+        skip_tests => $skip_tests,
+        v          => $verbose,
+        showcfg    => $showcfg,
+        cfg        => \( my $bcfg = <<'__EOCFG__' )), "init for get_local_patches() ");
+==
+-Duseithreads
+==
+__EOCFG__
+
+    $no_tests = join "\n", map "    $_" => split /\n/, $no_tests;
+    my $st_list = $reporter->user_skipped_tests;
+    is $st_list, "\nTests skipped on user request:\n$no_tests",
+       "user_skipped_tests()";
+
+    my $rpt = $reporter->report;
+    like $rpt, "/^Tests skipped on user request:\n$no_tests/m",
+         "Report contains user_skipped_tests()";
+
+    rmtree $testdir, $verbose;
+    1 while unlink $skip_tests;
 }
 
 {

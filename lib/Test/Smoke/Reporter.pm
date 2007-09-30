@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.028';
+$VERSION = '0.029';
 
 use Cwd;
 use File::Spec::Functions;
@@ -25,6 +25,7 @@ my %CONFIG = (
     df_locale     => undef,
     df_defaultenv => undef,
     df_is56x      => undef,
+    df_skip_tests => undef,
 
     df_v          => 0,
 );
@@ -495,6 +496,8 @@ sub report {
 
     $report .= $self->registered_patches;
 
+    $report .= $self->user_skipped_tests;
+
     $report .= "\nFailures: (common-args) $self->{_rpt}{common_args}\n"
             .  $self->failures if $self->has_test_failures;
     $report .= "\n" . $self->mani_fail           if $self->has_mani_failures;
@@ -659,6 +662,23 @@ sub summary {
     }
 
     return "Summary: $rpt_summary\n";
+}
+
+=item $reporter->user_skipped_tests( )
+
+=cut
+
+sub user_skipped_tests {
+    my( $self ) = @_;
+    $self->{skip_tests} && -f $self->{skip_tests} or return "";
+
+    local *NOTESTS;
+    open NOTESTS, "< $self->{skip_tests}" or return "";
+
+    my $skipped = join "\n", map { chomp; "    $_" } <NOTESTS>;
+    close NOTESTS;
+
+    return "\nTests skipped on user request:\n$skipped";
 }
 
 =item $repoarter->has_test_failures( )
