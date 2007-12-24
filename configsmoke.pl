@@ -18,7 +18,7 @@ use Test::Smoke::SysInfo;
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.067';
+$VERSION = '0.068';
 
 use Getopt::Long;
 my %options = ( 
@@ -121,7 +121,7 @@ my %vdirs = map {
     my $vdir = $_;
     is_vms and $vdir =~ tr/.//d;
     ( $_ => $vdir )
-} qw( 5.5.x 5.8.x ); # unsupported: 5.6.2
+} qw( 5.5.x 5.8.x 5.10.x ); # unsupported: 5.6.2
 
 my %versions = (
 #    '5.5.x' => { source => 'public.activestate.com::perl-5.005xx',
@@ -170,25 +170,45 @@ my %versions = (
                            : is_vms ? 'vmsperl.cfg' : 'perl58x.cfg' ),
                  is56x  => 0 },
 
-    '5.9.x' => { source => 'public.activestate.com::perl-current',
-                 server => 'public.activestate.com',
-                 sdir   => '/pub/apc/perl-current-snap',
-                 sfile  => 'perl-current-latest.tar.gz',
-                 pdir   => '/pub/apc/perl-current-diffs',
-                 ddir   => File::Spec->catdir( cwd(), File::Spec->updir,
-                                               'perl-current' ),
-                 ftphost => 'public.activestate.com',
-                 ftpusr  => 'anonymous',
-                 ftppwd  => 'smokers@perl.org',
-                 ftpsdir => '/pub/apc/perl-current',
-                 ftpcdir => '/pub/apc/perl-current-diffs',
+    '5.10.x' => { source =>  'public.activestate.com::perl-5.10.x',
+                  server => 'public.activestate.com',
+                  sdir   => '/pub/apc/perl-5.10.x-snap',
+                  sfile  => 'perl-5.10.x-latest.tar.gz',
+                  pdir   => '/pub/apc/perl-5.10.x-diffs',
+                  ddir   => File::Spec->catdir( cwd(), File::Spec->updir,
+                                                "perl-$vdirs{'5.10.x'}" ),
+                  ftphost => 'public.activestate.com',
+                  ftpusr  => 'anonymous',
+                  ftppwd  => 'smokers@perl.org',
+                  ftpsdir => '/pub/apc/perl-5.10.x',
+                  ftpcdir => '/pub/apc/perl-5.10.x-diffs',
+ 
+                  text   => 'Perl 5.10 MAINT',
+                  cfg    => ( is_win32 ? 'w32current.cfg'
+                            : is_vms ? 'vmsperl.cfg' : 'perl510x.cfg' ),
+                  is56x  => 0 },
 
-                 text   => 'Perl 5.10 to-be',
-                 cfg    => ( is_win32 ? 'w32current.cfg'
-                           : is_vms ? 'vmsperl.cfg' : 'perlcurrent.cfg' ),
-                 is56x  => 0 },
+    '5.11.x' => { source => 'public.activestate.com::perl-current',
+                  server => 'public.activestate.com',
+                  sdir   => '/pub/apc/perl-current-snap',
+                  sfile  => 'perl-current-latest.tar.gz',
+                  pdir   => '/pub/apc/perl-current-diffs',
+                  ddir   => File::Spec->catdir( cwd(), File::Spec->updir,
+                                                'perl-current' ),
+                  ftphost => 'public.activestate.com',
+                  ftpusr  => 'anonymous',
+                  ftppwd  => 'smokers@perl.org',
+                  ftpsdir => '/pub/apc/perl-current',
+                  ftpcdir => '/pub/apc/perl-current-diffs',
+ 
+                  text   => 'Perl 5.12 to-be',
+                  cfg    => ( is_win32 ? 'w32current.cfg'
+                            : is_vms ? 'vmsperl.cfg' : 'perlcurrent.cfg' ),
+                  is56x  => 0 },
 );
-my @pversions = sort keys %versions;
+my @pversions = sort {
+    _perl_numeric_version( $a ) <=> _perl_numeric_version( $b )
+} keys %versions;
 my $smoke_version = join "\n", map {
     "\t$_ - $versions{ $_ }->{text}"
 } @pversions;
@@ -455,6 +475,19 @@ EOT
         msg => 'Use harness only (skip TEST)?',
         alt => [qw( y N )],
         dft => ( $^O =~ /VMS/i ? 'y' : 'n' ),
+    },
+    hasharness3 => {
+        msg => "",
+        alt => [ ],
+        dft => 0,
+    },
+    harness3opts => {
+        msg => <<EOT,
+Extra options for Test::Harness 3 (HARNESS_OPTIONS)
+\tUse 'j5' for parallel testing.
+EOT
+        alt => [ ],
+        dft => '',
     },
 
     # mail stuff
@@ -1285,6 +1318,26 @@ test_harness>.
 $arg = 'harnessonly';
 $config{ $arg } = prompt_yn( $arg );
 
+=item hasharness3
+
+C<hasharness3> is automagically set for perl version >= 5.11
+
+=cut
+
+$config{hasharness3} = _perl_numeric_version( $config{perl_version} ) > 5.01001;
+
+=item harness3opts
+
+C<harness3opts> are passed to C<HARNESS_OPTIONS> for the C<make
+test_harness> step.
+
+=cut
+
+if ( ($config{harnessonly} || is_win32) && $config{hasharness3} ) {
+    $arg = 'harness3opts';
+    $config{ $arg } = prompt( $arg );
+}
+
 =item umask
 
 C<umask> will be set in the shell-script that starts the smoke.
@@ -1579,7 +1632,7 @@ sub sort_configkeys {
         qw( adir lfile ),
 
         # make fine-tuning
-        qw( makeopt testmake harnessonly ),
+        qw( makeopt testmake harnessonly hasharness3 harness3opts ),
 
         # ENV stuff
         qw( perl5lib delay_report ),
@@ -2178,8 +2231,7 @@ sub check_buildcfg {
     close BCFG;
     my $oldcfg = join "", grep !/^#/ => @bcfg;
 
-    my ($rev, @vparts ) = $config{perl_version} =~ /^(\d)(?:\.(\d+))+/;
-    my $pversion = sprintf "%d.%03d%02d", $rev, @vparts, 0;
+    my $pversion = _perl_numeric_version( $config{perl_version} );
 
     my $uname_s = Test::Smoke::SysInfo::tsuname( 's' );
     my( $os, $osver ) = split /\s+-\s+/, $uname_s;
@@ -2271,6 +2323,18 @@ sub finish_cfgcheck {
         return;
     };
     print "Wrote '$fname'$msg\n";
+}
+
+=item _perl_numeric_version( $dotted )
+
+Normalize the dotted version to a numeric version.
+
+=cut
+
+sub _perl_numeric_version {
+    my $dotted = shift;
+    my ($rev, @vparts ) = $dotted =~ /^(\d)(?:\.(\d+))+/;
+    return sprintf "%d.%03d%02d", $rev, @vparts, 0;
 }
 
 =back

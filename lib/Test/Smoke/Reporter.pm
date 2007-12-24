@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.029';
+$VERSION = '0.030';
 
 use Cwd;
 use File::Spec::Functions;
@@ -301,6 +301,11 @@ sub _parse {
                 if ref $rpt{$cfgarg}->{$debug}{$tstenv};
             next;
         }
+        if ( /^\s+Bad plan/ ) {
+            push @{ $rpt{$cfgarg}->{$debug}{$tstenv} }, $_
+                if ref $rpt{$cfgarg}->{$debug}{$tstenv};
+            next;
+        }
         next;
     }
 
@@ -323,7 +328,7 @@ sub _post_process {
 
     unless ( defined $self->{is56x} ) {
         my %cfg = get_smoked_Config( $self->{ddir}, 'version' );
-        my $p_version = sprintf "%d.%03d%03d", split /\./, $cfg{version};
+        my $p_version = sprintf "%d.%03d%03d", split m/\./, $cfg{version};
         $self->{is56x} = $p_version < 5.007;
     }
     $self->{defaultenv} ||= $self->{is56x};
@@ -752,9 +757,9 @@ sub bldenv_legend {
                 my $locale = shift @locale;     # XXX: perhaps pop()
                 $line .= "LC_ALL = $locale"
             } else {
-                $line .= ( $i % 2 == 0 )
+                $line .= ( (($i - @{$self->{_locale}}) % $half) % 2 == 0 )
                     ? "PERLIO = perlio"
-                    : "PERLIO = stdio";
+                    : "PERLIO = stdio ";
             }
             $i < $half and $line .= " $debugging";
             $line .= "\n";

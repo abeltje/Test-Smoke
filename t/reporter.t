@@ -653,11 +653,11 @@ __EOCFG__
 | | | | | | | +- LC_ALL = nl_NL.UTF-8 -DDEBUGGING
 | | | | | | +--- LC_ALL = be_BY.UTF-8 -DDEBUGGING
 | | | | | +----- PERLIO = perlio -DDEBUGGING
-| | | | +------- PERLIO = stdio -DDEBUGGING
+| | | | +------- PERLIO = stdio  -DDEBUGGING
 | | | +--------- LC_ALL = nl_NL.UTF-8
 | | +----------- LC_ALL = be_BY.UTF-8
 | +------------- PERLIO = perlio
-+--------------- PERLIO = stdio
++--------------- PERLIO = stdio 
 __EOL__
 
     1 while unlink catfile( $findbin, 'patchlevel.h' );
@@ -691,11 +691,11 @@ __EOC__
 
     is $report->bldenv_legend, <<__EOL__, "legend ok";
 | | | | | +- LC_ALL = en_US.utf8 -DDEBUGGING
-| | | | +--- PERLIO = stdio -DDEBUGGING
-| | | +----- PERLIO = perlio -DDEBUGGING
+| | | | +--- PERLIO = perlio -DDEBUGGING
+| | | +----- PERLIO = stdio  -DDEBUGGING
 | | +------- LC_ALL = en_US.utf8
 | +--------- PERLIO = perlio
-+----------- PERLIO = stdio
++----------- PERLIO = stdio 
 __EOL__
 
     1 while unlink catfile( $findbin, 'patchlevel.h' );

@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.036';
+$VERSION = '0.037';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -26,6 +26,8 @@ my %CONFIG = (
     df_is_vms         => $^O eq 'VMS',
     df_vmsmake        => 'MMK',
     df_harnessonly    => scalar ($^O =~ /VMS/),
+    df_hasharness3    => 0,
+    df_harness3opts   => '',
 
     df_is_win32       => $^O eq 'MSWin32',
     df_w32cc          => 'MSVC60',
@@ -494,6 +496,9 @@ sub make_test {
 
 	if  ( $self->{harnessonly} ) {
 
+            $self->{harness3opts} and
+                local $ENV{HARNESS_OPTIONS} = $self->{harness3opts};
+
             $self->make_test_harness( $config );
 
         } else {
@@ -502,9 +507,10 @@ sub make_test {
 
             # MSWin32 builds from its own directory
             if ( $self->{is_win32} ) {
-                $config->has_arg( '-Uuseshrplib' )
-                    and $test_target = 'static-test';
-                $self->_run_harness_target( $test_target );
+#                $config->has_arg( '-Uuseshrplib' )
+#                    and $test_target = 'static-test';
+#                $self->_run_harness_target( $test_target );
+                $self->make_test_harness( $config );
             } else {
                 $self->_run_TEST_target( $test_target, 1 );
             }
@@ -598,7 +604,11 @@ sub make_test_harness {
         $target = $config->has_arg( '-Uuseshrplib' ) ? "static-test" : "test";
     }
 
-    $self->_run_harness_target( $target, $debugging );
+    if ( $self->{hasharness3} ) {
+        $self->_run_harness3_target( $target, $debugging );
+    } else {
+        $self->_run_harness_target( $target, $debugging );
+    }
 }
 
 =item $smoker->_run_harness_target( $target, $extra )
@@ -621,15 +631,16 @@ sub _run_harness_target {
 
     my $tst = $self->_make_fork( $target, $extra );
 
-    while ( <$tst> ) {
-        $self->{v} > 1 and $self->tty( $_ );
+    my $line;
+    while ( $line = <$tst> ) {
+        $self->{v} > 1 and $self->tty( $line );
 
-        /All tests successful/ and push( @failed, $_ ), last;
+        $line =~ /All tests successful/ and push( @failed, $line ), last;
 
-        /Failed Test\s+Stat/ and $seenheader = 1, next;
+        $line =~ /Failed Test\s+Stat/ and $seenheader = 1, next;
         $seenheader or next;
 
-        my( $name, $fail ) = m/$harness_re1/;
+        my( $name, $fail ) = $line =~ m/$harness_re1/;
         if ( $name ) {
             my $dots = '.' x (40 - length $name );
             push @failed, "    $name${dots}FAILED $fail\n";
@@ -637,6 +648,62 @@ sub _run_harness_target {
             ( $fail ) = m/$harness_re2/;
             next unless $fail;
             push @failed, " " x 51 . "$fail\n";
+        }
+    }
+
+    close $tst or do {
+        my $error = $! || ( $? >> 8);
+        Carp::carp( "\nerror while running harness target '$target': $error" );
+    };
+
+    $self->ttylog( "\n", join( "", @failed ), "\n" );
+    $self->tty( "Archived results...\n" );
+}
+
+=item $smoker->_run_harness3_target( $target, $extra )
+
+The command to run C<make test_harness> differs based on platform, so
+the arguments have to be passed into general routine. C<$target>
+specifies the makefile-target, C<$makeopt> specifies the extra options
+for the make program.
+
+=cut
+
+sub _run_harness3_target {
+    my( $self, $target, $extra ) = @_;
+
+    my $seenheader = 0;
+    my @failed = ( );
+
+    my $tst = $self->_make_fork( $target, $extra );
+
+    my $line;
+    while ( $line = <$tst> ) {
+        $self->{v} > 1 and $self->tty( $line );
+
+        $line =~ /All tests successful/ and push( @failed, $line ), last;
+
+        $line =~ /Test Summary Report/ and $seenheader = 1, next;
+        $seenheader or next;
+    
+        my( $tname ) = $line =~ /^\s*(.+\.t)\s+\(Wstat/;
+        if ( $tname ) {
+            my $dots = '.' x (60 - length $tname);
+            push @failed, "$tname${dots}FAILED\n";
+            next;
+        }
+    
+        my( $failed ) =
+            $line =~ /^(?:(?:  Failed tests?:  )|\s+)(\d[0-9, -]*)/;
+        if ( $failed ) {
+            push @failed, "    $failed\n";
+            next;
+        }
+    
+        my( $parse_error ) = $line =~ /^  Parse errors: (.+)/;
+        if ( $parse_error ) {
+            push @failed, "    $parse_error\n";
+            next;
         }
     }
 
