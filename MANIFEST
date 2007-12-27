@@ -12,11 +12,13 @@ runsmoke.pl
 perl55x.cfg
 perl562.cfg
 perl58x.cfg
+perl510x.cfg
 perlcurrent.cfg
 vmsperl.cfg
 w32current.cfg
 smoke55x_dfconfig
 smoke58x_dfconfig
+smoke510x_dfconfig
 smokeperl.pl
 smokestatus.pl
 synctree.pl
