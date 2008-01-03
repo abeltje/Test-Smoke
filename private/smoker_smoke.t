@@ -25,6 +25,7 @@ use_ok( 'Test::Smoke::Smoker' );
     local *DEVNULL;
     open DEVNULL, ">". File::Spec->devnull;
     my $stdout = select( DEVNULL ); $| = 1;
+    $verbose > 1 and select $stdout;
     local *KEEPERR;
     open KEEPERR, ">&STDERR" and  open STDERR, ">&DEVNULL"
         unless $verbose;
@@ -57,6 +58,7 @@ use_ok( 'Test::Smoke::Smoker' );
         $smoker->log( "\nConfiguration: $bcfg\n", '-' x 78, "\n" );
 
         local $ENV{PERL_FAIL_MINI} = $bcfg->has_arg( '-DDEBUGGING' ) ? 1 : 0;
+        local $ENV{EXEPERL} = $^X;
         ok( $smoker->smoke( $bcfg ), "smoke($bcfg)" );
     }
 
@@ -86,6 +88,7 @@ use_ok( 'Test::Smoke::Smoker' );
     local *DEVNULL;
     open DEVNULL, ">". File::Spec->devnull;
     my $stdout = select( DEVNULL ); $| = 1;
+    $verbose > 1 and select $stdout;
     local *KEEPERR;
     open KEEPERR, ">&STDERR" and  open STDERR, ">&DEVNULL"
         unless $verbose;
@@ -100,10 +103,14 @@ use_ok( 'Test::Smoke::Smoker' );
     open LOG, "> $l_name" or die "Cannot open($l_name): $!";
     select( (select( LOG ), $|++)[0] );
 
+    # we need te cheat for Test::Harness 3
+    require Test::Harness;
+    my $hasharness3 = Test::Harness->VERSION >= 3;
     my $smoker = Test::Smoke::Smoker->new( \*LOG => {
         ddir        => $ddir,
         cfg         => $config,
         harnessonly => 1,
+        hasharness3 => $hasharness3,
         v           => $verbose,
         %w32args,
     } );
@@ -120,6 +127,7 @@ use_ok( 'Test::Smoke::Smoker' );
         $smoker->log( "\nConfiguration: $bcfg\n", '-' x 78, "\n" );
 
         local $ENV{PERL_FAIL_MINI} = $bcfg->has_arg( '-DDEBUGGING' ) ? 1 : 0;
+        local $ENV{EXEPERL} = $^X;
         ok( $smoker->smoke( $bcfg ), "smoke($bcfg)" );
     }
 
@@ -132,7 +140,8 @@ use_ok( 'Test::Smoke::Smoker' );
     like( $report, q@/^
         \[stdio\/perlio\]\s*
         -DDEBUGGING.*\s+
-        .*smoke\/minitest\.t\.+FAILED
+        .*smoke\/minitest\.t\.+FAILED\s+
+        \d(?:[, -]\d+)*
     /xm@, "Failures report" );
           
 

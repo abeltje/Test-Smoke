@@ -25,6 +25,7 @@ use_ok( 'Test::Smoke::Smoker' );
     local *DEVNULL;
     open DEVNULL, ">". File::Spec->devnull;
     my $stdout = select( DEVNULL ); $| = 1;
+    $verbose > 1 and select $stdout;
     local *KEEPERR;
     open KEEPERR, ">&STDERR" and open STDERR,  ">&DEVNULL"
         unless $verbose;
@@ -58,6 +59,7 @@ use_ok( 'Test::Smoke::Smoker' );
         $smoker->log( "\nConfiguration: $bcfg\n", '-' x 78, "\n" );
 
         local $ENV{SMOKE_FAIL_TEST} = $bcfg->has_arg( '-DDEBUGGING' ) ? 1 : 0;
+        local $ENV{EXEPERL} = $^X;
         ok( $smoker->smoke( $bcfg ), "smoke($bcfg)" );
     }
 
@@ -73,9 +75,9 @@ use_ok( 'Test::Smoke::Smoker' );
         Failures: \\s+ \\(common-args\\) \\s+ none \\s+
         \\[stdio\\/perlio\\]\\s+
         -DDEBUGGING$cfgopt\\s+
-        .*smoke\\/die\\.t\\.+FAILED\\ \\?+\\s+
-        .*smoke\\/many\\.t\\.+FAILED\\ \\d+(?:[\\s-]+\\d+)*\\s+
-        \\d+(?:[\\s-]+\\d+)*\\s+
+        .*smoke\\/die\\.t\\.+FAILED(?:\\ \\?+)?\\s+
+        .*smoke\\/many\\.t\\.+FAILED\\s+\\d+(?:[,\\s-]+\\d+)*\\s+
+        \\d+(?:[,\\s-]+\\d+)*\\s+
     /xm@, "Failures report" );
           
 
@@ -106,11 +108,15 @@ use_ok( 'Test::Smoke::Smoker' );
     open LOG, "> $l_name" or die "Cannot open($l_name): $!";
     select( (select( LOG ), $|++)[0] );
 
+    # we need to cheat here;
+    require Test::Harness;
+    my $hasharness3 = Test::Harness->VERSION >= 3;
     my $smoker = Test::Smoke::Smoker->new( \*LOG => {
         ddir        => $ddir,
         cfg         => $config,
         v           => $verbose,
         harnessonly => 1,
+        hasharness3 => $hasharness3,
         %w32args,
     } );
 
@@ -126,6 +132,7 @@ use_ok( 'Test::Smoke::Smoker' );
         $smoker->log( "\nConfiguration: $bcfg\n", '-' x 78, "\n" );
 
         local $ENV{SMOKE_FAIL_TEST} = $bcfg->has_arg( '-DDEBUGGING' ) ? 1 : 0;
+        local $ENV{EXEPERL} = $^X;
         ok( $smoker->smoke( $bcfg ), "smoke($bcfg)" );
     }
 
@@ -141,9 +148,9 @@ use_ok( 'Test::Smoke::Smoker' );
         Failures: \\s+ \\(common-args\\) \\s+ none \\s+
         \\[stdio\\/perlio\\]\\s+
         -DDEBUGGING$cfgopt\\s+
-        .*smoke\\/die\\.t\\.+FAILED\\ \\?+\\s+
-        .*smoke\\/many\\.t\\.+FAILED\\ \\d+(?:[\\s-]+\\d+)*\\s+
-        \\d+(?:[\\s-]+\\d+)*\\s+
+        .*smoke\\/die\\.t\\.+FAILED(?:\\ \\?+)?\\s+
+        .*smoke\\/many\\.t\\.+FAILED\\s+\\d+(?:[,\\s-]+\\d+)*\\s+
+        \\d+(?:[,\\s-]+\\d+)*\\s+
     /xm@, "Failures report" );
           
 

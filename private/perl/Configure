@@ -1,2 +1,3 @@
 #! /bin/sh
-PERL5LIB= /usr/bin/perl Makefile.PL $*
+EXEPERL=${EXEPERL:-/usr/bin/perl}
+PERL5LIB= $EXEPERL Makefile.PL $*

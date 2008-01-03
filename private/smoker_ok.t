@@ -25,6 +25,7 @@ use_ok( 'Test::Smoke::Smoker' );
     local *DEVNULL;
     open DEVNULL, ">". File::Spec->devnull;
     my $stdout = select( DEVNULL ); $| = 1;
+    $verbose > 1 and select $stdout;
     local *KEEPERR;
     open KEEPERR, ">&STDERR" and open STDERR, ">&DEVNULL"
         unless $verbose;
@@ -55,6 +56,7 @@ use_ok( 'Test::Smoke::Smoker' );
     for my $bcfg ( $config->configurations ) {
         $smoker->mark_out; $smoker->mark_in;
         $smoker->make_distclean;
+        local $ENV{EXEPERL} = $^X;
         ok( $smoker->Configure( $bcfg ), "Configure $bcfg" );
 
         $smoker->log( "\nConfiguration: $bcfg\n", '-' x 78, "\n" );

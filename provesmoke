@@ -31,7 +31,11 @@ unless ( defined $opt{perl} ) {
             $opt{perl} = [qw( 554 562 588 594 )];
             last MACHINE;
         };
-     }
+         /droopy/ && do {
+            $opt{perl} = [qw( 554 562 585 588 5100 )];
+            last MACHINE;
+        };
+    }
 }
 defined $opt{dir}  or $opt{dir} = [ 't', 'private' ];
 $opt{debug} and $opt{v} = 1;

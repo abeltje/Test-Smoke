@@ -19,7 +19,7 @@ chdir 't' if -d 't';
 #@INC = '../lib';
 
 # Don't interfere with the taintedness of %ENV, this could perturbate tests
-$ENV{PERL_CORE} = 1 unless ${^TAINT};
+$ENV{PERL_CORE} = 1;
 
 $0 =~ s/\.dp$//; # for the test.deparse make target
 1;
