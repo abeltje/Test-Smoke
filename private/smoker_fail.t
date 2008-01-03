@@ -76,6 +76,7 @@ use_ok( 'Test::Smoke::Smoker' );
         \\[stdio\\/perlio\\]\\s+
         -DDEBUGGING$cfgopt\\s+
         .*smoke\\/die\\.t\\.+FAILED(?:\\ \\?+)?\\s+
+        (?:.+\\s)?
         .*smoke\\/many\\.t\\.+FAILED\\s+\\d+(?:[,\\s-]+\\d+)*\\s+
         \\d+(?:[,\\s-]+\\d+)*\\s+
     /xm@, "Failures report" );
@@ -149,6 +150,7 @@ use_ok( 'Test::Smoke::Smoker' );
         \\[stdio\\/perlio\\]\\s+
         -DDEBUGGING$cfgopt\\s+
         .*smoke\\/die\\.t\\.+FAILED(?:\\ \\?+)?\\s+
+        (?:.+\\s)?
         .*smoke\\/many\\.t\\.+FAILED\\s+\\d+(?:[,\\s-]+\\d+)*\\s+
         \\d+(?:[,\\s-]+\\d+)*\\s+
     /xm@, "Failures report" );
