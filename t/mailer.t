@@ -8,7 +8,7 @@ my $findbin;
 use File::Basename;
 BEGIN { $findbin = dirname $0; }
 use lib $findbin;
-
+use lib File::Spec->catdir( $findbin, File::Spec->updir, 'inc' );
 use TestLib;
 
 use Test::More tests => 32;

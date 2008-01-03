@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.030';
+$VERSION = '0.032';
 
 use Cwd;
 use File::Spec::Functions;
@@ -15,19 +15,22 @@ use Test::Smoke::Util qw( grepccmsg get_smoked_Config
                           time_in_hhmm get_local_patches );
 
 my %CONFIG = (
-    df_ddir       => curdir(),
-    df_outfile    => 'mktest.out',
-    df_rptfile    => 'mktest.rpt',
-    df_cfg        => undef,
-    df_lfile      => undef,
-    df_showcfg    => 0,
+    df_ddir         => curdir(),
+    df_outfile      => 'mktest.out',
+    df_rptfile      => 'mktest.rpt',
+    df_cfg          => undef,
+    df_lfile        => undef,
+    df_showcfg      => 0,
 
-    df_locale     => undef,
-    df_defaultenv => undef,
-    df_is56x      => undef,
-    df_skip_tests => undef,
+    df_locale       => undef,
+    df_defaultenv   => undef,
+    df_is56x        => undef,
+    df_skip_tests   => undef,
 
-    df_v          => 0,
+    df_harnessonly  => undef,
+    df_harness3opts => undef,
+
+    df_v            => 0,
 );
 
 =head1 NAME
@@ -301,7 +304,7 @@ sub _parse {
                 if ref $rpt{$cfgarg}->{$debug}{$tstenv};
             next;
         }
-        if ( /^\s+Bad plan/ ) {
+        if ( /^\s+(?:Bad plan)|(?:No plan found)/ ) {
             push @{ $rpt{$cfgarg}->{$debug}{$tstenv} }, $_
                 if ref $rpt{$cfgarg}->{$debug}{$tstenv};
             next;
@@ -501,6 +504,8 @@ sub report {
 
     $report .= $self->registered_patches;
 
+    $report .= $self->harness3_options;
+
     $report .= $self->user_skipped_tests;
 
     $report .= "\nFailures: (common-args) $self->{_rpt}{common_args}\n"
@@ -553,7 +558,43 @@ sub registered_patches {
     @lpatches or return "";
 
     my $list = join "\n", map "    $_" => @lpatches;
-    return "Locally applied patches:\n$list\n";
+    return "\nLocally applied patches:\n$list\n";
+}
+
+=item $reporter->harness3_options
+
+Show indication of the options used for C<HARNESS_OPTIONS>.
+
+=cut
+
+sub harness3_options {
+    my $self = shift;
+
+    $self->{harnessonly} or return "";
+
+    my $msg = "\nTestsuite was run only with 'harness'";
+    $self->{harness3opts} or return $msg . "\n";
+
+    return  $msg . " and HARNESS_OPTIONS=$self->{harness3opts}\n";
+}
+
+=item $reporter->user_skipped_tests( )
+
+Show indication for the fact that the user requested to skip some tests.
+
+=cut
+
+sub user_skipped_tests {
+    my( $self ) = @_;
+    $self->{skip_tests} && -f $self->{skip_tests} or return "";
+
+    local *NOTESTS;
+    open NOTESTS, "< $self->{skip_tests}" or return "";
+
+    my $skipped = join "\n", map { chomp; "    $_" } <NOTESTS>;
+    close NOTESTS;
+
+    return "\nTests skipped on user request:\n$skipped";
 }
 
 =item $reporter->ccmessages( )
@@ -667,23 +708,6 @@ sub summary {
     }
 
     return "Summary: $rpt_summary\n";
-}
-
-=item $reporter->user_skipped_tests( )
-
-=cut
-
-sub user_skipped_tests {
-    my( $self ) = @_;
-    $self->{skip_tests} && -f $self->{skip_tests} or return "";
-
-    local *NOTESTS;
-    open NOTESTS, "< $self->{skip_tests}" or return "";
-
-    my $skipped = join "\n", map { chomp; "    $_" } <NOTESTS>;
-    close NOTESTS;
-
-    return "\nTests skipped on user request:\n$skipped";
 }
 
 =item $repoarter->has_test_failures( )

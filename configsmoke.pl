@@ -12,13 +12,15 @@ use File::Basename;
 my $findbin;
 BEGIN { $findbin = dirname $0 }
 use lib File::Spec->catdir( $findbin, 'lib' );
+use lib File::Spec->catdir( $findbin, 'lib', 'inc' );
 use lib $findbin;
+use lib File::Spec->catdir( $findbin, 'inc' );
 use Test::Smoke::Util qw( do_pod2usage whereis );
 use Test::Smoke::SysInfo;
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.068';
+$VERSION = '0.070';
 
 use Getopt::Long;
 my %options = ( 
@@ -51,17 +53,33 @@ foreach my $opt (qw( config jcl log )) {
     $options{$opt} = "$options{ $key }$suffix{ $opt }";
 }
 
-eval { require $options{config} };
-$options{oldcfg} = 1, print "Using '$options{config}' for defaults.\n" 
-    unless $@;
-if ( $@ || $options{default} ) {
-    my $df_key = $options{default} ? 'default' : 'prefix';
-    my $df_config = "$options{ $df_key }_dfconfig";
+{
     local $@;
-    eval { require $df_config };
-    $options{oldcfg} = 0, print "Using '$df_config' for more defaults.\n"
-        unless $@;
-} 
+    eval { require $options{config} };
+    my $load_error = $@; 
+    unless ( $load_error ) {
+        $options{oldcfg} = 1;
+        print "Using '$options{config}' for defaults.\n";
+        $conf->{perl_version} eq '5.9.x' and $conf->{perl_version} = '5.11.x';
+    }
+
+    if ( $load_error || $options{default} ) {
+        my $df_key = $options{default} ? 'default' : 'prefix';
+        my $df_config = "$options{ $df_key }_dfconfig";
+        my $df_config_inc = $df_config;
+        for my $dir ( @INC ) {
+            my $ts_dir = File::Spec->catdir( $dir, 'Test', 'Smoke' );
+            $df_config_inc = File::Spec->catfile( $ts_dir, $df_config );
+    #        print "Checking for defaults [$df_config_inc]\n";
+            -f $df_config_inc and last;
+        }
+        eval { require $df_config_inc };
+        unless ( $@ ) {
+            $options{oldcfg} = 0;
+            print "Using '$df_config_inc' for more defaults.\n";
+        }
+    }
+}
 
 # -des will only work fully when $options{oldcfg}
 unless ( $options{oldcfg} ) {
@@ -102,7 +120,7 @@ Current options:
 sub is_win32() { $^O eq 'MSWin32' }
 sub is_vms()   { $^O eq 'VMS'     }
 
-my %config = ( perl_version => $conf->{perl_version} || '5.9.x' );
+my %config = ( perl_version => $conf->{perl_version} || '5.11.x' );
 
 my %mailers = get_avail_mailers();
 my @mailers = sort keys %mailers;
@@ -803,15 +821,23 @@ There are several build-cfg files provided with the distribution:
 
 =over 4
 
-=item F<perlcurrent.cfg> for 5.9.x+ on unixy systems
+=item F<perlcurrent.cfg> for 5.11.x+ on unixy systems
+
+=item F<perl510x.cfg> for 5.10.x (MAINT) on unixy systems
 
 =item F<perl58x.cfg> for 5.8.x (MAINT) on unixy systems
+
+=begin nomoresupport
 
 =item F<perl562.cfg> for 5.6.2 (MAINT) on unixy systems
 
 =item F<perl55x.cfg> for 5.005_04 (MAINT) on unixy systems
 
+=end nomoresupport
+
 =item F<w32current.cfg> for 5.8.x+ on MSWin32
+
+=item F<vmsperl.cfg> for 5.8.x+ on OpenVMS
 
 =back
 
@@ -1416,6 +1442,8 @@ If you want this then set the directory where you want the stored
 =cut
 
 $arg = 'adir';
+( my $pver_nodot = $config{perl_version} ) =~ tr/.//d;
+$opt{ $arg }->{dft} = File::Spec->catdir( 'logs', $pver_nodot );
 $config{ $arg } = prompt_dir( $arg );
 $config{lfile} = File::Spec->rel2abs( $options{log}, cwd );
 
@@ -2198,15 +2226,20 @@ sub default_buildcfg {
     -f $file_name and return 1;
 
     $pversion =~ tr/.//d;
-    $pversion eq '59x' and $pversion = 'current';
+    $pversion eq '511x' and $pversion = 'current';
     my $basename = is_win32
         ? "w32current.cfg"
         : is_vms ? "vmsperl.cfg" : "perl${pversion}.cfg";
 
-    my $dftbcfg = File::Spec->catfile( $findbin, $basename );
-    -f $dftbcfg 
+    my $dftbcfg;
+    for my $dir ( @INC ) {
+        my $ts_dir = File::Spec->catdir( $dir, 'Test', 'Smoke' );
+        $dftbcfg = File::Spec->catfile( $ts_dir, $basename );
+        -f $dftbcfg and last;
+    }
+    -f $dftbcfg
         or die "You seem to have an incomplete Test::Smoke installation" . 
-               "($dftbcfg is missing)!\n";
+               "($basename is missing)!\n";
     copy $dftbcfg, $file_name
         and print "\nCreated buildconfig '$file_name'";
 }

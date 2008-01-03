@@ -1,58 +1,41 @@
 =head1 NAME
 
-ReleaseNotes - These are the Release Notes for 1.20
+ReleaseNotes - These are the Release Notes for 1.30
 
 =head1 SYNOPSIS
 
-These are the major changes since version 1.19
+These are the major changes since version 1.20
 
 =head1 DESCRIPTION
 
-Thanks to Bernd Ulmann for giving me access to his VAX and the help of
-the vmsperl community, I have added support for OpenVMS.
-
-Major changes since 1.19
+You will need to rerun F<configsmoke.pl> in order to use the new
+Test::Harness 3 parallel testing feature.
 
 =over 4
 
+=item 0
+
+Remove all the cruft from F<Makefile.PL>, so it's more standard.
+
 =item 1
 
-C<Test::Smoke::SysInfo> is a work in progress. Some more tweaking for
-Solaris was done with the help of Alan Burlison and Davis Woolger.
+I moved L<Mail::Sendmail> so it will be installed but no longer looks
+like a part of the distribution.
 
 =item 2
 
-I order to support systems without C<rsync(1)> access, I have added
-C<Test::Smoke::FTPClient> that syncs source-trees with Net::FTP from
-the ActiveState ftp repository. It is slow, but gets the job done.
+I moved all the default configuration files to the Test/Smoke library
+directory (easier in standard install).
 
 =item 3
 
-A lot of filename/directoryname issues with VMS were resolved.
+I added support for L<Test::Harness> 3. This is for extending test
+failures with harness and to take advantage of the new parallel
+testing option in this version of the harness.
 
 =item 4
 
-A new way to get testresults directly from "make test_harness" was
-introduced to help VMS (and perhaps Win32).
-
-=item 5
-
-Jarkko Hietaniemi supplied a way to add C compiler messages to the
-smoke report.
-
-=item 6
-
-Patches applied through the pfile mechanism now support a third
-argument that represents a patch description. This (optional)
-description is also added to F<patchlevel.h>.
-
-Added a new "Locally applied patches:" section to the smoke report.
-
-=item 7
-
-The longtime TODO item of patching with forest setup has been
-resolved. For this type of setup, first the intermediate tree is
-patched and then the build tree is resynced from that.
+I changed my mind about version numbering. I'll just use X.YY from now on.
 
 =back
 
@@ -62,7 +45,7 @@ $Id$
 
 =head1 COPYRIGHT
 
-(c) 2002-2004, Abe Timmerman <abeltje@cpan.org> All rights reserved.
+(c) MMII-MMVIII, Abe Timmerman <abeltje@cpan.org> All rights reserved.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

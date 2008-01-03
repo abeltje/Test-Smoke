@@ -70,22 +70,22 @@ WriteMakefile(
                        SUFFIX   => ".gz",
 		     },
     PREREQ_PM     => { 'File::Spec' => 0.82, 'Test::More' => 0},
-    PMLIBDIRS     => [ './' ],
+    PMLIBDIRS     => [qw/ lib inc /],
     EXE_FILES     => \@scripts,
     %install
 );
 
-sub MY::libscan {
-    my( $self, $path ) = @_;
-    my @nopaths = qw( .svn t private investigate );
-    my $patt = join '|', map {
-        /^\w/ and $_ = "\\b$_";
-        /\w$/ and $_ = "$_\\b";
-        $_;
-    } @nopaths;
-
-    return $path =~ m:$patt: ? "" : $path;
-}
+#sub MY::libscan {
+#    my( $self, $path ) = @_;
+#    my @nopaths = qw( .svn t private investigate );
+#    my $patt = join '|', map {
+#        /^\w/ and $_ = "\\b$_";
+#        /\w$/ and $_ = "$_\\b";
+#        $_;
+#    } @nopaths;
+#
+#    return $path =~ m:$patt: ? "" : $path;
+#}
 
 sub dir_prompt {
 

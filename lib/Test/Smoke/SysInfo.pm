@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.038';
+$VERSION = '0.039';
 
 use base 'Exporter';
 @EXPORT_OK = qw( &sysinfo &tsuname );
@@ -419,10 +419,14 @@ sub Darwin {
 
     my $model = $system_profiler{'Machine Name'} ||
                 $system_profiler{'Machine Model'};
+
+    my $ncpu = $system_profiler{'Number Of CPUs'};
+    $system_profiler{'Total Number Of Cores'} and
+        $ncpu .= " ($system_profiler{'Total Number Of Cores'} cores";
     return {
         _cpu_type => ($system_profiler{'CPU Type'} || __get_cpu_type()),
         _cpu      => ("$model ($system_profiler{'CPU Speed'})" || __get_cpu),
-        _ncpu     => $system_profiler{'Number Of CPUs'},
+        _ncpu     => $ncpu,
         _host     => __get_hostname(),
         _os       => __get_os() . " (Mac OS X)",
     };
@@ -494,6 +498,12 @@ sub Linux {
             ( $_ => __from_proc_cpuinfo( $_, \@cpu_info ) );
         } @parts;
         $cpu = sprintf "%s (%s %.0fMHz)", map $info{ $_ } => @parts;
+
+        my $ncores = 0;
+        for my $cores ( grep /cpu cores\s*:\d+/ => @cpu_info ) {
+            $ncores += $cores =~ /(\d+)/ ? $1 : 0;
+        }
+        $ncores and $ncpu .= " ($ncores cores)";
     } else {
         $cpu = __get_cpu();
     }

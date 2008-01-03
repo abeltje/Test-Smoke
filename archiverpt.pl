@@ -4,7 +4,7 @@ $| = 1;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.004';
+$VERSION = '0.005';
 
 use Cwd;
 use File::Spec::Functions;
@@ -118,15 +118,30 @@ $opt{adir} && -d $opt{adir} or do {
 my $patch_level = get_patch( $opt{ddir} );
 $patch_level =~ tr/ //sd;
 
-my $archived_rpt = catfile( $opt{adir}, "rpt${patch_level}.rpt" );
+SKIP_RPT: {
+    my $archived_rpt = catfile( $opt{adir}, "rpt${patch_level}.rpt" );
+    # Do not archive if it is already done
+    last SKIP_RPT
+        if -f $archived_rpt && !$opt{force};
 
-# Do not archive if it is already done
--f $archived_rpt && !$opt{force} and exit;
+    my $mktest_rpt = catfile( $opt{ddir}, 'mktest.rpt' );
+    if ( -f $mktest_rpt ) {
+        copy( $mktest_rpt, $archived_rpt ) or
+            die "Cannot copy to '$archived_rpt': $!";
+    }
+}
 
-my $mktest_rpt = catfile( $opt{ddir}, 'mktest.rpt' );
-if ( -f $mktest_rpt ) {
-    copy( $mktest_rpt, $archived_rpt ) or
-        die "Cannot copy to '$archived_rpt': $!";
+SKIP_OUT: {
+    my $archived_out = catfile( $opt{adir}, "out${patch_level}.out" );
+    # Do not archive if it is already done
+    last SKIP_OUT
+        if -f $archived_out && !$opt{force};
+
+    my $mktest_out = catfile( $opt{ddir}, 'mktest.out' );
+    if ( -f $mktest_out ) {
+        copy( $mktest_out, $archived_out ) or
+            die "Cannot copy to '$archived_out': $!";
+    }
 }
 
 SKIP_LOG: {

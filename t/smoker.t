@@ -9,7 +9,7 @@ use Cwd;
 use lib 't';
 use TestLib;
 
-use Test::More tests => 30;
+use Test::More tests => 33;
 use_ok( 'Test::Smoke::Smoker' );
 
 my $debug   = exists $ENV{SMOKE_DEBUG} && $ENV{SMOKE_DEBUG};
@@ -91,8 +91,8 @@ EOHO
     } @harness_test;
 
     my $all_ok;
-    my $harness_out = $smoker->_parse_harness( \%inconsistent, $all_ok,
-                                               @harness_test );
+    my $harness_out = $smoker->_parse_harness_output( \%inconsistent, $all_ok,
+                                                      @harness_test );
 
     is $harness_out, <<EOOUT, "Catch Test::Harness pre 2.60 output";
     ../lib/Math/Trig.t......................FAILED 24-29
@@ -119,8 +119,8 @@ EOHO
     } @harness_test;
 
     my $all_ok;
-    my $harness_out = $smoker->_parse_harness( \%inconsistent, $all_ok,
-                                               @harness_test );
+    my $harness_out = $smoker->_parse_harness_output( \%inconsistent, $all_ok,
+                                                      @harness_test );
 
     is $harness_out, <<EOOUT, "Catch Test::Harness pre 2.60 output";
     smoke/die.t.............................FAILED ??
@@ -147,8 +147,8 @@ EOHO
     } @harness_test;
 
     my $all_ok;
-    my $harness_out = $smoker->_parse_harness( \%inconsistent, $all_ok,
-                                               @harness_test );
+    my $harness_out = $smoker->_parse_harness_output( \%inconsistent, $all_ok,
+                                                      @harness_test );
 
     is $harness_out,
        "    ../t/op/utftaint.t......................FAILED 87-88\n",
@@ -173,8 +173,8 @@ EOHO
     } @harness_test;
 
     my $all_ok;
-    my $harness_out = $smoker->_parse_harness( \%inconsistent, $all_ok,
-                                               @harness_test );
+    my $harness_out = $smoker->_parse_harness_output( \%inconsistent, $all_ok,
+                                                      @harness_test );
 
     is $harness_out, <<EOOUT, "Catch Test::Harness 2.60 output";
     smoke/die.t.............................FAILED ??
@@ -204,14 +204,59 @@ EOHO
     $inconsistent{ '../t/op/utftaint.t' } = 1;
 
     my $all_ok;
-    my $harness_out = $smoker->_parse_harness( \%inconsistent, $all_ok,
-                                               @harness_test );
+    my $harness_out = $smoker->_parse_harness_output( \%inconsistent, $all_ok,
+                                                      @harness_test );
 
     is $harness_out, <<EOOUT, "Catch Test::Harness 2.60 output";
     smoke/die.t.............................FAILED ??
     smoke/many.t............................FAILED 2-6 8-12 14-18 20-24 26-30 32-36 38-42 44-
                                                    48 50-54 56-60 62-66 68-72 74-78 80-84 86-
                                                    90 92-96 98-100
+EOOUT
+
+    is keys %inconsistent, 1, "One inconssistent test result";
+}
+
+{
+    my $smoker = Test::Smoke::Smoker->new( \*LOG, v => $verbose );
+    isa_ok $smoker, 'Test::Smoke::Smoker';
+    my @harness3_test = split m/\n/, <<'EOHO';
+Failed 2/2 test programs. 83/100 subtests failed.
+../t/smoke/die....... Dubious, test returned 255 (wstat 65280, 0xff00)
+ No subtests run 
+../t/smoke/many...... Dubious, test returned 83 (wstat 21248, 0x5300)
+ Failed 83/100 subtests 
+
+Test Summary Report
+-------------------
+smoke/die.t (Wstat: 65280 Tests: 0 Failed: 0)
+  Non-zero exit status: 255
+  Parse errors: No plan found in TAP output
+smoke/many.t (Wstat: 21248 Tests: 100 Failed: 83)
+  Failed test number(s):  2-6, 8-12, 14-18, 20-24, 26-30, 32-36, 38-42
+                44-48, 50-54, 56-60, 62-66, 68-72, 74-78
+                80-84, 86-90, 92-96, 98-100
+  Non-zero exit status: 83
+Files=2, Tests=100,  0 wallclock secs ( 0.03 usr  0.01 sys +  0.06 cusr  0.01 csys =  0.11 CPU)
+Result: FAIL
+EOHO
+
+    my %inconsistent = map +( $_ => 1 ) => grep length $_ => map {
+        m/(\S+\.t)\s+/ ? $1 : ''
+    } @harness3_test;
+    $inconsistent{ '../t/op/utftaint.t' } = 1;
+
+    my $all_ok;
+    my $harness_out = $smoker->_parse_harness_output( \%inconsistent, $all_ok,
+                                                      @harness3_test );
+
+    is $harness_out, <<EOOUT, "Catch Test::Harness 3+ output";
+    smoke/die.t.................................................FAILED
+        No plan found in TAP output
+    smoke/many.t................................................FAILED
+        2-6, 8-12, 14-18, 20-24, 26-30, 32-36, 38-42
+        44-48, 50-54, 56-60, 62-66, 68-72, 74-78
+        80-84, 86-90, 92-96, 98-100
 EOOUT
 
     is keys %inconsistent, 1, "One inconssistent test result";

@@ -12,7 +12,9 @@ my $findbin;
 use File::Basename;
 BEGIN { $findbin = dirname $0; }
 use lib File::Spec->catdir( $findbin, 'lib' );
+use lib File::Spec->catdir( $findbin, 'lib', 'inc' );
 use lib $findbin;
+use lib File::Spec->catdir( $findbin, 'inc' );
 use Test::Smoke::Reporter;
 use Test::Smoke::Mailer;
 use Test::Smoke;

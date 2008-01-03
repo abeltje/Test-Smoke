@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.037';
+$VERSION = '0.038';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -50,6 +50,16 @@ sub HARNESS_RE1 () {
      '(\S+\.t)(?:\s+[\d?]+){0,4}(?:\s+[\d?.]*%)?\s+([\d?]+(?:[-\s]+\d+-?)*)$'
 }
 sub HARNESS_RE2() { '^\s+(\d+(?:[-\s]+\d+)*-?)$' }
+
+sub HARNESS3_RE() {
+     '^(?:
+          (?:\ \ Failed\ tests?(?:\ number\(s\))?:\ \ )
+          |
+          \s+
+       )
+       (\d[0-9, -]*)'
+}
+
 
 =head1 NAME
 
@@ -553,8 +563,8 @@ sub extend_with_harness {
         my $tst_perl = catfile( curdir(), 'perl' );
         my $verbose = $self->{v} > 1 ? "-v" : "";
         my @run_harness = $self->_run( "$tst_perl harness $verbose $harness" );
-        my $harness_out = $self->_parse_harness( \%inconsistent, $all_ok,
-                                                 @run_harness );
+        my $harness_out = $self->_parse_harness_output( \%inconsistent, $all_ok,
+                                                        @run_harness );
 
         # safeguard against empty results
         $inconsistent{ $_ } ||= 'FAILED' for keys %inconsistent;
@@ -645,7 +655,7 @@ sub _run_harness_target {
             my $dots = '.' x (40 - length $name );
             push @failed, "    $name${dots}FAILED $fail\n";
         } else {
-            ( $fail ) = m/$harness_re2/;
+            ( $fail ) = $line =~ m/$harness_re2/;
             next unless $fail;
             push @failed, " " x 51 . "$fail\n";
         }
@@ -672,6 +682,7 @@ for the make program.
 sub _run_harness3_target {
     my( $self, $target, $extra ) = @_;
 
+    my $harness3_re = HARNESS3_RE();
     my $seenheader = 0;
     my @failed = ( );
 
@@ -693,8 +704,7 @@ sub _run_harness3_target {
             next;
         }
     
-        my( $failed ) =
-            $line =~ /^(?:(?:  Failed tests?:  )|\s+)(\d[0-9, -]*)/;
+        my( $failed ) = $line =~ /$harness3_re/x;
         if ( $failed ) {
             push @failed, "    $failed\n";
             next;
@@ -787,8 +797,12 @@ to change.
 
 =cut
 
-sub _parse_harness {
+sub _parse_harness_output {
     my( $self, $notok, $all_ok, @lines ) = @_;
+
+    grep m/^Test Summary Report/ => @lines
+        and return $self->_parse_harness3_output( $notok, $all_ok, @lines );
+
     my $harness_re1 = HARNESS_RE1();
     my $harness_re2 = HARNESS_RE2();
 
@@ -806,6 +820,47 @@ sub _parse_harness {
         /All tests successful/ && $all_ok++;
         $self->{v} and $self->tty( $_ );
         $_;
+    } @lines;
+
+    $_[2] = $all_ok;
+    return $output;
+}
+
+=item $self->_parse_harness3_output( $\%notok, $all_ok, @lines )
+
+Fator out the parsing of the Test::Harness 3 output, as it seems subject
+to change.
+
+=cut
+
+sub _parse_harness3_output {
+    my( $self, $notok, $all_ok, @lines ) = @_;
+
+    my $harness3_re = HARNESS3_RE();
+    my $seenheader = 0;
+    my $output = join "", grep defined $_ => map {
+        my $line = $_;
+
+        my( $tname ) = $line =~ /^\s*(.+\.t)\s+\(Wstat/;
+        my( $failed ) = $line =~ /$harness3_re/x;
+        my( $parse_error ) = $line =~ /^  Parse errors: (.+)/;
+
+        if ( $tname ) {
+            delete $notok->{ $tname };
+            my $dots = '.' x (60 - length $tname);
+            "    $tname${dots}FAILED\n";
+        } elsif ( $failed ) {
+            "        $failed\n";
+        } elsif ( $parse_error ) {
+            "        $parse_error\n";
+        } else {
+            undef;
+        }
+    } grep defined $_ && length $_ => map {
+        $seenheader or $seenheader = $_ =~ /Test Summary Report/;
+        /All tests successful/ && $all_ok++;
+        $self->{v} and $self->tty( $_ );
+        $seenheader ? $_ : '';
     } @lines;
 
     $_[2] = $all_ok;
