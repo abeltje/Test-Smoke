@@ -4,6 +4,7 @@ use strict;
 # $Id$
 
 use Data::Dumper;
+use Cwd;
 use File::Spec;
 use Test::More tests => 33;
 
@@ -29,7 +30,7 @@ my %df_rsync = (
 {
     my %rsync = %df_rsync;
     $rsync{source} = 'ftp.linux.ActiveState.com::perl-current'; 
-    $rsync{ddir}   = File::Spec->canonpath('/usr/local/src/bleadperl/perl');
+    $rsync{ddir}   = File::Spec->canonpath( cwd() );
     my $sync = eval { 
         Test::Smoke::Syncer->new( 'rsync', 
             source => $rsync{source},
@@ -49,7 +50,7 @@ my %df_rsync = (
 {
     my %rsync = %df_rsync;
     $rsync{source} = 'ftp.linux.ActiveState.com::perl-current'; 
-    $rsync{ddir}   = File::Spec->canonpath('/usr/local/src/bleadperl/perl');
+    $rsync{ddir}   = File::Spec->canonpath( cwd() );
     my $sync = eval { 
         Test::Smoke::Syncer->new( rsync => {
             source => $rsync{source},
