@@ -63,6 +63,7 @@ t/syncer_link.t
 t/syncer_rsync.t
 t/syncer_snap.t
 t/sysinfo.t
+t/sysinfo_proc.t
 t/tree.t
 t/ts_config.t
 t/util_times.t
