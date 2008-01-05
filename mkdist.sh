@@ -12,12 +12,15 @@ for argv
         -c)   SMOKE_CI_FILES=1;;
         -s)   SMOKE_CI_SNAP=1;;
         -d=*) SMOKE_DIST_DIR=`echo $argv | perl -pe 's/^-d=//'`;;
-        -58)  SMOKE_PERL=/opt/perl585/bin/perl5.8.5
-              SMOKE_PROVE=/opt/perl585/bin/prove5.8.5
-              SMOKE_COVER=/opt/perl585/bin/cover;;
-        -59)  SMOKE_PERL=/opt/bleadperl/bin/perl5.9.2
-              SMOKE_PROVE=/opt/bleadperl/bin/prove5.9.2
-              SMOKE_COVER=/opt/bleadperl/bin/cover;;
+        -588)  SMOKE_PERL=/opt/perl/perl588/bin/perl5.8.8
+               SMOKE_PROVE=/opt/perl/perl588/bin/prove5.8.8
+               SMOKE_COVER=/opt/perl/perl588/bin/cover;;
+        -58)  SMOKE_PERL=/opt/perl/perl585/bin/perl5.8.5
+              SMOKE_PROVE=/opt/perl/perl585/bin/prove5.8.5
+              SMOKE_COVER=/opt/perl/perl585/bin/cover;;
+        -510)  SMOKE_PERL=/opt/perl/perl5100/bin/perl5.10.0
+               SMOKE_PROVE=/opt/perl/perl5100/bin/prove
+               SMOKE_COVER=/opt/perl/perl5100/bin/cover;;
         -*)   if test "$argv" == "--help" || test "$argv" == "-h" ; then
                   echo ""
               else
@@ -46,7 +49,7 @@ fi
 # Set the directory where distributions are kept
 distdir=./
 UNAME=`uname -n`
-if [ "$UNAME" == "fikkie" -o "$UNAME" == "snowy.local" ] ; then
+if [ "$UNAME" == "fikkie" -o "$UNAME" == "droopy.local" ] ; then
     distdir=~/distro
 fi
 if [ "$SMOKE_DIST_DIR" != "" ] ; then
@@ -70,21 +73,20 @@ $SMOKE_PROVE private/test_*.pl || exit
 
 if [ "$SMOKE_TEST_ONLY" == "1" ] ; then
     if [ "$SMOKE_COVERAGE" == "1" ] ; then
-        $SMOKE_PROVE -Ilib private/*.t
         $SMOKE_COVER -delete
-        HARNESS_PERL_SWITCHES=-MDevel::Cover \
-            $SMOKE_PROVE -Ilib t/*.t private/*.t
+        HARNESS_PERL_SWITCHES=-MDevel::Cover=+ignore,^\(?:t\|private\)/ \
+            $SMOKE_PROVE -l t/*.t private/*.t
         PROVE_ERROR=$?
         $SMOKE_COVER
         if [ "$PROVE_ERROR" != "0" ] ; then exit $PROVE_ERROR ; fi
     else
-        $SMOKE_PROVE -I lib private/*.t t/*.t || exit
+        $SMOKE_PROVE -l private/*.t t/*.t || exit
     fi
     echo "SMOKE_TEST_ONLY was set, quitting..."
     trap 0
     exit
 else
-    $SMOKE_PROVE -I lib private/smoker_*.t || exit
+    $SMOKE_PROVE -l private/smoker_*.t || exit
 fi
 
 # Clean up before we start
