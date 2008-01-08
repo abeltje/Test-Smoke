@@ -4,13 +4,13 @@ $| = 1;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.016';
+$VERSION = '0.017';
 
 use Cwd;
 use File::Spec;
 my $findbin;
 use File::Basename;
-BEGIN { $findbin = dirname $0; }
+BEGIN { $findbin = File::Spec->rel2abs( dirname $0 ); }
 use lib File::Spec->catdir( $findbin, 'lib' );
 use lib File::Spec->catdir( $findbin, 'lib', 'inc' );
 use lib $findbin;
