@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.032';
+$VERSION = '0.033';
 
 use Cwd;
 use File::Spec::Functions;
@@ -636,7 +636,10 @@ sub preamble {
     ));
     my $si = Test::Smoke::SysInfo->new;
     my $archname  = $si->cpu_type;
-    $archname .= sprintf "/%s cpu", $si->ncpu if $si->ncpu;
+ 
+    (my $ncpu = $si->ncpu || "") =~ s/^(\d+)\s*/$1 cpu/;
+    $archname .= "/$ncpu";
+
     my $cpu = $si->cpu;
 
     my $this_host = $si->host;
