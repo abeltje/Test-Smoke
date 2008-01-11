@@ -12,7 +12,7 @@ use File::Path;
 use File::Copy;
 my $findbin;
 use File::Basename;
-BEGIN { $findbin = dirname $0; }
+BEGIN { $findbin = File::Spec->rel2abs( dirname $0 ); }
 use lib File::Spec->catdir( $findbin, 'lib' );
 use lib File::Spec->catdir( $findbin, 'lib', 'inc' );
 use lib $findbin;
@@ -155,14 +155,14 @@ if ( $options{continue} ) {
 
 my $cwd = cwd();
 chdir $conf->{ddir} or die "Cannot chdir($conf->{ddir}): $!";
-call_mktest();
+call_mktest( $cwd );
+chdir $cwd;
 unless ( $conf->{delay_report} ) {
     genrpt();
     mailrpt();
 } else {
     $conf->{v} and print "Delayed creation of the report. See 'mailrpt.pl'\n";
 }
-chdir $cwd;
 archiverpt();
 
 sub synctree {
@@ -217,6 +217,7 @@ sub patchtree {
 }
 
 sub call_mktest {
+    my $cwd = shift;
     my $timeout = 0;
     if ( $Config{d_alarm} && $conf->{killtime} ) {
         $timeout = calc_timeout( $conf->{killtime} );
@@ -225,6 +226,7 @@ sub call_mktest {
     }
     $timeout and local $SIG{ALRM} = sub {
         warn "This smoke is aborted ($conf->{killtime})\n";
+        chdir $cwd;
         genrpt();
         mailrpt();
         exit(42);
