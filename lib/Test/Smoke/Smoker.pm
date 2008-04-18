@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.038';
+$VERSION = '0.039';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -987,7 +987,7 @@ sub change_manifest {
                     chomp $mline;
                     ( my $fn = $mline ) =~ s/^(\S+).*/$1/;
                     if ( ! grep /\Q$fn\E/ => @$tests ) {
-                        print MANIN "$fn\n";
+                        print MANIN "$mline\n";
                     } else {
                         $self->{v} and $self->tty( "\t$fn\n" );
                     }
