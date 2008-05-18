@@ -6,11 +6,26 @@ use strict;
 use File::Spec;
 use File::Copy;
 
-use Test::More tests => 6;
+use Test::More tests => 7;
 BEGIN { use_ok( 'Test::Smoke::Util' ); }
 
 chdir 't' or die "chdir: $!" if -d 't';
 my $snap_level = 17888;
+
+SKIP: {
+    # Test for empty .patch file
+    1 while unlink '.patch';
+    -f '.patch' and skip "Can't unlink '.patch'", 1;
+
+    local *PL;
+    open( PL, '> .patch') or skip "Couldn't create .patch: $!", 1;
+    close PL or skip "Couldn't close .patch: $!", 1;
+
+    my $get_empty_patch = get_patch();
+    is( $get_empty_patch, '', "Found empty patchlevel" );
+
+    1 while unlink '.patch';
+}
 
 SKIP: {
     # better safe; try and unlink '.patch'

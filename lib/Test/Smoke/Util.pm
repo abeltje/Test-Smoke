@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK $NOCASE );
-$VERSION = '0.55';
+$VERSION = '0.56';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -688,7 +688,7 @@ sub get_patch {
     local *DOTPATCH;
     my $patch_level = '?????';
     if ( open DOTPATCH, "< $dot_patch" ) {
-        chomp( $patch_level = <DOTPATCH> );
+        chomp( $patch_level = <DOTPATCH> || '?????' );
         close DOTPATCH;
         return $patch_level if $patch_level =~ /-RC\d+$/;
         $patch_level =~ tr/0-9//cd;
