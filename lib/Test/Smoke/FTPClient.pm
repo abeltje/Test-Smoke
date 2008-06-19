@@ -9,7 +9,7 @@ use Test::Smoke::Util qw( clean_filename time_in_hhmm );
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.010';
+$VERSION = '0.011';
 
 my %CONFIG = (
     df_fserver  => undef,
@@ -294,6 +294,7 @@ sub __do_mirror {
         }
     }
     if ( $cleanup ) {
+        chdir $localdir;
         $verbose > 1 and print "Cleanup '$localdir'\n";
         my %ok_file = map {
             ( clean_filename( $_->{name} ) => $_->{type} )
