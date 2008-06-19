@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.040';
+$VERSION = '0.041';
 
 use base 'Exporter';
 @EXPORT_OK = qw( &sysinfo &tsuname );
@@ -328,10 +328,15 @@ sub HPUX {
         }
     } else {
         my $machinfo = `/usr/contrib/bin/machinfo`;
-        if( $machinfo =~ m/processor model:\s+(\d+)\s+(.*)/ ) {
+        if ( $machinfo =~ m/processor model:\s+(\d+)\s+(.*)/ ) {
             $hpux->{_cpu} = $2;
+        } elsif ( $machinfo =~ m{\s*[0-9]+\s+(intel.r.*processor)\s*\(([0-9.]+)\s*([GM])Hz.*}mi) {
+            my ($m, $s, $h) = ($1, $2, $3);
+            $m =~ s: series processor::;
+            $h eq "G" and $s = int ($s * 1024);
+            $hpux->{_cpu} = "$m/$s";
         }
-        if( $machinfo =~ m/Clock\s+speed\s+=\s+(.*)/ ) {
+        if ( $machinfo =~ m/Clock\s+speed\s+=\s+(.*)/ ) {
             $hpux->{_cpu} .= "/$1";
         }
     }
