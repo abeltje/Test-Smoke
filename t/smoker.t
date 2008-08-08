@@ -9,7 +9,7 @@ use Cwd;
 use lib 't';
 use TestLib;
 
-use Test::More tests => 33;
+use Test::More tests => 36;
 use_ok( 'Test::Smoke::Smoker' );
 
 my $debug   = exists $ENV{SMOKE_DEBUG} && $ENV{SMOKE_DEBUG};
@@ -54,19 +54,16 @@ open LOG, "> " . devnull();
 
     my %tests = $smoker->_transform_testnames( @nok );
     my %raw = (
-        '../ext/Cwd/t/Cwd.t'          => 'FAILED at test 10',
-        '../t/op/magic.t'             => 'FAILED at test 37',
-        '../t/op/die.t'               => 'FAILED at test 22',
-        '../ext/IPC/SysV/t/ipcsysv.t' => 'FAILED at test 1',
+        'ext/Cwd/t/Cwd.t'          => 'FAILED at test 10',
+        't/op/magic.t'             => 'FAILED at test 37',
+        't/op/die.t'               => 'FAILED at test 22',
+        'ext/IPC/SysV/t/ipcsysv.t' => 'FAILED at test 1',
     );
     my %expect;
     my $test_base = catdir( cwd, 't' );
     foreach my $test ( keys %raw ) {
-        my $cname = canonpath( $test );
-        my $test_name = rel2abs( $cname, $test_base );
+        my $test_path = $smoker->_normalize_testname( $test );
 
-        my $test_path = abs2rel( $test_name, $test_base );
-        $test_path =~ tr!\\!/! if $^O eq 'MSWin32';
         $expect{ $test_path } = $raw{ $test };
     }
     is_deeply \%tests, \%expect, "transform testnames" or diag Dumper \%tests;
@@ -99,7 +96,8 @@ EOHO
     ../lib/Net/hostent.t....................FAILED 2-7
     ../lib/Time/Local.t.....................FAILED 133
 EOOUT
-    is keys %inconsistent, 0, "No inconssistent test results";
+    is keys %inconsistent, 0, "No inconssistent test results"
+        or diag Dumper \%inconsistent;
 }
 
 {
@@ -242,7 +240,7 @@ Result: FAIL
 EOHO
 
     my %inconsistent = map +( $_ => 1 ) => grep length $_ => map {
-        m/(\S+\.t)\s+/ ? $1 : ''
+        m/(\S+\.t)\s+/ ? "../t/$1" : ''
     } @harness3_test;
     $inconsistent{ '../t/op/utftaint.t' } = 1;
 
@@ -251,9 +249,55 @@ EOHO
                                                       @harness3_test );
 
     is $harness_out, <<EOOUT, "Catch Test::Harness 3+ output";
-    smoke/die.t.................................................FAILED
+    ../t/smoke/die.t............................................FAILED
         No plan found in TAP output
-    smoke/many.t................................................FAILED
+    ../t/smoke/many.t...........................................FAILED
+        2-6, 8-12, 14-18, 20-24, 26-30, 32-36, 38-42
+        44-48, 50-54, 56-60, 62-66, 68-72, 74-78
+        80-84, 86-90, 92-96, 98-100
+EOOUT
+
+    is keys %inconsistent, 1, "One inconssistent test result"
+        or diag Dumper \%inconsistent;
+}
+
+{
+    my $smoker = Test::Smoke::Smoker->new( \*LOG, v => $verbose );
+    isa_ok $smoker, 'Test::Smoke::Smoker';
+    my @harness3_test = split m/\n/, <<'EOHO';
+Failed 2/2 test programs. 83/100 subtests failed.
+../t/smoke/die....... Dubious, test returned 255 (wstat 65280, 0xff00)
+ No subtests run 
+../t/smoke/many...... Dubious, test returned 83 (wstat 21248, 0x5300)
+ Failed 83/100 subtests 
+
+Test Summary Report
+-------------------
+smoke/die (Wstat: 65280 Tests: 0 Failed: 0)
+  Non-zero exit status: 255
+  Parse errors: No plan found in TAP output
+smoke/many (Wstat: 21248 Tests: 100 Failed: 83)
+  Failed test number(s):  2-6, 8-12, 14-18, 20-24, 26-30, 32-36, 38-42
+                44-48, 50-54, 56-60, 62-66, 68-72, 74-78
+                80-84, 86-90, 92-96, 98-100
+  Non-zero exit status: 83
+Files=2, Tests=100,  0 wallclock secs ( 0.03 usr  0.01 sys +  0.06 cusr  0.01 csys =  0.11 CPU)
+Result: FAIL
+EOHO
+
+    my %inconsistent = map +( $_ => 1 ) => grep length $_ => map {
+        m/(\S+\.t)\s+/ ? "../t/$1" : ''
+    } @harness3_test;
+    $inconsistent{ '../t/op/utftaint.t' } = 1;
+
+    my $all_ok;
+    my $harness_out = $smoker->_parse_harness_output( \%inconsistent, $all_ok,
+                                                      @harness3_test );
+
+    is $harness_out, <<EOOUT, "Catch Test::Harness 3.13 output";
+    ../t/smoke/die.t............................................FAILED
+        No plan found in TAP output
+    ../t/smoke/many.t...........................................FAILED
         2-6, 8-12, 14-18, 20-24, 26-30, 32-36, 38-42
         44-48, 50-54, 56-60, 62-66, 68-72, 74-78
         80-84, 86-90, 92-96, 98-100

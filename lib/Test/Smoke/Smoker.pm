@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.039';
+$VERSION = '0.040';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -697,10 +697,11 @@ sub _run_harness3_target {
         $line =~ /Test Summary Report/ and $seenheader = 1, next;
         $seenheader or next;
     
-        my( $tname ) = $line =~ /^\s*(.+\.t)\s+\(Wstat/;
+        my( $tname ) = $line =~ /^\s*(.+(?:\.t)?)\s+\(Wstat/;
         if ( $tname ) {
-            my $dots = '.' x (60 - length $tname);
-            push @failed, "$tname${dots}FAILED\n";
+            my $ntest = $self->_normalize_testname( $tname );
+            my $dots = '.' x (60 - length $ntest);
+            push @failed, "$ntest${dots}FAILED\n";
             next;
         }
     
@@ -841,14 +842,15 @@ sub _parse_harness3_output {
     my $output = join "", grep defined $_ => map {
         my $line = $_;
 
-        my( $tname ) = $line =~ /^\s*(.+\.t)\s+\(Wstat/;
+        my( $tname ) = $line =~ /^\s*(.+(:?\.t)?)\s+\(Wstat/;
         my( $failed ) = $line =~ /$harness3_re/x;
         my( $parse_error ) = $line =~ /^  Parse errors: (.+)/;
 
         if ( $tname ) {
-            delete $notok->{ $tname };
-            my $dots = '.' x (60 - length $tname);
-            "    $tname${dots}FAILED\n";
+            my $ntest = $self->_normalize_testname( $tname );
+            delete $notok->{ $ntest };
+            my $dots = '.' x (60 - length $ntest);
+            "    $ntest${dots}FAILED\n";
         } elsif ( $failed ) {
             "        $failed\n";
         } elsif ( $parse_error ) {
@@ -882,20 +884,36 @@ sub _transform_testnames {
     for my $nok ( @notok ) {
         $nok =~ m!^(?:\.\.[\\/])?(\w+[\\/][-\w/\\]+)\.*(.*)! or next;
         my( $test_name, $status ) = ( $1, $2 );
-        $test_name .= '.t';
 
-        $test_name = $test_name =~ /^(?:ext|lib|t)\b/
-            ? catfile( updir(), $test_name )
-            : catfile( updir(), 't', $test_name );
+        my $test_path = $self->_normalize_testname( $test_name );
 
-        my $test_base = catdir( $self->{ddir}, 't' );
-        $test_name = rel2abs( $test_name, $test_base );
-
-        my $test_path = abs2rel( $test_name, $test_base );
-        $test_path =~ tr!\\!/! if $self->{is_win32};
         $inconsistent{ $test_path } ||= $status;
     }
     return %inconsistent;
+}
+
+=item $smoker->_normalize_testname( $test )
+
+Normalize a testname...
+
+=cut
+
+sub _normalize_testname {
+    my( $self, $test_name ) = @_;
+
+    $test_name =~ s/\s+$//;
+    $test_name =~ /\.t$/ or $test_name .= '.t';
+    $test_name = $test_name =~ /^(?:ext|lib|t)\b/
+        ? catfile( updir(), $test_name )
+        : catfile( updir(), 't', $test_name );
+
+    my $test_base = catdir( $self->{ddir}, 't' );
+    $test_name = rel2abs( $test_name, $test_base );
+
+    my $test_path = abs2rel( $test_name, $test_base );
+    $test_path =~ tr!\\!/! if $self->{is_win32};
+
+    return $test_path;
 }
 
 =item set_skip_tests( [$unset] )
