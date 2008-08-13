@@ -882,7 +882,7 @@ sub _transform_testnames {
     my( $self, @notok ) = @_;
     my %inconsistent;
     for my $nok ( @notok ) {
-        $nok =~ m!^(?:\.\.[\\/])?(\w+[\\/][-\w/\\]+)\.*(.*)! or next;
+        $nok =~ m!^((?:\.\.[\\/])?\w+[\\/][-\w/\\]+)\.*(.*)! or next;
         my( $test_name, $status ) = ( $1, $2 );
 
         my $test_path = $self->_normalize_testname( $test_name );
@@ -903,13 +903,14 @@ sub _normalize_testname {
 
     $test_name =~ s/\s+$//;
     $test_name =~ /\.t$/ or $test_name .= '.t';
-    $test_name = $test_name =~ /^(?:ext|lib|t)\b/
-        ? catfile( updir(), $test_name )
-        : catfile( updir(), 't', $test_name );
-
+    if ( $test_name !~ m|^\Q../| ) {
+        $test_name = $test_name =~ /^(?:ext|lib|t)\b/
+            ? catfile( updir(), $test_name )
+            : catfile( updir(), 't', $test_name );
+    }
     my $test_base = catdir( $self->{ddir}, 't' );
     $test_name = rel2abs( $test_name, $test_base );
-
+    
     my $test_path = abs2rel( $test_name, $test_base );
     $test_path =~ tr!\\!/! if $self->{is_win32};
 
