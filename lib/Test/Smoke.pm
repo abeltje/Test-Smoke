@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION $REVISION $conf @EXPORT );
-$VERSION  = '1.29_63';
+$VERSION  = '1.35_01';
 $REVISION = __get_ts_patchlevel();
 
 use base 'Exporter';
@@ -134,6 +134,14 @@ sub run_smoke {
     Test::Smoke::BuildCFG->config( dfopts => join " ", @df_buildopts );
 
     my $patch = Test::Smoke::Util::get_patch( $conf->{ddir} );
+
+    { # I cannot find a better place to stick this (thanks Bram!)
+      # change 33961 introduced Test::Harness 3 for 5.10.x
+      # that needs different parsing, so set the config to do that 
+        if ( $conf->{perl_version} eq '5.10.x' && $patch >= 33961 ) {
+            $conf->{hasharness3} = 1;
+        }
+    }
 
     my $logfile = File::Spec->catfile( $conf->{ddir}, 'mktest.out' );
     my $BuildCFG = $continue 
