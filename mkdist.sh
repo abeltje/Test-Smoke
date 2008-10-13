@@ -101,6 +101,7 @@ else
 fi
 
 # I keep forgetting about Changes, so automate:
+svn up
 svnchanges > Changes
 if [ "$SMOKE_CI_FILES" == "1" ] ; then
     # Commit the newly generated Files
@@ -158,7 +159,7 @@ MKDIST_ADDDL=/data/apache/ztreet/adddl
 
 SMOKE_SVNBASE='http://'
 SMOKE_SOURCE=`svn info | perl -ne 's/^URL: //i and print'`
-SMOKE_SOURCE=`echo $SMOKE_SOURCE |perl -pe 's|https://([^/]+)/|http://gromit/|'`
+SMOKE_SOURCE=`echo $SMOKE_SOURCE |perl -pe's|https?://([^/]+)/|http://gromit/|'`
 
 SMOKE_SNAP_BASE="http://gromit/svn/snapshots/"
 SMOKE_SNAP_DIR="${SMOKE_SNAP_BASE}Test-Smoke-$SMOKE_VERSION"
@@ -170,7 +171,7 @@ if [ "$SMOKE_CI_SNAP" == "1" ] ; then
     echo "* [SVN] Create a snapshot for $SMOKE_VERSION" > $SMOKE_SNAP_MSG
     svn cp $SMOKE_SOURCE $SMOKE_SNAP_DIR -F $SMOKE_SNAP_MSG
     rm -f $SMOKE_SNAP_MSG
-    $SMOKE_DIST_NAME="Test-Smoke-$SMOKE_VERSION.tar.gz"
+    SMOKE_DIST_NAME="Test-Smoke-$SMOKE_VERSION.tar.gz"
     echo "Add '$distdir/$SMOKE_DIST_NAME' for download"
     $MKDIST_ADDDL "$distdir/$SMOKE_DIST_NAME"
 else
