@@ -908,11 +908,15 @@ sub _normalize_testname {
             ? catfile( updir(), $test_name )
             : catfile( updir(), 't', $test_name );
     }
-    my $test_base = catdir( $self->{ddir}, 't' );
+
+    my $test_base = rel2abs catdir( $self->{ddir}, 't' );
     $test_name = rel2abs( $test_name, $test_base );
-    
+
     my $test_path = abs2rel( $test_name, $test_base );
     $test_path =~ tr!\\!/! if $self->{is_win32};
+
+    # sometimes ../t is optimized away
+    $test_name !~ m|^\.\.[\\/]| and $test_path = "../t/$test_path";
 
     return $test_path;
 }
