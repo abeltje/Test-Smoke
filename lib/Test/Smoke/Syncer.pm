@@ -316,9 +316,12 @@ sub check_dot_patch {
     if ( open DOTPATCH, "< $dot_patch" ) {
         chomp( $patch_level = <DOTPATCH> );
         close DOTPATCH;
-        $patch_level =~ tr/0-9//cd;
-        $self->{patchlevel} = $1 if $patch_level =~/^([0-9]+)$/;
-        $self->{patchlevel} and return $self->{patchlevel};
+        if ( $patch_level ) {
+            my @dot_patch = split ' ', $patch_level;
+            $self->{patchlevel} = $dot_patch[2] || $dot_patch[0];
+            $self->{patchdate} = $dot_patch[1];
+            return $self->{patchlevel};
+        }
     }
 
     # There does not seem to be a '.patch', try 'patchlevel.h'

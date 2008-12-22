@@ -166,7 +166,7 @@ unless ( $conf->{delay_report} ) {
 archiverpt();
 
 sub synctree {
-    my $now_patchlevel = get_patch( $conf->{ddir} ) || -1;
+    my $now_patchlevel = get_patch( $conf->{ddir} )->[0] || -1;
     my $was_patchlevel = $options{smartsmoke} && $options{patchlevel}
         ? $options{patchlevel}
         : $now_patchlevel;
@@ -260,7 +260,7 @@ sub archiverpt {
             die "Cannot create '$conf->{adir}': $!";
     };
 
-    my $patch_level = get_patch( $conf->{ddir} );
+    my $patch_level = get_patch( $conf->{ddir} )->[0];
     $patch_level =~ tr/ //sd;
 
     SKIP_RPT: {

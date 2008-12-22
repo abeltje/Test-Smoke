@@ -115,7 +115,7 @@ $opt{adir} && -d $opt{adir} or do {
     mkpath( $opt{adir}, 0, 0775 ) or die "Cannot create '$opt{adir}': $!";
 };
 
-my $patch_level = get_patch( $opt{ddir} );
+my $patch_level = get_patch( $opt{ddir} )->[0];
 $patch_level =~ tr/ //sd;
 
 SKIP_RPT: {

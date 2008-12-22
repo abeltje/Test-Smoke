@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.033';
+$VERSION = '0.034';
 
 use Cwd;
 use File::Spec::Functions;
@@ -220,8 +220,15 @@ sub _parse {
             next;
         }
 
-        if  ( my( $patch ) = /^\s*Smoking patch\s* (\d+\S*)/ ) {
-            $rpt{patch} = $patch;
+        if  ( my( $patch ) = /^
+            \s*
+            Smoking\ patch\s*
+            ((?:[0-9a-f]+\s+\S+)|(?:\d+\S*))
+        /x ) {
+            my ($pl, $date) = split ' ', $patch;
+            $rpt{patchlevel} = $patch;
+            $rpt{patch} = $pl || $patch;
+            $rpt{patchdate} = $date || $pl;
             next;
         }
 
@@ -651,7 +658,7 @@ sub preamble {
     my $os = $si->os;
 
     return <<__EOH__;
-Automated smoke report for $Config{version} patch $self->{_rpt}{patch}
+Automated smoke report for $Config{version} patch $self->{_rpt}{patchlevel}
 $this_host: $cpu ($archname)
     on        $os
     using     $cinfo
@@ -672,8 +679,8 @@ sub smoke_matrix {
     my $rpt  = $self->{_rpt};
 
     # Maximum of 6 letters => 11 positions
-    my $pad = " " x int( (11 - length( $rpt->{patch} ))/2 );
-    my $patch = $pad . $rpt->{patch};
+    my $pad = " " x int( (11 - length( $rpt->{patchdate} ))/2 );
+    my $patch = $pad . $rpt->{patchdate};
     my $report = sprintf "%-11s  Configuration (common) %s\n", 
                          $patch, $rpt->{common_args};
     $report .= ("-" x 11) . " " . ("-" x 57) . "\n";

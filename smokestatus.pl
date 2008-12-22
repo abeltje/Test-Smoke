@@ -161,7 +161,7 @@ foreach my $config ( @configs ) {
 
 sub guess_status {
     my( $ddir, $adir, $config ) = @_;
-    ( my $patch = get_patch( $ddir ) || "" ) =~ s/\?//g;
+    ( my $patch = get_patch( $ddir )->[0] || "" ) =~ s/\?//g;
     if ( $patch && $adir ) {
         my $a_rpt = catfile( $adir, "rpt${patch}.rpt" );
         my $mtime = -e $a_rpt ? (stat $a_rpt)[9] : undef;

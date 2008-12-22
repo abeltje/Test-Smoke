@@ -15,7 +15,7 @@ use File::Copy;
 my $verbose = exists $ENV{SMOKE_VERBOSE} ? $ENV{SMOKE_VERBOSE} : 0;
 my $showcfg = 0;
 
-use Test::More tests => 77;
+use Test::More tests => 86;
 
 use_ok 'Test::Smoke::Reporter';
 
@@ -71,6 +71,72 @@ EORESULTS
     my @r_lines = split /\n/, $reporter->smoke_matrix;
     is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";
    20000     Configuration (common) -Dcc='ccache gcc'
+----------- ---------------------------------------------------------
+O O         -Uuseperlio
+__EOM__
+
+    chomp( my $summary = $reporter->summary );
+    is $summary, 'Summary: PASS', $summary;
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+            "hasn't the configurations";
+
+#    diag Dumper $reporter->{_counters};
+#    diag $reporter->report;
+}
+
+{
+    create_config_sh( $config_sh, version => '5.6.1' );
+    my $reporter = Test::Smoke::Reporter->new(
+        ddir       => $findbin,
+        v          => $verbose, 
+        outfile    => '',
+        showcfg    => $showcfg,
+        cfg        => \( my $bcfg = <<__EOCFG__ ),
+-Dcc='ccache gcc'
+=
+-Uuseperlio
+__EOCFG__
+    );
+    isa_ok( $reporter, 'Test::Smoke::Reporter' );
+
+    my $timer = time - 300;
+    $reporter->read_parse( \(my $result = <<EORESULTS) );
+Started smoke at @{ [$timer] }
+Smoking patch 2af192eebde5f7a93e229dfc3196f62ee4cbcd2e 20081220.10:38:02
+
+
+Stopped smoke at @{ [$timer += 100] }
+Started smoke at @{ [$timer] }
+
+Configuration: -Dusedevel -Dcc='ccache gcc' -Uuseperlio
+------------------------------------------------------------------------------
+PERLIO = stdio  u=3.96  s=0.66  cu=298.11  cs=21.18  scripts=731  tests=75945
+All tests successful.
+Stopped smoke at @{ [$timer += 100] }
+Started smoke at @{ [$timer] }
+
+Configuration: -Dusedevel -Dcc='ccache gcc' -Uuseperlio -DDEBUGGING
+------------------------------------------------------------------------------
+PERLIO = stdio  u=4.43  s=0.76  cu=324.65  cs=21.58  scripts=731  tests=75945
+All tests successful.
+Finished smoking 2af192eebde5f7a93e229dfc3196f62ee4cbcd2e 20081220.10:38:02
+Stopped smoke at @{ [$timer += 100] }
+EORESULTS
+
+    is( $reporter->{_rpt}{started}, $timer - 300, "Start time" );
+    is( $reporter->{_rpt}{patch}, '2af192eebde5f7a93e229dfc3196f62ee4cbcd2e',
+        "Changenumber $reporter->{_rpt}{patch}" );
+    is( $reporter->{_rpt}{patchdate}, '20081220.10:38:02',
+        "Changedate $reporter->{_rpt}{patchdate}" );
+    my $cfgarg = "-Dcc='ccache gcc' -Uuseperlio";
+    is( $reporter->{_rpt}{$cfgarg}{N}{stdio}, "O",
+        "'$cfgarg' reports ok" );
+    is( $reporter->{_rpt}{$cfgarg}{D}{stdio}, "O",
+        "'$cfgarg -DDEBUGGING' reports ok" );
+
+    my @r_lines = split /\n/, $reporter->smoke_matrix;
+    is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";
+20081220.10:38:02  Configuration (common) -Dcc='ccache gcc'
 ----------- ---------------------------------------------------------
 O O         -Uuseperlio
 __EOM__

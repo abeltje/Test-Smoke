@@ -6,7 +6,7 @@ use strict;
 use File::Spec;
 use File::Copy;
 
-use Test::More tests => 7;
+use Test::More tests => 9;
 BEGIN { use_ok( 'Test::Smoke::Util' ); }
 
 chdir 't' or die "chdir: $!" if -d 't';
@@ -22,7 +22,7 @@ SKIP: {
     close PL or skip "Couldn't close .patch: $!", 1;
 
     my $get_empty_patch = get_patch();
-    is( $get_empty_patch, '', "Found empty patchlevel" );
+    is $get_empty_patch->[0], '', "Found empty patchlevel";
 
     1 while unlink '.patch';
 }
@@ -46,7 +46,8 @@ EO_PATCHLEVEL
 
     my $get_patch = get_patch();
 
-    is( $get_patch, "$snap_level(+)", "Found snaplevel: $get_patch" );
+    is $get_patch->[0], "$snap_level(+)",
+       "Found snaplevel: $get_patch->[0]";
 }
 
 SKIP: {
@@ -57,7 +58,7 @@ SKIP: {
     close PL or skip "Couldn't close .patch: $!", 1;
 
     my $get_patch = get_patch();
-    is( $get_patch, $patch, "Found patchlevel: $patch" );
+    is $get_patch->[0], $patch, "Found patchlevel: $patch";
 
     1 while unlink '.patch';
 }
@@ -65,8 +66,8 @@ SKIP: {
 SKIP: {
     1 while unlink '.patch';
     -f '.patch' and skip "Can't unlink '.patch'", 1;
-    ( my $get_patch = get_patch() ) =~ tr/0-9//cd;
-    is( $get_patch, $snap_level, "Found snaplevel(2): $get_patch" );
+    ( my $get_patch = get_patch()->[0] ) =~ tr/0-9//cd;
+    is $get_patch, $snap_level, "Found snaplevel(2): $get_patch";
 }
 
 SKIP: { # Check for Release Candidates
@@ -94,7 +95,8 @@ EO_PATCHLEVEL
 
     my $get_patch = get_patch();
 
-    is( $get_patch, "5.9.0-RC$rc", "Found Release Candidate: $get_patch" );
+    is $get_patch->[0], "5.9.0-RC$rc",
+       "Found Release Candidate: $get_patch->[0]";
 }
 
 SKIP: {
@@ -102,7 +104,24 @@ SKIP: {
     copy $src, 'patchlevel.h' or skip 1, "Cannot copy patchlevel.h: $!";
 
     my $get_patch = get_patch;
-    is $get_patch, 25000, "PATCH_NUM $get_patch";
+    is $get_patch->[0], 25000, "PATCH_NUM $get_patch->[0]";
+}
+
+SKIP: {
+    my $pl = 'blead 2008-12-20.10:38:02 ' .
+             '2af192eebde5f7a93e229dfc3196f62ee4cbcd2e ' .
+             'GitLive-blead-45-g2af192ee';
+    my (undef, $date, $patch) = split ' ',  $pl;
+    local *PL;
+    open( PL, '> .patch') or skip "Couldn't create .patch: $!", 1;
+    print PL $pl;
+    close PL or skip "Couldn't close .patch: $!", 1;
+
+    my $get_patch = get_patch();
+    is $get_patch->[0], $patch, "Found patchlevel: $patch";
+    is $get_patch->[-1], $date, "Found patchdate: $date";
+
+    1 while unlink '.patch';
 }
 
 END { 

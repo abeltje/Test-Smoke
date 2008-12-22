@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION $REVISION $conf @EXPORT );
-$VERSION  = '1.35_01';
+$VERSION  = '1.35_02';
 $REVISION = __get_ts_patchlevel();
 
 use base 'Exporter';
@@ -137,8 +137,9 @@ sub run_smoke {
 
     { # I cannot find a better place to stick this (thanks Bram!)
       # change 33961 introduced Test::Harness 3 for 5.10.x
-      # that needs different parsing, so set the config to do that 
-        if ( $conf->{perl_version} eq '5.10.x' && $patch >= 33961 ) {
+      # that needs different parsing, so set the config to do that
+      # 20081220; new patchlevels due to git; cannot test it like an int
+        if ( $conf->{perl_version} eq '5.10.x' ) {
             $conf->{hasharness3} = 1;
         }
     }
@@ -173,9 +174,9 @@ sub run_smoke {
     chdir $conf->{ddir} or die "Cannot chdir($conf->{ddir}): $!";
     unless ( $continue ) {
         $smoker->make_distclean( );
-        $smoker->ttylog( "Smoking patch $patch\n" ); 
+        $smoker->ttylog( "Smoking patch $patch->[0] $patch->[-1]\n" ); 
         do_manifest_check( $conf->{ddir}, $smoker );
-        set_smoke_patchlevel( $conf->{ddir}, $patch );
+        set_smoke_patchlevel( $conf->{ddir}, $patch->[0] );
     }
 
     foreach my $this_cfg ( $BuildCFG->configurations ) {
@@ -190,7 +191,7 @@ sub run_smoke {
         $smoker->smoke( $this_cfg, $Policy );
     }
 
-    $smoker->ttylog( "Finished smoking $patch\n" );
+    $smoker->ttylog( "Finished smoking $patch->[0] $patch->[-1]\n" );
     $smoker->mark_out;
 
     close LOG or do {
