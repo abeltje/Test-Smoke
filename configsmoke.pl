@@ -20,7 +20,7 @@ use Test::Smoke::SysInfo;
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.070';
+$VERSION = '0.071';
 
 use Getopt::Long;
 my %options = ( 
