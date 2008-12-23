@@ -170,7 +170,7 @@ my %versions = (
 #                 cfg    => 'perl562.cfg',
 #                 is56x  => 1 },
 
-    '5.8.x' => { source =>  'public.activestate.com::perl-5.8.x',
+    '5.8.x' => { source =>  'perl5.git.perl.org::perl-5.8.x',
                  server => 'public.activestate.com',
                  sdir   => '/pub/apc/perl-5.8.x-snap',
                  sfile  => 'perl-5.8.x-latest.tar.gz',
@@ -188,7 +188,7 @@ my %versions = (
                            : is_vms ? 'vmsperl.cfg' : 'perl58x.cfg' ),
                  is56x  => 0 },
 
-    '5.10.x' => { source =>  'public.activestate.com::perl-5.10.x',
+    '5.10.x' => { source =>  'perl5.git.perl.org::perl-5.10.x',
                   server => 'public.activestate.com',
                   sdir   => '/pub/apc/perl-5.10.x-snap',
                   sfile  => 'perl-5.10.x-latest.tar.gz',
@@ -206,7 +206,7 @@ my %versions = (
                             : is_vms ? 'vmsperl.cfg' : 'perl510x.cfg' ),
                   is56x  => 0 },
 
-    '5.11.x' => { source => 'public.activestate.com::perl-current',
+    '5.11.x' => { source => 'perl5.git.perl.org::perl-current',
                   server => 'public.activestate.com',
                   sdir   => '/pub/apc/perl-current-snap',
                   sfile  => 'perl-current-latest.tar.gz',
