@@ -948,7 +948,7 @@ sub parse_report_Config {
     my( $report ) = @_;
 
     my $version  = $report =~ /^Automated.*for (.+) patch/ ? $1 : '';
-    my $plevel   = $report =~ /^Automated.*patch (\d+(?:\.\d+\.\d+-RC\d+)?)/
+    my $plevel   = $report =~ /^Automated.+?(\S+)$/m
         ? $1 : '';
     if ( !$plevel ) {
         $plevel = $report =~ /^Auto.*patch\s+\S+\s+(\S+)/ ? $1 : '';

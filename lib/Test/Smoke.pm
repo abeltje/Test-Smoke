@@ -211,11 +211,15 @@ use File::Spec::Functions;
 
 sub __get_ts_patchlevel {
     my( $rev ) = q$Rev$ =~ /(\d+)/;
+    if ( ! $rev ) {
+       chomp( $rev = `git describe --all --long` );
+    }
     my $dotpatch = catfile $FindBin::Bin, '.patch';
     local *DOTPATCH;
     open DOTPATCH, "< $dotpatch" or return $rev;
     chomp( my $plevel = <DOTPATCH> );
     close DOTPATCH;
+    ! defined $plevel or $plevel = $rev;
     return $plevel > $rev ? $plevel : $rev;
 }
 
