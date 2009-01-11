@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.041';
+$VERSION = '0.042';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -660,6 +660,7 @@ sub _run_harness_target {
             push @failed, " " x 51 . "$fail\n";
         }
     }
+    my @dump = <$tst>; # Read trailing output from pipe
 
     close $tst or do {
         my $error = $! || ( $? >> 8);
@@ -717,6 +718,7 @@ sub _run_harness3_target {
             next;
         }
     }
+    my @dump = <$tst>; # Read trailing output from pipe
 
     close $tst or do {
         my $error = $! || ( $? >> 8);
