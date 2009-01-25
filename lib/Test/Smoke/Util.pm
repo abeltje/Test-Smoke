@@ -694,7 +694,10 @@ sub get_patch {
         if ( $patch_level ) {
             my @dot_patch = split ' ', $patch_level;
             my @return = ( $dot_patch[2] || $dot_patch[0] );
-            $dot_patch[1] and push @return, $dot_patch[1];
+            if ( $dot_patch[3] ) {
+                ( my $short_describe = $dot_patch[3] ) =~ s/^GitLive-//;
+                push @return, $short_describe;
+            }
             return \@return;
         }
         else {

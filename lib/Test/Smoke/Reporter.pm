@@ -225,10 +225,10 @@ sub _parse {
             Smoking\ patch\s*
             ((?:[0-9a-f]+\s+\S+)|(?:\d+\S*))
         /x ) {
-            my ($pl, $date) = split ' ', $patch;
+            my ($pl, $descr) = split ' ', $patch;
             $rpt{patchlevel} = $patch;
             $rpt{patch} = $pl || $patch;
-            $rpt{patchdate} = $date || $pl;
+            $rpt{patchdescr} = $descr || $pl;
             next;
         }
 
@@ -679,8 +679,8 @@ sub smoke_matrix {
     my $rpt  = $self->{_rpt};
 
     # Maximum of 6 letters => 11 positions
-    my $pad = " " x int( (11 - length( $rpt->{patchdate} ))/2 );
-    my $patch = $pad . $rpt->{patchdate};
+    my $pad = " " x int( (11 - length( $rpt->{patchdescr} ))/2 );
+    my $patch = $pad . $rpt->{patchdescr};
     my $report = sprintf "%-11s  Configuration (common) %s\n", 
                          $patch, $rpt->{common_args};
     $report .= ("-" x 11) . " " . ("-" x 57) . "\n";

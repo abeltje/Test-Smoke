@@ -102,7 +102,7 @@ __EOCFG__
     my $timer = time - 300;
     $reporter->read_parse( \(my $result = <<EORESULTS) );
 Started smoke at @{ [$timer] }
-Smoking patch 2af192eebde5f7a93e229dfc3196f62ee4cbcd2e 20081220.10:38:02
+Smoking patch 2af192eebde5f7a93e229dfc3196f62ee4cbcd2e blead-47-2af192ee
 
 
 Stopped smoke at @{ [$timer += 100] }
@@ -119,15 +119,15 @@ Configuration: -Dusedevel -Dcc='ccache gcc' -Uuseperlio -DDEBUGGING
 ------------------------------------------------------------------------------
 PERLIO = stdio  u=4.43  s=0.76  cu=324.65  cs=21.58  scripts=731  tests=75945
 All tests successful.
-Finished smoking 2af192eebde5f7a93e229dfc3196f62ee4cbcd2e 20081220.10:38:02
+Finished smoking 2af192eebde5f7a93e229dfc3196f62ee4cbcd2e blead-47-2af192ee
 Stopped smoke at @{ [$timer += 100] }
 EORESULTS
 
     is( $reporter->{_rpt}{started}, $timer - 300, "Start time" );
     is( $reporter->{_rpt}{patch}, '2af192eebde5f7a93e229dfc3196f62ee4cbcd2e',
         "Changenumber $reporter->{_rpt}{patch}" );
-    is( $reporter->{_rpt}{patchdate}, '20081220.10:38:02',
-        "Changedate $reporter->{_rpt}{patchdate}" );
+    is( $reporter->{_rpt}{patchdescr}, 'blead-47-2af192ee',
+        "Changedescr $reporter->{_rpt}{patchdescr}" );
     my $cfgarg = "-Dcc='ccache gcc' -Uuseperlio";
     is( $reporter->{_rpt}{$cfgarg}{N}{stdio}, "O",
         "'$cfgarg' reports ok" );
@@ -136,7 +136,7 @@ EORESULTS
 
     my @r_lines = split /\n/, $reporter->smoke_matrix;
     is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";
-20081220.10:38:02  Configuration (common) -Dcc='ccache gcc'
+blead-47-2af192ee  Configuration (common) -Dcc='ccache gcc'
 ----------- ---------------------------------------------------------
 O O         -Uuseperlio
 __EOM__

@@ -319,7 +319,7 @@ sub check_dot_patch {
         if ( $patch_level ) {
             my @dot_patch = split ' ', $patch_level;
             $self->{patchlevel} = $dot_patch[2] || $dot_patch[0];
-            $self->{patchdate} = $dot_patch[1];
+            $self->{patchdescr} = $dot_patch[3] || $dot_patch[0];
             return $self->{patchlevel};
         }
     }
