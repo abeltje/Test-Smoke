@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK $NOCASE );
-$VERSION = '0.56';
+$VERSION = '0.57';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -1042,7 +1042,9 @@ sub whereis {
     foreach my $dir ( @path ) {
         foreach my $ext ( @pext ) {
             my $fname = File::Spec->catfile( $dir, "$prog$ext" );
-            return $fname if -x $fname;
+            if ( -x $fname ) {
+                return $fname =~ /\s/ ? qq/"$fname"/ : $fname;
+            }
         }
     }
     return '';
