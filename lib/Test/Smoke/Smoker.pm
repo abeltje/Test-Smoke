@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.043';
+$VERSION = '0.044';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -911,7 +911,7 @@ sub _normalize_testname {
             : catfile( updir(), 't', $test_name );
     }
 
-    my $test_base = catdir( $self->{ddir}, 't' );
+    my $test_base = catdir( $self->{ddir}, 'pod' );
     $test_name = rel2abs( $test_name, $test_base );
 
     my $test_path = abs2rel( $test_name, $test_base );
