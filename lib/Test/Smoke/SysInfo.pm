@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.041';
+$VERSION = '0.042';
 
 use base 'Exporter';
 @EXPORT_OK = qw( &sysinfo &tsuname );
@@ -660,19 +660,22 @@ sub Windows {
     eval { require Win32::TieRegistry };
     unless ( $@ ) {
         Win32::TieRegistry->import();
+	my $Registry = $Win32::TieRegistry::Registry->Open(
+          "",
+          { Access => 0x2000000 }
+        );
         my $basekey = join "\\",
             qw( LMachine HARDWARE DESCRIPTION System CentralProcessor );
         my $pnskey = "$basekey\\0\\ProcessorNameString";
-        my $cpustr = $Win32::TieRegistry::Registry->{ $pnskey };
+        my $cpustr = $Registry->{ $pnskey };
         my $idkey = "$basekey\\0\\Identifier";
-        $cpustr ||= $Win32::TieRegistry::Registry->{ $idkey };
+        $cpustr ||= $Registry->{ $idkey };
         $cpustr =~ tr/ / /sd;
         my $mhzkey = "$basekey\\0\\~MHz";
-        $cpustr .= sprintf "(~%d MHz)",
-            hex $Win32::TieRegistry::Registry->{ $mhzkey };
+        $cpustr .= sprintf "(~%d MHz)", hex $Registry->{ $mhzkey };
         $cpu = $cpustr;
-        $ncpu = keys %{ $Win32::TieRegistry::Registry->{ $basekey } };
-        ($cpu_type) = $Win32::TieRegistry::Registry->{ $idkey } =~ /^(\S+)/;
+        $ncpu = keys %{ $Registry->{ $basekey } };
+        ($cpu_type) = $Registry->{ $idkey } =~ /^(\S+)/;
     }
 
     return {
