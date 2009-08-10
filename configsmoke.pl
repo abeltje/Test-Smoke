@@ -20,7 +20,7 @@ use Test::Smoke::SysInfo;
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.071';
+$VERSION = '0.072';
 
 use Getopt::Long;
 my %options = ( 
@@ -636,6 +636,12 @@ EOT
 \t(Make empty, with single space, to not set it.)",
         alt => [ ],
         dft => (exists $ENV{PERL5LIB} ? $ENV{PERL5LIB} : ''),
+    },
+    perl5opt => {
+        msg => "What value should be used for PERL5OPT in the jcl wrapper?
+\t(Make empty, with single space, to not set it.)",
+        alt => [ ],
+        dft => (exists $ENV{PERL5OPT} ? $ENV{PERL5OPT} : ''),
     },
     # Schedule stuff
     docron => {
@@ -1459,7 +1465,7 @@ F<smokeperl.pl>. VMS might benefit.
 $arg = 'delay_report';
 $config{ $arg } = $^O =~ /VMS/;
 
-=item ENV stuff
+=item PERL5LIB
 
 If you have a value for PERL5LIB set in the config environment, you
 could have it transferred tho the jcl-wrapperscript. Do not bother
@@ -1474,6 +1480,24 @@ P5LIB: {
     $has_perl5lib or last P5LIB;
     print "\nI see you have PERL5LIB set to: '$ENV{PERL5LIB}'";
     $arg = 'perl5lib';
+    $config{ $arg } = prompt( $arg );
+}
+
+=item PERL5OPT
+
+If you have a value for PERL5OPT set in the config environment, you
+could have it transferred tho the jcl-wrapperscript. Do not bother
+asking if it is not there.
+
+=cut
+
+my $has_perl5opt = exists $ENV{PERL5OPT} && defined $ENV{PERL5OPT} &&
+                   length $ENV{PERL5OPT};
+
+P5OPT: {
+    $has_perl5opt or last P5OPT;
+    print "\nI see you have PERL5OPT set to: '$ENV{PERL5OPT}'";
+    $arg = 'perl5opt';
     $config{ $arg } = prompt( $arg );
 }
 
@@ -1690,10 +1714,14 @@ sub write_sh {
     my $cronline = schedule_entry( File::Spec->catfile( $cwd, $jcl ), 
                                    $cron, $crontime );
 
-    my $p5lib = $config{perl5lib} ? <<EO_P5L : '';
+    my $p5lib = $config{perl5lib} ? <<EO_P5LIB : '';
 PERL5LIB=$config{perl5lib}
 export PERL5LIB
-EO_P5L
+EO_P5LIB
+    my $p5opt = $config{perl5opt} ? <<EO_P5OPT : '';
+PERL5OPT=$config{perl5opt}
+export PERL5OPT
+EO_P5OPT
 
     my $handle_lock = $config{killtime} ? <<EO_CONT : <<EO_DIE;
     # Not sure about this, so I will keep the old behaviour 
@@ -1764,10 +1792,14 @@ REM I found hanging XCOPY while smoking; uncommenting the next line might help
 REM set COPYCMD=/Y \%COPYCMD\%
 
 EOCOPYCMD
-    my $p5lib = $config{perl5lib} ? <<EO_P5L : '';
+    my $p5lib = $config{perl5lib} ? <<EO_P5LIB : '';
 
 set PERL5LIB=$config{perl5lib}
-EO_P5L
+EO_P5LIB
+    my $p5opt = $config{perl5opt} ? <<EO_P5OPT : '';
+
+set PERL5OPT=$config{perl5opt}
+EO_P5OPT
 
 
     my $jcl = "$options{jcl}.cmd";
@@ -1836,6 +1868,8 @@ sub write_com {
     my $cwd = File::Spec->canonpath( cwd() );
     my $p5lib_p = $config{perl5lib} ? ' '  : '!';
     my $p5lib = "$p5lib_p DEFINE PERL5LIB $config{perl5lib}";
+    my $p5opt_p = $config{perl5opt} ? ' '  : '!';
+    my $p5opt = "$p5opt_p DEFINE PERL5OPT $config{perl5opt}";
     local *MYSMOKECOM;
     open MYSMOKECOM, "> $jcl" or
         die "Cannot write '$jcl': $!";
@@ -1851,6 +1885,7 @@ sub write_com {
 \$!
 \$  SET DEFAULT $cwd
 \$$p5lib
+\$$p5opt
 \$! DEFINE/USER sys\$output $options{log}
 \$! DEFINE/USER sys\$error $options{log}
 \$  MCR $^X ${findbin}smokeperl.pl "-c=$options{config}"
