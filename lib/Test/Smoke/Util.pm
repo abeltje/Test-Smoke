@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK $NOCASE );
-$VERSION = '0.57';
+$VERSION = '0.58';
 
 use base 'Exporter';
 @EXPORT = qw( 
@@ -1295,7 +1295,8 @@ sub skip_filter {
     m,^\s*pl2bat\.bat [\w\\]+, ||
     m,^Making , ||
     m,^Skip , ||
-    m,^Creating library file: libExtTest\.dll\.a,
+    m,^Creating library file: libExtTest\.dll\.a, ||
+    m,^cc: warning 983: ,
 }
 
 1;

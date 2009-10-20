@@ -3,28 +3,15 @@ use strict;
 
 # $Id$
 
-use File::Spec;
-
-use Test::More tests => 18;
-BEGIN { use_ok( 'Test::Smoke::Util' ); }
-
-while ( <DATA> ) {
-    my( $pf, $line ) = /^(.) (.*)$/;
-
-    if ( $pf =~ /[pP]/ ) {
-        ok( skip_filter( $line ), "P: $line" );
-    } else {
-        ok( !skip_filter( $line ), "F: $line" );
-    }
-}
-
-# Add the test-lines after __DATA__ 
+# Add the test-lines in the '    EOT' here-document
 # First char should be 'P' for PASS (we don't want it)
 # and 'F' for FAIL (we _do_ want it)
 # Second char should be a single space (for readability)
 # Rest of the line will be tested!
 
-__DATA__
+my @tests;
+BEGIN {
+    @tests = split /\n/, <<'    EOT';
 P op/strict.............ok
 F op/strict.............FAILED
 F       FAILED 4/10
@@ -42,3 +29,20 @@ P Creating library file: libExtTest.dll.a
 P not ok 43 # SKIP see perldelta583
 P base/cond...................................ok    0.060s
 P base/cond...................................ok       60 ms
+P cc: warning 983: The -lc library specified on the command line is also added automatically by the compiler driver.  
+    EOT
+}
+
+use Test::More tests => 1 + @tests;
+
+use_ok 'Test::Smoke::Util', 'skip_filter';
+
+for my $test ( @tests ) {
+    my( $pf, $line ) = $test =~ /^(.) (.*)$/;
+
+    if ( $pf =~ /[pP]/ ) {
+        ok( skip_filter( $line ), "P: $line" );
+    } else {
+        ok( !skip_filter( $line ), "F: $line" );
+    }
+}
