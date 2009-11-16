@@ -964,7 +964,7 @@ sub set_skip_tests {
             my $did_mv = rename $tsrc, $tdst;
             my $error = $did_mv ? "" : " ($!)";
             $self->{v} and
-                $self->tty( sprintf "\t$raw: %sok\n", $did_mv ?  'not ' : '',
+                $self->tty( sprintf "\t%s: %sok%s\n", $raw, $did_mv ?  '' : 'not ',
                                     $error );
             -f $tdst and chmod $perms, $tdst;
         }

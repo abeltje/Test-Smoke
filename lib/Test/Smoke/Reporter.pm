@@ -281,7 +281,7 @@ sub _parse {
             push @{ $rpt{$cfgarg}->{$debug}{$tstenv} }, $_;
         }
 
-        if ( /^Finished smoking \d+/ ) {
+        if ( /^Finished smoking [\dA-Fa-f]+/ ) {
             $rpt{statcfg}{ $statarg } = $fcnt;
             $rpt{finished} = "Finished";
             next;
@@ -474,7 +474,7 @@ use C<< catfile( $self->{ddir}, $self->{rptfile} ) >>.
 sub write_to_file {
     my $self = shift;
     return unless defined $self->{_outfile};
-    my( $name ) = @_ || ( catfile $self->{ddir}, $self->{rptfile} );
+    my( $name ) = shift || ( catfile $self->{ddir}, $self->{rptfile} );
 
     $self->{v} and print "Writing report to '$name':";
     local *RPT;
