@@ -1,5 +1,5 @@
 Started smoke at 1074150300
-Smoking patch 22154
+Smoking patch __PATCHLEVEL__
 MANIFEST did not declare '.config/README'
 MANIFEST did not declare '.config/instruct'
 MANIFEST did not declare 'mktest.log'

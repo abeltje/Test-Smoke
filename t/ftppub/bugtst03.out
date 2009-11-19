@@ -1,5 +1,5 @@
 Started smoke at 1078266866
-Smoking patch 22423
+Smoking patch __PATCHLEVEL__
 Stopped smoke at 1078266869
 Started smoke at 1078266869
 
@@ -319,5 +319,5 @@ Compiler info: cl version 12.00.8804
 TSTENV = stdio	
     ../ext/Cwd/t/cwd.t......................FAILED 9-20
 
-Finished smoking 22423
+Finished smoking __PATCHLEVEL__
 Stopped smoke at 1078296034

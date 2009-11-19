@@ -15,13 +15,39 @@ use File::Copy;
 my $verbose = exists $ENV{SMOKE_VERBOSE} ? $ENV{SMOKE_VERBOSE} : 0;
 my $showcfg = 0;
 
-use Test::More tests => 86;
+use Test::More tests => 247;
 
 use_ok 'Test::Smoke::Reporter';
 
+my @patchlevels = (
+#    [
+#        patch level,
+#        patch description,
+#        string in report
+#    ],
+     [
+         "20000",
+         "",
+         "   20000   ",
+     ],
+     [
+         "2af192eebde5f7a93e229dfc3196f62ee4cbcd2e",
+         "blead-47-2af192ee",
+         "blead-47-2af192ee",
+     ],
+     [
+         "a1248f17ffcfa8fe0e91df962317b46b81fc0ce5",
+         "v5.11.1-205-ga1248f1",
+         "v5.11.1-205-ga1248f1",
+     ],
+);
+
+
 my $config_sh = catfile( $findbin, 'config.sh' );
-{
+
+for my $p (@patchlevels) {
     create_config_sh( $config_sh, version => '5.6.1' );
+
     my $reporter = Test::Smoke::Reporter->new(
         ddir       => $findbin,
         v          => $verbose, 
@@ -36,9 +62,10 @@ __EOCFG__
     isa_ok( $reporter, 'Test::Smoke::Reporter' );
 
     my $timer = time - 300;
+    my $patch = $p->[0] . ($p->[1] ? " $p->[1]" : "");
     $reporter->read_parse( \(my $result = <<EORESULTS) );
 Started smoke at @{ [$timer] }
-Smoking patch 20000
+Smoking patch $patch
 
 
 Stopped smoke at @{ [$timer += 100] }
@@ -55,88 +82,28 @@ Configuration: -Dusedevel -Dcc='ccache gcc' -Uuseperlio -DDEBUGGING
 ------------------------------------------------------------------------------
 PERLIO = stdio  u=4.43  s=0.76  cu=324.65  cs=21.58  scripts=731  tests=75945
 All tests successful.
-Finished smoking 20000
+Finished smoking $patch
 Stopped smoke at @{ [$timer += 100] }
 EORESULTS
 
     is( $reporter->{_rpt}{started}, $timer - 300, "Start time" );
-    is( $reporter->{_rpt}{patch}, 20000,
+    is( $reporter->{_rpt}{patch}, $p->[0], 
         "Changenumber $reporter->{_rpt}{patch}" );
-    my $cfgarg = "-Dcc='ccache gcc' -Uuseperlio";
-    is( $reporter->{_rpt}{$cfgarg}{N}{stdio}, "O",
-        "'$cfgarg' reports ok" );
-    is( $reporter->{_rpt}{$cfgarg}{D}{stdio}, "O",
-        "'$cfgarg -DDEBUGGING' reports ok" );
-
-    my @r_lines = split /\n/, $reporter->smoke_matrix;
-    is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";
-   20000     Configuration (common) -Dcc='ccache gcc'
------------ ---------------------------------------------------------
-O O         -Uuseperlio
-__EOM__
-
-    chomp( my $summary = $reporter->summary );
-    is $summary, 'Summary: PASS', $summary;
-    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
-            "hasn't the configurations";
-
-#    diag Dumper $reporter->{_counters};
-#    diag $reporter->report;
-}
-
-{
-    create_config_sh( $config_sh, version => '5.6.1' );
-    my $reporter = Test::Smoke::Reporter->new(
-        ddir       => $findbin,
-        v          => $verbose, 
-        outfile    => '',
-        showcfg    => $showcfg,
-        cfg        => \( my $bcfg = <<__EOCFG__ ),
--Dcc='ccache gcc'
-=
--Uuseperlio
-__EOCFG__
-    );
-    isa_ok( $reporter, 'Test::Smoke::Reporter' );
-
-    my $timer = time - 300;
-    $reporter->read_parse( \(my $result = <<EORESULTS) );
-Started smoke at @{ [$timer] }
-Smoking patch 2af192eebde5f7a93e229dfc3196f62ee4cbcd2e blead-47-2af192ee
-
-
-Stopped smoke at @{ [$timer += 100] }
-Started smoke at @{ [$timer] }
-
-Configuration: -Dusedevel -Dcc='ccache gcc' -Uuseperlio
-------------------------------------------------------------------------------
-PERLIO = stdio  u=3.96  s=0.66  cu=298.11  cs=21.18  scripts=731  tests=75945
-All tests successful.
-Stopped smoke at @{ [$timer += 100] }
-Started smoke at @{ [$timer] }
-
-Configuration: -Dusedevel -Dcc='ccache gcc' -Uuseperlio -DDEBUGGING
-------------------------------------------------------------------------------
-PERLIO = stdio  u=4.43  s=0.76  cu=324.65  cs=21.58  scripts=731  tests=75945
-All tests successful.
-Finished smoking 2af192eebde5f7a93e229dfc3196f62ee4cbcd2e blead-47-2af192ee
-Stopped smoke at @{ [$timer += 100] }
-EORESULTS
-
-    is( $reporter->{_rpt}{started}, $timer - 300, "Start time" );
-    is( $reporter->{_rpt}{patch}, '2af192eebde5f7a93e229dfc3196f62ee4cbcd2e',
-        "Changenumber $reporter->{_rpt}{patch}" );
-    is( $reporter->{_rpt}{patchdescr}, 'blead-47-2af192ee',
+    is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
         "Changedescr $reporter->{_rpt}{patchdescr}" );
     my $cfgarg = "-Dcc='ccache gcc' -Uuseperlio";
     is( $reporter->{_rpt}{$cfgarg}{N}{stdio}, "O",
         "'$cfgarg' reports ok" );
     is( $reporter->{_rpt}{$cfgarg}{D}{stdio}, "O",
         "'$cfgarg -DDEBUGGING' reports ok" );
+    ok( (not defined $reporter->{_rpt}{running}),
+        "Smoke not running" );
+    is( $reporter->{_rpt}{finished}, "Finished",
+        "Smoke finished" );
 
     my @r_lines = split /\n/, $reporter->smoke_matrix;
     is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";
-blead-47-2af192ee  Configuration (common) -Dcc='ccache gcc'
+$p->[2]  Configuration (common) -Dcc='ccache gcc'
 ----------- ---------------------------------------------------------
 O O         -Uuseperlio
 __EOM__
@@ -150,7 +117,7 @@ __EOM__
 #    diag $reporter->report;
 }
 
-{
+for my $p (@patchlevels) {
     create_config_sh( $config_sh, version => '5.8.3' );
     my $reporter = Test::Smoke::Reporter->new(
         ddir    => $findbin,
@@ -164,10 +131,10 @@ __EOCFG__
     isa_ok( $reporter, 'Test::Smoke::Reporter' );
 
     my $timer = time - 1000;
-    my $patchlevel = 21000;
+    my $patch = $p->[0] . ($p->[1] ? " $p->[1]" : "");
     $reporter->read_parse( \(my $result = <<EORESULTS) );
 Started smoke at @{ [$timer] }
-Smoking patch $patchlevel
+Smoking patch $patch
 
 MANIFEST did not declare t/perl
 
@@ -202,12 +169,18 @@ TSTENV = locale:nl_NL.utf8      u=4.15  s=0.62  cu=269.53  cs=27.02  scripts=763
 
     ../lib/Benchmark.t............FAILED 193
 
-Finished smoking $patchlevel
+Finished smoking $patch
 Stopped smoke at @{ [$timer += 100] }
 EORESULTS
 
-    is( $reporter->{_rpt}{patch}, $patchlevel,
+    is( $reporter->{_rpt}{patch}, $p->[0],
         "Changenumber $reporter->{_rpt}{patch}" );
+    is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
+        "Changedescr $reporter->{_rpt}{patchdescr}" );
+    ok( (not defined $reporter->{_rpt}{running}),
+        "Smoke not running" );
+    is( $reporter->{_rpt}{finished}, "Finished",
+        "Smoke finished" );
 
     my $cfgarg = "-Dcc='ccache gcc'";
     {   local $" = "', '";
@@ -233,7 +206,7 @@ EORESULTS
 
     my @r_lines = split /\n/, $reporter->smoke_matrix;
     is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";
-   21000     Configuration (common) -Dcc='ccache gcc'
+$p->[2]  Configuration (common) -Dcc='ccache gcc'
 ----------- ---------------------------------------------------------
 F O F F O F 
 __EOM__
@@ -252,7 +225,7 @@ __EOM__
 #    diag $reporter->report;
 }
 
-{
+for my $p (@patchlevels) {
     create_config_sh( $config_sh, version => '5.9.0' );
     my $reporter = Test::Smoke::Reporter->new(
         ddir    => $findbin,
@@ -261,9 +234,9 @@ __EOM__
     );
     isa_ok( $reporter, 'Test::Smoke::Reporter' );
 
-    my $patchlevel = 19000;
+    my $patch = $p->[0] . ($p->[1] ? " $p->[1]" : "");
     $reporter->read_parse( \(my $result = <<EORESULTS) );
-Smoking patch 19000
+Smoking patch $patch
 Stopped smoke at 1073290464
 Started smoke at 1073290464
 
@@ -295,10 +268,17 @@ PERLIO = perlio u=0.05  s=0.01  cu=0.25  cs=0.02  scripts=3  tests=106
                                          96 98-100
 
 Stopped smoke at 1073290467
+Finished smoking $patch
 EORESULTS
 
-    is( $reporter->{_rpt}{patch}, $patchlevel,
+    is( $reporter->{_rpt}{patch}, $p->[0],
         "Changenumber $reporter->{_rpt}{patch}" );
+    is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
+        "Changedescr $reporter->{_rpt}{patchdescr}" );
+    ok( (not defined $reporter->{_rpt}{running}),
+        "Smoke not running" );
+    is( $reporter->{_rpt}{finished}, "Finished",
+        "Smoke finished" );
 
     my $cfgarg = "";
     {   local $" = "', '";
@@ -322,7 +302,7 @@ EORESULTS
 
     my @r_lines = split /\n/, $reporter->smoke_matrix;
     is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";
-   19000     Configuration (common) none
+$p->[2]  Configuration (common) none
 ----------- ---------------------------------------------------------
 O O F F     
 __EOM__
@@ -337,20 +317,21 @@ __EOM__
 
 unlink $config_sh;
 
-{ # This test is just to test 'PASS' (and not PASS-so-far)
-#    create_config_sh( $config_sh, version => '5.00504' );
+for my $p (@patchlevels) {
+    # This test is just to test 'PASS' (and not PASS-so-far)
+    #    create_config_sh( $config_sh, version => '5.00504' );
     my $reporter = Test::Smoke::Reporter->new( 
         ddir    => $findbin,
         v       => $verbose, 
         outfile => '',
         is56x   => 1,
     );
-    my $patchlevel = 22111;
+    my $patch = $p->[0] . ($p->[1] ? " $p->[1]" : "");
 
     isa_ok $reporter, 'Test::Smoke::Reporter';
     $reporter->read_parse( \(my $result = <<EORESULTS) );
 Started smoke at 1073864611
-Smoking patch 22111
+Smoking patch $patch
 Stopped smoke at 1073864615
 Started smoke at 1073864615
 
@@ -369,7 +350,7 @@ Configuration: -Dusedevel -Dcc='ccache egcc' -Uuseperlio -DDEBUGGING
 Compiler info: ccache egcc version 3.2
 TSTENV = stdio  u=9.84  s=2.03  cu=523.95  cs=61.85  scripts=776  tests=78557
 All tests successful.
-Finished smoking 22111
+Finished smoking $patch
 Stopped smoke at 1073869001
 EORESULTS
 
@@ -380,21 +361,27 @@ EORESULTS
 
     my @r_lines = split /\n/, $reporter->smoke_matrix;
     is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";
-   22111     Configuration (common) -Dcc='ccache egcc'
+$p->[2]  Configuration (common) -Dcc='ccache egcc'
 ----------- ---------------------------------------------------------
 O O         -Uuseperlio
 __EOM__
 
 }
 
-{ # Test a bug reported by Merijn
-  # the c's were reported for locale: only
+for my $p (@patchlevels) {
+    # Test a bug reported by Merijn
+    # the c's were reported for locale: only
+
+    my $patch = $p->[0] . ($p->[1] ? " $p->[1]" : "");
+    my $ddir = catfile( $findbin, 'ftppub' );
+    make_test_file($patch, $ddir, "bugtst01.out", "bugtst01.tmp");
+
     ok( my $reporter = Test::Smoke::Reporter->new(
-        ddir       => catfile( $findbin, 'ftppub' ),
+        ddir       => $ddir,
         is56x      => 0,
         defaultenv => 0,
         locale     => 'EN_US.UTF-8',
-        outfile    => 'bugtst01.out',
+        outfile    => 'bugtst01.tmp',
         v          => $verbose,
         showcfg    => $showcfg,
         cfg        => \( my $bcfg = <<__EOCFG__ ),
@@ -408,9 +395,19 @@ __EOCFG__
     isa_ok $reporter, 'Test::Smoke::Reporter';
     is $reporter->ccinfo, "? unknown cc version ", "ccinfo(bugstst01)";
 
+    is( $reporter->{_rpt}{patch}, $p->[0],
+        "Changenumber $reporter->{_rpt}{patch}" );
+    is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
+        "Changedescr $reporter->{_rpt}{patchdescr}" );
+
+    ok( (defined $reporter->{_rpt}{running}),
+        "Smoke still running" );
+    isnt( $reporter->{_rpt}{finished}, "Finished",
+        "Smoke not finished" );
+
     my @r_lines = split /\n/, $reporter->smoke_matrix;
     my $r = is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";
-   22154     Configuration (common) -Dcc=gcc
+$p->[2]  Configuration (common) -Dcc=gcc
 ----------- ---------------------------------------------------------
 F F F F F F 
 c - - c - - -Duselongdouble
@@ -426,14 +423,22 @@ __EOM__
          unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
                 "hasn't the configurations";
     }
+
+    unlink catfile( $ddir, "bugtst01.tmp" ) or die "Failed to unlink temp file: $!";
 }
 
-{ # report from cygwin
+for my $p (@patchlevels) {
+    # report from cygwin
+
+    my $patch = $p->[0] . ($p->[1] ? " $p->[1]" : "");
+    my $ddir = catfile( $findbin, 'ftppub' );
+    make_test_file($patch, $ddir, "bugtst02.out", "bugtst02.tmp");
+
     ok( my $reporter = Test::Smoke::Reporter->new(
-        ddir       => catdir( $findbin, 'ftppub' ),
+        ddir       => $ddir,
         is56x      => 0,
         defaultenv => 0,
-        outfile    => 'bugtst02.out',
+        outfile    => 'bugtst02.tmp',
         v          => $verbose,
         showcfg    => $showcfg,
         cfg        => \( my $bcfg = <<__EOCFG__ ),
@@ -448,9 +453,19 @@ __EOCFG__
     is $reporter->ccinfo, "gcc version 3.3.1 (cygming special)", 
        "ccinfo(bugstst02)";
 
+    is( $reporter->{_rpt}{patch}, $p->[0],
+        "Changenumber $reporter->{_rpt}{patch}" );
+    is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
+        "Changedescr $reporter->{_rpt}{patchdescr}" );
+
+    ok( (not defined $reporter->{_rpt}{running}),
+        "Smoke not running" );
+    is( $reporter->{_rpt}{finished}, "Finished",
+        "Smoke finished" );
+
     my @r_lines = split /\n/, $reporter->smoke_matrix;
     my $r = is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix 2";
-   22302     Configuration (common) none
+$p->[2]  Configuration (common) none
 ----------- ---------------------------------------------------------
 F F M -     
 F F M -     -Duse64bitint
@@ -467,15 +482,23 @@ __EOM__
          unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
                 "hasn't the configurations";
     }
+
+    unlink catfile( $ddir, "bugtst02.tmp" ) or die "Failed to unlink temp file: $!";
 }
 
-{ # report from Win32
+for my $p (@patchlevels) {
+    # report from Win32
+
+    my $patch = $p->[0] . ($p->[1] ? " $p->[1]" : "");
+    my $ddir = catfile( $findbin, 'ftppub' );
+    make_test_file($patch, $ddir, "bugtst03.out", "bugtst03.tmp");
+
     ok( my $reporter = Test::Smoke::Reporter->new(
         ddir       => catdir( $findbin, 'ftppub' ),
         is56x      => 0,
         defaultenv => 1,
         is_win32   => 1,
-        outfile    => 'bugtst03.out',
+        outfile    => 'bugtst03.tmp',
         v          => $verbose,
         showcfg    => $showcfg,
         cfg        => \( my $bcfg = <<'__EOCFG__' ),
@@ -501,9 +524,19 @@ __EOCFG__
     is $reporter->ccinfo, "cl version 12.00.8804",
        "ccinfo(bugstst03)";
 
+    is( $reporter->{_rpt}{patch}, $p->[0],
+        "Changenumber $reporter->{_rpt}{patch}" );
+    is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
+        "Changedescr $reporter->{_rpt}{patchdescr}" );
+
+    ok( (not defined $reporter->{_rpt}{running}),
+        "Smoke not running" );
+    is( $reporter->{_rpt}{finished}, "Finished",
+        "Smoke finished" );
+
     my @r_lines = split /\n/, $reporter->smoke_matrix;
-    my $r = is_deeply \@r_lines, [split /\n/, <<'__EOM__'], "Matrix 3";
-   22423     Configuration (common) -DINST_TOP=$(INST_DRV)\Smoke\doesntexist
+    my $r = is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix 3";
+$p->[2]  Configuration (common) -DINST_TOP=\$(INST_DRV)\\Smoke\\doesntexist
 ----------- ---------------------------------------------------------
 O O         
 F F         -Accflags='-DPERL_COPY_ON_WRITE'
@@ -581,6 +614,7 @@ Inconsistent test results (between TEST and harness):
     ../ext/threads/shared/t/sv_simple.t.....dubious
 __EOFAIL__
 
+    unlink catfile( $ddir, "bugtst03.tmp" ) or die "Failed to unlink temp file: $!";
 }
 
 { # Test the grepccmsg() feature
@@ -767,6 +801,72 @@ __EOL__
     1 while unlink catfile( $findbin, 'patchlevel.h' );
 }
 
+{ # Test write to file
+    create_config_sh( $config_sh, version => '5.6.1' );
+
+    my $reporter = Test::Smoke::Reporter->new(
+        ddir       => $findbin,
+        v          => $verbose, 
+        outfile    => '',
+        showcfg    => $showcfg,
+        cfg        => \( my $bcfg = <<__EOCFG__ ),
+-Dcc='ccache gcc'
+=
+-Uuseperlio
+__EOCFG__
+    );
+    isa_ok( $reporter, 'Test::Smoke::Reporter' );
+
+    my $timer = time - 300;
+    $reporter->read_parse( \(my $result = <<EORESULTS) );
+Started smoke at @{ [$timer] }
+Smoking patch 22000
+
+
+Stopped smoke at @{ [$timer += 100] }
+Started smoke at @{ [$timer] }
+
+Configuration: -Dusedevel -Dcc='ccache gcc' -Uuseperlio
+------------------------------------------------------------------------------
+PERLIO = stdio  u=3.96  s=0.66  cu=298.11  cs=21.18  scripts=731  tests=75945
+All tests successful.
+Stopped smoke at @{ [$timer += 100] }
+Started smoke at @{ [$timer] }
+
+Configuration: -Dusedevel -Dcc='ccache gcc' -Uuseperlio -DDEBUGGING
+------------------------------------------------------------------------------
+PERLIO = stdio  u=4.43  s=0.76  cu=324.65  cs=21.58  scripts=731  tests=75945
+All tests successful.
+Finished smoking 22000
+Stopped smoke at @{ [$timer += 100] }
+EORESULTS
+
+	my $report_string = $reporter->report;
+	my $file = catfile($findbin, "report.tmp");
+	if (-e $file) {
+		die "$file already exists?";
+	}
+	$reporter->write_to_file($file);
+
+
+	if (-e $file) {
+		ok(1, "file exists");
+
+		open my $in, "<", $file or die "Can't read file: $!";
+		my $in_string = "";
+		while (<$in>) {
+			$in_string .= $_;
+		}
+		is($in_string, $report_string, "file is the same as the report");
+		unlink $file or die "Can't unlink file: $!";
+	}
+	else {
+		ok(0, "file exists");
+		ok(0, "file is the same as the report");
+	}
+	unlink $config_sh;
+}
+
 sub create_config_sh {
     my( $file, %cfg ) = @_;
 
@@ -776,4 +876,18 @@ sub create_config_sh {
     $cfg_sh   .= join "", map "$_='$cfg{$_}'\n" => keys %cfg;
 
     put_file( $cfg_sh, $file );
+}
+
+
+sub make_test_file {
+    my ($patch, $ddir, $in_file, $out_file) = @_;
+
+    open my $in, "<", catfile( $ddir, $in_file ) or die "Failed to open input file: $!";
+    open my $out, ">", catfile( $ddir, $out_file ) or die "Failed to create temp file: $!";
+    while (<$in>) {
+       s/__PATCHLEVEL__/$patch/g;
+       print $out $_;
+    }
+    close $in;
+    close $out;
 }

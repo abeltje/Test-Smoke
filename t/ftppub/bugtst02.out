@@ -1,5 +1,5 @@
 Started smoke at 1076751124
-Smoking patch 22302
+Smoking patch __PATCHLEVEL__
 Stopped smoke at 1076751131
 Started smoke at 1076751131
 
@@ -194,5 +194,5 @@ TSTENV = minitest           cp ext/re/re.pm ext/re/re.tmp && sh mv-if-diff ext/r
     You may see some irrelevant test failures if you have been unable
     to build lib/Config.pm or lib/lib.pm.
         && PATH=/P/perl-current:.:/P/perl-current:.:/pro/bin:/usr/local/bin:/usr/bin:/bin:/usr/X11R6/bin:/C/Bin:/C/Util/Perl/bin:/C/Util/Elvis:/C/WinNT/system32:/C/WinNT:/C/WinNT/System32/Wbem:/C/Util/MySQL/bin:/C/Util/ImageMagick:/usr/local:/etc:/usr/lib:/lib:/sbin:/usr/sbin ./perl TEST base/*.t comp/*.t cmd/*.t run/*.t io/*.t op/*.t uni/*.t </dev/tty
-Finished smoking 22302
+Finished smoking __PATCHLEVEL__
 Stopped smoke at 1076767143
