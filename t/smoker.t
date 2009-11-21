@@ -334,7 +334,7 @@ EOOUT
 SKIP: {
     local *NOTESTS;
     open NOTESTS, "> $skip_tests" or skip "Cannot create($skip_tests): $!", 7;
-    my @notest = qw{ t/op/skip.t lib/t/skip.t ext/t/skip.t };
+    my @notest = qw{ t/op/skip.t lib/t/skip.t ext/t/skip.t cpan/t/skip.t dist/t/skip.t};
     print NOTESTS "$_\n" for @notest;
     close NOTESTS;
 
@@ -347,7 +347,7 @@ SKIP: {
        -f catfile( $dst, 't', 'op', 'skip.tskip' ),
        "t/op/skip.t was renamed";
 
-    my @libext = grep m{^(?:lib|ext)/} => @notest;
+    my @libext = grep m{^(?:lib|ext|cpan|dist)/} => @notest;
     my $manifest = catfile $dst, 'MANIFEST';
     my $manifiles = get_file( $manifest );
 

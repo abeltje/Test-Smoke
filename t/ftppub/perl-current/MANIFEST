@@ -8,4 +8,8 @@ lib/t/test.t
 lib/t/skip.t
 ext/t/test.t
 ext/t/skip.t
+cpan/t/test.t
+cpan/t/skip.t
+dist/t/test.t
+dist/t/skip.t
 MANIFEST
