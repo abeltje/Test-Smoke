@@ -950,8 +950,10 @@ sub set_skip_tests {
         while ( $raw = <SKIPTESTS> ) {
             $raw =~ m/^\s*#/ and next;
             $raw =~ s/(\S+).*/$1/s;
-            $raw =~ m/\.t$/ or next;
-            if ( $raw =~ m{^(?:lib|ext)/} ) {
+            if ($raw !~ m/\.t$/ and $raw !~ m/test\.pl$/) {
+                next;
+            }
+            if ( $raw =~ m{^(?:lib|ext|cpan|dist)/} ) {
                 push @libext, $raw;
                 next;
             }
