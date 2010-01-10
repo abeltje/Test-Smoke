@@ -15,7 +15,7 @@ use File::Copy;
 my $verbose = exists $ENV{SMOKE_VERBOSE} ? $ENV{SMOKE_VERBOSE} : 0;
 my $showcfg = 0;
 
-use Test::More tests => 247;
+use Test::More tests => 583;
 
 use_ok 'Test::Smoke::Reporter';
 
@@ -92,9 +92,9 @@ EORESULTS
     is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
         "Changedescr $reporter->{_rpt}{patchdescr}" );
     my $cfgarg = "-Dcc='ccache gcc' -Uuseperlio";
-    is( $reporter->{_rpt}{$cfgarg}{N}{stdio}, "O",
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{stdio}, "O",
         "'$cfgarg' reports ok" );
-    is( $reporter->{_rpt}{$cfgarg}{D}{stdio}, "O",
+    is( $reporter->{_rpt}{$cfgarg}{summary}{D}{stdio}, "O",
         "'$cfgarg -DDEBUGGING' reports ok" );
     ok( (not defined $reporter->{_rpt}{running}),
         "Smoke not running" );
@@ -189,19 +189,19 @@ EORESULTS
                    "Buildenvironments '@bldenv'" );
     }
 
-    is( $reporter->{_rpt}{$cfgarg}{N}{stdio}, 'F',
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{stdio}, 'F',
         "'$cfgarg' (stdio) reports failure" );
-    is( $reporter->{_rpt}{$cfgarg}{D}{stdio}, 'F',
+    is( $reporter->{_rpt}{$cfgarg}{summary}{D}{stdio}, 'F',
         "'$cfgarg -DDEBUGGING' (stdio) reports failure" );
 
-    is( $reporter->{_rpt}{$cfgarg}{N}{perlio}, 'O',
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{perlio}, 'O',
         "'$cfgarg' (perlio) reports OK" );
-    is( $reporter->{_rpt}{$cfgarg}{D}{perlio}, 'O',
+    is( $reporter->{_rpt}{$cfgarg}{summary}{D}{perlio}, 'O',
         "'$cfgarg -DDEBUGGING' (perlio) reports OK" );
 
-    is( $reporter->{_rpt}{$cfgarg}{N}{'locale:nl_NL.utf8'}, 'F',
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{'locale:nl_NL.utf8'}, 'F',
         "'$cfgarg' (utf8) reports failure" );
-    is( $reporter->{_rpt}{$cfgarg}{D}{'locale:nl_NL.utf8'}, 'F',
+    is( $reporter->{_rpt}{$cfgarg}{summary}{D}{'locale:nl_NL.utf8'}, 'F',
         "'$cfgarg -DDEBUGGING' (utf8) reports Failure" );
 
     my @r_lines = split /\n/, $reporter->smoke_matrix;
@@ -282,7 +282,7 @@ EORESULTS
 
     my $cfgarg = "";
     {   local $" = "', '";
-        my @bldenv = sort keys %{ $reporter->{_rpt}{$cfgarg}{N} };
+        my @bldenv = sort keys %{ $reporter->{_rpt}{$cfgarg}{summary}{N} };
         is_deeply( \@bldenv, [qw( perlio stdio )],
                    "Buildenvironments '@bldenv'" );
         @bldenv = sort @{ $reporter->{_tstenv} };
@@ -290,14 +290,14 @@ EORESULTS
                    "Buildenvironments '@bldenv'" );
     }
 
-    is( $reporter->{_rpt}{$cfgarg}{N}{stdio}, 'O',
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{stdio}, 'O',
         "'$cfgarg' (stdio) reports OK" );
-    is( $reporter->{_rpt}{$cfgarg}{D}{stdio}, 'F',
+    is( $reporter->{_rpt}{$cfgarg}{summary}{D}{stdio}, 'F',
         "'$cfgarg -DDEBUGGING' (stdio) reports failure" );
 
-    is( $reporter->{_rpt}{$cfgarg}{N}{perlio}, 'O',
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{perlio}, 'O',
         "'$cfgarg' (perlio) reports OK" );
-    is( $reporter->{_rpt}{$cfgarg}{D}{perlio}, 'F',
+    is( $reporter->{_rpt}{$cfgarg}{summary}{D}{perlio}, 'F',
         "'$cfgarg -DDEBUGGING' (perlio) reports Failure" );
 
     my @r_lines = split /\n/, $reporter->smoke_matrix;
@@ -616,6 +616,1018 @@ __EOFAIL__
 
     unlink catfile( $ddir, "bugtst03.tmp" ) or die "Failed to unlink temp file: $!";
 }
+
+for my $p (@patchlevels) {
+    # Failed tests (bad plan) + Passed TODO test
+    create_config_sh( $config_sh, version => '5.11.2' );
+
+    my $reporter = Test::Smoke::Reporter->new(
+        ddir       => $findbin,
+        v          => $verbose, 
+        outfile    => '',
+        showcfg    => $showcfg,
+        cfg        => \( my $bcfg = <<__EOCFG__ ),
+-Dcc=/opt/perl/ccache/gcc
+__EOCFG__
+    );
+    isa_ok( $reporter, 'Test::Smoke::Reporter' );
+
+    my $patch = $p->[0] . ($p->[1] ? " $p->[1]" : "");
+    $reporter->read_parse( \(my $result = <<EORESULTS) );
+Started smoke at 1258883807
+Smoking patch $patch
+
+Stopped smoke at 1258883808
+Started smoke at 1258883808
+
+
+Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc
+------------------------------------------------------------------------------
+TSTENV = stdio	
+../t/op/test1.t.............................................PASSED
+    2
+../t/op/test1.t.............................................FAILED
+    Bad plan.  You planned 5 tests but ran 2.
+../t/op/test2.t.............................................PASSED
+    2
+../t/op/test2.t.............................................FAILED
+    Bad plan.  You planned 5 tests but ran 2.
+
+TSTENV = perlio	
+../t/op/test1.t.............................................PASSED
+    2
+../t/op/test1.t.............................................FAILED
+    Bad plan.  You planned 5 tests but ran 2.
+../t/op/test2.t.............................................PASSED
+    2
+../t/op/test2.t.............................................FAILED
+    Bad plan.  You planned 5 tests but ran 2.
+
+Finished smoking $patch
+Stopped smoke at 1258883821
+EORESULTS
+
+    is( $reporter->{_rpt}{patch}, $p->[0], 
+        "Changenumber $reporter->{_rpt}{patch}" );
+    is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
+        "Changedescr $reporter->{_rpt}{patchdescr}" );
+
+    my $cfgarg = "-Dcc=/opt/perl/ccache/gcc";
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{stdio}, "F",
+        "'$cfgarg' reports fail" );
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{perlio}, "F",
+        "'$cfgarg' reports fail" );
+    ok( (not defined $reporter->{_rpt}{running}),
+        "Smoke not running" );
+    is( $reporter->{_rpt}{finished}, "Finished",
+        "Smoke finished" );
+
+
+
+    my @r_lines = split /\n/, $reporter->smoke_matrix;
+    is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";
+$p->[2]  Configuration (common) -Dcc=/opt/perl/ccache/gcc
+----------- ---------------------------------------------------------
+F F - -     
+__EOM__
+
+    chomp( my $summary = $reporter->summary );
+    is $summary, 'Summary: FAIL(F)', $summary;
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+            "hasn't the configurations";
+
+
+    my @f_lines = split /\n/, $reporter->failures;
+    is_deeply \@f_lines, [split /\n/, <<'__EOFAIL__'], "Failures";
+[stdio/perlio] 
+../t/op/test1.t.............................................FAILED
+    Bad plan.  You planned 5 tests but ran 2.
+../t/op/test2.t.............................................FAILED
+    Bad plan.  You planned 5 tests but ran 2.
+__EOFAIL__
+
+    my @t_lines = split /\n/, $reporter->todo_passed;
+    is_deeply \@t_lines, [split /\n/, <<'__EOTODO__'], "Passed Todo tests";
+[stdio/perlio] 
+../t/op/test1.t.............................................PASSED
+    2
+../t/op/test2.t.............................................PASSED
+    2
+__EOTODO__
+
+#    diag Dumper $reporter->{_counters};
+#    diag $reporter->report;
+}
+
+
+for my $p (@patchlevels) {
+    # Passed TODO test
+    create_config_sh( $config_sh, version => '5.11.2' );
+
+    my $reporter = Test::Smoke::Reporter->new(
+        ddir       => $findbin,
+        v          => $verbose, 
+        outfile    => '',
+        showcfg    => $showcfg,
+        cfg        => \( my $bcfg = <<__EOCFG__ ),
+-Dcc=/opt/perl/ccache/gcc
+__EOCFG__
+    );
+    isa_ok( $reporter, 'Test::Smoke::Reporter' );
+
+    my $patch = $p->[0] . ($p->[1] ? " $p->[1]" : "");
+    $reporter->read_parse( \(my $result = <<EORESULTS) );
+Started smoke at 1258883807
+Smoking patch $patch
+
+Stopped smoke at 1258883808
+Started smoke at 1258883808
+
+
+Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc
+------------------------------------------------------------------------------
+TSTENV = stdio	
+All tests successful.
+../t/op/test1.t.............................................PASSED
+    2
+../t/op/test2.t.............................................PASSED
+    2
+
+TSTENV = perlio	
+All tests successful.
+../t/op/test1.t.............................................PASSED
+    2
+../t/op/test2.t.............................................PASSED
+    2
+
+Finished smoking $patch
+Stopped smoke at 1258883821
+EORESULTS
+
+    is( $reporter->{_rpt}{patch}, $p->[0], 
+        "Changenumber $reporter->{_rpt}{patch}" );
+    is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
+        "Changedescr $reporter->{_rpt}{patchdescr}" );
+
+    my $cfgarg = "-Dcc=/opt/perl/ccache/gcc";
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{stdio}, "O",
+        "'$cfgarg' reports pass" );
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{perlio}, "O",
+        "'$cfgarg' reports pass" );
+    ok( (not defined $reporter->{_rpt}{running}),
+        "Smoke not running" );
+    is( $reporter->{_rpt}{finished}, "Finished",
+        "Smoke finished" );
+
+
+
+    my @r_lines = split /\n/, $reporter->smoke_matrix;
+    is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";
+$p->[2]  Configuration (common) -Dcc=/opt/perl/ccache/gcc
+----------- ---------------------------------------------------------
+O O - -     
+__EOM__
+
+    chomp( my $summary = $reporter->summary );
+    is $summary, 'Summary: PASS', $summary;
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+            "hasn't the configurations";
+
+
+    my @f_lines = split /\n/, $reporter->failures;
+    ok (! @f_lines, "No failures");
+
+    my @t_lines = split /\n/, $reporter->todo_passed;
+    is_deeply \@t_lines, [split /\n/, <<'__EOTODO__'], "Passed Todo tests";
+[stdio/perlio] 
+../t/op/test1.t.............................................PASSED
+    2
+../t/op/test2.t.............................................PASSED
+    2
+__EOTODO__
+
+#    diag Dumper $reporter->{_counters};
+#    diag $reporter->report;
+}
+
+
+for my $p (@patchlevels) {
+    # Failed tests + Passed TODO test
+    create_config_sh( $config_sh, version => '5.11.2' );
+
+    my $reporter = Test::Smoke::Reporter->new(
+        ddir       => $findbin,
+        v          => $verbose, 
+        outfile    => '',
+        showcfg    => $showcfg,
+        cfg        => \( my $bcfg = <<__EOCFG__ ),
+-Dcc=/opt/perl/ccache/gcc
+__EOCFG__
+    );
+    isa_ok( $reporter, 'Test::Smoke::Reporter' );
+
+    my $patch = $p->[0] . ($p->[1] ? " $p->[1]" : "");
+    $reporter->read_parse( \(my $result = <<EORESULTS) );
+Started smoke at 1258883807
+Smoking patch $patch
+
+Stopped smoke at 1258883808
+Started smoke at 1258883808
+
+Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc
+------------------------------------------------------------------------------
+TSTENV = stdio	
+../t/op/test1.t.............................................FAILED
+    1
+../t/op/test1.t.............................................PASSED
+    2
+../t/op/test2.t.............................................PASSED
+    2
+
+TSTENV = perlio	
+../t/op/test1.t.............................................FAILED
+    1
+../t/op/test1.t.............................................PASSED
+    2
+../t/op/test2.t.............................................PASSED
+    2
+
+Finished smoking $patch
+Stopped smoke at 1258883821
+EORESULTS
+
+    is( $reporter->{_rpt}{patch}, $p->[0], 
+        "Changenumber $reporter->{_rpt}{patch}" );
+    is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
+        "Changedescr $reporter->{_rpt}{patchdescr}" );
+
+    my $cfgarg = "-Dcc=/opt/perl/ccache/gcc";
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{stdio}, "F",
+        "'$cfgarg' reports fail" );
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{perlio}, "F",
+        "'$cfgarg' reports fail" );
+    ok( (not defined $reporter->{_rpt}{running}),
+        "Smoke not running" );
+    is( $reporter->{_rpt}{finished}, "Finished",
+        "Smoke finished" );
+
+
+
+    my @r_lines = split /\n/, $reporter->smoke_matrix;
+    is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";
+$p->[2]  Configuration (common) -Dcc=/opt/perl/ccache/gcc
+----------- ---------------------------------------------------------
+F F - -     
+__EOM__
+
+    chomp( my $summary = $reporter->summary );
+    is $summary, 'Summary: FAIL(F)', $summary;
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+            "hasn't the configurations";
+
+
+    my @f_lines = split /\n/, $reporter->failures;
+    is_deeply \@f_lines, [split /\n/, <<'__EOFAIL__'], "Failures";
+[stdio/perlio] 
+../t/op/test1.t.............................................FAILED
+    1
+__EOFAIL__
+
+    my @t_lines = split /\n/, $reporter->todo_passed;
+    is_deeply \@t_lines, [split /\n/, <<'__EOTODO__'], "Passed Todo tests";
+[stdio/perlio] 
+../t/op/test1.t.............................................PASSED
+    2
+../t/op/test2.t.............................................PASSED
+    2
+__EOTODO__
+
+#    diag Dumper $reporter->{_counters};
+#    diag $reporter->report;
+}
+
+
+for my $p (@patchlevels) {
+    # Failed + Passed TODO test
+    create_config_sh( $config_sh, version => '5.11.2' );
+
+    my $reporter = Test::Smoke::Reporter->new(
+        ddir       => $findbin,
+        v          => $verbose, 
+        outfile    => '',
+        showcfg    => $showcfg,
+        cfg        => \( my $bcfg = <<__EOCFG__ ),
+-Dcc=/opt/perl/ccache/gcc
+__EOCFG__
+    );
+    isa_ok( $reporter, 'Test::Smoke::Reporter' );
+
+    my $patch = $p->[0] . ($p->[1] ? " $p->[1]" : "");
+    $reporter->read_parse( \(my $result = <<EORESULTS) );
+Started smoke at 1258883807
+Smoking patch $patch
+
+Stopped smoke at 1258883808
+Started smoke at 1258883808
+
+Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc
+------------------------------------------------------------------------------
+TSTENV = stdio	u=0.37  s=0.00  cu=3.34  cs=0.10  scripts=5  tests=13349
+
+    ../t/op/test1.t.............................................FAILED
+        1
+    ../t/op/test1.t.............................................PASSED
+        2
+
+TSTENV = perlio	u=0.15  s=0.02  cu=3.02  cs=0.11  scripts=5  tests=13349
+
+    ../t/op/test1.t.............................................FAILED
+        1
+    ../t/op/test1.t.............................................PASSED
+        2
+
+Finished smoking $patch
+Stopped smoke at 1258883821
+EORESULTS
+
+    is( $reporter->{_rpt}{patch}, $p->[0], 
+        "Changenumber $reporter->{_rpt}{patch}" );
+    is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
+        "Changedescr $reporter->{_rpt}{patchdescr}" );
+
+    my $cfgarg = "-Dcc=/opt/perl/ccache/gcc";
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{stdio}, "F",
+        "'$cfgarg' reports fail" );
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{perlio}, "F",
+        "'$cfgarg' reports fail" );
+    ok( (not defined $reporter->{_rpt}{running}),
+        "Smoke not running" );
+    is( $reporter->{_rpt}{finished}, "Finished",
+        "Smoke finished" );
+
+
+
+    my @r_lines = split /\n/, $reporter->smoke_matrix;
+    is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";
+$p->[2]  Configuration (common) -Dcc=/opt/perl/ccache/gcc
+----------- ---------------------------------------------------------
+F F - -     
+__EOM__
+
+    chomp( my $summary = $reporter->summary );
+    is $summary, 'Summary: FAIL(F)', $summary;
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+            "hasn't the configurations";
+
+
+    my @f_lines = split /\n/, $reporter->failures;
+    is_deeply \@f_lines, [split /\n/, <<'__EOFAIL__'], "Failures";
+[stdio/perlio] 
+    ../t/op/test1.t.............................................FAILED
+        1
+__EOFAIL__
+
+    my @t_lines = split /\n/, $reporter->todo_passed;
+    is_deeply \@t_lines, [split /\n/, <<'__EOTODO__'], "Passed Todo tests";
+[stdio/perlio] 
+    ../t/op/test1.t.............................................PASSED
+        2
+__EOTODO__
+
+#    diag Dumper $reporter->{_counters};
+#    diag $reporter->report;
+}
+
+
+for my $p (@patchlevels) {
+    # Inconsistent result + Passed TODO test
+    create_config_sh( $config_sh, version => '5.11.2' );
+
+    my $reporter = Test::Smoke::Reporter->new(
+        ddir       => $findbin,
+        v          => $verbose, 
+        outfile    => '',
+        showcfg    => $showcfg,
+        cfg        => \( my $bcfg = <<__EOCFG__ ),
+-Dcc=/opt/perl/ccache/gcc
+__EOCFG__
+    );
+    isa_ok( $reporter, 'Test::Smoke::Reporter' );
+
+    my $patch = $p->[0] . ($p->[1] ? " $p->[1]" : "");
+    $reporter->read_parse( \(my $result = <<EORESULTS) );
+Started smoke at 1258883807
+Smoking patch $patch
+
+Stopped smoke at 1258883808
+Started smoke at 1258883808
+
+Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc
+------------------------------------------------------------------------------
+TSTENV = stdio	u=0.32  s=0.02  cu=3.32  cs=0.14  scripts=5  tests=13349
+
+    ../t/op/test1.t.............................................PASSED
+        2
+Inconsistent test results (between TEST and harness):
+    ../t/op/test1.t.........................FAILED at test 1
+
+TSTENV = perlio	u=0.10  s=0.00  cu=2.99  cs=0.12  scripts=5  tests=13349
+
+    ../t/op/test1.t.............................................PASSED
+        2
+Inconsistent test results (between TEST and harness):
+    ../t/op/test1.t.........................FAILED at test 1
+
+Finished smoking $patch
+Stopped smoke at 1258883821
+EORESULTS
+
+    is( $reporter->{_rpt}{patch}, $p->[0], 
+        "Changenumber $reporter->{_rpt}{patch}" );
+    is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
+        "Changedescr $reporter->{_rpt}{patchdescr}" );
+
+    my $cfgarg = "-Dcc=/opt/perl/ccache/gcc";
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{stdio}, "X",
+        "'$cfgarg' reports inconsistent" );
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{perlio}, "X",
+        "'$cfgarg' reports inconsistent" );
+    ok( (not defined $reporter->{_rpt}{running}),
+        "Smoke not running" );
+    is( $reporter->{_rpt}{finished}, "Finished",
+        "Smoke finished" );
+
+
+
+    my @r_lines = split /\n/, $reporter->smoke_matrix;
+    is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";
+$p->[2]  Configuration (common) -Dcc=/opt/perl/ccache/gcc
+----------- ---------------------------------------------------------
+X X - -     
+__EOM__
+
+    chomp( my $summary = $reporter->summary );
+    is $summary, 'Summary: FAIL(X)', $summary;
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+            "hasn't the configurations";
+
+
+    my @f_lines = split /\n/, $reporter->failures;
+    is_deeply \@f_lines, [split /\n/, <<'__EOFAIL__'], "Failures";
+[stdio/perlio] 
+Inconsistent test results (between TEST and harness):
+    ../t/op/test1.t.........................FAILED at test 1
+__EOFAIL__
+
+    my @t_lines = split /\n/, $reporter->todo_passed;
+    is_deeply \@t_lines, [split /\n/, <<'__EOTODO__'], "Passed Todo tests";
+[stdio/perlio] 
+    ../t/op/test1.t.............................................PASSED
+        2
+__EOTODO__
+
+#    diag Dumper $reporter->{_counters};
+#    diag $reporter->report;
+}
+
+
+for my $p (@patchlevels) {
+    # Inconsistent result + Failed test + Passed TODO test
+    create_config_sh( $config_sh, version => '5.11.2' );
+
+    my $reporter = Test::Smoke::Reporter->new(
+        ddir       => $findbin,
+        v          => $verbose, 
+        outfile    => '',
+        showcfg    => $showcfg,
+        cfg        => \( my $bcfg = <<__EOCFG__ ),
+-Dcc=/opt/perl/ccache/gcc
+__EOCFG__
+    );
+    isa_ok( $reporter, 'Test::Smoke::Reporter' );
+
+    my $patch = $p->[0] . ($p->[1] ? " $p->[1]" : "");
+    $reporter->read_parse( \(my $result = <<EORESULTS) );
+Started smoke at 1258883807
+Smoking patch $patch
+
+Stopped smoke at 1258883808
+Started smoke at 1258883808
+
+Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc
+------------------------------------------------------------------------------
+TSTENV = stdio	u=0.26  s=0.00  cu=3.32  cs=0.12  scripts=5  tests=13349
+
+    ../t/op/test1.t.............................................PASSED
+        2
+    ../t/op/test2.t.............................................FAILED
+        1
+    ../t/op/test2.t.............................................PASSED
+        2
+Inconsistent test results (between TEST and harness):
+    ../t/op/test1.t.........................FAILED at test 1
+
+TSTENV = perlio	u=0.09  s=0.00  cu=3.01  cs=0.12  scripts=5  tests=13349
+
+    ../t/op/test1.t.............................................PASSED
+        2
+    ../t/op/test2.t.............................................FAILED
+        1
+    ../t/op/test2.t.............................................PASSED
+        2
+Inconsistent test results (between TEST and harness):
+    ../t/op/test1.t.........................FAILED at test 1
+
+Finished smoking $patch
+Stopped smoke at 1258883821
+EORESULTS
+
+    is( $reporter->{_rpt}{patch}, $p->[0], 
+        "Changenumber $reporter->{_rpt}{patch}" );
+    is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
+        "Changedescr $reporter->{_rpt}{patchdescr}" );
+
+    my $cfgarg = "-Dcc=/opt/perl/ccache/gcc";
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{stdio}, "F",
+        "'$cfgarg' reports fail" );
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{perlio}, "F",
+        "'$cfgarg' reports fail" );
+    ok( (not defined $reporter->{_rpt}{running}),
+        "Smoke not running" );
+    is( $reporter->{_rpt}{finished}, "Finished",
+        "Smoke finished" );
+
+
+
+    my @r_lines = split /\n/, $reporter->smoke_matrix;
+    is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";
+$p->[2]  Configuration (common) -Dcc=/opt/perl/ccache/gcc
+----------- ---------------------------------------------------------
+F F - -     
+__EOM__
+
+    chomp( my $summary = $reporter->summary );
+    is $summary, 'Summary: FAIL(F)', $summary;
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+            "hasn't the configurations";
+
+
+    my @f_lines = split /\n/, $reporter->failures;
+    is_deeply \@f_lines, [split /\n/, <<'__EOFAIL__'], "Failures";
+[stdio/perlio] 
+    ../t/op/test2.t.............................................FAILED
+        1
+Inconsistent test results (between TEST and harness):
+    ../t/op/test1.t.........................FAILED at test 1
+__EOFAIL__
+
+    my @t_lines = split /\n/, $reporter->todo_passed;
+    is_deeply \@t_lines, [split /\n/, <<'__EOTODO__'], "Passed Todo tests";
+[stdio/perlio] 
+    ../t/op/test1.t.............................................PASSED
+        2
+    ../t/op/test2.t.............................................PASSED
+        2
+__EOTODO__
+
+#    diag Dumper $reporter->{_counters};
+#    diag $reporter->report;
+}
+
+
+for my $p (@patchlevels) {
+    # Failed test + Bad Plan + Passed TODO test
+    create_config_sh( $config_sh, version => '5.11.2' );
+
+    my $reporter = Test::Smoke::Reporter->new(
+        ddir       => $findbin,
+        v          => $verbose, 
+        outfile    => '',
+        showcfg    => $showcfg,
+        cfg        => \( my $bcfg = <<__EOCFG__ ),
+-Dcc=/opt/perl/ccache/gcc
+__EOCFG__
+    );
+    isa_ok( $reporter, 'Test::Smoke::Reporter' );
+
+    my $patch = $p->[0] . ($p->[1] ? " $p->[1]" : "");
+    $reporter->read_parse( \(my $result = <<EORESULTS) );
+Started smoke at 1258883807
+Smoking patch $patch
+
+Stopped smoke at 1258883808
+Started smoke at 1258883808
+
+Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc
+------------------------------------------------------------------------------
+TSTENV = stdio	
+../t/op/test1.t.............................................FAILED
+    1
+../t/op/test1.t.............................................PASSED
+    2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22
+    24, 26, 28, 30, 32, 34, 36, 38, 40, 42
+    44, 46, 48, 50, 52, 54, 56, 58, 60, 62
+    64
+../t/op/test2.t.............................................PASSED
+    2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22
+    24, 26, 28, 30, 32, 34, 36, 38, 40, 42
+    44, 46, 48, 50, 52, 54, 56, 58, 60, 62
+    64
+../t/op/test2.t.............................................FAILED
+    Bad plan.  You planned 70 tests but ran 64.
+../t/op/test3.t.............................................FAILED
+    1-2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22
+    24, 26, 28, 30, 32, 34, 36, 38, 40, 42
+    44, 46, 48, 50, 52, 54, 56, 58, 60, 62
+    64
+../t/op/test4.t.............................................FAILED
+    1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23
+    25, 27, 29, 31, 33, 35, 37, 39, 41, 43
+    45, 47, 49, 51, 53, 55, 57, 59, 61, 63
+../t/op/test4.t.............................................PASSED
+    2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22
+    24, 26, 28, 30, 32, 34, 36, 38, 40, 42
+    44, 46, 48, 50, 52, 54, 56, 58, 60, 62
+    64
+../t/op/test5.t.............................................FAILED
+    1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23
+    25, 27, 29, 31, 33, 35, 37, 39, 41, 43
+    45, 47, 49, 51, 53, 55, 57, 59, 61, 63
+../t/op/test5.t.............................................PASSED
+    2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22
+    24, 26, 28, 30, 32, 34, 36, 38, 40, 42
+    44, 46, 48, 50, 52, 54, 56, 58, 60, 62
+    64
+../t/op/test5.t.............................................FAILED
+    Bad plan.  You planned 75 tests but ran 64.
+
+TSTENV = perlio	
+../t/op/test1.t.............................................FAILED
+    1
+../t/op/test1.t.............................................PASSED
+    2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22
+    24, 26, 28, 30, 32, 34, 36, 38, 40, 42
+    44, 46, 48, 50, 52, 54, 56, 58, 60, 62
+    64
+../t/op/test2.t.............................................PASSED
+    2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22
+    24, 26, 28, 30, 32, 34, 36, 38, 40, 42
+    44, 46, 48, 50, 52, 54, 56, 58, 60, 62
+    64
+../t/op/test2.t.............................................FAILED
+    Bad plan.  You planned 70 tests but ran 64.
+../t/op/test3.t.............................................FAILED
+    1-2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22
+    24, 26, 28, 30, 32, 34, 36, 38, 40, 42
+    44, 46, 48, 50, 52, 54, 56, 58, 60, 62
+    64
+../t/op/test4.t.............................................FAILED
+    1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23
+    25, 27, 29, 31, 33, 35, 37, 39, 41, 43
+    45, 47, 49, 51, 53, 55, 57, 59, 61, 63
+../t/op/test4.t.............................................PASSED
+    2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22
+    24, 26, 28, 30, 32, 34, 36, 38, 40, 42
+    44, 46, 48, 50, 52, 54, 56, 58, 60, 62
+    64
+../t/op/test5.t.............................................FAILED
+    1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23
+    25, 27, 29, 31, 33, 35, 37, 39, 41, 43
+    45, 47, 49, 51, 53, 55, 57, 59, 61, 63
+../t/op/test5.t.............................................PASSED
+    2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22
+    24, 26, 28, 30, 32, 34, 36, 38, 40, 42
+    44, 46, 48, 50, 52, 54, 56, 58, 60, 62
+    64
+../t/op/test5.t.............................................FAILED
+    Bad plan.  You planned 75 tests but ran 64.
+
+Finished smoking $patch
+Stopped smoke at 1258883821
+EORESULTS
+
+    is( $reporter->{_rpt}{patch}, $p->[0], 
+        "Changenumber $reporter->{_rpt}{patch}" );
+    is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
+        "Changedescr $reporter->{_rpt}{patchdescr}" );
+
+    my $cfgarg = "-Dcc=/opt/perl/ccache/gcc";
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{stdio}, "F",
+        "'$cfgarg' reports fail" );
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{perlio}, "F",
+        "'$cfgarg' reports fail" );
+    ok( (not defined $reporter->{_rpt}{running}),
+        "Smoke not running" );
+    is( $reporter->{_rpt}{finished}, "Finished",
+        "Smoke finished" );
+
+
+
+    my @r_lines = split /\n/, $reporter->smoke_matrix;
+    is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";
+$p->[2]  Configuration (common) -Dcc=/opt/perl/ccache/gcc
+----------- ---------------------------------------------------------
+F F - -     
+__EOM__
+
+    chomp( my $summary = $reporter->summary );
+    is $summary, 'Summary: FAIL(F)', $summary;
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+            "hasn't the configurations";
+
+
+    my @f_lines = split /\n/, $reporter->failures;
+    is_deeply \@f_lines, [split /\n/, <<'__EOFAIL__'], "Failures";
+[stdio/perlio] 
+../t/op/test1.t.............................................FAILED
+    1
+../t/op/test2.t.............................................FAILED
+    Bad plan.  You planned 70 tests but ran 64.
+../t/op/test3.t.............................................FAILED
+    1-2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22
+    24, 26, 28, 30, 32, 34, 36, 38, 40, 42
+    44, 46, 48, 50, 52, 54, 56, 58, 60, 62
+    64
+../t/op/test4.t.............................................FAILED
+    1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23
+    25, 27, 29, 31, 33, 35, 37, 39, 41, 43
+    45, 47, 49, 51, 53, 55, 57, 59, 61, 63
+../t/op/test5.t.............................................FAILED
+    1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23
+    25, 27, 29, 31, 33, 35, 37, 39, 41, 43
+    45, 47, 49, 51, 53, 55, 57, 59, 61, 63
+    Bad plan.  You planned 75 tests but ran 64.
+__EOFAIL__
+
+    my @t_lines = split /\n/, $reporter->todo_passed;
+    is_deeply \@t_lines, [split /\n/, <<'__EOTODO__'], "Passed Todo tests";
+[stdio/perlio] 
+../t/op/test1.t.............................................PASSED
+    2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22
+    24, 26, 28, 30, 32, 34, 36, 38, 40, 42
+    44, 46, 48, 50, 52, 54, 56, 58, 60, 62
+    64
+../t/op/test2.t.............................................PASSED
+    2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22
+    24, 26, 28, 30, 32, 34, 36, 38, 40, 42
+    44, 46, 48, 50, 52, 54, 56, 58, 60, 62
+    64
+../t/op/test4.t.............................................PASSED
+    2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22
+    24, 26, 28, 30, 32, 34, 36, 38, 40, 42
+    44, 46, 48, 50, 52, 54, 56, 58, 60, 62
+    64
+../t/op/test5.t.............................................PASSED
+    2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22
+    24, 26, 28, 30, 32, 34, 36, 38, 40, 42
+    44, 46, 48, 50, 52, 54, 56, 58, 60, 62
+    64
+__EOTODO__
+
+#    diag Dumper $reporter->{_counters};
+#    diag $reporter->report;
+}
+
+
+for my $p (@patchlevels) {
+    # Passed TODO test (different configuration)
+    create_config_sh( $config_sh, version => '5.11.2' );
+
+    my $reporter = Test::Smoke::Reporter->new(
+        ddir       => $findbin,
+        v          => $verbose, 
+        outfile    => '',
+        showcfg    => $showcfg,
+        cfg        => \( my $bcfg = <<__EOCFG__ ),
+-Dcc=/opt/perl/ccache/gcc
+__EOCFG__
+    );
+    isa_ok( $reporter, 'Test::Smoke::Reporter' );
+
+    my $patch = $p->[0] . ($p->[1] ? " $p->[1]" : "");
+    $reporter->read_parse( \(my $result = <<EORESULTS) );
+Started smoke at 1258883807
+Smoking patch $patch
+
+Stopped smoke at 1258883808
+Started smoke at 1258883808
+
+
+Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc
+------------------------------------------------------------------------------
+TSTENV = stdio	
+All tests successful.
+../t/op/test1.t.............................................PASSED
+    2
+../t/op/test2.t.............................................PASSED
+    2
+
+TSTENV = perlio	
+All tests successful.
+../t/op/test1.t.............................................PASSED
+    2
+../t/op/test2.t.............................................PASSED
+    2
+
+
+Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc -Duseithreads
+------------------------------------------------------------------------------
+TSTENV = stdio	
+All tests successful.
+../t/op/test1.t.............................................PASSED
+    2
+../t/op/test2.t.............................................PASSED
+    2
+
+TSTENV = perlio	
+All tests successful.
+../t/op/test1.t.............................................PASSED
+    2
+../t/op/test2.t.............................................PASSED
+    2
+
+Finished smoking $patch
+Stopped smoke at 1258883821
+EORESULTS
+
+    is( $reporter->{_rpt}{patch}, $p->[0], 
+        "Changenumber $reporter->{_rpt}{patch}" );
+    is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
+        "Changedescr $reporter->{_rpt}{patchdescr}" );
+
+    my $cfgarg = "-Dcc=/opt/perl/ccache/gcc";
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{stdio}, "O",
+        "'$cfgarg' reports pass" );
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{perlio}, "O",
+        "'$cfgarg' reports pass" );
+    my $cfgarg2 = "-Dcc=/opt/perl/ccache/gcc -Duseithreads";
+    is( $reporter->{_rpt}{$cfgarg2}{summary}{N}{stdio}, "O",
+        "'$cfgarg' reports pass" );
+    is( $reporter->{_rpt}{$cfgarg2}{summary}{N}{perlio}, "O",
+        "'$cfgarg' reports pass" );
+    ok( (not defined $reporter->{_rpt}{running}),
+        "Smoke not running" );
+    is( $reporter->{_rpt}{finished}, "Finished",
+        "Smoke finished" );
+    use Data::Dumper;
+
+
+    my @r_lines = split /\n/, $reporter->smoke_matrix;
+    is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";
+$p->[2]  Configuration (common) -Dcc=/opt/perl/ccache/gcc
+----------- ---------------------------------------------------------
+O O - -     
+O O - -     -Duseithreads
+__EOM__
+
+    chomp( my $summary = $reporter->summary );
+    is $summary, 'Summary: PASS', $summary;
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+            "hasn't the configurations";
+
+
+    my @f_lines = split /\n/, $reporter->failures;
+    ok (! @f_lines, "No failures");
+
+    my @t_lines = split /\n/, $reporter->todo_passed;
+    is_deeply \@t_lines, [split /\n/, <<'__EOTODO__'], "Passed Todo tests";
+[stdio/perlio] 
+[stdio/perlio] -Duseithreads
+../t/op/test1.t.............................................PASSED
+    2
+../t/op/test2.t.............................................PASSED
+    2
+__EOTODO__
+
+#    diag Dumper $reporter->{_counters};
+#    diag $reporter->report;
+}
+
+for my $p (@patchlevels) {
+    # Passed TODO test (different configuration)
+    create_config_sh( $config_sh, version => '5.11.2' );
+
+    my $reporter = Test::Smoke::Reporter->new(
+        ddir       => $findbin,
+        v          => $verbose, 
+        outfile    => '',
+        showcfg    => $showcfg,
+        cfg        => \( my $bcfg = <<__EOCFG__ ),
+-Dcc=/opt/perl/ccache/gcc
+__EOCFG__
+    );
+    isa_ok( $reporter, 'Test::Smoke::Reporter' );
+
+    my $patch = $p->[0] . ($p->[1] ? " $p->[1]" : "");
+    $reporter->read_parse( \(my $result = <<EORESULTS) );
+Started smoke at 1258883807
+Smoking patch $patch
+
+Stopped smoke at 1258883808
+Started smoke at 1258883808
+
+
+Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc
+------------------------------------------------------------------------------
+TSTENV = stdio	
+All tests successful.
+../t/op/test1.t.............................................PASSED
+    2
+../t/op/test2.t.............................................PASSED
+    2
+
+TSTENV = perlio	
+All tests successful.
+../t/op/test1.t.............................................PASSED
+    2
+../t/op/test2.t.............................................PASSED
+    2
+
+
+Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc -Duseithreads
+------------------------------------------------------------------------------
+TSTENV = stdio	
+All tests successful.
+../t/op/test1.t.............................................PASSED
+    3
+../t/op/test2.t.............................................PASSED
+    2
+
+TSTENV = perlio	
+All tests successful.
+../t/op/test1.t.............................................PASSED
+    4
+../t/op/test2.t.............................................PASSED
+    2
+
+Finished smoking $patch
+Stopped smoke at 1258883821
+EORESULTS
+
+    is( $reporter->{_rpt}{patch}, $p->[0], 
+        "Changenumber $reporter->{_rpt}{patch}" );
+    is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
+        "Changedescr $reporter->{_rpt}{patchdescr}" );
+
+    my $cfgarg = "-Dcc=/opt/perl/ccache/gcc";
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{stdio}, "O",
+        "'$cfgarg' reports pass" );
+    is( $reporter->{_rpt}{$cfgarg}{summary}{N}{perlio}, "O",
+        "'$cfgarg' reports pass" );
+    my $cfgarg2 = "-Dcc=/opt/perl/ccache/gcc -Duseithreads";
+    is( $reporter->{_rpt}{$cfgarg2}{summary}{N}{stdio}, "O",
+        "'$cfgarg' reports pass" );
+    is( $reporter->{_rpt}{$cfgarg2}{summary}{N}{perlio}, "O",
+        "'$cfgarg' reports pass" );
+    ok( (not defined $reporter->{_rpt}{running}),
+        "Smoke not running" );
+    is( $reporter->{_rpt}{finished}, "Finished",
+        "Smoke finished" );
+    use Data::Dumper;
+
+
+    my @r_lines = split /\n/, $reporter->smoke_matrix;
+    is_deeply \@r_lines, [split /\n/, <<__EOM__], "Matrix";
+$p->[2]  Configuration (common) -Dcc=/opt/perl/ccache/gcc
+----------- ---------------------------------------------------------
+O O - -     
+O O - -     -Duseithreads
+__EOM__
+
+    chomp( my $summary = $reporter->summary );
+    is $summary, 'Summary: PASS', $summary;
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+            "hasn't the configurations";
+
+
+    my @f_lines = split /\n/, $reporter->failures;
+    ok (! @f_lines, "No failures");
+
+    my @t_lines = split /\n/, $reporter->todo_passed;
+    is_deeply \@t_lines, [split /\n/, <<'__EOTODO__'], "Passed Todo tests";
+[stdio/perlio] 
+../t/op/test1.t.............................................PASSED
+    2
+../t/op/test2.t.............................................PASSED
+    2
+
+[stdio] -Duseithreads
+../t/op/test1.t.............................................PASSED
+    3
+../t/op/test2.t.............................................PASSED
+    2
+
+[perlio] -Duseithreads
+../t/op/test1.t.............................................PASSED
+    4
+../t/op/test2.t.............................................PASSED
+    2
+__EOTODO__
+
+#    diag Dumper $reporter->{_counters};
+#    diag $reporter->report;
+}
+
 
 { # Test the grepccmsg() feature
     my $testdir = catdir $findbin, 'perl-current';

@@ -205,6 +205,9 @@ sub _parse {
     $rpt{count} = 0;
     # reverse and use pop() instead of using unshift()
     my @lines = reverse split /\n+/, $self->{_outfile};
+    my $previous = "";
+    my $previous_failed = "";
+
     while ( defined( local $_ = pop @lines ) ) {
         m/^\s*$/ and next;
         m/^-+$/  and next;
@@ -260,25 +263,32 @@ sub _parse {
 
             push @{ $rpt{cfglist} }, $_ unless $rpt{config}->{ $cfgarg }++;
             $tstenv = "";
+            $previous_failed = "";
             next;
         }
 
         if ( m/(?:PERLIO|TSTENV)\s*=\s*([-\w:.]+)/ ) {
             $tstenv = $1;
-            $rpt{$cfgarg}->{$debug}{$tstenv} ||= "?";
+            $previous_failed = "";
+            $rpt{$cfgarg}->{summary}{$debug}{$tstenv} ||= "?";
             # Deal with harness output
             s/^(?:PERLIO|TSTENV)\s*=\s+[-\w:.]+(?: :crlf)?\s*//;
         }
 
         if ( m/^\s*All tests successful/ ) {
-            $rpt{$cfgarg}->{$debug}{$tstenv} = "O";
+            $rpt{$cfgarg}->{summary}{$debug}{$tstenv} = "O";
             next;
         }
 
         if ( m/Inconsistent test ?results/ ) {
-            ref $rpt{$cfgarg}->{$debug}{$tstenv} or
-                $rpt{$cfgarg}->{$debug}{$tstenv} = [ ];
-            push @{ $rpt{$cfgarg}->{$debug}{$tstenv} }, $_;
+            ref $rpt{$cfgarg}->{$debug}{$tstenv}{failed} or
+                $rpt{$cfgarg}->{$debug}{$tstenv}{failed} = [ ];
+
+            if (not $rpt{$cfgarg}->{summary}{$debug}{$tstenv} or
+                    $rpt{$cfgarg}->{summary}{$debug}{$tstenv} ne "F") {
+                $rpt{$cfgarg}->{summary}{$debug}{$tstenv} = "X";
+            }
+            push @{ $rpt{$cfgarg}->{$debug}{$tstenv}{failed} }, $_;
         }
 
         if ( /^Finished smoking [\dA-Fa-f]+/ ) {
@@ -294,26 +304,47 @@ sub _parse {
             $mini and $status = uc $status; # M for no perl but miniperl
             # $tstenv is only set *after* this
             $tstenv = $mini ? 'minitest' : 'stdio' unless $tstenv;
-            $rpt{$cfgarg}->{$debug}{$tstenv} = $status;
+            $rpt{$cfgarg}->{summary}{$debug}{$tstenv} = $status;
             $fcnt++;
             next;
         }
 
         if ( m/FAILED/ || m/DIED/ || m/dubious$/) {
-            ref $rpt{$cfgarg}->{$debug}{$tstenv} or
-                $rpt{$cfgarg}->{$debug}{$tstenv} = [ ];
-            push @{ $rpt{$cfgarg}->{$debug}{$tstenv} }, $_;
-            $fcnt++;
+            ref $rpt{$cfgarg}->{$debug}{$tstenv}{failed} or
+                $rpt{$cfgarg}->{$debug}{$tstenv}{failed} = [ ];
+
+            if ($previous_failed ne $_) {
+                if (not $rpt{$cfgarg}->{summary}{$debug}{$tstenv} or
+                        $rpt{$cfgarg}->{summary}{$debug}{$tstenv} ne "X") {
+                    $rpt{$cfgarg}->{summary}{$debug}{$tstenv} = "F";
+                }
+                push @{ $rpt{$cfgarg}->{$debug}{$tstenv}{failed} }, $_;
+
+                $fcnt++; 
+            }
+            $previous_failed = $_;
+
+            $previous = "failed";
             next;
         }
+
+        if ( m/PASSED/) {
+            ref $rpt{$cfgarg}->{$debug}{$tstenv}{passed} or
+                $rpt{$cfgarg}->{$debug}{$tstenv}{passed} = [ ];
+
+            push @{ $rpt{$cfgarg}->{$debug}{$tstenv}{passed} }, $_;
+            $previous = "passed";
+            next;
+        }
+
         if ( /^\s+\d+(?:[-\s]+\d+)*/ ) {
-            push @{ $rpt{$cfgarg}->{$debug}{$tstenv} }, $_
-                if ref $rpt{$cfgarg}->{$debug}{$tstenv};
+            push @{ $rpt{$cfgarg}->{$debug}{$tstenv}{$previous} }, $_
+                if ref $rpt{$cfgarg}->{$debug}{$tstenv}{$previous};
             next;
         }
         if ( /^\s+(?:Bad plan)|(?:No plan found)/ ) {
-            push @{ $rpt{$cfgarg}->{$debug}{$tstenv} }, $_
-                if ref $rpt{$cfgarg}->{$debug}{$tstenv};
+            push @{ $rpt{$cfgarg}->{$debug}{$tstenv}{failed} }, $_
+                if ref $rpt{$cfgarg}->{$debug}{$tstenv}{failed};
             next;
         }
         next;
@@ -346,10 +377,10 @@ sub _post_process {
     my( %bldenv, %cfgargs );
     my $rpt = $self->{_rpt};
     foreach my $config ( @{ $rpt->{cfglist} } ) {
-        foreach my $buildenv ( keys %{ $rpt->{ $config }{N} } ) {
+        foreach my $buildenv ( keys %{ $rpt->{ $config }{summary}{N} } ) {
             $bldenv{ $buildenv }++;
         }
-        foreach my $buildenv ( keys %{ $rpt->{ $config }{D} } ) {
+        foreach my $buildenv ( keys %{ $rpt->{ $config }{summary}{D} } ) {
             $bldenv{ $buildenv }++;
         }
         $cfgargs{$_}++ for grep defined $_ => quotewords( '\s+', 1, $config );
@@ -367,6 +398,7 @@ sub _post_process {
     my %count = ( O => 0, F => 0, X => 0, M => 0, 
                   m => 0, c => 0, o => 0, t => 0 );
     my( %failures, %order ); my $ord = 1;
+    my( %todo_passed, %order2 ); my $ord2 = 1;
     my $debugging = $rpt->{dbughow} || '-DDEBUGGING';
     foreach my $config ( @{ $rpt->{cfglist} } ) {
         foreach my $dbinfo (qw( N D )) {
@@ -374,7 +406,7 @@ sub _post_process {
             ( $cfg =  $cfg ? "$debugging $cfg" : $debugging )
                 if $dbinfo eq "D";
             $self->{v} and print "Processing [$cfg]\n";
-            my $status = $self->{_rpt}{ $config }{ $dbinfo };
+            my $status = $self->{_rpt}{ $config }{ summary }{ $dbinfo };
             foreach my $tstenv ( reverse sort keys %bldenv ) {
                 next if $tstenv eq 'minitest' && ! exists $status->{ $tstenv };
 
@@ -387,8 +419,10 @@ sub _post_process {
                     if $self->{defaultenv} && $showenv eq 'stdio';
 
                 $status->{ $tstenv } ||= '-';
-                if ( ref $status->{ $tstenv } eq "ARRAY" ) {
-                    my $failed = join "\n", @{ $status->{ $tstenv } };
+
+		my $status2 = $self->{_rpt}{ $config }{ $dbinfo };
+                if ( exists $status2->{$tstenv}{failed}) {
+                    my $failed = join "\n", @{ $status2->{$tstenv}{failed} };
                     if ( exists $failures{ $failed } &&
                          @{ $failures{ $failed } } && 
                          $failures{ $failed }->[-1]{cfg} eq $cfg ) {
@@ -398,9 +432,21 @@ sub _post_process {
                              { cfg => $cfg, env => [ $showenv ] };
                         $order{ $failed } ||= $ord++;
                     }
-                    $status->{ $tstenv } = $failed =~ /^Inconsistent/
-                        ? "X" : "F";
                 }
+                if ( exists $status2->{$tstenv}{passed}) {
+                    my $passed = join "\n", @{ $status2->{$tstenv}{passed} };
+                    if ( exists $todo_passed{ $passed } &&
+                         @{ $todo_passed{ $passed } } && 
+                         $todo_passed{ $passed }->[-1]{cfg} eq $cfg ) {
+                        push @{ $todo_passed{ $passed }->[-1]{env} }, $showenv;
+                    } else {
+                        push @{ $todo_passed{ $passed } }, 
+                             { cfg => $cfg, env => [ $showenv ] };
+                        $order2{ $passed } ||= $ord2++;
+                    }
+
+                }
+
                 $self->{v} > 1 and print "\t[$showenv]: $status->{$tstenv}\n";
                 if ( $tstenv eq 'minitest' ) {
                     $status->{stdio} = "M";
@@ -434,14 +480,25 @@ sub _post_process {
     } sort { $order{$a} <=> $order{ $b} } keys %failures;
     $self->{_failures} = \@failures;
 
+    my @todo_passed = map {
+        { tests => $_,
+          cfgs  => [ map {
+              my $cfg_clean = __rm_common_args( $_->{cfg}, \%common_args );
+              my $env = join "/", @{ $_->{env} };
+              "[$env] $cfg_clean";
+        } @{ $todo_passed{ $_ } }],
+      }
+    } sort { $order2{$a} <=> $order2{ $b} } keys %todo_passed;
+    $self->{_todo_passed} = \@todo_passed;
+
     $self->{_counters} = \%count;
     # Need to rebuild the test-environments as minitest changes into stdio
     my %bldenv2;
     foreach my $config ( @{ $rpt->{cfglist} } ) {
-        foreach my $buildenv ( keys %{ $rpt->{ $config }{N} } ) {
+        foreach my $buildenv ( keys %{ $rpt->{ $config }{summary}{N} } ) {
             $bldenv2{ $buildenv }++;
         }
-        foreach my $buildenv ( keys %{ $rpt->{ $config }{D} } ) {
+        foreach my $buildenv ( keys %{ $rpt->{ $config }{summary}{D} } ) {
             $bldenv2{ $buildenv }++;
         }
     }
@@ -518,6 +575,9 @@ sub report {
     $report .= "\nFailures: (common-args) $self->{_rpt}{common_args}\n"
             .  $self->failures if $self->has_test_failures;
     $report .= "\n" . $self->mani_fail           if $self->has_mani_failures;
+
+    $report .= "\nPassed Todo tests: (common-args) $self->{_rpt}{common_args}\n"
+            .  $self->todo_passed if $self->has_todo_passed;
 
     $report .= $self->ccmessages;
 
@@ -689,7 +749,7 @@ sub smoke_matrix {
         my $letters = "";
         foreach my $dbinfo (qw( N D )) {
             foreach my $tstenv ( @{ $self->{_tstenv} } ) {
-                $letters .= "$rpt->{$config}{$dbinfo}{$tstenv} ";
+                $letters .= "$rpt->{$config}{summary}{$dbinfo}{$tstenv} ";
             }
         }
         my $cfg = join " ", grep ! exists $rpt->{_common_args}{ $_ }
@@ -740,6 +800,28 @@ sub failures {
     return join "\n", map {
          join "\n", @{ $_->{cfgs} }, $_->{tests}, ""
     } @{ $self->{_failures} };
+}
+
+=item $repoarter->has_todo_passed( )
+
+Returns true if C<< @{ $reporter->{_todo_pasesd} >>.
+
+=cut
+
+sub has_todo_passed { exists $_[0]->{_todo_passed} && @{ $_[0]->{_todo_passed} } }
+
+=item $reporter->todo_passed( )
+
+report the todo that passed (grouped by configurations).
+
+=cut
+
+sub todo_passed {
+    my $self = shift;
+
+    return join "\n", map {
+         join "\n", @{ $_->{cfgs} }, $_->{tests}, ""
+    } @{ $self->{_todo_passed} };
 }
 
 =item $repoarter->has_mani_failures( )

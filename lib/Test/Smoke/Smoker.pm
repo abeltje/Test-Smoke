@@ -51,11 +51,21 @@ sub HARNESS_RE1 () {
 }
 sub HARNESS_RE2() { '^\s+(\d+(?:[-\s]+\d+)*-?)$' }
 
-sub HARNESS3_RE() {
+
+sub HARNESS3_RE_EXTRA() {
+     '^\s+(\d[0-9, -]*)'
+}
+
+sub HARNESS3_RE_FAILED() {
      '^(?:
           (?:\ \ Failed\ tests?(?:\ number\(s\))?:\ \ )
-          |
-          \s+
+       )
+       (\d[0-9, -]*)'
+}
+
+sub HARNESS3_RE_TODO() {
+     '^(?:
+          (?:\ \ TODO\ passed(?:\ number\(s\))?:\ \ \ )
        )
        (\d[0-9, -]*)'
 }
@@ -683,17 +693,20 @@ for the make program.
 sub _run_harness3_target {
     my( $self, $target, $extra ) = @_;
 
-    my $harness3_re = HARNESS3_RE();
+    my $harness3_failed = HARNESS3_RE_FAILED();
+    my $harness3_todo = HARNESS3_RE_TODO();
+    my $harness3_extra = HARNESS3_RE_EXTRA();
     my $seenheader = 0;
     my @failed = ( );
 
     my $tst = $self->_make_fork( $target, $extra );
 
     my $line;
+    my $file;
     while ( $line = <$tst> ) {
         $self->{v} > 1 and $self->tty( $line );
 
-        $line =~ /All tests successful/ and push( @failed, $line ), last;
+        $line =~ /All tests successful/ and push( @failed, $line ), next;
 
         $line =~ /Test Summary Report/ and $seenheader = 1, next;
         $seenheader or next;
@@ -702,18 +715,33 @@ sub _run_harness3_target {
         if ( $tname ) {
             my $ntest = $self->_normalize_testname( $tname );
             my $dots = '.' x (60 - length $ntest);
-            push @failed, "$ntest${dots}FAILED\n";
+            $file = $ntest . $dots;
             next;
         }
     
-        my( $failed ) = $line =~ /$harness3_re/x;
+        my( $failed ) = $line =~ /$harness3_failed/x;
         if ( $failed ) {
+            push @failed, "${file}FAILED\n";
             push @failed, "    $failed\n";
+            next;
+        }
+
+        my( $todo ) = $line =~ /$harness3_todo/x;
+        if ( $todo ) {
+            push @failed, "${file}PASSED\n";
+            push @failed, "    $todo\n";
+            next;
+        }
+
+        my ( $extra ) = $line =~ /$harness3_extra/x;
+        if ( $extra) {
+            push @failed, "    $extra\n";
             next;
         }
     
         my( $parse_error ) = $line =~ /^  Parse errors: (.+)/;
         if ( $parse_error ) {
+            push @failed, "${file}FAILED\n";
             push @failed, "    $parse_error\n";
             next;
         }
@@ -804,7 +832,7 @@ sub _parse_harness_output {
     my( $self, $notok, $all_ok, @lines ) = @_;
 
     grep m/^Test Summary Report/ => @lines
-        and return $self->_parse_harness3_output( $notok, $all_ok, @lines );
+        and return $self->_parse_harness3_output( $notok, $_[2], @lines );
 
     my $harness_re1 = HARNESS_RE1();
     my $harness_re2 = HARNESS_RE2();
@@ -839,24 +867,37 @@ to change.
 sub _parse_harness3_output {
     my( $self, $notok, $all_ok, @lines ) = @_;
 
-    my $harness3_re = HARNESS3_RE();
+    my $harness3_failed = HARNESS3_RE_FAILED();
+    my $harness3_todo = HARNESS3_RE_TODO();
+    my $harness3_extra = HARNESS3_RE_EXTRA();
     my $seenheader = 0;
+    my $ntest = "";
+    my $file = "";
+
     my $output = join "", grep defined $_ => map {
         my $line = $_;
 
         my( $tname ) = $line =~ /^\s*(.+(:?\.t)?)\s+\(Wstat/;
-        my( $failed ) = $line =~ /$harness3_re/x;
+        my( $failed ) = $line =~ /$harness3_failed/x;
+        my( $todo ) = $line =~ /$harness3_todo/x;
+        my( $extra ) = $line =~ /$harness3_extra/x;
         my( $parse_error ) = $line =~ /^  Parse errors: (.+)/;
 
         if ( $tname ) {
-            my $ntest = $self->_normalize_testname( $tname );
-            delete $notok->{ $ntest };
+            $ntest = $self->_normalize_testname( $tname );
             my $dots = '.' x (60 - length $ntest);
-            "    $ntest${dots}FAILED\n";
+            $file = "    $ntest${dots}";
+            undef;
         } elsif ( $failed ) {
-            "        $failed\n";
+            delete $notok->{ $ntest };
+            ($file . "FAILED\n", "        $failed\n");
+        } elsif ( $todo ) {
+            ($file . "PASSED\n", "        $todo\n");
+        } elsif ($extra) {
+            "        $extra\n"
         } elsif ( $parse_error ) {
-            "        $parse_error\n";
+            delete $notok->{ $ntest };
+            ($file . "FAILED\n", "        $parse_error\n");
         } else {
             undef;
         }
