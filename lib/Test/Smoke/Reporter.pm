@@ -309,7 +309,7 @@ sub _parse {
             next;
         }
 
-        if ( m/FAILED/ || m/DIED/ || m/dubious$/) {
+        if ( m/FAILED/ || m/DIED/ || m/dubious$/ || m/\?\?\?\?\?\?$/) {
             ref $rpt{$cfgarg}->{$debug}{$tstenv}{failed} or
                 $rpt{$cfgarg}->{$debug}{$tstenv}{failed} = [ ];
 
@@ -342,7 +342,7 @@ sub _parse {
                 if ref $rpt{$cfgarg}->{$debug}{$tstenv}{$previous};
             next;
         }
-        if ( /^\s+(?:Bad plan)|(?:No plan found)/ ) {
+        if ( /^\s+(?:Bad plan)|(?:No plan found)|^\s+(?:Non-zero exit status)/ ) {
             push @{ $rpt{$cfgarg}->{$debug}{$tstenv}{failed} }, $_
                 if ref $rpt{$cfgarg}->{$debug}{$tstenv}{failed};
             next;

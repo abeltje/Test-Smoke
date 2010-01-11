@@ -703,6 +703,7 @@ sub _run_harness3_target {
 
     my $line;
     my $file;
+    my $found = 0;
     while ( $line = <$tst> ) {
         $self->{v} > 1 and $self->tty( $line );
 
@@ -713,9 +714,13 @@ sub _run_harness3_target {
     
         my( $tname ) = $line =~ /^\s*(.+(?:\.t)?)\s+\(Wstat/;
         if ( $tname ) {
+            if ($file and not $found) {
+                push @failed, "${file}??????\n";
+            }
             my $ntest = $self->_normalize_testname( $tname );
             my $dots = '.' x (60 - length $ntest);
             $file = $ntest . $dots;
+            $found = 0;
             next;
         }
     
@@ -723,6 +728,7 @@ sub _run_harness3_target {
         if ( $failed ) {
             push @failed, "${file}FAILED\n";
             push @failed, "    $failed\n";
+            $found = 1;
             next;
         }
 
@@ -730,6 +736,7 @@ sub _run_harness3_target {
         if ( $todo ) {
             push @failed, "${file}PASSED\n";
             push @failed, "    $todo\n";
+            $found = 1;
             next;
         }
 
@@ -743,9 +750,22 @@ sub _run_harness3_target {
         if ( $parse_error ) {
             push @failed, "${file}FAILED\n";
             push @failed, "    $parse_error\n";
+            $found = 1;
+            next;
+        }
+
+        my( $exit_status ) = $line =~ /^  (Non-zero exit status: .+)/;
+        if ( $exit_status ) {
+            push @failed, "${file}FAILED\n";
+            push @failed, "    $exit_status\n";
+            $found = 1;
             next;
         }
     }
+    if ($file and not $found) {
+        push @failed, "${file}??????\n";
+    }
+
     my @dump = <$tst>; # Read trailing output from pipe
 
     close $tst or do {
@@ -873,8 +893,9 @@ sub _parse_harness3_output {
     my $seenheader = 0;
     my $ntest = "";
     my $file = "";
+    my $found = 0;
 
-    my $output = join "", grep defined $_ => map {
+    my @out = map {
         my $line = $_;
 
         my( $tname ) = $line =~ /^\s*(.+(:?\.t)?)\s+\(Wstat/;
@@ -882,22 +903,36 @@ sub _parse_harness3_output {
         my( $todo ) = $line =~ /$harness3_todo/x;
         my( $extra ) = $line =~ /$harness3_extra/x;
         my( $parse_error ) = $line =~ /^  Parse errors: (.+)/;
+        my( $exit_status ) = $line =~ /^  (Non-zero exit status: .+)/;
 
         if ( $tname ) {
+            my $r;
+            if ($file and not $found) {
+                $r = "${file}??????\n";
+            }
+
             $ntest = $self->_normalize_testname( $tname );
             my $dots = '.' x (60 - length $ntest);
             $file = "    $ntest${dots}";
-            undef;
+            $found = 0;
+            $r;
         } elsif ( $failed ) {
             delete $notok->{ $ntest };
+            $found = 1;
             ($file . "FAILED\n", "        $failed\n");
         } elsif ( $todo ) {
+            $found = 1;
             ($file . "PASSED\n", "        $todo\n");
         } elsif ($extra) {
             "        $extra\n"
         } elsif ( $parse_error ) {
             delete $notok->{ $ntest };
+            $found = 1;
             ($file . "FAILED\n", "        $parse_error\n");
+        } elsif ( $exit_status ) {
+            delete $notok->{ $ntest };
+            $found = 1;
+            ($file . "FAILED\n", "        $exit_status\n");
         } else {
             undef;
         }
@@ -907,6 +942,10 @@ sub _parse_harness3_output {
         $self->{v} and $self->tty( $_ );
         $seenheader ? $_ : '';
     } @lines;
+    if ($file and not $found) {
+        push @out, "${file}??????\n";
+    }
+    my $output = join "", grep defined $_ => @out;
 
     $_[2] = $all_ok;
     return $output;

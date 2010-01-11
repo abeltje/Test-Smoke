@@ -9,7 +9,7 @@ use Cwd;
 use lib 't';
 use TestLib;
 
-use Test::More tests => 64;
+use Test::More tests => 76;
 use_ok( 'Test::Smoke::Smoker' );
 
 my $debug   = exists $ENV{SMOKE_DEBUG} && $ENV{SMOKE_DEBUG};
@@ -250,11 +250,15 @@ EOHO
 
     is $harness_out, <<EOOUT, "Catch Test::Harness 3+ output";
     ../t/smoke/die.t............................................FAILED
+        Non-zero exit status: 255
+    ../t/smoke/die.t............................................FAILED
         No plan found in TAP output
     ../t/smoke/many.t...........................................FAILED
         2-6, 8-12, 14-18, 20-24, 26-30, 32-36, 38-42
         44-48, 50-54, 56-60, 62-66, 68-72, 74-78
         80-84, 86-90, 92-96, 98-100
+    ../t/smoke/many.t...........................................FAILED
+        Non-zero exit status: 83
 EOOUT
 
     is keys %inconsistent, 1, "One inconsistent test result"
@@ -296,11 +300,15 @@ EOHO
 
     is $harness_out, <<EOOUT, "Catch Test::Harness 3.13 output";
     ../t/smoke/die.t............................................FAILED
+        Non-zero exit status: 255
+    ../t/smoke/die.t............................................FAILED
         No plan found in TAP output
     ../t/smoke/many.t...........................................FAILED
         2-6, 8-12, 14-18, 20-24, 26-30, 32-36, 38-42
         44-48, 50-54, 56-60, 62-66, 68-72, 74-78
         80-84, 86-90, 92-96, 98-100
+    ../t/smoke/many.t...........................................FAILED
+        Non-zero exit status: 83
 EOOUT
 
     is keys %inconsistent, 1, "One inconsistent test result";
@@ -755,6 +763,102 @@ EOHO
         Bad plan.  You planned 75 tests but ran 64.
 EOOUT
     is keys %inconsistent, 0, "No inconsistent test result";
+}
+
+
+{
+    my $smoker = Test::Smoke::Smoker->new( \*LOG, v => $verbose );
+    isa_ok $smoker, 'Test::Smoke::Smoker';
+    my @harness3_test = split m/\n/, <<'EOHO';
+some_error at porting/diag.t line 11.
+porting/diag.t .. skipped: (no reason given)
+
+Test Summary Report
+-------------------
+porting/diag.t (Wstat: 512 Tests: 0 Failed: 0)
+  Non-zero exit status: 2
+Files=1, Tests=0,  0 wallclock secs ( 0.01 usr  0.00 sys +  0.01 cusr  0.00 csys =  0.02 CPU)
+Result: FAIL
+EOHO
+
+    my %inconsistent = map +( $_ => 1 ) => grep length $_ => map {
+        m/(\S+\.t)\s+/ ? "../t/$1" : ''
+    } @harness3_test;
+
+    my $all_ok;
+    my $harness_out = $smoker->_parse_harness_output( \%inconsistent, $all_ok,
+                                                      @harness3_test );
+
+    is $all_ok, undef, "Test detected as failed";
+    is $harness_out, <<EOOUT, "Catch Test::Harness 3 output (Non-zero exit status)";
+    ../t/porting/diag.t.........................................FAILED
+        Non-zero exit status: 2
+EOOUT
+    is keys %inconsistent, 0, "No inconsistent test result";
+}
+
+{
+    my $smoker = Test::Smoke::Smoker->new( \*LOG, v => $verbose );
+    isa_ok $smoker, 'Test::Smoke::Smoker';
+    my @harness3_test = split m/\n/, <<'EOHO';
+some_error at porting/diag.t line 11.
+porting/diag.t .. skipped: (no reason given)
+
+Test Summary Report
+-------------------
+porting/diag.t (Wstat: 512 Tests: 0 Failed: 0)
+  Non-zero exit status: 2
+  Parse errors: No plan found in TAP output
+Files=1, Tests=0,  0 wallclock secs ( 0.01 usr  0.00 sys +  0.01 cusr  0.00 csys =  0.02 CPU)
+Result: FAIL
+EOHO
+
+    my %inconsistent = map +( $_ => 1 ) => grep length $_ => map {
+        m/(\S+\.t)\s+/ ? "../t/$1" : ''
+    } @harness3_test;
+
+    my $all_ok;
+    my $harness_out = $smoker->_parse_harness_output( \%inconsistent, $all_ok,
+                                                      @harness3_test );
+
+    is $all_ok, undef, "Test detected as failed";
+    is $harness_out, <<EOOUT, "Catch Test::Harness 3 output (Non-zero exit status)";
+    ../t/porting/diag.t.........................................FAILED
+        Non-zero exit status: 2
+    ../t/porting/diag.t.........................................FAILED
+        No plan found in TAP output
+EOOUT
+    is keys %inconsistent, 0, "No inconsistent test result";
+}
+
+{
+    my $smoker = Test::Smoke::Smoker->new( \*LOG, v => $verbose );
+    isa_ok $smoker, 'Test::Smoke::Smoker';
+    my @harness3_test = split m/\n/, <<'EOHO';
+some_error at porting/diag.t line 11.
+porting/diag.t .. skipped: (no reason given)
+
+Test Summary Report
+-------------------
+porting/diag.t (Wstat: 512 Tests: 0 Failed: 0)
+  unknown_harness_output_which_is_not_parseable
+Files=1, Tests=0,  0 wallclock secs ( 0.01 usr  0.00 sys +  0.01 cusr  0.00 csys =  0.02 CPU)
+Result: FAIL
+EOHO
+
+    my %inconsistent = map +( $_ => 1 ) => grep length $_ => map {
+        m/(\S+\.t)\s+/ ? "../t/$1" : ''
+    } @harness3_test;
+
+    my $all_ok;
+    my $harness_out = $smoker->_parse_harness_output( \%inconsistent, $all_ok,
+                                                      @harness3_test );
+
+    is $all_ok, undef, "Test detected as failed";
+    is $harness_out, <<EOOUT, "Catch Test::Harness 3 output (unknown output)";
+    ../t/porting/diag.t.........................................??????
+EOOUT
+    is keys %inconsistent, 1, "One inconsistent test result";
 }
 
 
