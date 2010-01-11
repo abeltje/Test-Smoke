@@ -1138,6 +1138,7 @@ sub _make {
     my $self = shift;
     my $cmd = shift;
     $self->{makeopt} and $cmd = "$self->{makeopt} $cmd";
+    $cmd =~ m/clean/ and $cmd =~ s/-j[0-9]+\s+//;
 
     $self->{is_win32} || $self->{is_vms} or return $self->_run( "make $cmd" );
 

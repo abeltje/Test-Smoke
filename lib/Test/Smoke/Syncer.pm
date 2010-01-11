@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.026';
+$VERSION = '0.027';
 
 use Config;
 use Cwd;
