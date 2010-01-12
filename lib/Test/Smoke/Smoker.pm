@@ -708,7 +708,7 @@ sub _run_harness3_target {
 
     my $tst = $self->_make_fork( $target, $extra );
 
-    my ($line, $last);
+    my $line;
     my $file;
     my $found = 0;
     while ( $line = <$tst> ) {
@@ -718,9 +718,8 @@ sub _run_harness3_target {
         $line =~ / \b (?:Files | u) = .+ Tests = [0-9]+ /xi
             and $self->log($line);
 
-        $last and next;
         $line =~ /All tests successful/
-            and push( @failed, $line ), $last++, next;
+            and push( @failed, $line ), next;
 
         $line =~ /Test Summary Report/ and $seenheader = 1, next;
         $seenheader or next;
