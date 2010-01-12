@@ -109,7 +109,7 @@ sub set_smoke_patchlevel {
     $ddir && $patch or return;
 
     my @smokereg = grep
-        /^\tSMOKE[a-fA-F0-9]+$/
+        /^SMOKE[a-fA-F0-9]+$/
     , get_local_patches( $ddir, $verbose );
     @smokereg or set_local_patch( $ddir, "SMOKE$patch" );
 }
