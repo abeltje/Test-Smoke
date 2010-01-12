@@ -77,8 +77,10 @@ use_ok( 'Test::Smoke::Smoker' );
         -DDEBUGGING$cfgopt\\s+
         .*smoke\\/die\\.t\\.+FAILED(?:\\ \\?+)?\\s+
         (?:.+\\s)?
+        (?:.+\\s)?
         .*smoke\\/many\\.t\\.+FAILED\\s+\\d+(?:[,\\s-]+\\d+)*\\s+
         \\d+(?:[,\\s-]+\\d+)*\\s+
+        (?:.+\\s)?
     /xm@, "Failures report" );
           
 
@@ -151,8 +153,10 @@ use_ok( 'Test::Smoke::Smoker' );
         -DDEBUGGING$cfgopt\\s+
         .*smoke\\/die\\.t\\.+FAILED(?:\\ \\?+)?\\s+
         (?:.+\\s)?
+        (?:.+\\s)?
         .*smoke\\/many\\.t\\.+FAILED\\s+\\d+(?:[,\\s-]+\\d+)*\\s+
         \\d+(?:[,\\s-]+\\d+)*\\s+
+        (?:.+\\s)?
     /xm@, "Failures report" );
           
 
