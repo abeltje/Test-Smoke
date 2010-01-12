@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION $REVISION $conf @EXPORT );
-$VERSION  = '1.37_04';
+$VERSION  = '1.41_01';
 $REVISION = __get_ts_patchlevel();
 
 use base 'Exporter';
@@ -108,7 +108,9 @@ sub set_smoke_patchlevel {
     my( $ddir, $patch, $verbose ) = @_;
     $ddir && $patch or return;
 
-    my @smokereg = grep /^SMOKE[\dA-Fa-f]+$/ => get_local_patches( $ddir, $verbose );
+    my @smokereg = grep
+        /^\tSMOKE[a-fA-F0-9]+$/
+    , get_local_patches( $ddir, $verbose );
     @smokereg or set_local_patch( $ddir, "SMOKE$patch" );
 }
 

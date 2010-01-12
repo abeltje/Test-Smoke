@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.044';
+$VERSION = '0.045';
 
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
@@ -651,13 +651,20 @@ sub _run_harness_target {
 
     my $tst = $self->_make_fork( $target, $extra );
 
-    my $line;
+    my ($line, $last);
     while ( $line = <$tst> ) {
         $self->{v} > 1 and $self->tty( $line );
 
-        $line =~ /All tests successful/ and push( @failed, $line ), last;
+        # This line with timings only has to be logged to .out.
+        $line =~ / \b (?:Files | u) = .+ Tests = [0-9]+ /xi
+            and $self->log($line);
 
-        $line =~ /Failed Test\s+Stat/ and $seenheader = 1, next;
+        $last and next;
+        $line =~ /All tests successful/
+            and push( @failed, $line ), $last++, next;
+
+        $line =~ /Failed Test\s+Stat/
+            and $seenheader = 1, next;
         $seenheader or next;
 
         my( $name, $fail ) = $line =~ m/$harness_re1/;
@@ -701,17 +708,23 @@ sub _run_harness3_target {
 
     my $tst = $self->_make_fork( $target, $extra );
 
-    my $line;
+    my ($line, $last);
     my $file;
     my $found = 0;
     while ( $line = <$tst> ) {
         $self->{v} > 1 and $self->tty( $line );
 
-        $line =~ /All tests successful/ and push( @failed, $line ), next;
+        # This line with timings only has to be logged to .out.
+        $line =~ / \b (?:Files | u) = .+ Tests = [0-9]+ /xi
+            and $self->log($line);
+
+        $last and next;
+        $line =~ /All tests successful/
+            and push( @failed, $line ), $last++, next;
 
         $line =~ /Test Summary Report/ and $seenheader = 1, next;
         $seenheader or next;
-    
+
         my( $tname ) = $line =~ /^\s*(.+(?:\.t)?)\s+\(Wstat/;
         if ( $tname ) {
             if ($file and not $found) {
@@ -723,7 +736,7 @@ sub _run_harness3_target {
             $found = 0;
             next;
         }
-    
+
         my( $failed ) = $line =~ /$harness3_failed/x;
         if ( $failed ) {
             push @failed, "${file}FAILED\n";
