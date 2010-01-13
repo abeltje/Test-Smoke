@@ -2,6 +2,7 @@
 use strict;
 
 use Test::More tests => 100;
+$! = 0;
 
 my $fail = exists $ENV{SMOKE_FAIL_TEST} && $ENV{SMOKE_FAIL_TEST};
 

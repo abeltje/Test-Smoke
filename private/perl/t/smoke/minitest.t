@@ -3,6 +3,7 @@ use strict;
 
 use FindBin;
 use Test::More tests => 4;
+$! = 0;
 
 my $fail = exists $ENV{PERL_FAIL_MINI} && $ENV{PERL_FAIL_MINI};
 

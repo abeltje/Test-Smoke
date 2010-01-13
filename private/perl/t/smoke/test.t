@@ -3,6 +3,7 @@ use strict;
 
 use FindBin;
 use Test::More tests => 2;
+$! = 0;
 
 
 
