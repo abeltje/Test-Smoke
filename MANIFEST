@@ -54,6 +54,7 @@ t/reporter.t
 t/regenstuff.t
 t/skip_config.t
 t/skip_filter.t
+t/smoke.t
 t/smoked_config.t
 t/smoker.t
 t/syncer_copy.t
@@ -94,6 +95,10 @@ t/ftppub/perl-current/lib/t/test.t
 t/ftppub/perl-current/lib/t/skip.t
 t/ftppub/perl-current/ext/t/test.t
 t/ftppub/perl-current/ext/t/skip.t
+t/ftppub/perl-current/cpan/t/test.t
+t/ftppub/perl-current/cpan/t/skip.t
+t/ftppub/perl-current/dist/t/test.t
+t/ftppub/perl-current/dist/t/skip.t
 t/ftppub/perl-current-diffs/20000.gz
 t/ftppub/perl-current-diffs/20001.gz
 t/ftppub/perl-current-diffs/20003.gz
