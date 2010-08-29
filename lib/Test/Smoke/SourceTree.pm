@@ -182,7 +182,7 @@ sub check_MANIFEST {
     my %ignore = map {
         my $entry = $NOCASE ? uc $_ : $_;
         $entry => undef 
-    } ( ".patch", "MANIFEST.SKIP", @_ ), 
+    } ( ".patch", "MANIFEST.SKIP", '.gitignore', @_ ), 
       keys %{ $self->_read_mani_file( 'MANIFEST.SKIP', 1 ) };
 
     # Walk the tree, remove all found files from %manifest

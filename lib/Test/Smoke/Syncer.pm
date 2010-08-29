@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.027';
+$VERSION = '0.028';
 
 use Config;
 use Cwd;
@@ -69,8 +69,15 @@ my %CONFIG = (
 
     ftp        => [qw( ftphost ftpusr ftppwd ftpsdir ftpcdir ftype )],
 
+# synctype: git
+    df_gitbin    => 'git',
+    df_gitorigin => 'git://perl5.git.perl.org/perl.git',
+    df_gitdir    => undef,
+
+    git => [qw( gitbin gitorigin gitdir )],
+
 # misc.
-    valid_type => { rsync => 1, snapshot => 1,
+    valid_type => { rsync => 1, git => 1, snapshot => 1,
                     copy  => 1, hardlink => 1, ftp => 1 },
 );
 
@@ -154,7 +161,7 @@ sub new {
     my $proto = shift;
     my $class = ref $proto ? ref $proto : $proto;
 
-    my $sync_type = lc shift || $CONFIG{df_sync};
+    my $sync_type = lc (shift || $CONFIG{df_sync});
 
     unless ( exists $CONFIG{valid_type}->{$sync_type} ) {
         require Carp;
@@ -181,6 +188,7 @@ sub new {
         local *_; $_ = $sync_type;
 
         /^rsync$/    && return Test::Smoke::Syncer::Rsync->new( %fields );
+        /^git$/      && return Test::Smoke::Syncer::Git->new( %fields );
         /^snapshot$/ && return Test::Smoke::Syncer::Snapshot->new( %fields );
         /^copy$/     && return Test::Smoke::Syncer::Copy->new( %fields );
         /^hardlink$/ && return Test::Smoke::Syncer::Hardlink->new( %fields );
@@ -413,7 +421,7 @@ sub clean_from_directory {
 
 =item $syncer->pre_sync
 
-C<pre_sync()> should be called by the C<sync()> methos to setup the
+C<pre_sync()> should be called by the C<sync()> methods to setup the
 sync environment. Currently only useful on I<OpenVMS>.
 
 =cut
@@ -436,7 +444,7 @@ sub sync {
 
 =item $syncer->post_sync
 
-C<post_sync()> should be called by the C<sync()> methos to unset the
+C<post_sync()> should be called by the C<sync()> methods to unset the
 sync environment. Currently only useful on I<OpenVMS>.
 
 =cut
@@ -678,8 +686,11 @@ sub _fetch_snapshot_HTTP {
     my $self = shift;
 
     require LWP::Simple;
-    my $snap_name = $self->{sfile};
+    my $snap_name = $self->{server} eq 'http://perl5.git.perl.org'
+        ? 'perl-current.tar.gz'
+        : $self->{sfile};
 
+    print "$self->{server}/$self->{sdir} => $snap_name\n" if $self->{v} > 1;
     unless ( $snap_name ) {
         require Carp;
         Carp::carp( "No snapshot specified for $self->{server}$self->{sdir}" );
@@ -1379,6 +1390,93 @@ sub create_dot_patch {
 }
 
 1;
+
+=head1 Test::Smoke::Syncer::Git
+
+This handles syncing with git repositories.
+
+=cut
+
+package Test::Smoke::Syncer::Git;
+
+@Test::Smoke::Syncer::Git::ISA = qw( Test::Smoke::Syncer );
+use Cwd;
+use File::Spec::Functions;
+
+=head2 Test::Smoke::Syncer::Git->new( %args )
+
+Keys for C<%args>:
+
+    * gitorigin
+    * gitdir
+
+=cut
+
+sub new {
+    my $class = shift;
+    return bless { @_ }, $class;
+}
+
+=head2 $syncer->sync()
+
+Do the actual syncing.
+
+=over
+
+=item New clone
+  git clone <gitorigin> <gitdir>
+  git clone <gitdir> --reference <gitdir> <ddir>
+
+=item Existing clone
+  cd <ddir>
+  git pull
+
+=back
+
+=cut
+
+sub sync {
+    my $self = shift;
+
+    use Carp;
+    my $cwd = cwd();
+    if ( ! -d $self->{gitdir} || ! -d catdir($self->{gitdir}, '.git') ) {
+        my $mainclone = system(
+            $self->{gitbin},
+            clone => $self->{gitorigin},
+            $self->{gitdir}
+        );
+        if ( $mainclone != 0 ) {
+            require Carp;
+            Carp::croak("Cannot make the inital clone.");
+        }
+    }
+
+    # make the smoke clone
+    if ( ! -d $self->{ddir} || ! -d catdir($self->{ddir}, '.git') ) {
+        # It needs to be empty ...
+        my $smokeclone = system(
+            $self->{gitbin},
+            clone         => $self->{gitdir},
+            '--reference' => $self->{gitdir},
+            $self->{ddir}
+        );
+        if ( $smokeclone != 0 ) {
+            require Carp;
+            Carp::croak("Cannot make the smoke clone.");
+        }
+    }
+
+    chdir $self->{ddir} or croak "Cannot chdir($self->{ddir}): $!";
+    system($self->{gitbin}, 'pull');
+    system("$^X Porting/make_dot_patch.pl > .patch");
+    chdir $cwd;
+
+    return $self->check_dot_patch;
+}
+
+1;
+
 
 =head1 Test::Smoke::Syncer::Forest
 

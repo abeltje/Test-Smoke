@@ -670,7 +670,7 @@ sub Windows {
         my $cpustr = $Registry->{ $pnskey };
         my $idkey = "$basekey\\0\\Identifier";
         $cpustr ||= $Registry->{ $idkey };
-        $cpustr =~ tr/ / /sd;
+        $cpustr =~ tr/ / /s;
         my $mhzkey = "$basekey\\0\\~MHz";
         $cpustr .= sprintf "(~%d MHz)", hex $Registry->{ $mhzkey };
         $cpu = $cpustr;

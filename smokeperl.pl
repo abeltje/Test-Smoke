@@ -175,6 +175,9 @@ sub synctree {
             $conf->{v} and print "Skipping synctree\n";
             last FETCHTREE;
         }
+        # TODO: It might be very useful to do a 'make distclean'
+        # *before* syncing the tree, as the sync might update MANIFEST
+        # and make distclean will not see leftovers
         if ( $options{snapshot} ) {
             if ( $conf->{sync_type} eq 'snapshot' ||
                ( $conf->{sync_type} eq 'forest'   && 

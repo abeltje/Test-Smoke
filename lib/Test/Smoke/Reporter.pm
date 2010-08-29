@@ -31,6 +31,7 @@ my %CONFIG = (
     df_harness3opts => undef,
 
     df_v            => 0,
+    df_user_note    => '',
 );
 
 =head1 NAME
@@ -923,10 +924,12 @@ __EOL__
 }
 
 sub signature {
+    my $self = shift;
     my $this_pver = $^V ? sprintf "%vd", $^V : $];
     my $build_info = "$Test::Smoke::VERSION build $Test::Smoke::REVISION";
+    (my $user_note = $self->{user_note} || "") =~ s/(\S)[\s\r\n]*\z/$1\n/;
     return <<__EOS__
-
+$user_note
 -- 
 Report by Test::Smoke v$build_info running on perl $this_pver
 (Reporter v$VERSION / Smoker v$Test::Smoke::Smoker::VERSION)

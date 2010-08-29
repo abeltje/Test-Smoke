@@ -15,7 +15,7 @@ use File::Copy;
 my $verbose = exists $ENV{SMOKE_VERBOSE} ? $ENV{SMOKE_VERBOSE} : 0;
 my $showcfg = 0;
 
-use Test::More tests => 682;
+use Test::More tests => 683;
 
 use_ok 'Test::Smoke::Reporter';
 
@@ -2060,6 +2060,7 @@ __EOL__
         v          => $verbose, 
         outfile    => '',
         showcfg    => $showcfg,
+        user_note  => 'This is user info',
         cfg        => \( my $bcfg = <<__EOCFG__ ),
 -Dcc='ccache gcc'
 =
@@ -2093,6 +2094,8 @@ Stopped smoke at @{ [$timer += 100] }
 EORESULTS
 
 	my $report_string = $reporter->report;
+
+	like($report_string, qr{\nThis is user info\n}, 'Has user info');
 	my $file = catfile($findbin, "report.tmp");
 	if (-e $file) {
 		die "$file already exists?";

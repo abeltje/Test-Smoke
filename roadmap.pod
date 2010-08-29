@@ -46,6 +46,38 @@ fixed.
 I want to release more often and increase versions more often, so that
 CPAN will install the latest version.
 
+=head2 Test::Smoke 1.40
+
+Added commitbits for Tux and Bram.
+
+=head2 Test::Smoke 1.50
+
+Support for:
+
+=over
+
+=item Smoke from gitsnapshot
+
+This is now the way to get to a snapshot.
+
+=item Smoke from gitrepository
+
+Plan is to accept a perl.git directory and a branchname.
+For smoking we'll create a new branch I<smokebranch> from the designated
+branch. This I<smokebranch> will be checked out and this is where we start
+smoking. At the beginning of each smokerun the I<smokebranch> will be deleted
+by force and created again.
+
+git clone URL --reference /local/path
+
+=item Metabase/CPANTesters2
+
+The intention is to move the smoke reports to metabase/cpantesters2. This
+requires dependenies for Test::Smoke, but it will gain us a basis for a much
+better interface to the results.
+
+=back
+
 =head2 Test::Smoke 2.00
 
 The intention for 2.00 is to restructure the configuration
@@ -54,27 +86,27 @@ stuff. Development releases will start at version 1.99.
 =head1 Test::Smoke repository
 
 The Test::Smoke sources are kept in a publicly accessable
-Subversion repository from which anyone can check them out.
+subversion repository from which anyone can check them out.
 
-=over 4
+=over
 
-=item The main trunk can be checked out
+=item the main trunk can be checked out
 
     svn co http://source.test-smoke.org/svn/Test-Smoke
 
-=item The 1.20 MAINT branch can be checked out
+=item the 1.4x maint branch can be checked out
 
-    svn co http://source.test-smoke.org/svn/Test-Smoke-1.20.xx
+    svn co http://source.test-smoke.org/svn/Test-Smoke-1.30.xx
 
-=item Snapshots get there own branche:
+=item snapshots get there own branche:
 
-This means that (development) version 1.19_86 can be found here:
+this means that (development) version 1.19_86 can be found here:
 
     svn co http://source.test-smoke.org/svn/snapshots/Test-Smoke-1.19_86
 
 =item rsync archive
 
-Both development track and maintenance track have their own rsync archive:
+both development track and maintenance track have their own rsync archive:
 
     rsync://source.test-smoke.org/ts-current
 
@@ -84,7 +116,7 @@ Both development track and maintenance track have their own rsync archive:
 
 =head1 REVISION
 
-$Id: roadmap.pod 243 2003-07-18 13:39:42Z abeltje $
+$id: roadmap.pod 243 2003-07-18 13:39:42z abeltje $
 
 =head1 COPYRIGHT
 
@@ -93,20 +125,10 @@ $Id: roadmap.pod 243 2003-07-18 13:39:42Z abeltje $
   * Abe Timmerman <abeltje@cpan.org>
 
 This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-See:
-
-=over 4
-
-=item * L<http://www.perl.com/perl/misc/Artistic.html>
-
-=item * L<http://www.gnu.org/copyleft/gpl.html>
-
-=back
+it under the same terms as perl itself.
 
 This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+but without any warranty; without even the implied warranty of
+merchantability or fitness for a particular purpose.
 
 =cut

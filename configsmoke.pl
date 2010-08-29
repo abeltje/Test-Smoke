@@ -20,7 +20,7 @@ use Test::Smoke::SysInfo;
 
 # $Id$
 use vars qw( $VERSION $conf );
-$VERSION = '0.072';
+$VERSION = '0.074';
 
 use Getopt::Long;
 my %options = ( 
@@ -61,6 +61,7 @@ foreach my $opt (qw( config jcl log )) {
         $options{oldcfg} = 1;
         print "Using '$options{config}' for defaults.\n";
         $conf->{perl_version} eq '5.9.x' and $conf->{perl_version} = '5.11.x';
+        $conf->{perl_version} eq '5.11.x' and $conf->{perl_version} = '5.13.x';
     }
 
     if ( $load_error || $options{default} ) {
@@ -120,13 +121,14 @@ Current options:
 sub is_win32() { $^O eq 'MSWin32' }
 sub is_vms()   { $^O eq 'VMS'     }
 
-my %config = ( perl_version => $conf->{perl_version} || '5.11.x' );
+my %config = ( perl_version => $conf->{perl_version} || '5.13.x' );
 
 my %mailers = get_avail_mailers();
 my @mailers = sort keys %mailers;
 my @syncers = get_avail_sync();
 my $syncmsg = join "\n", @{ { 
     rsync    => "\trsync - Use the rsync(1) program [preferred]",
+    git      => "\tgit - Use a git-repository.",
     ftp      => "\tftp - Use Net::FTP to sync from APC [!slow!]",
     copy     => "\tcopy - Use File::Copy to copy from a local directory",
     hardlink => "\thardlink - Copy from a local directory using link()",
@@ -139,90 +141,136 @@ my %vdirs = map {
     my $vdir = $_;
     is_vms and $vdir =~ tr/.//d;
     ( $_ => $vdir )
-} qw( 5.5.x 5.8.x 5.10.x ); # unsupported: 5.6.2
+} qw( 5.8.x 5.10.x 5.12.x );
 
 my %versions = (
-#    '5.5.x' => { source => 'public.activestate.com::perl-5.005xx',
-#                 server => 'public.activestate.com',
-#                 sdir   => '/pub/apc/perl-5.005xx-snap',
-#                 sfile  => '',
-#                 pdir   => '/pub/apc/perl-5.005xx-diffs',
-#                 cfg    => 'perl55x.cfg',
-#                 ddir   => File::Spec->catdir( cwd(), File::Spec->updir,
-#                                               "perl-$vdirs{'5.5.x'}" ),
-#                 text   => 'Perl 5.005 MAINT',
-#                 is56x  => 1},
+    '5.8.x' => {
+        source  => 'perl5.git.perl.org::perl-5.8.x',
+        server  => 'http://perl5.git.perl.org',
+        sdir    => '/perl.git/snapshot/refs/heads/',
+        sfile   => 'maint-5.8.tar.gz',
+        pdir    => '',
+        ddir    => File::Spec->catdir(
+            cwd(),
+            File::Spec->updir,
+            "perl-$vdirs{'5.8.x'}"
+        ),
+        ftphost => 'public.activestate.com',
+        ftpusr  => 'anonymous',
+        ftppwd  => 'smokers@perl.org',
+        ftpsdir => '/pub/apc/perl-5.8.x',
+        ftpcdir => '/pub/apc/perl-5.8.x-diffs',
 
-#    '5.6.2' => { source => 'public.activestate.com::perl-5.6.2',
-#                 server => 'public.activestate.com',
-#                 sdir   => '/pub/apc/perl-5.6.2-snap',
-#                 sfile  => 'perl-5.6.2-latest.tar.gz',
-#                 pdir   => '/pub/apc/perl-5.6.2-diffs',
-#                 ddir   => File::Spec->catdir( cwd(), File::Spec->updir,
-#                                               "perl-$vdirs{'5.6.2'}" ),
-#                 ftphost => 'public.activestate.com',
-#                 ftpusr  => 'anonymous',
-#                 ftppwd  => 'smokers@perl.org',
-#                 ftpsdir => '/pub/apc/perl-5.6.2',
-#                 ftpcdir => '/pub/apc/perl-5.6.2-diffs',
-#
-#                 text   => 'Perl 5.6.2 (final?)',
-#                 cfg    => 'perl562.cfg',
-#                 is56x  => 1 },
+        text    => 'Perl 5.8 MAINT',
+        cfg     => (
+            is_win32
+                ? 'w32current.cfg'
+                : is_vms ? 'vmsperl.cfg' : 'perl58x.cfg'
+        ),
+        is56x   => 0,
+    },
 
-    '5.8.x' => { source =>  'perl5.git.perl.org::perl-5.8.x',
-                 server => 'public.activestate.com',
-                 sdir   => '/pub/apc/perl-5.8.x-snap',
-                 sfile  => 'perl-5.8.x-latest.tar.gz',
-                 pdir   => '/pub/apc/perl-5.8.x-diffs',
-                 ddir   => File::Spec->catdir( cwd(), File::Spec->updir,
-                                               "perl-$vdirs{'5.8.x'}" ),
-                 ftphost => 'public.activestate.com',
-                 ftpusr  => 'anonymous',
-                 ftppwd  => 'smokers@perl.org',
-                 ftpsdir => '/pub/apc/perl-5.8.x',
-                 ftpcdir => '/pub/apc/perl-5.8.x-diffs',
+    '5.10.x' => {
+        source  => 'perl5.git.perl.org::perl-5.10.x',
+        server  => 'http://perl5.git.perl.org',
+        sdir    => '/perl.git/snapshot/refs/heads/',
+        sfile   => 'maint-5.10.tar.gz',
+        pdir    => '',
+        ddir    => File::Spec->catdir(
+            cwd(),
+            File::Spec->updir,
+            "perl-$vdirs{'5.10.x'}"
+        ),
+        ftphost => 'public.activestate.com',
+        ftpusr  => 'anonymous',
+        ftppwd  => 'smokers@perl.org',
+        ftpsdir => '/pub/apc/perl-5.10.x',
+        ftpcdir => '/pub/apc/perl-5.10.x-diffs',
 
-                 text   => 'Perl 5.8 MAINT',
-                 cfg    => ( is_win32 ? 'w32current.cfg'
-                           : is_vms ? 'vmsperl.cfg' : 'perl58x.cfg' ),
-                 is56x  => 0 },
+        text    => 'Perl 5.10 MAINT',
+        cfg     => (
+            is_win32
+                ? 'w32current.cfg'
+                : is_vms ? 'vmsperl.cfg' : 'perl510x.cfg'
+        ),
+        is56x   => 0,
+    },
 
-    '5.10.x' => { source =>  'perl5.git.perl.org::perl-5.10.x',
-                  server => 'public.activestate.com',
-                  sdir   => '/pub/apc/perl-5.10.x-snap',
-                  sfile  => 'perl-5.10.x-latest.tar.gz',
-                  pdir   => '/pub/apc/perl-5.10.x-diffs',
-                  ddir   => File::Spec->catdir( cwd(), File::Spec->updir,
-                                                "perl-$vdirs{'5.10.x'}" ),
-                  ftphost => 'public.activestate.com',
-                  ftpusr  => 'anonymous',
-                  ftppwd  => 'smokers@perl.org',
-                  ftpsdir => '/pub/apc/perl-5.10.x',
-                  ftpcdir => '/pub/apc/perl-5.10.x-diffs',
- 
-                  text   => 'Perl 5.10 MAINT',
-                  cfg    => ( is_win32 ? 'w32current.cfg'
-                            : is_vms ? 'vmsperl.cfg' : 'perl510x.cfg' ),
-                  is56x  => 0 },
+    '5.11.x' => {
+        source  => 'perl5.git.perl.org::perl-current',
+        server  => 'http://perl5.git.perl.org',
+        sdir    => '/perl.git/snapshot/refs/heads/',
+        sfile   => 'devel-5.11.tar.gz',
+        pdir    => '',
+        ddir    => File::Spec->catdir(
+            cwd(),
+            File::Spec->updir,
+            'perl-current'
+        ),
+        ftphost => 'public.activestate.com',
+        ftpusr  => 'anonymous',
+        ftppwd  => 'smokers@perl.org',
+        ftpsdir => '/pub/apc/perl-current',
+        ftpcdir => '/pub/apc/perl-current-diffs',
 
-    '5.11.x' => { source => 'perl5.git.perl.org::perl-current',
-                  server => 'public.activestate.com',
-                  sdir   => '/pub/apc/perl-current-snap',
-                  sfile  => 'perl-current-latest.tar.gz',
-                  pdir   => '/pub/apc/perl-current-diffs',
-                  ddir   => File::Spec->catdir( cwd(), File::Spec->updir,
-                                                'perl-current' ),
-                  ftphost => 'public.activestate.com',
-                  ftpusr  => 'anonymous',
-                  ftppwd  => 'smokers@perl.org',
-                  ftpsdir => '/pub/apc/perl-current',
-                  ftpcdir => '/pub/apc/perl-current-diffs',
- 
-                  text   => 'Perl 5.12 to-be',
-                  cfg    => ( is_win32 ? 'w32current.cfg'
-                            : is_vms ? 'vmsperl.cfg' : 'perlcurrent.cfg' ),
-                  is56x  => 0 },
+        text    => 'Perl 5.12 to-be',
+        cfg     => (
+            is_win32
+                ? 'w32current.cfg'
+                : is_vms ? 'vmsperl.cfg' : 'perlcurrent.cfg'
+        ),
+        is56x   => 0,
+    },
+    '5.12.x' => {
+        source  => 'perl5.git.perl.org::perl-5.12.x',
+        server  => 'http://perl5.git.perl.org',
+        sdir    => '/perl.git/snapshot/refs/heads/',
+        sfile   => 'maint-5.12.tar.gz',
+        pdir    => '/pub/apc/perl-current-diffs',
+        ddir    => File::Spec->catdir(
+            cwd(),
+            File::Spec->updir,
+            'perl-current'
+        ),
+        ftphost => 'public.activestate.com',
+        ftpusr  => 'anonymous',
+        ftppwd  => 'smokers@perl.org',
+        ftpsdir => '/pub/apc/perl-current',
+        ftpcdir => '/pub/apc/perl-current-diffs',
+
+        text    => 'Perl 5.12 maint',
+        cfg     => (
+            is_win32
+                ? 'w32current.cfg'
+                : is_vms ? 'vmsperl.cfg' : 'perl512.cfg'
+        ),
+        is56x   => 0,
+    },
+    '5.13.x' => {
+        source  => 'perl5.git.perl.org::perl-current',
+        server  => 'http://perl5.git.perl.org',
+        sdir    => '/perl.git/snapshot/',
+        sfile   => '',
+        pdir    => '/pub/apc/perl-current-diffs',
+        ddir    => File::Spec->catdir(
+            cwd(),
+            File::Spec->updir,
+            'perl-current'
+        ),
+        ftphost => 'public.activestate.com',
+        ftpusr  => 'anonymous',
+        ftppwd  => 'smokers@perl.org',
+        ftpsdir => '/pub/apc/perl-current',
+        ftpcdir => '/pub/apc/perl-current-diffs',
+
+        text    => 'Perl 5.14 to-be',
+        cfg     => (
+            is_win32
+                ? 'w32current.cfg'
+                : is_vms ? 'vmsperl.cfg' : 'perlcurrent.cfg'
+        ),
+        is56x   => 0,
+    },
 );
 my @pversions = sort {
     _perl_numeric_version( $a ) <=> _perl_numeric_version( $b )
@@ -349,11 +397,29 @@ my %opt = (
         dft => '/pub/languages/perl/snap',
     },
     sfile => {
-        msg => "Which file should be FTPed?
-\tLeave empty to automatically find newest.
-\tMandatory for HTTP! (see also --snapshot switch in perlsmoke.pl)",
+        msg => "Which file should be downloaded?
+\tLeave empty to automatically find newest.",
         alt => [ ],
         dft => '',
+    },
+
+    gitbin => {
+        msg => "Which git binary do you want to use.",
+        alt => [ ],
+        dft => whereis('git'),
+    },
+    gitorigin => {
+        msg => "Git main repository?",
+        alt => [ ],
+        dft => 'git://perl5.git.perl.org/perl.git',
+    },
+    gitdir => {
+        msg => "Directory for the local git repository?",
+        alt => [ ],
+        dft => File::Spec->catdir(
+            File::Spec->rel2abs(File::Spec->updir),
+            'git-perl'
+        ),
     },
 
     tar => {
@@ -364,7 +430,7 @@ Examples:$untarmsg",
     },
 
     snapext => {
-        msg => 'What type of snapshots should be FTPed?',
+        msg => 'What type of snapshots should be downloaded?',
         alt => [qw( tgz tbz )],
         dft => 'tgz',
     },
@@ -508,14 +574,21 @@ EOT
         dft => '',
     },
 
+    # metabase
+    metabase => {
+        msg => "Send smoke results to Metabase?",
+        alt => [qw( n Y )],
+        dft => 'y',
+    },
+
     # mail stuff
     mail => {
-        msg => "Would you like your reports send by e-mail?",
+        msg => "Would you like to send your reports?",
         alt => [qw( N y )],
         dft => 'n',
     },
     mail_type => {
-        msg => 'Which mail facility should be used?',
+        msg => 'Which send facility should be used?',
         alt => [ @mailers ],
         dft => $mailers[0],
         nocase => 1,
@@ -989,10 +1062,23 @@ SYNCER: {
         last SYNCER;
     };
 
+    /^git$/ && do {
+        $arg = 'gitbin';
+        $config{$arg} = prompt($arg);
+
+        $arg = 'gitorigin';
+        $config{$arg} = prompt($arg);
+
+        $arg = 'gitdir';
+        $config{$arg} = prompt_dir($arg);
+
+        last SYNCER;
+    };
+
     /^ftp$/  && do {
         for $arg (qw( ftphost ftpusr ftpsdir ftpcdir )) {
             $config{ $arg } = prompt( $arg );
-	}
+        }
         $config{ftppwd} = $conf->{ftppwd} || $opt{ftppwd}{dft};
 
         last SYNCER;
@@ -1025,8 +1111,8 @@ SYNCER: {
                 $opt{cleanup}->{msg} .= " 2(patches) 3(both)";
                 $opt{cleanup}->{alt}  = [0, 1, 2, 3];
             }
-	} else {
-	    $config{ $arg } = 0;
+        } else {
+            $config{ $arg } = 0;
         }
         $arg = 'cleanup';
         $config{ $arg } = prompt( $arg );
@@ -1185,6 +1271,40 @@ $list
     $config{ $arg } = prompt( $arg );
 }
 
+=item metabase
+
+Starting in the spring of 2010 (The QA-Hackathon Vienna), we want to store the
+test results in the CPANTesters2 Metabase. We hope that we can provide a better
+search interface to these results that way.
+
+=cut
+
+$arg = 'metabase';
+METABASE: {
+    last METABASE;
+    # I intend to make this mandatory in some version of Test::Smoke!!!
+    eval q{require Test::Smoke::Metabase;};
+    my $has_ts_metabase = !$@;
+    if ( !$has_ts_metabase ) {
+        print "Could not find 'Test::Smoke::Metabase', please install.\n";
+    }
+
+    eval q{require Metabase::Client::Simple;};
+    my $has_metabase_client = !$@;
+    if ( !$has_metabase_client ) {
+        print "Could not find 'Metabase::Client::Simple', please install.\n";
+    }
+    my $can_metabase = $has_ts_metabase && $has_metabase_client;
+    if ( !$can_metabase ) {
+        print "Cannot use Metabase to store the results, " .
+              "please consider to install the right modules.";
+        last METABASE;
+    }
+
+    $opt{ $arg }{metabase} = $can_metabase ? 'y' : 'n';
+    $config{ $arg } = prompt_yn( $arg );
+}
+
 =item mail
 
 C<{mail}> will set the new default for L<smokeperl.pl>
@@ -1222,7 +1342,7 @@ MAIL: {
         /^sendmail$/       && do {
             $arg = 'from';
             $config{ $arg } = prompt( $arg );
-	};
+        };
 
         /^(?:Mail::Sendmail|MIME::Lite)$/ && do {
             $arg = 'from';
@@ -1449,7 +1569,8 @@ If you want this then set the directory where you want the stored
 
 $arg = 'adir';
 ( my $pver_nodot = $config{perl_version} ) =~ tr/.//d;
-$opt{ $arg }->{dft} = File::Spec->catdir( 'logs', $pver_nodot );
+my $adirsuf = $options{'prefix'} || $pver_nodot;
+$opt{ $arg }->{dft} = File::Spec->catdir( 'logs', $adirsuf );
 $config{ $arg } = prompt_dir( $arg );
 $config{lfile} = File::Spec->rel2abs( $options{log}, cwd );
 
@@ -1557,7 +1678,7 @@ SCHEDULE: {
         }
         foreach ( @current_cron ) {
             s/^(?<!#)(\d+.+(?:$options{jcl}|smoke)\.sh)/#$1/;
-	}
+        }
 
         my $jcl = File::Spec->rel2abs( "$options{jcl}.sh" );
         $new_entry = schedule_entry( $jcl, $cron, $crontime );
@@ -2022,7 +2143,7 @@ sub prompt_file {
         $file = File::Spec->rel2abs( $file ) unless !$file && $no_valid;
 
         print "'$file' does not exist: $!\n" and redo GETFILE
-	    unless -f $file || $no_valid;
+            unless -f $file || $no_valid;
 
         printf "Got[%s]\n", defined $file ? $file : 'undef';
         return $file;
@@ -2085,7 +2206,10 @@ sub get_avail_sync {
 
     unshift @synctype, 'ftp' if $has_ftp;
 
+    unshift @synctype, 'git' if whereis('git');
+
     unshift @synctype, 'rsync' if whereis( 'rsync' );
+
     return @synctype;
 }
 
@@ -2261,7 +2385,7 @@ sub default_buildcfg {
     -f $file_name and return 1;
 
     $pversion =~ tr/.//d;
-    $pversion eq '511x' and $pversion = 'current';
+    $pversion eq '513x' and $pversion = 'current';
     my $basename = is_win32
         ? "w32current.cfg"
         : is_vms ? "vmsperl.cfg" : "perl${pversion}.cfg";
@@ -2304,7 +2428,7 @@ sub check_buildcfg {
     my $uname_s = Test::Smoke::SysInfo::tsuname( 's' );
     my( $os, $osver ) = split /\s+-\s+/, $uname_s;
     # May assume much too much about OS version number formats.
-    my( $osvermaj, $osvermin ) = ($osver =~ /^.+?(\d+)\D+(\d+)/);
+    my( $osvermaj, $osvermin ) = ($osver =~ /^\D*(\d+)\D+(\d+)/);
     $osver = sprintf "%s", $osvermaj || '?'; 
     defined $osvermin and $osver .= sprintf ".%03d", $osvermin;
 
@@ -2322,7 +2446,7 @@ sub check_buildcfg {
             push @no_option, qw( -Duselongdouble -Dusemorebits -Duse64bitall );
         };
 
-	$os =~ /linux/i && do {
+        $os =~ /linux/i && do {
             push @no_option, qw( -Duse64bitall );
         };
 
