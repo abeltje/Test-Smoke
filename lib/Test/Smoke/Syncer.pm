@@ -6,13 +6,13 @@ use vars qw( $VERSION );
 $VERSION = '0.028';
 
 use Config;
-use Cwd;
+use Cwd qw( cwd abs_path);
 use File::Spec;
 require File::Path;
 
 my %CONFIG = (
     df_sync     => 'rsync',
-    df_ddir     => File::Spec->rel2abs( 'perl-current', File::Spec->curdir ),
+    df_ddir     => File::Spec->rel2abs( 'perl-current', abs_path() ),
     df_v        => 0,
 
 # these settings have to do synctype==rsync
@@ -180,9 +180,9 @@ sub new {
         ( $_ => $value )
     } ( v => ddir => @{ $CONFIG{ $sync_type } } );
     if ( ! File::Spec->file_name_is_absolute( $fields{ddir} ) ) {
-        $fields{ddir} = File::Spec->catdir( cwd(), $fields{ddir} );
+        $fields{ddir} = File::Spec->catdir( abs_path(), $fields{ddir} );
     }
-    $fields{ddir} = File::Spec->rel2abs( $fields{ddir} );
+    $fields{ddir} = File::Spec->rel2abs( $fields{ddir}, abs_path() );
 
     DO_NEW: {
         local *_; $_ = $sync_type;
@@ -382,7 +382,7 @@ sub version_from_patchlevel_h {
     require Test::Smoke::Util;
     return Test::Smoke::Util::version_from_patchelevel( $self->{ddir} );
 }
- 
+
 =item $syncer->clean_from_directory( $source_dir[, @leave_these] )
 
 C<clean_from_directory()> uses File::Find to get the contents of
@@ -395,7 +395,7 @@ The contents of @leave_these should be in "MANIFEST-format"
 
 sub clean_from_directory {
     my $self = shift;
-    my $source_dir = File::Spec->rel2abs( shift );
+    my $source_dir = File::Spec->rel2abs( shift, abs_path() );
 
     require Test::Smoke::SourceTree;
     my $tree = Test::Smoke::SourceTree->new( $source_dir );

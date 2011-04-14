@@ -9,7 +9,7 @@ use File::Basename;
 BEGIN { $findbin = dirname $0; }
 use lib $findbin;
 use TestLib;
-use Cwd;
+use Cwd 'abs_path';
 
 my $win32_fat;
 BEGIN { $win32_fat = $^O eq 'MSWin32' && Win32::FsType() ne 'NTFS' }
@@ -31,11 +31,11 @@ $verbose and diag( "found untargz: $untgz" );
 my $unzipper = find_unzip();
 $verbose and diag( "Found unzip: $unzipper" );
 my %config = (
-    ddir  => catdir(qw( t perl-current )),
+    ddir  => catdir(abs_path(), qw( t perl-current )),
     fsync    => 'copy',
-    cdir     => catdir(qw( t perl )),
-    mdir     => catdir(qw( t perl-master )),
-    fdir     => catdir(qw( t perl-inter  )),
+    cdir     => catdir(abs_path(), qw( t perl )),
+    mdir     => catdir(abs_path(), qw( t perl-master )),
+    fdir     => catdir(abs_path(), qw( t perl-inter  )),
     patchbin => $patch,
     v        => $verbose,
 );

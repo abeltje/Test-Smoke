@@ -5,7 +5,8 @@ use strict;
 
 use Config;
 use File::Spec;
-use lib File::Spec->rel2abs( 't' );
+use Cwd 'abs_path';
+use lib File::Spec->rel2abs( 't', abs_path() );
 use TestLib;
 
 my $win32_fat;
@@ -48,15 +49,15 @@ SKIP: {
     my $tar = find_uncompress() or
         skip "Cannot find decompression stuff", $to_skip;
 
-    do_uncompress( $tar, 't', 
+    do_uncompress( $tar, 't',
                    File::Spec->catfile(qw( ftppub snap perl@20000.tgz )) ) or
         skip "Cannot decompress testsnapshot", $to_skip;
 
     ok( -d File::Spec->catdir(qw( t perl )), "snapshot OK" );
 
     my $syncer = Test::Smoke::Syncer->new( hardlink => { v=> $verbose,
-        ddir => File::Spec->catdir(qw( t perl-current )),
-        hdir => File::Spec->catdir(qw( t perl )),
+        ddir => File::Spec->catdir(abs_path(), qw( t perl-current )),
+        hdir => File::Spec->catdir(abs_path(), qw( t perl )),
     } );
 
     my %perl = map { ($_ => 1) } get_dir( $syncer->{hdir} );
@@ -95,8 +96,8 @@ SKIP: { # Check that the same works for {haslink} == 0
     ok( -d File::Spec->catdir(qw( t perl )), "snapshot OK" );
 
     my $syncer = Test::Smoke::Syncer->new( hardlink => { v=> $verbose,
-        ddir    => File::Spec->catdir(qw( t perl-current )),
-        hdir    => File::Spec->catdir(qw( t perl )),
+        ddir    => File::Spec->catdir(abs_path(), qw( t perl-current )),
+        hdir    => File::Spec->catdir(abs_path(), qw( t perl )),
         haslink => 0,
     } );
 
