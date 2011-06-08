@@ -58,7 +58,7 @@ my $this_system = Test::Smoke::SysInfo::Generic();
             # we can do this fully qualified filehandle as we only use GLOBs
             # to keep up with 5.005xx
             no strict 'refs';
-            tie $handle, 'ReadProc', $files{ $fn };
+            tie *$handle, 'ReadProc', $files{ $fn };
         } else {
             CORE::open \$handle, $second, @args;
         }
@@ -221,4 +221,4 @@ sub READLINE {
     }
 }
 
-1;    
+1;
