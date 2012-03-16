@@ -599,6 +599,17 @@ EOT
         alt => [ ],
         dft => 'localhost',
     },
+    muser => {
+        msg => 'Which username should be used for the SMTP server?',
+        alt => [ ],
+        dft => '',
+    },
+    mpass => {
+        msg => 'Which password should be used for the SMTP server?' .
+               "\nLeave empty to be prompted when sending email",
+        alt => [ ],
+        dft => '',
+    },
 
     to => {
        msg => <<EOMSG,
@@ -1344,6 +1355,20 @@ MAIL: {
             $config{ $arg } = prompt( $arg );
         };
 
+        /^sendemail$/       && do {
+            $arg = 'from';
+            $config{ $arg } = prompt( $arg );
+
+            $arg = 'mserver';
+            $config{ $arg } = prompt( $arg );
+
+            $arg = 'muser';
+            $config{ $arg } = prompt( $arg );
+
+            $arg = 'mpass';
+            $config{ $arg } = prompt( $arg );
+	};
+
         /^(?:Mail::Sendmail|MIME::Lite)$/ && do {
             $arg = 'from';
             $opt{ $arg }{chk} = '\S+';
@@ -1798,7 +1823,7 @@ sub sort_configkeys {
         qw( force_c_locale locale defaultenv ),
 
         # Report related
-        qw( mail mail_type mserver from to ccp5p_onfail
+        qw( mail mail_type mserver muser mpass from to ccp5p_onfail
             swcc cc swbcc bcc ),
 
         # Archive reports and logfile
@@ -2295,6 +2320,8 @@ sub get_avail_mailers {
         local $ENV{PATH} = "$ENV{PATH}$Config{path_sep}/usr/sbin";
         $map{ $mailer } = whereis( $mailer );
     }
+    $mailer = 'sendemail';
+    $map{ $mailer } = whereis( $mailer );
 
     eval { require Mail::Sendmail };
     $map{ 'Mail::Sendmail' } = $@ ? '' : 'Mail::Sendmail';

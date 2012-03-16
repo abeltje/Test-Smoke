@@ -27,12 +27,14 @@ my %CONFIG = (
     mail             => [qw( bcc cc mailbin )],
     df_mailxbin      => 'mailx',
     mailx            => [qw( bcc cc mailxbin swcc swbcc )],
+    df_sendemailbin  => 'sendemail',
+    sendemail        => [qw( from bcc cc sendemailbin mserver muser mpass )],
     df_sendmailbin   => 'sendmail',
     sendmail         => [qw( from bcc cc sendmailbin )],
     'Mail::Sendmail' => [qw( from bcc cc mserver )],
     'MIME::Lite'     => [qw( from bcc cc mserver )],
 
-    valid_mailer => { sendmail => 1, mail => 1, mailx => 1,
+    valid_mailer => { sendmail => 1, mail => 1, mailx => 1, sendemail => 1,
                       'Mail::Sendmail' => 1, 'MIME::Lite' => 1, },
 );
 
@@ -51,7 +53,7 @@ Test::Smoke::Mailer - Wrapper to send the report.
 
 =head1 DESCRIPTION
 
-This little wrapper still allows you to use the B<sendmail>, 
+This little wrapper still allows you to use the B<sendmail>, B<sendemail>,
 B<mail> or B<mailx> programs, but prefers to use the B<Mail::Sendmail>
 module (which comes with this distribution) to send the reports.
 
@@ -63,7 +65,7 @@ module (which comes with this distribution) to send the reports.
 
 Can we provide sensible defaults for the mail stuff?
 
-    mhowto  => [Module::Name|sendmail|mail|mailx]
+    mhowto  => [Module::Name|sendmail|mail|mailx|sendemail]
     mserver => an SMTP server || localhost
     mbin    => the full path to the mail binary
     mto     => list of addresses (comma separated!)
@@ -101,6 +103,7 @@ sub  new {
 
         /^sendmail$/  && return Test::Smoke::Mailer::Sendmail->new( %fields );
         /^mailx?$/ && return Test::Smoke::Mailer::Mail_X->new( %fields );
+        /^sendemail?$/ && return Test::Smoke::Mailer::SendEmail->new( %fields );
         /^Mail::Sendmail$/ && 
             return Test::Smoke::Mailer::Mail_Sendmail->new( %fields );
         /^MIME::Lite$/ && 
@@ -119,15 +122,15 @@ subject line for the mail-message.
 sub fetch_report {
     my $self = shift;
 
-    my $report_file = File::Spec->catfile( $self->{ddir}, $self->{rptfile} );
+    $self->{file} = File::Spec->catfile( $self->{ddir}, $self->{rptfile} );
 
     local *REPORT;
-    if ( open REPORT, "< $report_file" ) {
+    if ( open REPORT, "< $self->{file}" ) {
         $self->{body} = do { local $/; <REPORT> };
         close REPORT;
     } else {
         require Carp;
-        Carp::croak( "Cannot read '$report_file': $!" );
+        Carp::croak( "Cannot read '$self->{file}': $!" );
     }
 
     my @config = parse_report_Config( $self->{body} );
@@ -336,6 +339,80 @@ sub mail {
             $self->{error} = "Error in pipe to '$mailer': $! (" . $?>>8 . ")";
     } else {
 	$self->{error} = "Cannot fork '$mailer': $!";
+    }
+    $self->{v} and print $self->{error} ? "not OK\n" : "OK\n";
+
+    return ! $self->{error};
+}
+
+=back
+
+=head1 Test::Smoke::Mailer::SendEmail
+
+This handles sending the message with the B<sendEmail> program.
+
+=over 4
+
+=cut
+
+package Test::Smoke::Mailer::SendEmail;
+
+@Test::Smoke::Mailer::SendEmail::ISA = qw( Test::Smoke::Mailer );
+
+=item Test::Smoke::Mailer::SendEmail->new( %args )
+
+Keys for C<%args>:
+
+  * ddir
+  * mserver
+  * muser
+  * mpass
+  * sendemailbin
+  * to
+  * from
+  * cc
+  * v
+
+=cut
+
+sub new {
+    my $proto = shift;
+    my $class = ref $proto || $proto;
+
+    return bless { @_ }, $class;
+}
+
+=item $mailer->mail( )
+
+C<mail()> sets up the commandline and body and passes it to the 
+B<sendemail> program.
+
+=cut
+
+sub mail {
+    my $self = shift;
+
+    my $mailer = $self->{sendemailbin};
+
+    my $subject = $self->fetch_report();
+    my $cc = $self->_get_cc( $subject );
+
+    my $cmdline = qq|$mailer -u "$subject"|;
+    $self->{swcc}  ||= '-cc',  $cmdline   .= qq| $self->{swcc} "$cc"| if $cc;
+    $self->{swbcc} ||= '-bcc', $cmdline   .= qq| $self->{swbcc} "$self->{bcc}"|
+        if $self->{bcc};
+    $cmdline   .= qq| -t "$self->{to}"|;
+    $cmdline   .= qq| -f "$self->{from}"| if $self->{from};
+    $cmdline   .= qq| -s "$self->{mserver}"| if $self->{mserver};
+    $cmdline   .= qq| -xu "$self->{muser}"| if $self->{muser};
+    $cmdline   .= qq| -xp "$self->{mpass}"| if ($self->{mpass});
+    $cmdline   .= qq| -o message-file="$self->{file}"|;
+
+    $self->{v} > 1 and print "[$cmdline]\n";
+    $self->{v} and print "Sending report to $self->{to}\n";
+    system $cmdline;
+    if ($?) {
+        $self->{error} = "Error executing '$mailer': " . $?>>8;
     }
     $self->{v} and print $self->{error} ? "not OK\n" : "OK\n";
 

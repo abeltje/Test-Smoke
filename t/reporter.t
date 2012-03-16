@@ -643,7 +643,7 @@ Started smoke at 1258883808
 
 Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc
 ------------------------------------------------------------------------------
-TSTENV = stdio	
+TSTENV = stdio  
 ../t/op/test1.t.............................................PASSED
     2
 ../t/op/test1.t.............................................FAILED
@@ -653,7 +653,7 @@ TSTENV = stdio
 ../t/op/test2.t.............................................FAILED
     Bad plan.  You planned 5 tests but ran 2.
 
-TSTENV = perlio	
+TSTENV = perlio 
 ../t/op/test1.t.............................................PASSED
     2
 ../t/op/test1.t.............................................FAILED
@@ -746,14 +746,14 @@ Started smoke at 1258883808
 
 Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc
 ------------------------------------------------------------------------------
-TSTENV = stdio	
+TSTENV = stdio  
 All tests successful.
 ../t/op/test1.t.............................................PASSED
     2
 ../t/op/test2.t.............................................PASSED
     2
 
-TSTENV = perlio	
+TSTENV = perlio 
 All tests successful.
 ../t/op/test1.t.............................................PASSED
     2
@@ -836,7 +836,7 @@ Started smoke at 1258883808
 
 Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc
 ------------------------------------------------------------------------------
-TSTENV = stdio	
+TSTENV = stdio  
 ../t/op/test1.t.............................................FAILED
     1
 ../t/op/test1.t.............................................PASSED
@@ -844,7 +844,7 @@ TSTENV = stdio
 ../t/op/test2.t.............................................PASSED
     2
 
-TSTENV = perlio	
+TSTENV = perlio 
 ../t/op/test1.t.............................................FAILED
     1
 ../t/op/test1.t.............................................PASSED
@@ -932,14 +932,14 @@ Started smoke at 1258883808
 
 Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc
 ------------------------------------------------------------------------------
-TSTENV = stdio	u=0.37  s=0.00  cu=3.34  cs=0.10  scripts=5  tests=13349
+TSTENV = stdio  u=0.37  s=0.00  cu=3.34  cs=0.10  scripts=5  tests=13349
 
     ../t/op/test1.t.............................................FAILED
         1
     ../t/op/test1.t.............................................PASSED
         2
 
-TSTENV = perlio	u=0.15  s=0.02  cu=3.02  cs=0.11  scripts=5  tests=13349
+TSTENV = perlio u=0.15  s=0.02  cu=3.02  cs=0.11  scripts=5  tests=13349
 
     ../t/op/test1.t.............................................FAILED
         1
@@ -1024,14 +1024,14 @@ Started smoke at 1258883808
 
 Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc
 ------------------------------------------------------------------------------
-TSTENV = stdio	u=0.32  s=0.02  cu=3.32  cs=0.14  scripts=5  tests=13349
+TSTENV = stdio  u=0.32  s=0.02  cu=3.32  cs=0.14  scripts=5  tests=13349
 
     ../t/op/test1.t.............................................PASSED
         2
 Inconsistent test results (between TEST and harness):
     ../t/op/test1.t.........................FAILED at test 1
 
-TSTENV = perlio	u=0.10  s=0.00  cu=2.99  cs=0.12  scripts=5  tests=13349
+TSTENV = perlio u=0.10  s=0.00  cu=2.99  cs=0.12  scripts=5  tests=13349
 
     ../t/op/test1.t.............................................PASSED
         2
@@ -1116,7 +1116,7 @@ Started smoke at 1258883808
 
 Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc
 ------------------------------------------------------------------------------
-TSTENV = stdio	u=0.26  s=0.00  cu=3.32  cs=0.12  scripts=5  tests=13349
+TSTENV = stdio  u=0.26  s=0.00  cu=3.32  cs=0.12  scripts=5  tests=13349
 
     ../t/op/test1.t.............................................PASSED
         2
@@ -1127,7 +1127,7 @@ TSTENV = stdio	u=0.26  s=0.00  cu=3.32  cs=0.12  scripts=5  tests=13349
 Inconsistent test results (between TEST and harness):
     ../t/op/test1.t.........................FAILED at test 1
 
-TSTENV = perlio	u=0.09  s=0.00  cu=3.01  cs=0.12  scripts=5  tests=13349
+TSTENV = perlio u=0.09  s=0.00  cu=3.01  cs=0.12  scripts=5  tests=13349
 
     ../t/op/test1.t.............................................PASSED
         2
@@ -1220,7 +1220,7 @@ Started smoke at 1258883808
 
 Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc
 ------------------------------------------------------------------------------
-TSTENV = stdio	
+TSTENV = stdio  
 ../t/op/test1.t.............................................FAILED
     1
 ../t/op/test1.t.............................................PASSED
@@ -1261,7 +1261,7 @@ TSTENV = stdio
 ../t/op/test5.t.............................................FAILED
     Bad plan.  You planned 75 tests but ran 64.
 
-TSTENV = perlio	
+TSTENV = perlio 
 ../t/op/test1.t.............................................FAILED
     1
 ../t/op/test1.t.............................................PASSED
@@ -1415,14 +1415,14 @@ Started smoke at 1258883808
 
 Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc
 ------------------------------------------------------------------------------
-TSTENV = stdio	
+TSTENV = stdio  
 All tests successful.
 ../t/op/test1.t.............................................PASSED
     2
 ../t/op/test2.t.............................................PASSED
     2
 
-TSTENV = perlio	
+TSTENV = perlio 
 All tests successful.
 ../t/op/test1.t.............................................PASSED
     2
@@ -1432,14 +1432,14 @@ All tests successful.
 
 Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc -Duseithreads
 ------------------------------------------------------------------------------
-TSTENV = stdio	
+TSTENV = stdio  
 All tests successful.
 ../t/op/test1.t.............................................PASSED
     2
 ../t/op/test2.t.............................................PASSED
     2
 
-TSTENV = perlio	
+TSTENV = perlio 
 All tests successful.
 ../t/op/test1.t.............................................PASSED
     2
@@ -1529,14 +1529,14 @@ Started smoke at 1258883808
 
 Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc
 ------------------------------------------------------------------------------
-TSTENV = stdio	
+TSTENV = stdio  
 All tests successful.
 ../t/op/test1.t.............................................PASSED
     2
 ../t/op/test2.t.............................................PASSED
     2
 
-TSTENV = perlio	
+TSTENV = perlio 
 All tests successful.
 ../t/op/test1.t.............................................PASSED
     2
@@ -1546,14 +1546,14 @@ All tests successful.
 
 Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc -Duseithreads
 ------------------------------------------------------------------------------
-TSTENV = stdio	
+TSTENV = stdio  
 All tests successful.
 ../t/op/test1.t.............................................PASSED
     3
 ../t/op/test2.t.............................................PASSED
     2
 
-TSTENV = perlio	
+TSTENV = perlio 
 All tests successful.
 ../t/op/test1.t.............................................PASSED
     4
@@ -1654,12 +1654,12 @@ Started smoke at 1258883808
 
 Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc
 ------------------------------------------------------------------------------
-TSTENV = stdio	u=0.37  s=0.00  cu=3.34  cs=0.10  scripts=5  tests=13349
+TSTENV = stdio  u=0.37  s=0.00  cu=3.34  cs=0.10  scripts=5  tests=13349
 
     ../t/porting/diag.t.........................................FAILED
         Non-zero exit status: 2
  
-TSTENV = perlio	u=0.15  s=0.02  cu=3.02  cs=0.11  scripts=5  tests=13349
+TSTENV = perlio u=0.15  s=0.02  cu=3.02  cs=0.11  scripts=5  tests=13349
 
     ../t/porting/diag.t.........................................FAILED
         Non-zero exit status: 2
@@ -1733,14 +1733,14 @@ Started smoke at 1258883808
 
 Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc
 ------------------------------------------------------------------------------
-TSTENV = stdio	u=0.37  s=0.00  cu=3.34  cs=0.10  scripts=5  tests=13349
+TSTENV = stdio  u=0.37  s=0.00  cu=3.34  cs=0.10  scripts=5  tests=13349
 
     ../t/porting/diag.t.........................................FAILED
         Non-zero exit status: 2
     ../t/porting/diag.t.........................................FAILED
         No plan found in TAP output
  
-TSTENV = perlio	u=0.15  s=0.02  cu=3.02  cs=0.11  scripts=5  tests=13349
+TSTENV = perlio u=0.15  s=0.02  cu=3.02  cs=0.11  scripts=5  tests=13349
 
     ../t/porting/diag.t.........................................FAILED
         Non-zero exit status: 2
@@ -1817,11 +1817,11 @@ Started smoke at 1258883808
 
 Configuration: -Dusedevel -Dcc=/opt/perl/ccache/gcc
 ------------------------------------------------------------------------------
-TSTENV = stdio	u=0.37  s=0.00  cu=3.34  cs=0.10  scripts=5  tests=13349
+TSTENV = stdio  u=0.37  s=0.00  cu=3.34  cs=0.10  scripts=5  tests=13349
 
     ../t/porting/diag.t.........................................??????
  
-TSTENV = perlio	u=0.15  s=0.02  cu=3.02  cs=0.11  scripts=5  tests=13349
+TSTENV = perlio u=0.15  s=0.02  cu=3.02  cs=0.11  scripts=5  tests=13349
 
     ../t/porting/diag.t.........................................??????
 
@@ -2028,9 +2028,8 @@ __EOL__
 
 -DDEBUGGING
 __EOC__
-    my $plhsrc = catdir( $findbin, qw( ftppub perl-current ) );
-    copy( catfile( $plhsrc, 'patchlevel.h' ),
-          catfile( $findbin, 'patchlevel.h' ) );
+    my $plhsrc = catdir($findbin, qw( ftppub perl-current ));
+    copy(catfile($plhsrc, 'patchlevel.h'), catfile($findbin, 'patchlevel.h'));
     my $report = Test::Smoke::Reporter->new(
         ddir       => $findbin,
         outfile    => 'pc09.out',
@@ -2049,28 +2048,28 @@ __EOC__
 +----------- PERLIO = stdio 
 __EOL__
 
-    1 while unlink catfile( $findbin, 'patchlevel.h' );
+    1 while unlink catfile($findbin, 'patchlevel.h');
 }
 
-{ # Test write to file
-    create_config_sh( $config_sh, version => '5.6.1' );
+{    # Test write to file
+    create_config_sh($config_sh, version => '5.6.1');
 
     my $reporter = Test::Smoke::Reporter->new(
-        ddir       => $findbin,
-        v          => $verbose, 
-        outfile    => '',
-        showcfg    => $showcfg,
-        user_note  => 'This is user info',
-        cfg        => \( my $bcfg = <<__EOCFG__ ),
+        ddir      => $findbin,
+        v         => $verbose,
+        outfile   => '',
+        showcfg   => $showcfg,
+        user_note => 'This is user info',
+        cfg       => \(my $bcfg = <<__EOCFG__ ),
 -Dcc='ccache gcc'
 =
 -Uuseperlio
 __EOCFG__
     );
-    isa_ok( $reporter, 'Test::Smoke::Reporter' );
+    isa_ok($reporter, 'Test::Smoke::Reporter');
 
     my $timer = time - 300;
-    $reporter->read_parse( \(my $result = <<EORESULTS) );
+    $reporter->read_parse(\(my $result = <<EORESULTS));
 Started smoke at @{ [$timer] }
 Smoking patch 22000
 
@@ -2093,54 +2092,55 @@ Finished smoking 22000
 Stopped smoke at @{ [$timer += 100] }
 EORESULTS
 
-	my $report_string = $reporter->report;
+    my $report_string = $reporter->report;
 
-	like($report_string, qr{\nThis is user info\n}, 'Has user info');
-	my $file = catfile($findbin, "report.tmp");
-	if (-e $file) {
-		die "$file already exists?";
-	}
-	$reporter->write_to_file($file);
+    like($report_string, qr{\nThis is user info\n}, 'Has user info');
+    my $file = catfile($findbin, "report.tmp");
+    if (-e $file) {
+        die "$file already exists?";
+    }
+    $reporter->write_to_file($file);
 
+    if (-e $file) {
+        ok(1, "file exists");
 
-	if (-e $file) {
-		ok(1, "file exists");
-
-		open my $in, "<", $file or die "Can't read file: $!";
-		my $in_string = "";
-		while (<$in>) {
-			$in_string .= $_;
-		}
-		is($in_string, $report_string, "file is the same as the report");
-		unlink $file or die "Can't unlink file: $!";
-	}
-	else {
-		ok(0, "file exists");
-		ok(0, "file is the same as the report");
-	}
-	unlink $config_sh;
+        open my $in, "<", $file or die "Can't read file: $!";
+        my $in_string = "";
+        while (<$in>) {
+            $in_string .= $_;
+        }
+        is($in_string, $report_string, "file is the same as the report");
+        close $file;
+        unlink $file or die "Can't unlink file: $!";
+    }
+    else {
+        ok(0, "file exists");
+        ok(0, "file is the same as the report");
+    }
+    unlink $config_sh;
 }
 
 sub create_config_sh {
-    my( $file, %cfg ) = @_;
+    my ($file, %cfg) = @_;
 
     my $cfg_sh = "# This is a testfile config.sh\n";
-    $cfg_sh   .= "# created by $0\n";
+    $cfg_sh .= "# created by $0\n";
 
-    $cfg_sh   .= join "", map "$_='$cfg{$_}'\n" => keys %cfg;
+    $cfg_sh .= join "", map "$_='$cfg{$_}'\n" => keys %cfg;
 
-    put_file( $cfg_sh, $file );
+    put_file($cfg_sh, $file);
 }
-
 
 sub make_test_file {
     my ($patch, $ddir, $in_file, $out_file) = @_;
 
-    open my $in, "<", catfile( $ddir, $in_file ) or die "Failed to open input file: $!";
-    open my $out, ">", catfile( $ddir, $out_file ) or die "Failed to create temp file: $!";
+    open my $in, "<", catfile($ddir, $in_file)
+        or die "Failed to open input file: $!";
+    open my $out, ">", catfile($ddir, $out_file)
+        or die "Failed to create temp file: $!";
     while (<$in>) {
-       s/__PATCHLEVEL__/$patch/g;
-       print $out $_;
+        s/__PATCHLEVEL__/$patch/g;
+        print $out $_;
     }
     close $in;
     close $out;

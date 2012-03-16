@@ -29,6 +29,8 @@ my %opt = (
     ccp5p_onfail => undef,
     from         => undef,
     mserver      => undef,
+    muser        => undef,
+    mpass        => undef,
     v            => undef,
 
     rptfile      => 'mktest.rpt',
@@ -42,7 +44,7 @@ my %opt = (
 
 my $defaults = Test::Smoke::Mailer->config( 'all_defaults' );
 
-my %valid_type = map { $_ => 1 } qw( mail mailx sendmail 
+my %valid_type = map { $_ => 1 } qw( mail mailx sendmail sendemail
                                      Mail::Sendmail MIME::Lite );
 
 =head1 NAME
@@ -76,7 +78,8 @@ Other options can override the settings from the configuration file.
     --to <emailaddresses>    Comma separated list (smokers-reports@perl.org)
     --cc <emailaddresses>    Comma separated list
 
-    -t | --type <type>       mail mailx sendmail Mail::Sendmail [mandatory]
+    -t | --type <type>       mail mailx sendmail sendemail Mail::Sendmail
+                             [mandatory]
 
     --nomail                 Don't send the message
     --report                 Create a report anyway
@@ -96,6 +99,13 @@ no extra options
 
     --from <address>
 
+=item * B<options for> -t sendemail
+
+    --from <address>
+    --mserver <smtpserver>  (localhost)
+    --muser <smtpserverusername>
+    --mpass <smtpserverpassword>
+
 =item * B<options for> -t Mail::Sendmail | MIME::Lite
 
     --from <address>
@@ -114,7 +124,7 @@ GetOptions( \%opt,
     'type|t=s', 'ddir|d=s', 'to=s', 'cc=s', 'bcc=s', 'ccp5p_onfail!',
     'v|verbose=i',
 
-    'from=s', 'mserver=s',
+    'from=s', 'mserver=s', 'muser=s', 'mpass=s',
 
     'help|h', 'man',
 
