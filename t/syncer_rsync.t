@@ -4,7 +4,7 @@ use strict;
 # $Id$
 
 use Data::Dumper;
-use Cwd;
+use Cwd qw/cwd abs_path/;
 use File::Spec;
 use Test::More tests => 33;
 
@@ -14,7 +14,9 @@ my %df_rsync = (
     rsync => 'rsync',
     source => 'public.activestate.com::perl-current',
     opts   => '-az --delete',
-    ddir   => File::Spec->rel2abs( 'perl-current', File::Spec->curdir ),
+    ddir   => File::Spec->canonpath(
+        File::Spec->rel2abs('perl-current', abs_path(cwd()))
+    ),
 );
 
 {
@@ -30,7 +32,7 @@ my %df_rsync = (
 {
     my %rsync = %df_rsync;
     $rsync{source} = 'ftp.linux.ActiveState.com::perl-current'; 
-    $rsync{ddir}   = File::Spec->canonpath( cwd() );
+    $rsync{ddir}   = File::Spec->canonpath(abs_path(cwd()));
     my $sync = eval { 
         Test::Smoke::Syncer->new( 'rsync', 
             source => $rsync{source},
@@ -50,7 +52,7 @@ my %df_rsync = (
 {
     my %rsync = %df_rsync;
     $rsync{source} = 'ftp.linux.ActiveState.com::perl-current'; 
-    $rsync{ddir}   = File::Spec->canonpath( cwd() );
+    $rsync{ddir}   = File::Spec->canonpath(abs_path(cwd()));
     my $sync = eval { 
         Test::Smoke::Syncer->new( rsync => {
             source => $rsync{source},

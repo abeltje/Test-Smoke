@@ -161,7 +161,7 @@ sub new {
     my $proto = shift;
     my $class = ref $proto ? ref $proto : $proto;
 
-    my $sync_type = lc (shift || $CONFIG{df_sync});
+    my $sync_type = lc(shift || $CONFIG{df_sync});
 
     unless ( exists $CONFIG{valid_type}->{$sync_type} ) {
         require Carp;
