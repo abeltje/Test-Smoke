@@ -2110,7 +2110,7 @@ EORESULTS
             $in_string .= $_;
         }
         is($in_string, $report_string, "file is the same as the report");
-        close $file;
+        close $in;
         unlink $file or die "Can't unlink file: $!";
     }
     else {
