@@ -385,7 +385,7 @@ sub BSD {
 =head2 Darwin( )
 
 If the L<system_profiler> program is accessible (meaning that this is
-Mac OS X), use it to find information; otherwise treat as L</BSD>.
+Mac OS X), use it to find information; otherwise treat as L</BSD( )>.
 
 This sub was donated by Dominic Dunlup.
 
@@ -784,9 +784,9 @@ See:
 
 =over 4
 
-=item * http://www.perl.com/perl/misc/Artistic.html
+=item * L<http://www.perl.com/perl/misc/Artistic.html>
 
-=item * http://www.gnu.org/copyleft/gpl.html
+=item * L<http://www.gnu.org/copyleft/gpl.html>
 
 =back
 

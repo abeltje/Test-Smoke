@@ -91,6 +91,8 @@ Test::Smoke::Smoker - OO interface to do one smoke cycle.
 
 =head1 DESCRIPTION
 
+The Test::Smoke::Smoker module, an OO interface to do one smoke cycle.
+
 =head1 METHODS
 
 =over 4
@@ -855,7 +857,7 @@ sub make_minitest {
 
 =item $self->_parse_harness_output( $\%notok, $all_ok, @lines )
 
-Fator out the parsing of the Test::Harness output, as it seems subject
+Factor out the parsing of the Test::Harness output, as it seems subject
 to change.
 
 =cut
@@ -1249,9 +1251,9 @@ See:
 
 =over 4
 
-=item * http://www.perl.com/perl/misc/Artistic.html
+=item * L<http://www.perl.com/perl/misc/Artistic.html>
 
-=item * http://www.gnu.org/copyleft/gpl.html
+=item * L<http://www.gnu.org/copyleft/gpl.html>
 
 =back
 
