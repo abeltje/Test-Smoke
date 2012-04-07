@@ -109,7 +109,7 @@ O O         -Uuseperlio
 __EOM__
 
     chomp( my $summary = $reporter->summary );
-    is $summary, 'Summary: PASS', $summary;
+    is $summary, 'PASS', $summary;
     unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
             "hasn't the configurations";
 
@@ -212,7 +212,7 @@ F O F F O F
 __EOM__
 
     chomp( my $summary = $reporter->summary );
-    is $summary, 'Summary: FAIL(F)', $summary;
+    is $summary, 'FAIL(F)', $summary;
     if ( $showcfg ) {
          like $reporter->report, "/Build configurations:\n$bcfg=/", 
               "has the configurations";
@@ -308,7 +308,7 @@ O O F F
 __EOM__
 
     chomp( my $summary = $reporter->summary );
-    is $summary, 'Summary: FAIL(F)', $summary;
+    is $summary, 'FAIL(F)', $summary;
     like $reporter->report, qq@/^
          Failures: \\s+ \\(common-args\\) \\s+ none \\n
          \\[stdio\\/perlio\\] \\s* -DDEBUGGING
@@ -355,7 +355,7 @@ Stopped smoke at 1073869001
 EORESULTS
 
     chomp( my $summary = $reporter->summary );
-    is $summary, 'Summary: PASS', $summary;
+    is $summary, 'PASS', $summary;
     is $reporter->ccinfo, "ccache egcc version 3.2", "ccinfo()";
     like $reporter->report, "/^Summary: PASS\n/m", "Summary from report";
 
@@ -692,7 +692,7 @@ F F - -
 __EOM__
 
     chomp( my $summary = $reporter->summary );
-    is $summary, 'Summary: FAIL(F)', $summary;
+    is $summary, 'FAIL(F)', $summary;
     unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
             "hasn't the configurations";
 
@@ -789,7 +789,7 @@ O O - -
 __EOM__
 
     chomp( my $summary = $reporter->summary );
-    is $summary, 'Summary: PASS', $summary;
+    is $summary, 'PASS', $summary;
     unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
             "hasn't the configurations";
 
@@ -881,7 +881,7 @@ F F - -
 __EOM__
 
     chomp( my $summary = $reporter->summary );
-    is $summary, 'Summary: FAIL(F)', $summary;
+    is $summary, 'FAIL(F)', $summary;
     unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
             "hasn't the configurations";
 
@@ -975,7 +975,7 @@ F F - -
 __EOM__
 
     chomp( my $summary = $reporter->summary );
-    is $summary, 'Summary: FAIL(F)', $summary;
+    is $summary, 'FAIL(F)', $summary;
     unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
             "hasn't the configurations";
 
@@ -1067,7 +1067,7 @@ X X - -
 __EOM__
 
     chomp( my $summary = $reporter->summary );
-    is $summary, 'Summary: FAIL(X)', $summary;
+    is $summary, 'FAIL(X)', $summary;
     unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
             "hasn't the configurations";
 
@@ -1167,7 +1167,7 @@ F F - -
 __EOM__
 
     chomp( my $summary = $reporter->summary );
-    is $summary, 'Summary: FAIL(F)', $summary;
+    is $summary, 'FAIL(F)', $summary;
     unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
             "hasn't the configurations";
 
@@ -1331,7 +1331,7 @@ F F - -
 __EOM__
 
     chomp( my $summary = $reporter->summary );
-    is $summary, 'Summary: FAIL(F)', $summary;
+    is $summary, 'FAIL(F)', $summary;
     unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
             "hasn't the configurations";
 
@@ -1481,7 +1481,7 @@ O O - -     -Duseithreads
 __EOM__
 
     chomp( my $summary = $reporter->summary );
-    is $summary, 'Summary: PASS', $summary;
+    is $summary, 'PASS', $summary;
     unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
             "hasn't the configurations";
 
@@ -1595,7 +1595,7 @@ O O - -     -Duseithreads
 __EOM__
 
     chomp( my $summary = $reporter->summary );
-    is $summary, 'Summary: PASS', $summary;
+    is $summary, 'PASS', $summary;
     unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
             "hasn't the configurations";
 
@@ -1691,7 +1691,7 @@ F F - -
 __EOM__
 
     chomp( my $summary = $reporter->summary );
-    is $summary, 'Summary: FAIL(F)', $summary;
+    is $summary, 'FAIL(F)', $summary;
     unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
             "hasn't the configurations";
 
@@ -1774,7 +1774,7 @@ F F - -
 __EOM__
 
     chomp( my $summary = $reporter->summary );
-    is $summary, 'Summary: FAIL(F)', $summary;
+    is $summary, 'FAIL(F)', $summary;
     unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
             "hasn't the configurations";
 
@@ -1852,7 +1852,7 @@ F F - -
 __EOM__
 
     chomp( my $summary = $reporter->summary );
-    is $summary, 'Summary: FAIL(F)', $summary;
+    is $summary, 'FAIL(F)', $summary;
     unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
             "hasn't the configurations";
 

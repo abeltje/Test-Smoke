@@ -28,22 +28,26 @@ use Test::Smoke::Util qw( get_patch calc_timeout do_pod2usage );
 use Getopt::Long;
 Getopt::Long::Configure( 'pass_through' );
 my %options = (
-    config       => 'smokecurrent_config',
-    run          => 1,
-    pfile        => undef,
-    fetch        => 1,
-    patch        => 1,
-    mail         => undef,
-    archive      => undef,
-    continue     => 0,
-    ccp5p_onfail => undef,
-    killtime     => undef,
-    is56x        => undef,
-    defaultenv   => undef,
-    smartsmoke   => undef,
-    delay_report => undef,
-    v            => undef,
-    cfg          => undef
+    config        => 'smokecurrent_config',
+    run           => 1,
+    pfile         => undef,
+    fetch         => 1,
+    patch         => 1,
+    mail          => undef,
+    transport     => 1,
+    transport_url => undef,
+    send_out      => "never",
+    send_log      => "on_fail",
+    archive       => undef,
+    continue      => 0,
+    ccp5p_onfail  => undef,
+    killtime      => undef,
+    is56x         => undef,
+    defaultenv    => undef,
+    smartsmoke    => undef,
+    delay_report  => undef,
+    v             => undef,
+    cfg           => undef
 );
 
 my $myusage = "Usage: $0 [-c configname]";
@@ -53,6 +57,8 @@ GetOptions( \%options,
     'patch!',
     'ccp5p_onfail!',
     'mail!',
+    'transport!',
+    'transport_url=s',
     'delay_report!',
     'run!',
     'archive!',
@@ -95,6 +101,7 @@ It can take these options
   --nofetch                Skip the synctree step
   --nopatch                Skip the patch step
   --nomail                 Skip the mail step
+  --notransport            Skip the transport step
   --noarchive              Skip the archive step (if applicable)
   --[no]ccp5p_onfail       Do (not) send failure reports to perl5-porters
   --[no]delay_report       Do (not) create the report now
@@ -134,17 +141,19 @@ defined $options{fetch} && !$options{fetch} && !defined $options{smartsmoke}
 
 # Correction for backward compatability
 !defined $options{ $_ } && !exists $conf->{ $_ } and $options{ $_ } = 1
-    for qw( run fetch patch mail archive v );
+    for qw( run fetch patch archive v );
 !defined $options{ $_ } && !exists $conf->{ $_ } and $options{ $_ } = 0
-    for qw( delay_report );
+    for qw( delay_report mail );
 
 # Make command-line options override configfile
 defined $options{ $_ } and $conf->{ $_ } = $options{ $_ }
-    for qw( is56x defaultenv continue killtime pfile cfg delay_report
-            smartsmoke run fetch patch mail ccp5p_onfail archive v );
+    for qw( is56x defaultenv continue killtime pfile cfg delay_report v run
+            smartsmoke fetch patch mail transport_url ccp5p_onfail archive );
 
 # Make sure the --pfile command-line override works
 $options{pfile} and $conf->{patch_type} ||= 'multi';
+
+$options{transport} or $conf->{transport_url} = undef;
 
 if ( $options{continue} ) {
     $options{v} and print "Will try to continue current smoke\n";
@@ -158,8 +167,7 @@ chdir $conf->{ddir} or die "Cannot chdir($conf->{ddir}): $!";
 call_mktest( $cwd );
 chdir $cwd;
 unless ( $conf->{delay_report} ) {
-    genrpt();
-    mailrpt();
+    sendrpt(genrpt());
 } else {
     $conf->{v} and print "Delayed creation of the report. See 'mailrpt.pl'\n";
 }
@@ -230,8 +238,7 @@ sub call_mktest {
     $timeout and local $SIG{ALRM} = sub {
         warn "This smoke is aborted ($conf->{killtime})\n";
         chdir $cwd;
-        genrpt();
-        mailrpt();
+        sendrpt(genrpt());
         exit(42);
     };
     $Config{d_alarm} and alarm $timeout;
@@ -243,15 +250,31 @@ sub genrpt {
     return unless $options{run};
     my $reporter = Test::Smoke::Reporter->new( $conf );
     $reporter->write_to_file;
+    return $reporter;
 }
 
-sub mailrpt {
-    unless ( $conf->{mail} && $options{run} ) {
-        $conf->{v} and print "Skipping mailrpt\n";
+sub sendrpt {
+    my $reporter = shift;
+
+    unless ( $options{run} ) {
+        $conf->{v} and print "Skipping mailrpt and transport\n";
         return;
     }
-    my $mailer = Test::Smoke::Mailer->new( $conf->{mail_type}, $conf );
-    $mailer->mail or warn "[$conf->{mail_type}] " . $mailer->error;
+
+    if ( $conf->{mail} ) {
+	my $mailer = Test::Smoke::Mailer->new( $conf->{mail_type}, $conf );
+	$mailer->mail or warn "[$conf->{mail_type}] " . $mailer->error;
+    }
+    else {
+        $conf->{v} and print "Skipping mailrpt\n";
+    }
+
+    if ( $reporter && $conf->{transport_url} ) {
+	$reporter->transport( $conf->{transport_url} );
+    }
+    else {
+        $conf->{v} and print "Skipping transport\n";
+    }
 }
 
 sub archiverpt {

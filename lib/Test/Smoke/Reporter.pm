@@ -3,14 +3,17 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.034';
+$VERSION = '0.050';
 
+require File::Path;
+require Test::Smoke;
 use Cwd;
 use File::Spec::Functions;
-require File::Path;
-use Text::ParseWords;
-require Test::Smoke;
+use JSON;
+use LWP::UserAgent;
+use POSIX qw( strftime );
 use Test::Smoke::SysInfo;
+use Text::ParseWords;
 use Test::Smoke::Util qw( grepccmsg get_smoked_Config
                           time_in_hhmm get_local_patches );
 
@@ -45,6 +48,7 @@ Test::Smoke::Reporter - OO interface for handling the testresults (mktest.out)
 
     my $reporter = Test::Smoke::Reporter->new( %args );
     $reporter->write_to_file;
+    $reporter->transport( $url );
 
 =head1 DESCRIPTION
 
@@ -80,6 +84,7 @@ sub new {
         ( $_ => $value )
     } keys %{ $class->config( 'all_defaults' ) };
 
+    $fields{_conf_args} = { %args_raw };
     my $self = bless \%fields, $class;
     $self->read_parse(  );
 }
@@ -167,7 +172,7 @@ sub _read {
         $self->{_outfile} = join "", @$nameorref;
         $vmsg = "from internal content";
     } elsif ( ref $nameorref eq 'GLOB' ) {
-	*SMOKERSLT = *$nameorref;
+        *SMOKERSLT = *$nameorref;
         $self->{_outfile} = do { local $/; <SMOKERSLT> };
         $vmsg = "from anonymous filehandle";
     } else {
@@ -192,64 +197,67 @@ sub _read {
 
 =item $self->_parse( )
 
-Interpret the contents of the logfile and prepare them for processing,
+Interpret the contents of the outfile and prepare them for processing,
 so report can be made.
 
 =cut
 
 sub _parse {
     my $self = shift;
-    $self->{_rpt} = { }; $self->{_cache} = { }; $self->{_mani} = [ ];
+
+    $self->{_rpt}    = \(my %rpt);
+    $self->{_cache}  = {};
+    $self->{_mani}   = [];
+    $self->{configs} = \(my @new);
     return $self unless defined $self->{_outfile};
 
-    my( %rpt, $cfgarg, $debug, $tstenv, $start, $statarg, $fcnt );
+    my ($cfgarg, $debug, $tstenv, $start, $statarg, $fcnt);
     $rpt{count} = 0;
     # reverse and use pop() instead of using unshift()
-    my @lines = reverse split /\n+/, $self->{_outfile};
-    my $previous = "";
+    my @lines           = reverse split m/\n+/, $self->{_outfile};
+    my $previous        = "";
     my $previous_failed = "";
 
-    while ( defined( local $_ = pop @lines ) ) {
+    while (defined (local $_ = pop @lines)) {
         m/^\s*$/ and next;
         m/^-+$/  and next;
         s/\s*$//;
 
-        if ( my( $status, $time ) = /(Started|Stopped) smoke at (\d+)/ ) {
-            if ( $status eq "Started" ) {
+        if (my ($status, $time) = /(Started|Stopped) smoke at (\d+)/) {
+            if ($status eq "Started") {
                 $start = $time;
                 $rpt{started} ||= $time;
-            } else {
-                $rpt{secs} += ($time - $start) if defined $start;
+            }
+            elsif (defined $start) {
+                my $elapsed = $time - $start;
+                $rpt{secs} += $elapsed;
+                @new and $new[-1]{duration} = $elapsed;
             }
             next;
         }
 
-        if  ( my( $patch ) = /^
-            \s*
-            Smoking\ patch\s*
-            ((?:[0-9a-f]+\s+\S+)|(?:\d+\S*))
-        /x ) {
+        if (my ($patch) = m/^   \s*
+                                Smoking\ patch\s*
+                                ((?:[0-9a-f]+\s+\S+)|(?:\d+\S*))
+                                /x )
+        {
             my ($pl, $descr) = split ' ', $patch;
             $rpt{patchlevel} = $patch;
-            $rpt{patch} = $pl || $patch;
+            $rpt{patch}      = $pl || $patch;
             $rpt{patchdescr} = $descr || $pl;
             next;
         }
 
-        if ( my( $cinfo ) = /^Compiler info: (.+)$/ ) {
-            $rpt{cinfo} = $cinfo unless $rpt{cinfo};
+        if (/^MANIFEST /) {
+            push @{$self->{_mani}}, $_;
             next;
         }
 
-        if ( /^MANIFEST / ) {
-            push @{ $self->{_mani} }, $_;
-            next;
-        }
+        if (s/^\s*Configuration:\s*//) {
 
-        if ( s/^\s*Configuration:\s*// ) {
-            # You might need to do something here with 
+            # You might need to do something here with
             # the previous Configuration: $cfgarg
-            $rpt{statcfg}{ $statarg } = $fcnt if defined $statarg;
+            $rpt{statcfg}{$statarg} = $fcnt if defined $statarg;
             $fcnt = 0;
 
             $rpt{count}++;
@@ -262,66 +270,163 @@ sub _parse {
 
             $cfgarg = $_ || "";
 
-            push @{ $rpt{cfglist} }, $_ unless $rpt{config}->{ $cfgarg }++;
-            $tstenv = "";
+            push(
+                @new,
+                {
+                    arguments => $_,
+                    debugging => $debug,
+                    started   => __posixdate($start),
+                    results   => [],
+                }
+            );
+            push @{$rpt{cfglist}}, $_ unless $rpt{config}->{$cfgarg}++;
+            $tstenv          = "";
             $previous_failed = "";
             next;
         }
 
-        if ( m/(?:PERLIO|TSTENV)\s*=\s*([-\w:.]+)/ ) {
-            $tstenv = $1;
+        if (my ($cinfo) = /^Compiler info: (.+)$/) {
+            $rpt{$cfgarg}->{cinfo} = $cinfo;
+            $rpt{cinfo} ||= $cinfo;
+            @{$new[-1]}{qw( cc ccversion )} = split m/ version / => $cinfo, 2;
+            next;
+        }
+
+        if (m/(?:PERLIO|TSTENV)\s*=\s*([-\w:.]+)/) {
+            $tstenv          = $1;
             $previous_failed = "";
             $rpt{$cfgarg}->{summary}{$debug}{$tstenv} ||= "?";
+            my ($io_env, $locale) = split m/:/ => $tstenv,
+                2;
+            push(
+                @{$new[-1]{results}},
+                {
+                    io_env        => $io_env,
+                    locale        => $locale,
+                    summary       => "?",
+                    statistics    => undef,
+                    stat_tests    => undef,
+                    stat_cpu_time => undef,
+                    failures      => [],
+                }
+            );
+
             # Deal with harness output
             s/^(?:PERLIO|TSTENV)\s*=\s+[-\w:.]+(?: :crlf)?\s*//;
         }
 
-        if ( m/^\s*All tests successful/ ) {
+        if (m/\b(Files=[0-9]+,\s*Tests=([0-9]+),.*?=\s*([0-9.]+)\s*CPU)/) {
+            $new[-1]{results}[-1]{statistics}    = $1;
+            $new[-1]{results}[-1]{stat_tests}    = $2;
+            $new[-1]{results}[-1]{stat_cpu_time} = $3;
+        }
+        elsif (
+            m/\b(u=([0-9.]+)\s+
+                    s=([0-9.]+)\s+
+                    cu=([0-9.]+)\s+
+                    cs=([0-9.]+)\s+
+                    scripts=[0-9]+\s+
+                    tests=([0-9]+))/xi
+            )
+        {
+            $new[-1]{results}[-1]{statistics}    = $1;
+            $new[-1]{results}[-1]{stat_tests}    = $6;
+            $new[-1]{results}[-1]{stat_cpu_time} = $2 + $3 + $4 + $5;
+        }
+
+        if (m/^\s*All tests successful/) {
             $rpt{$cfgarg}->{summary}{$debug}{$tstenv} = "O";
+            $new[-1]{results}[-1]{summary} = "O";
             next;
         }
 
-        if ( m/Inconsistent test ?results/ ) {
-            ref $rpt{$cfgarg}->{$debug}{$tstenv}{failed} or
-                $rpt{$cfgarg}->{$debug}{$tstenv}{failed} = [ ];
+        if (m/Inconsistent test ?results/) {
+            ref $rpt{$cfgarg}->{$debug}{$tstenv}{failed}
+                or $rpt{$cfgarg}->{$debug}{$tstenv}{failed} = [];
 
-            if (not $rpt{$cfgarg}->{summary}{$debug}{$tstenv} or
-                    $rpt{$cfgarg}->{summary}{$debug}{$tstenv} ne "F") {
+            if (not $rpt{$cfgarg}->{summary}{$debug}{$tstenv}
+                or $rpt{$cfgarg}->{summary}{$debug}{$tstenv} ne "F")
+            {
                 $rpt{$cfgarg}->{summary}{$debug}{$tstenv} = "X";
+                $new[-1]{results}[-1]{summary} = "X";
             }
-            push @{ $rpt{$cfgarg}->{$debug}{$tstenv}{failed} }, $_;
+            push @{$rpt{$cfgarg}->{$debug}{$tstenv}{failed}}, $_;
+            push(
+                @{$new[-1]{results}[-1]{failures}},
+                m/^ \s* (\S+?) \.+ (\w+) \s* $/x
+                    ? {
+                        test   => $1,
+                        status => $2,
+                        extra  => []
+                        }
+                    : {
+                        test   => "?",
+                        status => "?",
+                        extra  => []
+                    }
+            );
         }
 
-        if ( /^Finished smoking [\dA-Fa-f]+/ ) {
-            $rpt{statcfg}{ $statarg } = $fcnt;
+        if (/^Finished smoking [\dA-Fa-f]+/) {
+            $rpt{statcfg}{$statarg} = $fcnt;
             $rpt{finished} = "Finished";
             next;
         }
 
-        if ( my( $status, $mini ) =
-             m/^\s*Unable\ to
-               \ (?=([cbmt]))(?:build|configure|make|test)
-               \ (anything\ but\ mini)?perl/x) {
-            $mini and $status = uc $status; # M for no perl but miniperl
-            # $tstenv is only set *after* this
-            $tstenv = $mini ? 'minitest' : 'stdio' unless $tstenv;
+        if (my ($status, $mini) =
+            m/^ \s* Unable\ to
+                \ (?=([cbmt]))(?:build|configure|make|test)
+                \ (anything\ but\ mini)?perl/x
+                )
+        {
+            $mini and $status = uc $status;   # M for no perl but miniperl
+                                              # $tstenv is only set *after* this
+            $tstenv ||= $mini ? "minitest" : "stdio";
             $rpt{$cfgarg}->{summary}{$debug}{$tstenv} = $status;
+            push(
+                @{$new[-1]{results}},
+                {
+                    io_env        => $tstenv,
+                    locale        => undef,
+                    summary       => $status,
+                    statistics    => undef,
+                    stat_tests    => undef,
+                    stat_cpu_time => undef,
+                    failures      => [],
+                }
+            );
             $fcnt++;
             next;
         }
 
-        if ( m/FAILED/ || m/DIED/ || m/dubious$/ || m/\?\?\?\?\?\?$/) {
-            ref $rpt{$cfgarg}->{$debug}{$tstenv}{failed} or
-                $rpt{$cfgarg}->{$debug}{$tstenv}{failed} = [ ];
+        if (m/FAILED/ || m/DIED/ || m/dubious$/ || m/\?\?\?\?\?\?$/) {
+            ref $rpt{$cfgarg}->{$debug}{$tstenv}{failed}
+                or $rpt{$cfgarg}->{$debug}{$tstenv}{failed} = [];
 
             if ($previous_failed ne $_) {
-                if (not $rpt{$cfgarg}->{summary}{$debug}{$tstenv} or
-                        $rpt{$cfgarg}->{summary}{$debug}{$tstenv} ne "X") {
+                if (not $rpt{$cfgarg}->{summary}{$debug}{$tstenv}
+                    or $rpt{$cfgarg}->{summary}{$debug}{$tstenv} ne "X")
+                {
                     $rpt{$cfgarg}->{summary}{$debug}{$tstenv} = "F";
+                    $new[-1]{results}[-1]{summary} = "F";
                 }
-                push @{ $rpt{$cfgarg}->{$debug}{$tstenv}{failed} }, $_;
+                push @{$rpt{$cfgarg}->{$debug}{$tstenv}{failed}}, $_;
+                push(
+                    @{$new[-1]{results}[-1]{failures}},
+                    m/^ \s* (\S+?) \.+ (\w+) \s* $/x
+                        ? {
+                            test   => $1,
+                            status => $2,
+                            extra  => []
+                            }
+                        : {
+                            test   => "?",
+                            status => "?",
+                            extra  => []
+                        }
+                );
 
-                $fcnt++; 
+                $fcnt++;
             }
             $previous_failed = $_;
 
@@ -329,30 +434,50 @@ sub _parse {
             next;
         }
 
-        if ( m/PASSED/) {
-            ref $rpt{$cfgarg}->{$debug}{$tstenv}{passed} or
-                $rpt{$cfgarg}->{$debug}{$tstenv}{passed} = [ ];
+        if (m/PASSED/) {
+            ref $rpt{$cfgarg}->{$debug}{$tstenv}{passed}
+                or $rpt{$cfgarg}->{$debug}{$tstenv}{passed} = [];
 
-            push @{ $rpt{$cfgarg}->{$debug}{$tstenv}{passed} }, $_;
+            push @{$rpt{$cfgarg}->{$debug}{$tstenv}{passed}}, $_;
+            push(
+                @{$new[-1]{results}[-1]{failures}},
+                m/^ \s* (\S+?) \.+ (\w+) \s* $/x
+                    ? {
+                        test   => $1,
+                        status => $2,
+                        extra  => []
+                        }
+                    : {
+                        test   => "?",
+                        status => "?",
+                        extra  => []
+                    }
+            );
             $previous = "passed";
             next;
         }
 
-        if ( /^\s+\d+(?:[-\s]+\d+)*/ ) {
-            push @{ $rpt{$cfgarg}->{$debug}{$tstenv}{$previous} }, $_
-                if ref $rpt{$cfgarg}->{$debug}{$tstenv}{$previous};
+        if (/^\s+(\d+(?:[-\s]+\d+)*)/) {
+            if (ref $rpt{$cfgarg}->{$debug}{$tstenv}{$previous}) {
+                push @{$rpt{$cfgarg}->{$debug}{$tstenv}{$previous}}, $_;
+                push @{$new[-1]{results}[-1]{failures}[-1]{extra}}, $1;
+            }
             next;
         }
-        if ( /^\s+(?:Bad plan)|(?:No plan found)|^\s+(?:Non-zero exit status)/ ) {
-            push @{ $rpt{$cfgarg}->{$debug}{$tstenv}{failed} }, $_
-                if ref $rpt{$cfgarg}->{$debug}{$tstenv}{failed};
+
+        if (/^\s+(?:Bad plan)|(?:No plan found)|^\s+(?:Non-zero exit status)/) {
+            if (ref $rpt{$cfgarg}->{$debug}{$tstenv}{failed}) {
+                push @{$rpt{$cfgarg}->{$debug}{$tstenv}{failed}}, $_;
+                s/^\s+//;
+                push @{$new[-1]{results}[-1]{failures}[-1]{extra}}, $_;
+            }
             next;
         }
         next;
     }
 
     $rpt{last_cfg} = $statarg;
-    exists $rpt{statcfg}{ $statarg } or $rpt{running} = $fcnt;
+    exists $rpt{statcfg}{$statarg} or $rpt{running} = $fcnt;
     $rpt{avg} = $rpt{secs} / $rpt{count};
     $self->{_rpt} = \%rpt;
     $self->_post_process;
@@ -368,143 +493,192 @@ sort the buildenvironments, statusletters and test failures.
 sub _post_process {
     my $self = shift;
 
-    unless ( defined $self->{is56x} ) {
-        my %cfg = get_smoked_Config( $self->{ddir}, 'version' );
+    unless (defined $self->{is56x}) {
+        my %cfg = get_smoked_Config($self->{ddir}, "version");
         my $p_version = sprintf "%d.%03d%03d", split m/\./, $cfg{version};
         $self->{is56x} = $p_version < 5.007;
     }
     $self->{defaultenv} ||= $self->{is56x};
 
-    my( %bldenv, %cfgargs );
+    my (%bldenv, %cfgargs);
     my $rpt = $self->{_rpt};
-    foreach my $config ( @{ $rpt->{cfglist} } ) {
-        foreach my $buildenv ( keys %{ $rpt->{ $config }{summary}{N} } ) {
-            $bldenv{ $buildenv }++;
+    foreach my $config (@{$rpt->{cfglist}}) {
+
+        foreach my $buildenv (keys %{$rpt->{$config}{summary}{N}}) {
+            $bldenv{$buildenv}++;
         }
-        foreach my $buildenv ( keys %{ $rpt->{ $config }{summary}{D} } ) {
-            $bldenv{ $buildenv }++;
+        foreach my $buildenv (keys %{$rpt->{$config}{summary}{D}}) {
+            $bldenv{$buildenv}++;
         }
-        $cfgargs{$_}++ for grep defined $_ => quotewords( '\s+', 1, $config );
+        foreach my $ca (grep defined $_ => quotewords('\s+', 1, $config)) {
+            $cfgargs{$ca}++;
+        }
     }
-    my %common_args = map {
-        ( $_ => 1)
-    } grep $cfgargs{ $_ } == @{ $rpt->{cfglist} } && ! /^-[DU]use/
-        => keys %cfgargs;
+    my %common_args =
+        map { ($_ => 1) }
+        grep $cfgargs{$_} == @{$rpt->{cfglist}}
+        && !/^-[DU]use/ => keys %cfgargs;
 
     $rpt->{_common_args} = \%common_args;
     $rpt->{common_args} = join " ", sort keys %common_args;
     $rpt->{common_args} ||= 'none';
 
-    $self->{_tstenv} = [ reverse sort keys %bldenv ];
-    my %count = ( O => 0, F => 0, X => 0, M => 0, 
-                  m => 0, c => 0, o => 0, t => 0 );
-    my( %failures, %order ); my $ord = 1;
-    my( %todo_passed, %order2 ); my $ord2 = 1;
+    $self->{_tstenv} = [reverse sort keys %bldenv];
+    my %count = (
+        O => 0,
+        F => 0,
+        X => 0,
+        M => 0,
+        m => 0,
+        c => 0,
+        o => 0,
+        t => 0
+    );
+    my (%failures, %order);
+    my $ord = 1;
+    my (%todo_passed, %order2);
+    my $ord2 = 1;
     my $debugging = $rpt->{dbughow} || '-DDEBUGGING';
-    foreach my $config ( @{ $rpt->{cfglist} } ) {
+
+    foreach my $config (@{$rpt->{cfglist}}) {
         foreach my $dbinfo (qw( N D )) {
             my $cfg = $config;
-            ( $cfg =  $cfg ? "$debugging $cfg" : $debugging )
+            ($cfg = $cfg ? "$debugging $cfg" : $debugging)
                 if $dbinfo eq "D";
             $self->{v} and print "Processing [$cfg]\n";
-            my $status = $self->{_rpt}{ $config }{ summary }{ $dbinfo };
-            foreach my $tstenv ( reverse sort keys %bldenv ) {
-                next if $tstenv eq 'minitest' && ! exists $status->{ $tstenv };
+            my $status = $self->{_rpt}{$config}{summary}{$dbinfo};
+            foreach my $tstenv (reverse sort keys %bldenv) {
+                next if $tstenv eq 'minitest' && !exists $status->{$tstenv};
 
-                ( my $showenv = $tstenv ) =~ s/^locale://;
-                if ( $tstenv =~ /^locale:/ ) {
-                    $self->{_locale_keys}{ $showenv }++
-                        or push @{ $self->{_locale} }, $showenv;
+                (my $showenv = $tstenv) =~ s/^locale://;
+                if ($tstenv =~ /^locale:/) {
+                    $self->{_locale_keys}{$showenv}++
+                        or push @{$self->{_locale}}, $showenv;
                 }
-                $showenv = 'default' 
+                $showenv = 'default'
                     if $self->{defaultenv} && $showenv eq 'stdio';
 
-                $status->{ $tstenv } ||= '-';
+                $status->{$tstenv} ||= '-';
 
-		my $status2 = $self->{_rpt}{ $config }{ $dbinfo };
-                if ( exists $status2->{$tstenv}{failed}) {
-                    my $failed = join "\n", @{ $status2->{$tstenv}{failed} };
-                    if ( exists $failures{ $failed } &&
-                         @{ $failures{ $failed } } && 
-                         $failures{ $failed }->[-1]{cfg} eq $cfg ) {
-                        push @{ $failures{ $failed }->[-1]{env} }, $showenv;
-                    } else {
-                        push @{ $failures{ $failed } }, 
-                             { cfg => $cfg, env => [ $showenv ] };
-                        $order{ $failed } ||= $ord++;
+                my $status2 = $self->{_rpt}{$config}{$dbinfo};
+                if (exists $status2->{$tstenv}{failed}) {
+                    my $failed = join "\n", @{$status2->{$tstenv}{failed}};
+                    if (   exists $failures{$failed}
+                        && @{$failures{$failed}}
+                        && $failures{$failed}->[-1]{cfg} eq $cfg)
+                    {
+                        push @{$failures{$failed}->[-1]{env}}, $showenv;
+                    }
+                    else {
+                        push @{$failures{$failed}},
+                            {
+                            cfg => $cfg,
+                            env => [$showenv]
+                            };
+                        $order{$failed} ||= $ord++;
                     }
                 }
-                if ( exists $status2->{$tstenv}{passed}) {
-                    my $passed = join "\n", @{ $status2->{$tstenv}{passed} };
-                    if ( exists $todo_passed{ $passed } &&
-                         @{ $todo_passed{ $passed } } && 
-                         $todo_passed{ $passed }->[-1]{cfg} eq $cfg ) {
-                        push @{ $todo_passed{ $passed }->[-1]{env} }, $showenv;
-                    } else {
-                        push @{ $todo_passed{ $passed } }, 
-                             { cfg => $cfg, env => [ $showenv ] };
-                        $order2{ $passed } ||= $ord2++;
+                if (exists $status2->{$tstenv}{passed}) {
+                    my $passed = join "\n", @{$status2->{$tstenv}{passed}};
+                    if (   exists $todo_passed{$passed}
+                        && @{$todo_passed{$passed}}
+                        && $todo_passed{$passed}->[-1]{cfg} eq $cfg)
+                    {
+                        push @{$todo_passed{$passed}->[-1]{env}}, $showenv;
+                    }
+                    else {
+                        push(
+                            @{$todo_passed{$passed}},
+                            {
+                                cfg => $cfg,
+                                env => [$showenv]
+                            }
+                        );
+                        $order2{$passed} ||= $ord2++;
                     }
 
                 }
 
                 $self->{v} > 1 and print "\t[$showenv]: $status->{$tstenv}\n";
-                if ( $tstenv eq 'minitest' ) {
+                if ($tstenv eq 'minitest') {
                     $status->{stdio} = "M";
                     delete $status->{minitest};
                 }
             }
-            unless ( $self->{defaultenv} ) {
+            unless ($self->{defaultenv}) {
                 exists $status->{perlio} or $status->{perlio} = '-';
                 my @locales = split ' ', ($self->{locale} || '');
-                for my $locale ( @locales ) {
-                    exists $status->{ "locale:$locale" } or 
-                        $status->{ "locale:$locale" } = '-'
+                for my $locale (@locales) {
+                    exists $status->{"locale:$locale"}
+                        or $status->{"locale:$locale"} = '-';
                 }
             }
 
-            $count{ $_ }++ for map {
-                m/[cmMtFXO]/ ? $_ : m/-/ ? 'O' : 'o' 
-            } map $status->{ $_ } => keys %$status;
+            $count{$_}++
+                for map { m/[cmMtFXO]/ ? $_ : m/-/ ? 'O' : 'o' }
+                map $status->{$_} => keys %$status;
         }
     }
-    defined $self->{_locale} or $self->{_locale} = [ ];
+    defined $self->{_locale} or $self->{_locale} = [];
 
     my @failures = map {
-        { tests => $_,
-          cfgs  => [ map {
-              my $cfg_clean = __rm_common_args( $_->{cfg}, \%common_args );
-              my $env = join "/", @{ $_->{env} };
-              "[$env] $cfg_clean";
-        } @{ $failures{ $_ } }],
-      }
-    } sort { $order{$a} <=> $order{ $b} } keys %failures;
+        {
+            tests => $_,
+            cfgs  => [
+                map {
+                    my $cfg_clean = __rm_common_args($_->{cfg}, \%common_args);
+                    my $env = join "/", @{$_->{env}};
+                    "[$env] $cfg_clean";
+                } @{$failures{$_}}
+            ],
+        }
+    } sort { $order{$a} <=> $order{$b} } keys %failures;
     $self->{_failures} = \@failures;
 
     my @todo_passed = map {
-        { tests => $_,
-          cfgs  => [ map {
-              my $cfg_clean = __rm_common_args( $_->{cfg}, \%common_args );
-              my $env = join "/", @{ $_->{env} };
-              "[$env] $cfg_clean";
-        } @{ $todo_passed{ $_ } }],
-      }
-    } sort { $order2{$a} <=> $order2{ $b} } keys %todo_passed;
+        {
+            tests => $_,
+            cfgs  => [
+                map {
+                    my $cfg_clean = __rm_common_args($_->{cfg}, \%common_args);
+                    my $env = join "/", @{$_->{env}};
+                    "[$env] $cfg_clean";
+                } @{$todo_passed{$_}}
+            ],
+        }
+    } sort { $order2{$a} <=> $order2{$b} } keys %todo_passed;
     $self->{_todo_passed} = \@todo_passed;
 
     $self->{_counters} = \%count;
+
     # Need to rebuild the test-environments as minitest changes into stdio
     my %bldenv2;
-    foreach my $config ( @{ $rpt->{cfglist} } ) {
-        foreach my $buildenv ( keys %{ $rpt->{ $config }{summary}{N} } ) {
-            $bldenv2{ $buildenv }++;
+    foreach my $config (@{$rpt->{cfglist}}) {
+        foreach my $buildenv (keys %{$rpt->{$config}{summary}{N}}) {
+            $bldenv2{$buildenv}++;
         }
-        foreach my $buildenv ( keys %{ $rpt->{ $config }{summary}{D} } ) {
-            $bldenv2{ $buildenv }++;
+        foreach my $buildenv (keys %{$rpt->{$config}{summary}{D}}) {
+            $bldenv2{$buildenv}++;
         }
     }
     $self->{_tstenvraw} = $self->{_tstenv};
-    $self->{_tstenv} = [ reverse sort keys %bldenv2 ];
+    $self->{_tstenv}    = [reverse sort keys %bldenv2];
+}
+
+=item __posixdate($time)
+
+Returns C<strftime("%F %T %z")>.
+
+=cut
+
+sub __posixdate {
+
+    # Note that the format "%F %T %z" returns:
+    #  Linux:  2012-04-02 10:57:58 +0200
+    #  HP-UX:  April 08:53:32 METDST
+    # ENOTPORTABLE!  %F is C99 only!
+    my $stamp = shift || time;
+    return POSIX::strftime("%Y-%m-%d %T %z", localtime $stamp);
 }
 
 =item __rm_common_args( $cfg, \%common )
@@ -551,6 +725,96 @@ sub write_to_file {
     return 1;
 }
 
+=item $reporter->transport( $url )
+
+Transport the report to the gateway. The transported data will also be stored
+locally in the file mktest.jsn
+
+=cut
+
+sub transport {
+    my $self = shift;
+    my ($url, %args) = @_;
+    my %rpt  = map { $_ => $self->{$_} } keys %$self;
+    $rpt{manifest_msgs}   = delete $rpt{_mani};
+    $rpt{applied_patches} = [$self->registered_patches];
+    $rpt{sysinfo}         = do {
+        my %Conf = get_smoked_Config($self->{ddir} => qw( version lfile ));
+        my $si = Test::Smoke::SysInfo->new;
+        my ($osname, $osversion) = split m/ - / => $si->os, 2;
+        (my $ncpu      = $si->ncpu          || "?") =~ s/^\s*(\d+)\s*/$1/;
+        (my $user_note = $self->{user_note} || "")  =~ s/(\S)[\s\r\n]*\z/$1\n/;
+        {
+            architecture     => $si->cpu_type,
+            config_count     => $self->{_rpt}{count},
+            cpu_count        => $ncpu,
+            cpu_description  => $si->cpu,
+            duration         => $self->{_rpt}{secs},
+            git_describe     => $self->{_rpt}{patchdescr},
+            git_id           => $self->{_rpt}{patch},
+            hostname         => $si->host,
+            lang             => $ENV{LANG},
+            lc_all           => $ENV{LC_ALL},
+            osname           => $osname,
+            osversion        => $osversion,
+            perl_id          => $Conf{version},
+            reporter         => $self->{_conf_args}{from},
+            reporter_version => $VERSION,
+            smoke_date       => __posixdate(),
+            smoke_revision   => $Test::Smoke::REVISION,
+            smoker_version   => $Test::Smoke::Smoker::VERSION,
+            smoke_version    => $Test::Smoke::VERSION,
+            test_jobs        => $ENV{TEST_JOBS},
+            username         => $ENV{LOGNAME} // getlogin // getpwuid($<) // "?",
+            user_note        => $user_note,
+            smoke_perl       => ($^V ? sprintf("%vd", $^V) : $]),
+        };
+    };
+    $rpt{compiler_msgs} = [$self->ccmessages];
+    $rpt{skipped_tests} = [$self->user_skipped_tests];
+    $rpt{harness_only}  = delete $rpt{harnessonly};
+    $rpt{summary}       = $self->summary;
+
+    $rpt{log_file} = undef;
+    $rpt{out_file} = undef;
+    my $rpt_fail = $rpt{summary} eq "PASS" ? 0 : 1;
+    if (my $send_log = $rpt{_conf_args}{send_log}) {
+        if ($send_log eq "always" or $send_log eq "on_fail" && $rpt_fail) {
+            if (open my $fh, "<", $rpt{lfile}) {
+                local $/;
+                $rpt{log_file} = <$fh>;
+                close $fh;
+            }
+        }
+    }
+    if (my $send_out = $rpt{_conf_args}{send_out}) {
+        if ($send_out eq "always" or $send_out eq "on_fail" && $rpt_fail) {
+            if (open my $fh, "<", $rpt{_outfile}) {
+                local $/;
+                $rpt{out_file} = <$fh>;
+                close $fh;
+            }
+        }
+    }
+    delete $rpt{$_} for "user_note", grep m/^_/ => keys %rpt;
+    my $json = JSON->new->utf8(1)->pretty(1)->encode(\%rpt);
+    open my $fh, ">:raw", "mktest.jsn";
+    print $fh $json;
+    close $fh;
+
+    # NOW SEND $json TO $url
+    my $ua = LWP::UserAgent->new(agent => "Test::Smoke/$VERSION");
+    my $result = eval { $ua->post($url, {json => $json}) };
+
+    # and deal with possible errors
+    if ($@) {
+        print "Transport failed (to $url):\n", $@;
+    }
+    else {
+        print $result->content;
+    }
+}
+
 =item $reporter->report( )
 
 Return a string with the full report
@@ -563,7 +827,7 @@ sub report {
 
     my $report = $self->preamble;
 
-    $report .= $self->summary . "\n";
+    $report .= "Summary: ".$self->summary."\n\n";
     $report .= $self->letter_legend . "\n";
     $report .= $self->smoke_matrix . $self->bldenv_legend;
 
@@ -622,7 +886,10 @@ Return a section with the locally applied patches (from patchlevel.h).
 sub registered_patches {
     my $self = shift;
 
-    my @lpatches = get_local_patches( $self->{ddir}, $self->{v} );
+    my @lpatches = get_local_patches($self->{ddir}, $self->{v});
+    @lpatches && $lpatches[0] eq "uncommitted-changes" and shift @lpatches;
+    wantarray and return @lpatches;
+
     @lpatches or return "";
 
     my $list = join "\n", map "    $_" => @lpatches;
@@ -653,14 +920,18 @@ Show indication for the fact that the user requested to skip some tests.
 =cut
 
 sub user_skipped_tests {
-    my( $self ) = @_;
-    $self->{skip_tests} && -f $self->{skip_tests} or return "";
+    my $self = shift;
 
-    local *NOTESTS;
-    open NOTESTS, "< $self->{skip_tests}" or return "";
+    my @skipped;
+    if ($self->{skip_tests} && -f $self->{skip_tests} and open my $fh,
+        "<", $self->{skip_tests})
+    {
+        @skipped = map { chomp; "    $_" } <$fh>;
+        close $fh;
+    }
+    wantarray and return @skipped;
 
-    my $skipped = join "\n", map { chomp; "    $_" } <NOTESTS>;
-    close NOTESTS;
+    my $skipped = join "\n", @skipped or return "";
 
     return "\nTests skipped on user request:\n$skipped";
 }
@@ -673,17 +944,17 @@ Use a port of Jarkko's F<grepccerr> script to report the compiler messages.
 
 sub ccmessages {
     my $self = shift;
-    my $ccinfo = $self->{_rpt}{cinfo} || $self->{_ccinfo};
+    my $ccinfo = $self->{_rpt}{cinfo} || $self->{_ccinfo} || "cc";
     $ccinfo =~ s/^(.+)\s+version\s+.+/$1/;
 
     $^O =~ /^(?:linux|.*bsd.*|darwin)/ and $ccinfo = 'gcc';
     my $cc = $ccinfo =~ /(gcc|bcc32)/ ? $1 : $^O;
 
     $self->{v} and print "Looking for cc messages: '$cc'\n";
-    my $errors = grepccmsg( $cc, $self->{lfile}, $self->{v} ) || [ ];
+    my $errors = grepccmsg($cc, $self->{lfile}, $self->{v}) || [];
 
     local $" = "\n";
-    return @$errors ? <<EOERRORS : "";
+    return @$errors ? wantarray ? @$errors : <<EOERRORS : "";
 
 Compiler messages($cc):
 @$errors
@@ -768,17 +1039,18 @@ Return the B<PASS> or B<FAIL(x)> string.
 =cut
 
 sub summary {
-    my $self = shift;
-    my $count = $self->{_counters};
-    my @rpt_sum_stat = grep $count->{ $_ } > 0 => qw( X F M m c t );
-    my $rpt_summary = '';
-    if ( @rpt_sum_stat ) {
-        $rpt_summary = "FAIL(" . join( "", @rpt_sum_stat ) . ")";
-    } else {
-        $rpt_summary = $count->{o} == 0 ? 'PASS' : 'PASS-so-far';
+    my $self         = shift;
+    my $count        = $self->{_counters};
+    my @rpt_sum_stat = grep $count->{$_} > 0 => qw( X F M m c t );
+    my $rpt_summary  = "";
+    if (@rpt_sum_stat) {
+        $rpt_summary = "FAIL(" . join("", @rpt_sum_stat) . ")";
+    }
+    else {
+        $rpt_summary = $count->{o} == 0 ? "PASS" : "PASS-so-far";
     }
 
-    return "Summary: $rpt_summary\n";
+    return $rpt_summary;
 }
 
 =item $repoarter->has_test_failures( )
@@ -946,9 +1218,10 @@ L<Test::Smoke::Smoker>
 
 =head1 COPYRIGHT
 
-(c) 2002-2003, All rights reserved.
+(c) 2002-2012, All rights reserved.
 
   * Abe Timmerman <abeltje@cpan.org>
+  * H.Merijn Brand <hmbrand@cpan.org>
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

@@ -72,9 +72,16 @@ git clone URL --reference /local/path
 
 =item Metabase/CPANTesters2
 
-The intention is to move the smoke reports to metabase/cpantesters2. This
-requires dependenies for Test::Smoke, but it will gain us a basis for a much
-better interface to the results.
+The intention to move the smoke reports to metabase/cpantesters2 has been
+completely abandoned.
+
+=item Gateway
+
+The new Test::Smoke runs will support both the - soon to be deprecated -
+mail(ing list) backend as well as the new gateway backend. The smoke results
+will be send to a gateway that will store the reports and features a user
+interface to withdraw them again. You can still use the mail interface to
+send a copy to yourself :)
 
 =back
 
@@ -116,7 +123,7 @@ both development track and maintenance track have their own rsync archive:
 
 =head1 REVISION
 
-$id: roadmap.pod 243 2003-07-18 13:39:42z abeltje $
+roadmap.pod 244 2012-04-01 10:23
 
 =head1 COPYRIGHT
 

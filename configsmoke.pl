@@ -574,11 +574,21 @@ EOT
         dft => '',
     },
 
-    # metabase
-    metabase => {
-        msg => "Send smoke results to Metabase?",
-        alt => [qw( n Y )],
-        dft => 'y',
+    # gateway
+    transport_url => {
+        msg => 'Send smoke results to the Gateway? (url)',
+        alt => [ ],
+        dft => '',
+    },
+    send_log => {
+	msg => 'Do you want to send the logfile with the report?',
+	alt => [qw( always on_fail never )],
+	dft => 'on_fail',
+    },
+    send_out => {
+	msg => 'Do you want to send the outfile with the report?',
+	alt => [qw( always on_fail never )],
+	dft => 'never',
     },
 
     # mail stuff
@@ -1282,38 +1292,32 @@ $list
     $config{ $arg } = prompt( $arg );
 }
 
-=item metabase
+=item gateway
 
-Starting in the spring of 2010 (The QA-Hackathon Vienna), we want to store the
-test results in the CPANTesters2 Metabase. We hope that we can provide a better
-search interface to these results that way.
+Instead of flooding a mailing list, reposts should be sent to the gateway. The
+option to mail yourself a copy of the report still exists. The gateway however
+offers a central point of view to the smoke results.
 
 =cut
 
-$arg = 'metabase';
-METABASE: {
-    last METABASE;
-    # I intend to make this mandatory in some version of Test::Smoke!!!
-    eval q{require Test::Smoke::Metabase;};
-    my $has_ts_metabase = !$@;
-    if ( !$has_ts_metabase ) {
-        print "Could not find 'Test::Smoke::Metabase', please install.\n";
+$arg = 'transport_url';
+GATEWAY: {
+    eval q{require JSON;};
+    my $has_json = !$@;
+    if ( !$has_json ) {
+        print "Could not find 'JSON', please install.\n";
+        last GATEWAY;
     }
 
-    eval q{require Metabase::Client::Simple;};
-    my $has_metabase_client = !$@;
-    if ( !$has_metabase_client ) {
-        print "Could not find 'Metabase::Client::Simple', please install.\n";
-    }
-    my $can_metabase = $has_ts_metabase && $has_metabase_client;
-    if ( !$can_metabase ) {
-        print "Cannot use Metabase to store the results, " .
-              "please consider to install the right modules.";
-        last METABASE;
+    eval q{require LWP::UserAgent;};
+    my $has_lwp_useragent = !$@;
+    if ( !$has_lwp_useragent ) {
+        print "Could not find 'LWP::UserAgent', please install.\n";
+        last GATEWAY;
     }
 
-    $opt{ $arg }{metabase} = $can_metabase ? 'y' : 'n';
-    $config{ $arg } = prompt_yn( $arg );
+    $config{ $arg } = 'http://gateway.test-smoke.org/report';
+    $config{ $arg } = prompt( $arg );
 }
 
 =item mail
