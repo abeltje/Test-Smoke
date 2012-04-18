@@ -7,16 +7,17 @@ use vars qw( $VERSION );
 $VERSION = Test::Smoke->VERSION;
 
 use Cwd;
-use File::Spec;
+use File::Spec::Functions qw(:DEFAULT rel2abs);
 use File::Path;
 use File::Copy;
 my $findbin;
 use File::Basename;
-BEGIN { $findbin = File::Spec->rel2abs( dirname $0 ); }
-use lib File::Spec->catdir( $findbin, 'lib' );
-use lib File::Spec->catdir( $findbin, 'lib', 'inc' );
+BEGIN { $findbin = rel2abs(dirname $0); }
+use lib catdir($findbin, 'lib');
+use lib catdir($findbin, 'lib', 'inc');
 use lib $findbin;
-use lib File::Spec->catdir( $findbin, 'inc' );
+use lib catdir($findbin, 'inc');
+
 use Config;
 use Test::Smoke::Syncer;
 use Test::Smoke::Patcher;
@@ -28,26 +29,25 @@ use Test::Smoke::Util qw( get_patch calc_timeout do_pod2usage );
 use Getopt::Long;
 Getopt::Long::Configure( 'pass_through' );
 my %options = (
-    config        => 'smokecurrent_config',
-    run           => 1,
-    pfile         => undef,
-    fetch         => 1,
-    patch         => 1,
-    mail          => undef,
-    transport     => 1,
-    transport_url => undef,
-    send_out      => "never",
-    send_log      => "on_fail",
-    archive       => undef,
-    continue      => 0,
-    ccp5p_onfail  => undef,
-    killtime      => undef,
-    is56x         => undef,
-    defaultenv    => undef,
-    smartsmoke    => undef,
-    delay_report  => undef,
-    v             => undef,
-    cfg           => undef
+    config       => 'smokecurrent_config',
+    run          => 1,
+    pfile        => undef,
+    fetch        => 1,
+    patch        => 1,
+    mail         => undef,
+    smokedb      => 1,
+    smokedb_url  => undef send_out => "never",
+    send_log     => "on_fail",
+    archive      => undef,
+    continue     => 0,
+    ccp5p_onfail => undef,
+    killtime     => undef,
+    is56x        => undef,
+    defaultenv   => undef,
+    smartsmoke   => undef,
+    delay_report => undef,
+    v            => undef,
+    cfg          => undef
 );
 
 my $myusage = "Usage: $0 [-c configname]";
@@ -57,8 +57,8 @@ GetOptions( \%options,
     'patch!',
     'ccp5p_onfail!',
     'mail!',
-    'transport!',
-    'transport_url=s',
+    'smokedb!',
+    'smokedb_url=s',
     'delay_report!',
     'run!',
     'archive!',
@@ -101,7 +101,7 @@ It can take these options
   --nofetch                Skip the synctree step
   --nopatch                Skip the patch step
   --nomail                 Skip the mail step
-  --notransport            Skip the transport step
+  --nosmokedb_send         Skip the transport step
   --noarchive              Skip the archive step (if applicable)
   --[no]ccp5p_onfail       Do (not) send failure reports to perl5-porters
   --[no]delay_report       Do (not) create the report now
@@ -127,9 +127,9 @@ front-ends internally and does some sanity checking.
 =cut
 
 # Try cwd() first, then $findbin
-my $config_file = File::Spec->catfile( cwd(), $options{config} );
+my $config_file = catfile( cwd(), $options{config} );
 unless ( read_config( $config_file ) ) {
-    $config_file = File::Spec->catfile( $findbin, $options{config} );
+    $config_file = catfile( $findbin, $options{config} );
     read_config( $config_file );
 }
 defined Test::Smoke->config_error and 
@@ -148,7 +148,7 @@ defined $options{fetch} && !$options{fetch} && !defined $options{smartsmoke}
 # Make command-line options override configfile
 defined $options{ $_ } and $conf->{ $_ } = $options{ $_ }
     for qw( is56x defaultenv continue killtime pfile cfg delay_report v run
-            smartsmoke fetch patch mail transport_url ccp5p_onfail archive );
+            smartsmoke fetch patch mail smokedb_url ccp5p_onfail archive );
 
 # Make sure the --pfile command-line override works
 $options{pfile} and $conf->{patch_type} ||= 'multi';
@@ -262,18 +262,22 @@ sub sendrpt {
     }
 
     if ( $conf->{mail} ) {
-	my $mailer = Test::Smoke::Mailer->new( $conf->{mail_type}, $conf );
-	$mailer->mail or warn "[$conf->{mail_type}] " . $mailer->error;
+        my $mailer = Test::Smoke::Mailer->new( $conf->{mail_type}, $conf );
+        $mailer->mail or warn "[$conf->{mail_type}] " . $mailer->error;
     }
     else {
         $conf->{v} and print "Skipping mailrpt\n";
     }
 
-    if ( $reporter && $conf->{transport_url} ) {
-	$reporter->transport( $conf->{transport_url} );
+    if ($conf->{smokedb} && $conf->{smokedb_url} ) {
+        require LWP::UserAgent;
+        my $ua = LWP::UserAgent->new(
+            agent => "Test::Smoke/$Test::Smoke::VERSION",
+        );
+        $ua->post($conf->{smokedb_url}, {json => $reporter->smokedb_json});
     }
     else {
-        $conf->{v} and print "Skipping transport\n";
+        $conf->{v} and print "Skipping smokedb_send\n";
     }
 }
 
@@ -293,10 +297,10 @@ sub archiverpt {
         my $archived_rpt = "rpt${patch_level}.rpt";
         # Do not archive if it is already done
         last SKIP_RPT
-            if -f File::Spec->catfile( $conf->{adir}, $archived_rpt );
+            if -f catfile( $conf->{adir}, $archived_rpt );
 
-        copy( File::Spec->catfile( $conf->{ddir}, 'mktest.rpt' ),
-              File::Spec->catfile( $conf->{adir}, $archived_rpt ) ) or
+        copy( catfile( $conf->{ddir}, 'mktest.rpt' ),
+              catfile( $conf->{adir}, $archived_rpt ) ) or
             die "Cannot copy to '$archived_rpt': $!";
     }
 
@@ -304,10 +308,10 @@ sub archiverpt {
         my $archived_out = "out${patch_level}.out";
         # Do not archive if it is already done
         last SKIP_OUT
-            if -f File::Spec->catfile( $conf->{adir}, $archived_out );
+            if -f catfile( $conf->{adir}, $archived_out );
 
-        copy( File::Spec->catfile( $conf->{ddir}, 'mktest.out' ),
-              File::Spec->catfile( $conf->{adir}, $archived_out ) ) or
+        copy( catfile( $conf->{ddir}, 'mktest.out' ),
+              catfile( $conf->{adir}, $archived_out ) ) or
             die "Cannot copy to '$archived_out': $!";
     }
 
@@ -317,8 +321,18 @@ sub archiverpt {
         last SKIP_LOG 
             unless -f $conf->{lfile};
         copy( $conf->{lfile},
-              File::Spec->catfile( $conf->{adir}, $archived_log ) ) or
+              catfile( $conf->{adir}, $archived_log ) ) or
             die "Cannot copy to '$archived_log': $!";
+    }
+
+    SKIP_JSN: {
+        my $archived_jsn = "out${patch_level}.jsn";
+        last SKIP_JSN
+            if -f catfile($conf->{adir}, $archived_jsn);
+        copy(
+            catfile($conf->{ddir}, 'mktest.jsn'),
+            catfile($conf->{adir}, $archived_jsn)
+        ) or die "Cannot copy to $archived_jsn: $!";
     }
 }
 

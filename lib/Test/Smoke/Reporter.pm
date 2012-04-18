@@ -21,6 +21,7 @@ my %CONFIG = (
     df_ddir         => curdir(),
     df_outfile      => 'mktest.out',
     df_rptfile      => 'mktest.rpt',
+    df_jsnfile      => 'mktest.jsn',
     df_cfg          => undef,
     df_lfile        => undef,
     df_showcfg      => 0,
@@ -725,16 +726,15 @@ sub write_to_file {
     return 1;
 }
 
-=item $reporter->transport( $url )
+=item $reporter->smokedb_data()
 
 Transport the report to the gateway. The transported data will also be stored
 locally in the file mktest.jsn
 
 =cut
 
-sub transport {
+sub smokedb_data {
     my $self = shift;
-    my ($url, %args) = @_;
     my %rpt  = map { $_ => $self->{$_} } keys %$self;
     $rpt{manifest_msgs}   = delete $rpt{_mani};
     $rpt{applied_patches} = [$self->registered_patches];
@@ -776,10 +776,11 @@ sub transport {
     $rpt{summary}       = $self->summary;
 
     $rpt{log_file} = undef;
-    $rpt{out_file} = undef;
     my $rpt_fail = $rpt{summary} eq "PASS" ? 0 : 1;
     if (my $send_log = $rpt{_conf_args}{send_log}) {
-        if ($send_log eq "always" or $send_log eq "on_fail" && $rpt_fail) {
+        if (   ($send_log eq "always")
+            or ($send_log eq "on_fail" && $rpt_fail))
+        {
             if (open my $fh, "<", $rpt{lfile}) {
                 local $/;
                 $rpt{log_file} = <$fh>;
@@ -787,9 +788,12 @@ sub transport {
             }
         }
     }
+    $rpt{out_file} = undef;
     if (my $send_out = $rpt{_conf_args}{send_out}) {
-        if ($send_out eq "always" or $send_out eq "on_fail" && $rpt_fail) {
-            if (open my $fh, "<", $rpt{_outfile}) {
+        if (   ($send_out eq "always")
+            or ($send_out eq "on_fail" && $rpt_fail))
+        {
+            if (open my $fh, "<", $rpt{outfile}) {
                 local $/;
                 $rpt{out_file} = <$fh>;
                 close $fh;
@@ -797,22 +801,18 @@ sub transport {
         }
     }
     delete $rpt{$_} for "user_note", grep m/^_/ => keys %rpt;
+
     my $json = JSON->new->utf8(1)->pretty(1)->encode(\%rpt);
-    open my $fh, ">:raw", "mktest.jsn";
-    print $fh $json;
-    close $fh;
 
-    # NOW SEND $json TO $url
-    my $ua = LWP::UserAgent->new(agent => "Test::Smoke/$VERSION");
-    my $result = eval { $ua->post($url, {json => $json}) };
+    # write the json to file:
+    local *JSON;
+    if (open JSON, ">", catfile($self->{ddir}, $self->{jsnfile})) {
+        binmode(JSON);
+        print JSON $json;
+        close JSON;
+    }
 
-    # and deal with possible errors
-    if ($@) {
-        print "Transport failed (to $url):\n", $@;
-    }
-    else {
-        print $result->content;
-    }
+    $self->{_json} = $json;
 }
 
 =item $reporter->report( )

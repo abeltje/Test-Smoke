@@ -11,16 +11,17 @@ use Data::Dumper;
 use File::Basename;
 my $findbin;
 BEGIN { $findbin = dirname $0 }
-use lib File::Spec->catdir( $findbin, 'lib' );
-use lib File::Spec->catdir( $findbin, 'lib', 'inc' );
+
+use lib File::Spec->catdir($findbin, 'lib');
+use lib File::Spec->catdir($findbin, 'lib', 'inc');
 use lib $findbin;
-use lib File::Spec->catdir( $findbin, 'inc' );
-use Test::Smoke::Util qw( do_pod2usage whereis );
+use lib File::Spec->catdir($findbin, 'inc');
 use Test::Smoke::SysInfo;
+use Test::Smoke::Util qw(do_pod2usage whereis);
 
 # $Id$
-use vars qw( $VERSION $conf );
-$VERSION = '0.074';
+use vars qw($VERSION $conf);
+$VERSION = '0.080';
 
 use Getopt::Long;
 my %options = ( 
@@ -62,6 +63,7 @@ foreach my $opt (qw( config jcl log )) {
         print "Using '$options{config}' for defaults.\n";
         $conf->{perl_version} eq '5.9.x' and $conf->{perl_version} = '5.11.x';
         $conf->{perl_version} eq '5.11.x' and $conf->{perl_version} = '5.13.x';
+        $conf->{perl_version} eq '5.13.x' and $conf->{perl_version} = '5.15.x';
     }
 
     if ( $load_error || $options{default} ) {
@@ -121,7 +123,7 @@ Current options:
 sub is_win32() { $^O eq 'MSWin32' }
 sub is_vms()   { $^O eq 'VMS'     }
 
-my %config = ( perl_version => $conf->{perl_version} || '5.13.x' );
+my %config = ( perl_version => $conf->{perl_version} || '5.15.x' );
 
 my %mailers = get_avail_mailers();
 my @mailers = sort keys %mailers;
@@ -141,7 +143,7 @@ my %vdirs = map {
     my $vdir = $_;
     is_vms and $vdir =~ tr/.//d;
     ( $_ => $vdir )
-} qw( 5.8.x 5.10.x 5.12.x );
+} qw( 5.8.x 5.10.x 5.12.x 5.14.x 5.16.x );
 
 my %versions = (
     '5.8.x' => {
@@ -165,7 +167,7 @@ my %versions = (
         cfg     => (
             is_win32
                 ? 'w32current.cfg'
-                : is_vms ? 'vmsperl.cfg' : 'perl58x.cfg'
+                : is_vms ? 'vmsperl.cfg' : 'perlmaint.cfg'
         ),
         is56x   => 0,
     },
@@ -191,36 +193,11 @@ my %versions = (
         cfg     => (
             is_win32
                 ? 'w32current.cfg'
-                : is_vms ? 'vmsperl.cfg' : 'perl510x.cfg'
+                : is_vms ? 'vmsperl.cfg' : 'perlmaint.cfg'
         ),
         is56x   => 0,
     },
 
-    '5.11.x' => {
-        source  => 'perl5.git.perl.org::perl-current',
-        server  => 'http://perl5.git.perl.org',
-        sdir    => '/perl.git/snapshot/refs/heads/',
-        sfile   => 'devel-5.11.tar.gz',
-        pdir    => '',
-        ddir    => File::Spec->catdir(
-            cwd(),
-            File::Spec->updir,
-            'perl-current'
-        ),
-        ftphost => 'public.activestate.com',
-        ftpusr  => 'anonymous',
-        ftppwd  => 'smokers@perl.org',
-        ftpsdir => '/pub/apc/perl-current',
-        ftpcdir => '/pub/apc/perl-current-diffs',
-
-        text    => 'Perl 5.12 to-be',
-        cfg     => (
-            is_win32
-                ? 'w32current.cfg'
-                : is_vms ? 'vmsperl.cfg' : 'perlcurrent.cfg'
-        ),
-        is56x   => 0,
-    },
     '5.12.x' => {
         source  => 'perl5.git.perl.org::perl-5.12.x',
         server  => 'http://perl5.git.perl.org',
@@ -242,11 +219,36 @@ my %versions = (
         cfg     => (
             is_win32
                 ? 'w32current.cfg'
-                : is_vms ? 'vmsperl.cfg' : 'perl512.cfg'
+                : is_vms ? 'vmsperl.cfg' : 'perlmaint.cfg'
         ),
         is56x   => 0,
     },
-    '5.13.x' => {
+    '5.14.x' => {
+        source  => 'perl5.git.perl.org::perl-5.14.x',
+        server  => 'http://perl5.git.perl.org',
+        sdir    => '/perl.git/snapshot/refs/heads/',
+        sfile   => 'maint-5.14.tar.gz',
+        pdir    => '/pub/apc/perl-current-diffs',
+        ddir    => File::Spec->catdir(
+            cwd(),
+            File::Spec->updir,
+            'perl-current'
+        ),
+        ftphost => 'public.activestate.com',
+        ftpusr  => 'anonymous',
+        ftppwd  => 'smokers@perl.org',
+        ftpsdir => '/pub/apc/perl-current',
+        ftpcdir => '/pub/apc/perl-current-diffs',
+
+        text    => 'Perl 5.14 maint',
+        cfg     => (
+            is_win32
+                ? 'w32current.cfg'
+                : is_vms ? 'vmsperl.cfg' : 'perlmaint.cfg'
+        ),
+        is56x   => 0,
+    },
+    '5.15.x' => {
         source  => 'perl5.git.perl.org::perl-current',
         server  => 'http://perl5.git.perl.org',
         sdir    => '/perl.git/snapshot/',
@@ -263,7 +265,7 @@ my %versions = (
         ftpsdir => '/pub/apc/perl-current',
         ftpcdir => '/pub/apc/perl-current-diffs',
 
-        text    => 'Perl 5.14 to-be',
+        text    => 'Perl 5.16 to-be',
         cfg     => (
             is_win32
                 ? 'w32current.cfg'
@@ -574,21 +576,23 @@ EOT
         dft => '',
     },
 
-    # gateway
-    transport_url => {
-        msg => 'Send smoke results to the Gateway? (url)',
+    # Test::Smoke::Gateway database
+    smokedb_url => {
+        msg => <<EOT,
+Send smoke results to the SmokeDB? (url)
+\t(Leave empty for no.)
         alt => [ ],
-        dft => '',
+        dft => 'http://perl5.test-smoke.org/report',
     },
     send_log => {
-	msg => 'Do you want to send the logfile with the report?',
-	alt => [qw( always on_fail never )],
-	dft => 'on_fail',
+        msg => 'Do you want to send the logfile with the report?',
+        alt => [qw( always on_fail never )],
+        dft => 'on_fail',
     },
     send_out => {
-	msg => 'Do you want to send the outfile with the report?',
-	alt => [qw( always on_fail never )],
-	dft => 'never',
+        msg => 'Do you want to send the outfile with the report?',
+        alt => [qw( always on_fail never )],
+        dft => 'never',
     },
 
     # mail stuff
@@ -1292,32 +1296,44 @@ $list
     $config{ $arg } = prompt( $arg );
 }
 
-=item gateway
+=item smokedb_url [http://perl5.test-smoke.org]
 
-Instead of flooding a mailing list, reposts should be sent to the gateway. The
-option to mail yourself a copy of the report still exists. The gateway however
-offers a central point of view to the smoke results.
+Instead of flooding a mailing list, reposts should be sent to the SmokeDB.
+The option to mail yourself a copy of the report still exists. The SmokeDB
+however offers a central point of view to the smoke results.
+
+=item send_log <always|on_fail|never> [on_fail]
+
+Please send in the smoke-logfile for failures.
+
+=item send_out <always|on_fail|never> [never]
 
 =cut
 
-$arg = 'transport_url';
-GATEWAY: {
+$arg = 'smokedb_url';
+SMOKEDB: {
     eval q{require JSON;};
     my $has_json = !$@;
     if ( !$has_json ) {
         print "Could not find 'JSON', please install.\n";
-        last GATEWAY;
+        last SMOKEDB;
     }
 
     eval q{require LWP::UserAgent;};
     my $has_lwp_useragent = !$@;
     if ( !$has_lwp_useragent ) {
         print "Could not find 'LWP::UserAgent', please install.\n";
-        last GATEWAY;
+        last SMOKEDB;
     }
 
-    $config{ $arg } = 'http://gateway.test-smoke.org/report';
     $config{ $arg } = prompt( $arg );
+    last SMOKEDB if !$config{ $arg };
+
+    $arg = 'send_log';
+    $config{ $arg } = prompt( $arg );
+
+    $arg = 'send_out';
+    $config{ $arg } = promt( $arg );
 }
 
 =item mail
@@ -1371,7 +1387,7 @@ MAIL: {
 
             $arg = 'mpass';
             $config{ $arg } = prompt( $arg );
-	};
+        };
 
         /^(?:Mail::Sendmail|MIME::Lite)$/ && do {
             $arg = 'from';
@@ -1829,6 +1845,9 @@ sub sort_configkeys {
         # Report related
         qw( mail mail_type mserver muser mpass from to ccp5p_onfail
             swcc cc swbcc bcc ),
+
+        #SmokeDB
+        qw( smokedb_url send_log send_out ),
 
         # Archive reports and logfile
         qw( adir lfile ),

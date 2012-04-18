@@ -22,23 +22,24 @@ use Test::Smoke::Util qw( do_pod2usage );
 
 use Getopt::Long;
 my %opt = (
-    type          => undef,
-    ddir          => undef,
-    to            => undef, #'smokers-reports@perl.org',
-    cc            => undef,
-    ccp5p_onfail  => undef,
-    from          => undef,
-    v             => undef,
+    type         => undef,
+    ddir         => undef,
+    to           => undef,    #'smokers-reports@perl.org',
+    cc           => undef,
+    ccp5p_onfail => undef,
+    from         => undef,
+    v            => undef,
 
-    transport_url => undef,
+    smokedb_url => undef,
 
-    rptfile       => 'mktest.rpt',
-    mail          => 0,
-    report        => 1,
-    defaultenv    => undef,
-    config        => undef,
-    help          => 0,
-    man           => 0,
+    rptfile    => 'mktest.rpt',
+    jsnfile    => 'mktest.jsn',
+    mail       => 0,
+    report     => 1,
+    defaultenv => undef,
+    config     => undef,
+    help       => 0,
+    man        => 0,
 );
 
 my $defaults = Test::Smoke::Mailer->config( 'all_defaults' );
@@ -96,18 +97,27 @@ This is a small front-end for L<Test::Smoke::Mailer>.
 =cut
 
 my $my_usage = "Usage: $0 -t <type> -d <directory> [options]";
-GetOptions( \%opt,
-    'type|t=s', 'ddir|d=s', 'to=s', 'cc=s', 'bcc=s', 'ccp5p_onfail!',
-    'v|verbose=i',
+GetOptions(
+    \%opt => qw(
+        type|t=s
+        ddir|d=s
+        to=s      cc=s      bcc=s
 
-    'transport_url|u=s',
+        ccp5p_onfail!
+        v|verbose=i
 
-    'help|h', 'man',
+        smokedb_url|u=s
 
-    'config|c:s', 'rptfile|r=s',
+        help|h         man
 
-    'mail|email!', 'report!', 'defaultenv!',
-) or do_pod2usage( verbose => 1, myusage => $my_usage );
+        config|c:s     rptfile|r=s
+
+        mail|email! report! smokedb! defaultenv!
+    )
+) or do_pod2usage(
+    verbose => 1,
+    myusage => $my_usage
+);
 
 $opt{ man} and do_pod2usage( verbose => 2, exitval => 0, myusage => $my_usage);
 $opt{help} and do_pod2usage( verbose => 1, exitval => 0, myusage => $my_usage);
@@ -136,7 +146,20 @@ if ( defined $opt{config} ) {
 
 $opt{ddir} && -d $opt{ddir} or do_pod2usage( verbose => 0 );
 
-my $cont = check_for_report();
+my $has_report = check_for_report();
+if ($has_report && $opt{mail}) {
+    my $mailer = Test::Smoke::Mailer->new( $opt{type} => \%opt );
+    $mailer->mail;
+}
+
+my $json = check_for_json();
+if ($json && $opt{smokedb} && $opt{smokedb_url}) {
+    require LWP::UserAgent;
+    my $ua = LWP::UserAgent->new(
+        agent => "Test::Smoke/$Test::Smoke::VERSION",
+    );
+    $ua->post($opt{smokedb_url}, {json => $json});
+}
 
 # Basically: call mkovz.pl unless -f <builddir>/mktest.rpt
 sub check_for_report {
@@ -152,12 +175,31 @@ sub check_for_report {
 
     my $reporter = Test::Smoke::Reporter->new( $conf );
     if ( defined $reporter->{_outfile} ) {
-        $reporter->transport( $conf->{transport_url} );
+        $reporter->write_to_file;
+    
+        unless ( -f $report ) {
+            die "Hmmm... cannot find [$report]";
+        }
         return 1;
     } else {
         $opt{v} and print "Skipped, no .out-file\n";
         return;
     }
+}
+
+sub check_for_json {
+    my $jsnfile = File::Spec->catfile($opt{ddir}, $opt{jsnfile});
+    if (! -f $jsnfile or $opt{report}) { 
+        my $reporter = Test::Smoke::Reporter->new($conf);
+        return $reporter->smokedb_data();
+    }
+
+    $opt{v} and print "Found [$jsnfile]\n";
+    local *JSON;
+    open JSON, '<', $jsnfile or die "Cannot open($jsnfile): $!";
+    my $json = do {local $/; <JSON> };
+    close JSON;
+    return $json;
 }
 
 =head1 SEE ALSO
