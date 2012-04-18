@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION $REVISION $conf @EXPORT );
-$VERSION  = '1.44._01';
+$VERSION  = '1.49_02';
 $REVISION = __get_ts_patchlevel();
 
 use base 'Exporter';
@@ -213,7 +213,7 @@ use File::Spec::Functions;
 
 sub __get_ts_patchlevel {
     my( $rev ) = q$Rev$ =~ /(\d+)/;
-    if ( ! $rev ) {
+    if ( ! $rev && -d '.git' ) {
        chomp( $rev = `git describe --all --long` );
     }
     my $dotpatch = catfile $FindBin::Bin, '.patch';
