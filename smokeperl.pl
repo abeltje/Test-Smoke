@@ -1,4 +1,7 @@
-#! /usr/bin/perl -w
+#!/usr/bin/perl -w
+
+eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}'
+    if 0; # not running under some shell
 use strict;
 $|=1;
 
@@ -36,7 +39,8 @@ my %options = (
     patch        => 1,
     mail         => undef,
     smokedb      => 1,
-    smokedb_url  => undef send_out => "never",
+    smokedb_url  => undef,
+    send_out     => "never",
     send_log     => "on_fail",
     archive      => undef,
     continue     => 0,

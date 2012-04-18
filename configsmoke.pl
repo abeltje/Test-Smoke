@@ -1,4 +1,7 @@
 #!/usr/bin/perl -w
+
+eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}'
+    if 0; # not running under some shell
 use strict;
 
 use Config;
@@ -581,6 +584,7 @@ EOT
         msg => <<EOT,
 Send smoke results to the SmokeDB? (url)
 \t(Leave empty for no.)
+EOT
         alt => [ ],
         dft => 'http://perl5.test-smoke.org/report',
     },
@@ -597,7 +601,7 @@ Send smoke results to the SmokeDB? (url)
 
     # mail stuff
     mail => {
-        msg => "Would you like to send your reports?",
+        msg => "Would you like to email your reports?",
         alt => [qw( N y )],
         dft => 'n',
     },
@@ -1333,7 +1337,7 @@ SMOKEDB: {
     $config{ $arg } = prompt( $arg );
 
     $arg = 'send_out';
-    $config{ $arg } = promt( $arg );
+    $config{ $arg } = prompt( $arg );
 }
 
 =item mail
@@ -2435,7 +2439,8 @@ sub default_buildcfg {
     -f $file_name and return 1;
 
     $pversion =~ tr/.//d;
-    $pversion eq '513x' and $pversion = 'current';
+    my $is_devel = $pversion =~ /^5\d+[13579]x$/;
+    $pversion = $is_devel ? 'current' : 'maint';
     my $basename = is_win32
         ? "w32current.cfg"
         : is_vms ? "vmsperl.cfg" : "perl${pversion}.cfg";
