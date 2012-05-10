@@ -1,4 +1,4 @@
-#!/pro/bin/perl -w
+#!/usr/bin/perl -w
 use strict;
 $| = 1;
 
@@ -112,7 +112,7 @@ GetOptions(
 
         config|c:s     rptfile|r=s
 
-        mail|email! report! smokedb! defaultenv!
+        mail|email! report! defaultenv!
     )
 ) or do_pod2usage(
     verbose => 1,
@@ -153,12 +153,14 @@ if ($has_report && $opt{mail}) {
 }
 
 my $json = check_for_json();
-if ($json && $opt{smokedb} && $opt{smokedb_url}) {
+if ($json && $opt{smokedb_url}) {
     require LWP::UserAgent;
     my $ua = LWP::UserAgent->new(
         agent => "Test::Smoke/$Test::Smoke::VERSION",
     );
-    $ua->post($opt{smokedb_url}, {json => $json});
+    $opt{v} and print "Posting to SmokeDB ($opt{smokedb_url})\n";
+    my $response = $ua->post($opt{smokedb_url}, {json => $json});
+    $opt{v} and print $response->content;
 }
 
 # Basically: call mkovz.pl unless -f <builddir>/mktest.rpt

@@ -1319,6 +1319,7 @@ SMOKEDB: {
     eval q{require JSON;};
     my $has_json = !$@;
     if ( !$has_json ) {
+        $config{ $arg } = "";
         print "Could not find 'JSON', please install.\n";
         last SMOKEDB;
     }
@@ -1326,6 +1327,7 @@ SMOKEDB: {
     eval q{require LWP::UserAgent;};
     my $has_lwp_useragent = !$@;
     if ( !$has_lwp_useragent ) {
+        $config{ $arg } = "";
         print "Could not find 'LWP::UserAgent', please install.\n";
         last SMOKEDB;
     }

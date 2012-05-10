@@ -206,10 +206,10 @@ so report can be made.
 sub _parse {
     my $self = shift;
 
-    $self->{_rpt}    = \(my %rpt);
+    $self->{_rpt}    = \my %rpt;
     $self->{_cache}  = {};
     $self->{_mani}   = [];
-    $self->{configs} = \(my @new);
+    $self->{configs} = \my @new;
     return $self unless defined $self->{_outfile};
 
     my ($cfgarg, $debug, $tstenv, $start, $statarg, $fcnt);
@@ -760,12 +760,12 @@ sub smokedb_data {
             perl_id          => $Conf{version},
             reporter         => $self->{_conf_args}{from},
             reporter_version => $VERSION,
-            smoke_date       => __posixdate(),
+            smoke_date       => __posixdate($self->{_rpt}{started}),
             smoke_revision   => $Test::Smoke::REVISION,
             smoker_version   => $Test::Smoke::Smoker::VERSION,
             smoke_version    => $Test::Smoke::VERSION,
             test_jobs        => $ENV{TEST_JOBS},
-            username         => $ENV{LOGNAME} // getlogin // getpwuid($<) // "?",
+            username         => $ENV{LOGNAME} || getlogin || getpwuid($<) || "?",
             user_note        => $user_note,
             smoke_perl       => ($^V ? sprintf("%vd", $^V) : $]),
         };
@@ -781,10 +781,11 @@ sub smokedb_data {
         if (   ($send_log eq "always")
             or ($send_log eq "on_fail" && $rpt_fail))
         {
-            if (open my $fh, "<", $rpt{lfile}) {
+            local *FH;
+            if (open FH, "<", $rpt{lfile}) {
                 local $/;
-                $rpt{log_file} = <$fh>;
-                close $fh;
+                $rpt{log_file} = <FH>;
+                close FH;
             }
         }
     }
@@ -793,10 +794,11 @@ sub smokedb_data {
         if (   ($send_out eq "always")
             or ($send_out eq "on_fail" && $rpt_fail))
         {
-            if (open my $fh, "<", $rpt{outfile}) {
+            local *FH;
+            if (open FH, "<", $rpt{outfile}) {
                 local $/;
-                $rpt{out_file} = <$fh>;
-                close $fh;
+                $rpt{out_file} = <FH>;
+                close FH;
             }
         }
     }
@@ -805,14 +807,14 @@ sub smokedb_data {
     my $json = JSON->new->utf8(1)->pretty(1)->encode(\%rpt);
 
     # write the json to file:
-    local *JSON;
-    if (open JSON, ">", catfile($self->{ddir}, $self->{jsnfile})) {
-        binmode(JSON);
-        print JSON $json;
-        close JSON;
+    local *JSN;
+    if (open JSN, ">", catfile($self->{ddir}, $self->{jsnfile})) {
+        binmode(JSN);
+        print JSN $json;
+        close JSN;
     }
 
-    $self->{_json} = $json;
+    return $self->{_json} = $json;
 }
 
 =item $reporter->report( )

@@ -29,12 +29,12 @@ lib/Test/Smoke/SysInfo.pm
 lib/Test/Smoke/SourceTree.pm
 lib/Test/Smoke/Util.pm
 lib/Test/Smoke/perl58x.cfg
-lib/Test/Smoke/perl510x.cfg
+lib/Test/Smoke/perlmaint.cfg
 lib/Test/Smoke/perlcurrent.cfg
 lib/Test/Smoke/vmsperl.cfg
 lib/Test/Smoke/w32current.cfg
 lib/Test/Smoke/smoke58x_dfconfig
-lib/Test/Smoke/smoke510x_dfconfig
+lib/Test/Smoke/maint_dfconfig
 t/TestLib.pm
 t/buildcfg.t
 t/cfgstuff.t
