@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION $REVISION $conf @EXPORT );
-$VERSION  = '1.49_02';
+$VERSION  = '1.50';
 $REVISION = __get_ts_patchlevel();
 
 use base 'Exporter';
