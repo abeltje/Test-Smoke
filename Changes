@@ -10,6 +10,17 @@ The filelists have a short symbolic indicator:
 
 Enjoy!
 ___________________________________________________________________________
+[  1372] By: abeltje                          on 2012-06-11 23:01:22 +0200
+        Log: * [CHANGE]
+	       - proper release of 1.52
+        Url: https://source.test-smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[  1370] By: abeltje                          on 2012-06-11 22:56:48 +0200
+        Log: * mosterd na de maaltijd
+        Url: https://source.test-smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Changes
+___________________________________________________________________________
 [  1369] By: abeltje                          on 2012-06-11 22:52:54 +0200
         Log: * [CHANGE]
 	       + Makefile.PL: add JSON and LWP::UserAgent as dependencies
