@@ -1,7 +1,7 @@
 #! /usr/bin/perl -w
 # $Id$
 use strict;
-use 5.004;
+use 5.006;
 use ExtUtils::MakeMaker;
 use Config;
 
@@ -51,25 +51,31 @@ unless ( @ARGV ) {
                  LIB   => $install_dir );
 }
 my @scripts = qw( synctree.pl patchtree.pl mailrpt.pl W32Configure.pl
-                  configsmoke.pl smokeperl.pl runsmoke.pl
+                  configsmoke.pl smokeperl.pl runsmoke.pl sendrpt.pl
                   archiverpt.pl smokestatus.pl chkbcfg.pl );
 -f catfile( $findbin, '.patch' ) and push @scripts, '.patch';
 
 WriteMakefile(
-    NAME	  => "Test-Smoke",
-    DISTNAME	  => "Test-Smoke",
+    NAME          => "Test-Smoke",
+    DISTNAME      => "Test-Smoke",
     VERSION_FROM  => "lib/Test/Smoke.pm",
     $] >= 5.005 ? (
-    AUTHOR	  => 'H.Merijn Brand <h.m.brand@hccnet.nl>, '.
-		     'Nicholas Clark <nick@plum.flirble.org> and ' .
+    AUTHOR        => 'H.Merijn Brand <h.m.brand@hccnet.nl>, '.
+                     'Nicholas Clark <nick@plum.flirble.org> and ' .
                      'Abe Timmerman <abeltje@cpan.org>',
     ABSTRACT_FROM => 'lib/Test/Smoke.pm',
     ) : (),
 
-    dist	  => { COMPRESS => "gzip -9f",
-                       SUFFIX   => ".gz",
-		     },
-    PREREQ_PM     => { 'File::Spec' => 0.82, 'Test::More' => 0},
+    dist => {
+        COMPRESS => "gzip -9f",
+        SUFFIX   => ".gz",
+        },
+    PREREQ_PM     => {
+        'File::Spec'     => 0.82,
+        'Test::More'     => 0,
+        'JSON'           => 0,
+        'LWP::UserAgent' => 0,
+    },
     PMLIBDIRS     => [qw/ lib inc /],
     EXE_FILES     => \@scripts,
     %install

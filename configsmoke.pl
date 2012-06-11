@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}'
-    if 0; # not running under some shell
+if 0; # not running under some shell
 use strict;
 
 use Config;
@@ -28,26 +28,26 @@ $VERSION = '0.080';
 
 use Getopt::Long;
 my %options = ( 
-    config  => undef, 
-    jcl     => undef, 
-    log     => undef,
-    default => undef,
-    prefix  => undef,
-    oldcfg  => 0,
-    usedft  => undef,
-);
+        config  => undef, 
+        jcl     => undef, 
+        log     => undef,
+        default => undef,
+        prefix  => undef,
+        oldcfg  => 0,
+        usedft  => undef,
+        );
 my $myusage = "Usage: $0 -p <prefix>[ -d <defaultsprefix>]";
 GetOptions( \%options, 
-    'config|c=s', 'jcl|j=s', 'log|l=s', 
-    'prefix|p=s', 'default|d:s', 'usedft|des',
+        'config|c=s', 'jcl|j=s', 'log|l=s', 
+        'prefix|p=s', 'default|d:s', 'usedft|des',
 
-    'help|h', 'man',
-) or do_pod2usage( verbose => 1, myusage => $myusage );
+        'help|h', 'man',
+        ) or do_pod2usage( verbose => 1, myusage => $myusage );
 
 $options{ man} and 
-    do_pod2usage( verbose => 2, exitval => 0, myusage => $myusage );
+do_pod2usage( verbose => 2, exitval => 0, myusage => $myusage );
 $options{help} and 
-    do_pod2usage( verbose => 1, exitval => 0, myusage => $myusage );
+do_pod2usage( verbose => 1, exitval => 0, myusage => $myusage );
 
 $options{prefix} = 'smokecurrent' unless defined $options{prefix};
 
@@ -64,9 +64,10 @@ foreach my $opt (qw( config jcl log )) {
     unless ( $load_error ) {
         $options{oldcfg} = 1;
         print "Using '$options{config}' for defaults.\n";
-        $conf->{perl_version} eq '5.9.x' and $conf->{perl_version} = '5.11.x';
-        $conf->{perl_version} eq '5.11.x' and $conf->{perl_version} = '5.13.x';
-        $conf->{perl_version} eq '5.13.x' and $conf->{perl_version} = '5.15.x';
+        $conf->{perl_version} eq '5.9.x'  and $conf->{perl_version} = 'blead';
+        $conf->{perl_version} eq '5.11.x' and $conf->{perl_version} = 'blead';
+        $conf->{perl_version} eq '5.13.x' and $conf->{perl_version} = 'blead';
+        $conf->{perl_version} eq '5.15.x' and $conf->{perl_version} = 'blead';
     }
 
     if ( $load_error || $options{default} ) {
@@ -126,7 +127,7 @@ Current options:
 sub is_win32() { $^O eq 'MSWin32' }
 sub is_vms()   { $^O eq 'VMS'     }
 
-my %config = ( perl_version => $conf->{perl_version} || '5.15.x' );
+my %config = ( perl_version => $conf->{perl_version} || 'blead' );
 
 my %mailers = get_avail_mailers();
 my @mailers = sort keys %mailers;
@@ -251,7 +252,32 @@ my %versions = (
         ),
         is56x   => 0,
     },
-    '5.15.x' => {
+    '5.16.x' => {
+        source  => 'perl5.git.perl.org::perl-5.16.x',
+        server  => 'http://perl5.git.perl.org',
+        sdir    => '/perl.git/snapshot/refs/heads/',
+        sfile   => 'maint-5.16.tar.gz',
+        pdir    => '/pub/apc/perl-current-diffs',
+        ddir    => File::Spec->catdir(
+            cwd(),
+            File::Spec->updir,
+            'perl-current'
+        ),
+        ftphost => 'public.activestate.com',
+        ftpusr  => 'anonymous',
+        ftppwd  => 'smokers@perl.org',
+        ftpsdir => '/pub/apc/perl-current',
+        ftpcdir => '/pub/apc/perl-current-diffs',
+
+        text    => 'Perl 5.16 maint',
+        cfg     => (
+            is_win32
+                ? 'w32current.cfg'
+                : is_vms ? 'vmsperl.cfg' : 'perlmaint.cfg'
+        ),
+        is56x   => 0,
+    },
+    'blead' => {
         source  => 'perl5.git.perl.org::perl-current',
         server  => 'http://perl5.git.perl.org',
         sdir    => '/perl.git/snapshot/',
@@ -268,7 +294,7 @@ my %versions = (
         ftpsdir => '/pub/apc/perl-current',
         ftpcdir => '/pub/apc/perl-current-diffs',
 
-        text    => 'Perl 5.16 to-be',
+        text    => 'Perl 5.18 to-be',
         cfg     => (
             is_win32
                 ? 'w32current.cfg'
@@ -279,7 +305,8 @@ my %versions = (
 );
 my @pversions = sort {
     _perl_numeric_version( $a ) <=> _perl_numeric_version( $b )
-} keys %versions;
+} grep /^5\./, keys %versions;
+push @pversions, 'blead';
 my $smoke_version = join "\n", map {
     "\t$_ - $versions{ $_ }->{text}"
 } @pversions;
@@ -1527,7 +1554,8 @@ C<hasharness3> is automagically set for perl version >= 5.11
 
 =cut
 
-$config{hasharness3} = _perl_numeric_version( $config{perl_version} ) > 5.01001;
+$config{hasharness3} = $config{perl_version} eq 'blead'
+                    || _perl_numeric_version( $config{perl_version} ) > 5.01001;
 
 =item harness3opts
 
@@ -2252,11 +2280,11 @@ sub get_avail_sync {
     eval { local $^W; require LWP::Simple };
     my $has_lwp = !$@;
 
-    my $pversion = $config{perl_version} || '5.9.x';
+    my $pversion = $config{perl_version} || 'blead';
 
     # (has_ftp && 5.9.x) || has_lwp
     unshift @synctype, 'snapshot' 
-        if ( $has_ftp && $pversion eq '5.9.x' ) || $has_lwp;
+        if ( $has_ftp && $pversion eq 'blead' ) || $has_lwp;
 
     unshift @synctype, 'ftp' if $has_ftp;
 
@@ -2480,7 +2508,9 @@ sub check_buildcfg {
     close BCFG;
     my $oldcfg = join "", grep !/^#/ => @bcfg;
 
-    my $pversion = _perl_numeric_version( $config{perl_version} );
+    my $pversion = $config{perl_version} =~ /^5\./
+        ? _perl_numeric_version( $config{perl_version} )
+        : $config{perl_version};
 
     my $uname_s = Test::Smoke::SysInfo::tsuname( 's' );
     my( $os, $osver ) = split /\s+-\s+/, $uname_s;
@@ -2492,7 +2522,9 @@ sub check_buildcfg {
 
     print "Checking '$file_name'\n     for $pversion on $uname_s\n";
 
-    my @no_option = $pversion >= 5.009 ? ( '-Uuseperlio' ) : ( );
+    my @no_option = ($pversion eq 'blead') ||($pversion >= 5.009)
+        ? ( '-Uuseperlio' )
+        : ( );
     OSCHECK: {
         $os =~ /darwin/ && $osver >= 8 and do {
             push @no_option, qw( -Duselongdouble -Dusemorebits );
