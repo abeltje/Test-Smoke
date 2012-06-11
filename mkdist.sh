@@ -31,8 +31,8 @@ Usage: $0 [-t] [-d=<directory]
 
     -t              Run tests only, do not make a tarball
     -e              Extend testing by running coverage (sets -t)
-    -c              Commit the auto generated files Changes and SIGNATURE
     -s              Commit this tree as a snapshot (set by -c)
+    -c              Commit the auto generated files Changes and SIGNATURE
     -58             Use the latest 5.8 installed (needed for -e)
     -59             Use the latest 5.9 installed
     -d=<directory>  Taret directory for the tarball
