@@ -10,6 +10,21 @@ The filelists have a short symbolic indicator:
 
 Enjoy!
 ___________________________________________________________________________
+[  1374] By: abeltje                          on 2012-06-17 13:36:11 +0200
+        Log: * [CHANGE]
+	       + Fix the manifest and re-release.
+        Url: https://source.test-smoke.org/svn/Test-Smoke
+           + /Test-Smoke/MANIFEST.SKIP
+           - /Test-Smoke/lib/Test/Smoke/smoke55x_dfconfig,
+	     /Test-Smoke/lib/Test/Smoke/smoke56x_dfconfig
+           ! /Test-Smoke/MANIFEST, /Test-Smoke/lib/Test/Smoke.pm
+___________________________________________________________________________
+[  1373] By: abeltje                          on 2012-06-11 23:02:05 +0200
+        Log: * [AUTOCOMMIT]
+	       * Regenerate 'Changes'
+        Url: https://source.test-smoke.org/svn/Test-Smoke
+           ! /Test-Smoke/Changes
+___________________________________________________________________________
 [  1372] By: abeltje                          on 2012-06-11 23:01:22 +0200
         Log: * [CHANGE]
 	       - proper release of 1.52
