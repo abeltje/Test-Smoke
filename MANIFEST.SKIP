@@ -1,0 +1,14 @@
+\.svn
+~$
+\.swp$
+.gitignore
+private/
+klad/
+contrib/
+mkdist.sh
+provesmoke
+resmoke.pl
+roadmap.pod
+sprove.pl
+tags
+TAGS

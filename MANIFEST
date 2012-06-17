@@ -1,4 +1,5 @@
 MANIFEST	$Id$
+MANIFEST.SKIP
 README
 ReleaseNotes
 Changes
@@ -9,6 +10,7 @@ configsmoke.pl
 mailrpt.pl
 patchtree.pl
 runsmoke.pl
+sendrpt.pl
 smokeperl.pl
 smokestatus.pl
 synctree.pl
