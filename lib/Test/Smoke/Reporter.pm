@@ -293,7 +293,11 @@ sub _parse {
             next;
         }
 
-        if (m/(?:PERLIO|TSTENV)\s*=\s*([-\w:.]+)/) {
+        if (m/(?:PERLIO|TSTENV)\s*=\s*([-\w:.]+)/
+              # skip this if it's from a build failure, since the
+              # Unable to build... pushed an M
+              && (!@{$new[-1]{results}}
+                  || $new[-1]{results}[0]{summary} ne "M")) {
             $tstenv          = $1;
             $previous_failed = "";
             $rpt{$cfgarg}->{summary}{$debug}{$tstenv} ||= "?";
@@ -406,7 +410,7 @@ sub _parse {
 
             if ($previous_failed ne $_) {
                 if (not $rpt{$cfgarg}->{summary}{$debug}{$tstenv}
-                    or $rpt{$cfgarg}->{summary}{$debug}{$tstenv} ne "X")
+                    or $rpt{$cfgarg}->{summary}{$debug}{$tstenv} !~ m/[XM]/)
                 {
                     $rpt{$cfgarg}->{summary}{$debug}{$tstenv} = "F";
                     $new[-1]{results}[-1]{summary} = "F";
