@@ -516,9 +516,16 @@ sub _post_process {
     my $self = shift;
 
     unless (defined $self->{is56x}) {
-        my %cfg = get_smoked_Config($self->{ddir}, "version");
-        my $p_version = sprintf "%d.%03d%03d", split m/\./, $cfg{version};
-        $self->{is56x} = $p_version < 5.007;
+        $self->{is56x} = 0;
+        # Overly defensive, as .out files might be analyzed outside of the
+        # original smoke environment
+        if ($self->{ddir} && -d $self->{ddir}) {
+            my %cfg = get_smoked_Config($self->{ddir}, "version");
+            if ($cfg{version} =~ m/^\s* ([0-9]+) \. ([0-9]+) \. ([0-9]+) \s*$/x) {
+                my $p_version = sprintf "%d.%03d%03d", $1, $2, $3;
+                $self->{is56x} = $p_version < 5.007;
+            }
+        }
     }
     $self->{defaultenv} ||= $self->{is56x};
 
