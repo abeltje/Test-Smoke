@@ -356,20 +356,32 @@ sub _parse {
                 $new[-1]{results}[-1]{summary} = "X";
             }
             push @{$rpt{$cfgarg}->{$debug}{$tstenv}{failed}}, $_;
-            push(
-                @{$new[-1]{results}[-1]{failures}},
-                m/^ \s* (\S+?) \.+ (\w+) \s* $/x
-                    ? {
-                        test   => $1,
-                        status => $2,
-                        extra  => []
-                        }
-                    : {
-                        test   => "?",
-                        status => "?",
-                        extra  => []
-                    }
-            );
+            while (m/^ \s* (\S+?) \s* \.+(?:\s+\.+)* \s* (\w.*?) \s*$/xgm) {
+                my ($_test, $_info) = ($1, $2);
+
+                push(
+                    @{$new[-1]{results}[-1]{failures}},
+                    $_info =~ m/^ \w+ $/x
+                        ? {
+                            test   => $_test,
+                            status => $_info,
+                            extra  => []
+                            }
+                        : # TEST output from minitest
+                    $_info =~ m/^ (\w+) \s+at\ test\s+ (\d+) \s* $/x
+                 || $_info =~ m/^ (\w+)--(\S.*\S) \s* $/x 
+                        ? {
+                            test   => $_test,
+                            status => $1,
+                            extra  => [ $2 ]
+                            }
+                        : {
+                            test   => "?",
+                            status => "?",
+                            extra  => []
+                            }
+                );
+            }
         }
 
         if (/^Finished smoking [\dA-Fa-f]+/) {
@@ -418,7 +430,12 @@ sub _parse {
                 push @{$rpt{$cfgarg}->{$debug}{$tstenv}{failed}}, $_;
                 push(
                     @{$new[-1]{results}[-1]{failures}},
-                    m/^ \s* (\S+?) \.+ (\w+) \s* $/x
+                    m{^ \s*                     # leading space
+                       ((?:\S+[/\\])?           # Optional leading path to
+                           \S(?:[^.]+|\.t)+)    #  test file name
+                       [. ]+                    # ....... ......
+                       (\w.*?)                  # result
+                       \s* $}x
                         ? {
                             test   => $1,
                             status => $2,
@@ -446,7 +463,7 @@ sub _parse {
             push @{$rpt{$cfgarg}->{$debug}{$tstenv}{passed}}, $_;
             push(
                 @{$new[-1]{results}[-1]{failures}},
-                m/^ \s* (\S+?) \.+ (\w+) \s* $/x
+                m/^ \s* (\S+?) \.+(?:\s+\.+)* (\w+) \s* $/x
                     ? {
                         test   => $1,
                         status => $2,
