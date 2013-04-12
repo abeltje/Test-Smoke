@@ -484,11 +484,11 @@ Use the C</proc/cpuinfo> pseudofile to get the system information.
 
 sub Linux {
     my( $type, $cpu, $ncpu ) = ( __get_cpu_type() );
-    ARCH: {
 
+    ARCH: {
         $type =~ /sparc/ and return Linux_sparc( $type );
         $type =~ /ppc/i  and return Linux_ppc(   $type );
-
+        $type =~ /arm/i  and return Linux_arm(   $type );
     }
 
     local *CPUINFO;
@@ -586,6 +586,73 @@ sub Linux_ppc {
         $cpu = __get_cpu();
     }
     $cpu =~ s/\s+/ /g;
+    return {
+        _cpu_type => $type,
+        _cpu      => $cpu,
+        _ncpu     => $ncpu,
+        _host     => __get_hostname(),
+        _os       => __get_os(),
+    };
+}
+
+=head2 Linux_arm( )
+
+Linux on ARM architecture.
+
+Contents of /proc/cpuinfo on RaspberryPI, raspbian:
+
+  Processor      : ARMv6-compatible processor rev 7 (v6l)
+  BogoMIPS       : 697.95
+  Features       : swp half thumb fastmult vfp edsp java tls 
+  CPU implementer        : 0x41
+  CPU architecture: 7
+  CPU variant    : 0x0
+  CPU part       : 0xb76
+  CPU revision   : 7
+
+  Hardware       : BCM2708
+  Revision       : 000e
+  Serial         : 00000000dc08448c
+
+Contents of /proc/cpuinfo on Archos 101IT, Android 2.2:
+
+  Processor      : ARMv7 Processor rev 2 (v7l)
+  BogoMIPS       : 298.32
+  Features       : swp half thumb fastmult vfp edsp neon vfpv3 
+  CPU implementer        : 0x41
+  CPU architecture: 7
+  CPU variant    : 0x3
+  CPU part       : 0xc08
+  CPU revision   : 2
+
+  Hardware       : Archos A101IT board
+  Board          : 0005
+  OMAP revision  : ES1.2
+  Revision       : 0000
+  Serial         : 0000000000000000
+  Boot           : 4.04.000000
+
+=cut
+
+sub Linux_arm {
+    my( $type, $cpu, $ncpu ) = @_;
+    $cpu ||= __get_cpu();
+    my $mhz;
+
+    local *CPUINFO;
+    if ( open CPUINFO, "< /proc/cpuinfo" ) {
+        chomp( my @cpu_info = <CPUINFO> );
+        close CPUINFO;
+
+        $ncpu =  grep /^processor\s+:\s+/i => @cpu_info;
+        $cpu = __from_proc_cpuinfo('Processor', \@cpu_info);
+        my @parts = qw( cpu machine clock );
+        my $bogo = __from_proc_cpuinfo('BogoMIPS', \@cpu_info);
+        $mhz  = 100 * int(($bogo + 50)/100);
+
+    }
+    $cpu =~ s/\s+/ /g;
+    $cpu .= " ($mhz MHz)" if $mhz;
     return {
         _cpu_type => $type,
         _cpu      => $cpu,
