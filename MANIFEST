@@ -29,6 +29,7 @@ lib/Test/Smoke/Smoker.pm
 lib/Test/Smoke/Syncer.pm
 lib/Test/Smoke/SysInfo.pm
 lib/Test/Smoke/SourceTree.pm
+lib/Test/Smoke/Util/Execute.pm
 lib/Test/Smoke/Util.pm
 lib/Test/Smoke/perl58x.cfg
 lib/Test/Smoke/perlmaint.cfg
@@ -37,6 +38,7 @@ lib/Test/Smoke/vmsperl.cfg
 lib/Test/Smoke/w32current.cfg
 lib/Test/Smoke/smoke58x_dfconfig
 lib/Test/Smoke/maint_dfconfig
+t/00-manifest.t
 t/TestLib.pm
 t/buildcfg.t
 t/cfgstuff.t
@@ -66,9 +68,11 @@ t/syncer_link.t
 t/syncer_rsync.t
 t/syncer_snap.t
 t/sysinfo.t
+t/sysinfo_macos.t
 t/sysinfo_proc.t
 t/tree.t
 t/ts_config.t
+t/util-execute.t
 t/util_times.t
 t/vms_rl.t
 t/gccmsg.log
