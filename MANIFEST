@@ -54,6 +54,7 @@ t/patcher_forest.t
 t/parse_report.t
 t/pc09.out
 t/policy.t
+t/report-usernote.t
 t/reporter.t
 t/regenstuff.t
 t/skip_config.t

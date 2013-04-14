@@ -1,9 +1,8 @@
 package Test::Smoke::Reporter;
 use strict;
 
-# $Id$
 use vars qw( $VERSION );
-$VERSION = '0.050';
+$VERSION = '0.051';
 
 require File::Path;
 require Test::Smoke;
@@ -16,6 +15,8 @@ use Test::Smoke::SysInfo;
 use Text::ParseWords;
 use Test::Smoke::Util qw( grepccmsg get_smoked_Config
                           time_in_hhmm get_local_patches );
+
+use constant USERNOTE_ON_TOP => 'top';
 
 my %CONFIG = (
     df_ddir         => curdir(),
@@ -36,6 +37,7 @@ my %CONFIG = (
 
     df_v            => 0,
     df_user_note    => '',
+    df_un_position  => 'bottom', # != USERNOTE_ON_TOP for bottom
 );
 
 =head1 NAME
@@ -1019,7 +1021,7 @@ sub preamble {
 
     my $os = $si->os;
 
-    return <<__EOH__;
+    my $preamble = <<__EOH__;
 Automated smoke report for $Config{version} patch $self->{_rpt}{patchlevel}
 $this_host: $cpu ($archname)
     on        $os
@@ -1027,6 +1029,13 @@ $this_host: $cpu ($archname)
     smoketime $time_msg (average $savg_msg)
 
 __EOH__
+
+    if ($self->{un_position} eq USERNOTE_ON_TOP) {
+        (my $user_note = $self->{user_note}) =~ s/(?<=\S)\s*\z/\n/;
+        $preamble = "$user_note\n$preamble";
+    }
+
+    return $preamble;
 }
 
 =item $reporter->smoke_matrix( )
@@ -1229,13 +1238,19 @@ sub signature {
     my $self = shift;
     my $this_pver = $^V ? sprintf "%vd", $^V : $];
     my $build_info = "$Test::Smoke::VERSION build $Test::Smoke::REVISION";
-    (my $user_note = $self->{user_note} || "") =~ s/(\S)[\s\r\n]*\z/$1\n/;
-    return <<__EOS__
-$user_note
+
+    my $signature = <<"    __EOS__";
 -- 
 Report by Test::Smoke v$build_info running on perl $this_pver
 (Reporter v$VERSION / Smoker v$Test::Smoke::Smoker::VERSION)
-__EOS__
+    __EOS__
+
+    if ($self->{un_position} ne USERNOTE_ON_TOP) {
+        (my $user_note = $self->{user_note}) =~ s/(?<=\S)\s*\z/\n/;
+        $signature = "$user_note\n$signature";
+    }
+
+    return $signature;
 }
 
 1;
