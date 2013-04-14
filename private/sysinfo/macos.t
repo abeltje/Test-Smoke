@@ -19,7 +19,7 @@ use_ok 'Test::Smoke::SysInfo';
 
 my %output = (
     mini_intel => {
-        uname  => 'Mac mini (1.83 GHz) 1 Intel Core Duo',
+        uname  => 'Mac mini (1.83 GHz) 1 [2 cores] Intel Core Duo',
         output => <<__EOOUT__ },
 Hardware:
     Hardware Overview:

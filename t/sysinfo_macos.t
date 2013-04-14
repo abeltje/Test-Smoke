@@ -1,7 +1,7 @@
 #! perl -w
 use strict;
 
-# We need at least 5.9.5 for the readpipe() override
+# We need at least 5.9.5 for the CORE::GLOBEL::readpipe() override
 my $not595;
 BEGIN { eval qq/use 5.009005/; $not595 = $@ }
 
@@ -12,7 +12,7 @@ use Test::More $not595
 use Carp qw/ cluck /;
 our $DEBUG = 0;
 
-use Test::Smoke::SysInfo;
+require Test::Smoke::SysInfo;
 
 my %output = (
     mini_intel => {

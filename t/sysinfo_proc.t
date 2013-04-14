@@ -9,7 +9,7 @@ use Test::More;
 BEGIN {
     plan $] < 5.008
         ? ( skip_all => "Tests not supported on $]" )
-        : ( tests => 4 );
+        : ( tests => 6 );
 }
 
 my %files;
@@ -66,7 +66,7 @@ my $this_system = Test::Smoke::SysInfo::Generic();
     local *CORE::GLOBAL::close = sub (*) {
         my( $pkg ) = caller;
         no strict 'refs';
-        untie *{ "$pkg\:\:$_[0]" };
+        untie *{ "$pkg\:\:$_[0]" } if tied $_[0];
     };
     *Test::Smoke::SysInfo::__get_cpu_type = sub { 'i386' };
     $^W = 1;
