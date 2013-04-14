@@ -37,9 +37,9 @@ Test::Smoke - The Perl core test smoke suite
 
 C<Test::Smoke> exports C<$conf> and C<read_config()> by default.
 
-=over 4
+=head2 Test::Smoke::read_config( $config_name )
 
-=item Test::Smoke::read_config( $config_name )
+Read (require) the configfile.
 
 =cut
 
@@ -59,7 +59,7 @@ sub read_config {
     return defined $ConfigError ? undef : 1;
 }
 
-=item Test::Smoke->config_error()
+=head2 Test::Smoke->config_error()
 
 Return the value of C<$ConfigError>
 
@@ -69,7 +69,7 @@ sub config_error {
     return $ConfigError;
 }
 
-=item is_win32( )
+=head2 is_win32( )
 
 C<is_win32()> returns true if  C<< $^O eq "MSWin32" >>.
 
@@ -77,7 +77,7 @@ C<is_win32()> returns true if  C<< $^O eq "MSWin32" >>.
 
 sub is_win32() { $^O eq "MSWin32" }
 
-=item do_manifest_check( $ddir, $smoker )
+=head2 do_manifest_check( $ddir, $smoker )
 
 C<do_manifest_check()> uses B<Test::Smoke::SourceTree> to do the 
 MANIFEST check.
@@ -98,7 +98,7 @@ sub do_manifest_check {
     }
 }
 
-=item set_smoke_patchlevel( $ddir, $patch[, $verbose] )
+=head2 set_smoke_patchlevel( $ddir, $patch[, $verbose] )
 
 Set the current patchlevel as a registered patch like "SMOKE$patch"
 
@@ -114,7 +114,7 @@ sub set_smoke_patchlevel {
     @smokereg or set_local_patch( $ddir, "SMOKE$patch" );
 }
 
-=item run_smoke( [$continue[, @df_buildopts]] )
+=head2 run_smoke( [$continue[, @df_buildopts]] )
 
 C<run_smoke()> sets up de build environment and gets the private Policy
 file and build configurations and then runs the smoke stuff for all 
@@ -202,7 +202,7 @@ sub run_smoke {
    };
 }
 
-=item __get_ts_patchlevel( )
+=head2 __get_ts_patchlevel( )
 
 Read the contents of F<.patch>.
 
@@ -226,12 +226,6 @@ sub __get_ts_patchlevel {
 }
 
 1;
-
-=back
-
-=head1 REVISION
-
-$Id$
 
 =head1 COPYRIGHT
 
