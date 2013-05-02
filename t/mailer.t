@@ -14,9 +14,11 @@ use TestLib;
 use Test::More tests => 32;
 
 my $eg_config = { plevel => 19000, os => 'linux', osvers => '2.4.18-4g',
-                  arch => 'i686/1 cpu', sum => 'PASS', version => '5.9.0' };
+                  arch => 'i686/1 cpu', sum => 'PASS', version => '5.9.0',
+                  branch => 'smokeme/nicholas/tryme'};
 my $fail_cfg  = { plevel => 19000, os => 'linux', osvers => '2.4.18-4g',
-                  arch => 'i686/1 cpu', sum => 'FAIL(F)', version => '5.9.0' };
+                  arch => 'i686/1 cpu', sum => 'FAIL(F)', version => '5.9.0',
+                  branch => 'maint-5.16'};
 
 use_ok( 'Test::Smoke::Mailer' );
 use Test::Smoke::Util 'parse_report_Config';
@@ -43,7 +45,7 @@ SKIP: {
     my $subject = $mailer->fetch_report();
 
     my @config = parse_report_Config( $mailer->{body} );
-    my @conf = @{ $eg_config }{qw( version plevel os osvers arch sum )};
+    my @conf = @{ $eg_config }{qw(version plevel os osvers arch sum branch)};
     
     is_deeply( \@config, \@conf, "Config..." );
     my $subj = sprintf "Smoke [%s] %s %s %s %s (%s)", @conf[0, 1, 5, 2, 3, 4];
@@ -85,7 +87,7 @@ SKIP: {
     my $subject = $mailer->fetch_report();
 
     my @config = parse_report_Config( $mailer->{body} );
-    my @conf = @{ $fail_cfg }{qw( version plevel os osvers arch sum )};
+    my @conf = @{ $fail_cfg }{qw(version plevel os osvers arch sum branch)};
     
     is_deeply( \@config, \@conf, "Config..." );
     my $subj = sprintf "Smoke [%s] %s %s %s %s (%s)", @conf[0, 1, 5, 2, 3, 4];
@@ -128,7 +130,7 @@ SKIP: {
     my $subject = $mailer->fetch_report();
 
     my @config = parse_report_Config( $mailer->{body} );
-    my @conf = @{ $eg_config }{qw( version plevel os osvers arch sum )};
+    my @conf = @{ $eg_config }{qw(version plevel os osvers arch sum branch)};
     
     is_deeply( \@config, \@conf, "Config..." );
     my $subj = sprintf "Smoke [%s] %s %s %s %s (%s)", @conf[0, 1, 5, 2, 3, 4];
@@ -155,7 +157,7 @@ SKIP: {
     my $subject = $mailer->fetch_report();
 
     my @config = parse_report_Config( $mailer->{body} );
-    my @conf = @{ $eg_config }{qw( version plevel os osvers arch sum )};
+    my @conf = @{ $eg_config }{qw(version plevel os osvers arch sum branch)};
     
     is_deeply( \@config, \@conf, "Config..." );
     my $subj = sprintf "Smoke [%s] %s %s %s %s (%s)", @conf[0, 1, 5, 2, 3, 4];
@@ -184,7 +186,7 @@ SKIP: {
     my $subject = $mailer->fetch_report();
 
     my @config = parse_report_Config( $mailer->{body} );
-    my @conf = @{ $eg_config }{qw( version plevel os osvers arch sum )};
+    my @conf = @{ $eg_config }{qw(version plevel os osvers arch sum branch)};
     
     is_deeply( \@config, \@conf, "Config..." );
     my $subj = sprintf "Smoke [%s] %s %s %s %s (%s)", @conf[0, 1, 5, 2, 3, 4];
@@ -211,8 +213,12 @@ sub write_report {
 
 sub create_report {
     my $eg = shift;
+    my $branch = '';
+    if (exists $eg->{branch}) {
+        $branch = " branch $eg->{branch}";
+    }
     return <<__EOR__;
-Automated smoke report for $eg->{version} patch $eg->{plevel}
+Automated smoke report for$branch $eg->{version} patch $eg->{plevel}
 host: TI UltraSparc I (SpitFire) ($eg->{arch})
     on $eg->{os} - $eg->{osvers}
     using cc version 4.2

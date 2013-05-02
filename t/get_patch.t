@@ -6,26 +6,11 @@ use strict;
 use File::Spec;
 use File::Copy;
 
-use Test::More tests => 9;
+use Test::More tests => 8;
 BEGIN { use_ok( 'Test::Smoke::Util' ); }
 
 chdir 't' or die "chdir: $!" if -d 't';
 my $snap_level = 17888;
-
-SKIP: {
-    # Test for empty .patch file
-    1 while unlink '.patch';
-    -f '.patch' and skip "Can't unlink '.patch'", 1;
-
-    local *PL;
-    open( PL, '> .patch') or skip "Couldn't create .patch: $!", 1;
-    close PL or skip "Couldn't close .patch: $!", 1;
-
-    my $get_empty_patch = get_patch();
-    is $get_empty_patch->[0], '', "Found empty patchlevel";
-
-    1 while unlink '.patch';
-}
 
 SKIP: {
     # better safe; try and unlink '.patch'
@@ -48,19 +33,6 @@ EO_PATCHLEVEL
 
     is $get_patch->[0], "$snap_level(+)",
        "Found snaplevel: $get_patch->[0]";
-}
-
-SKIP: {
-    my $patch = 17999;
-    local *PL;
-    open( PL, '> .patch') or skip "Couldn't create .patch: $!", 1;
-    print PL $patch;
-    close PL or skip "Couldn't close .patch: $!", 1;
-
-    my $get_patch = get_patch();
-    is $get_patch->[0], $patch, "Found patchlevel: $patch";
-
-    1 while unlink '.patch';
 }
 
 SKIP: {
@@ -111,7 +83,7 @@ SKIP: {
     my $pl = 'blead 2008-12-20.10:38:02 ' .
              '2af192eebde5f7a93e229dfc3196f62ee4cbcd2e ' .
              'GitLive-blead-45-g2af192ee';
-    my (undef, $date, $patch, $descr) = split ' ',  $pl;
+    my ($branch, $date, $patch, $descr) = split ' ',  $pl;
     $descr =~ s/^GitLive-//;
     local *PL;
     open( PL, '> .patch') or skip "Couldn't create .patch: $!", 1;
@@ -120,7 +92,8 @@ SKIP: {
 
     my $get_patch = get_patch();
     is $get_patch->[0], $patch, "Found patchlevel: $patch";
-    is $get_patch->[-1], $descr, "Found short description: $descr";
+    is $get_patch->[1], $descr, "Found short description: $descr";
+    is $get_patch->[2], $branch, "Found branch: $branch";
 
     1 while unlink '.patch';
 }

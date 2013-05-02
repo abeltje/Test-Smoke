@@ -693,17 +693,11 @@ sub get_patch {
         close DOTPATCH;
 
         if ( $patch_level ) {
-            my @dot_patch = split ' ', $patch_level;
-            my @return = ( $dot_patch[2] || $dot_patch[0] );
-            if ( $dot_patch[3] ) {
-                ( my $short_describe = $dot_patch[3] ) =~ s/^GitLive-//;
-                push @return, $short_describe;
-            }
-            return \@return;
+            my ($branch, $date, $sha, $describe) = split(' ', $patch_level);
+            ( my $short_describe = $describe ) =~ s/^GitLive-//;
+            return [$sha, $short_describe, $branch]
         }
-        else {
-            return [ '' ];
-        }
+        return [ '' ];
     }
 
     # There does not seem to be a '.patch', try 'patchlevel.h'
@@ -947,7 +941,7 @@ sub get_smoked_Config {
 
 C<parse_report_Config()> returns a list attributes from a smoke report.
 
-    my( $version, $plevel, $os, $osvers, $archname, $summary ) = 
+    my( $version, $plevel, $os, $osvers, $archname, $summary, $branch ) = 
         parse_report_Config( $rpt );
 
 =cut
@@ -955,7 +949,8 @@ C<parse_report_Config()> returns a list attributes from a smoke report.
 sub parse_report_Config {
     my( $report ) = @_;
 
-    my $version  = $report =~ /^Automated.*for (.+) patch/ ? $1 : '';
+    my $branch   = $report =~ /^Automated.+branch (.+?) / ? $1 : 'blead';
+    my $version  = $report =~ /^Automated.*for(?: branch \S+)? (.+) patch/ ? $1 : '';
     my $plevel   = $report =~ /^Automated.+?(\S+)$/m
         ? $1 : '';
     if ( !$plevel ) {
@@ -967,7 +962,7 @@ sub parse_report_Config {
     my $archname = $report =~ /:.* \((.*)\)/ ? $1 : '';
     my $summary  = $report =~ /^Summary: (.*)/m ? $1 : '';
 
-    return ( $version, $plevel, $osname, $osvers, $archname, $summary );
+    return ( $version, $plevel, $osname, $osvers, $archname, $summary, $branch );
 }
 
 =head2 get_regen_headers( $ddir )

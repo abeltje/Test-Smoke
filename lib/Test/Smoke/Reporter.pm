@@ -250,6 +250,9 @@ sub _parse {
             $rpt{patchdescr} = $descr || $pl;
             next;
         }
+        if (/^Smoking branch (\S+)/) {
+            $rpt{smokebranch} = $1;
+        }
 
         if (/^MANIFEST /) {
             push @{$self->{_mani}}, $_;
@@ -782,6 +785,7 @@ sub smokedb_data {
             duration         => $self->{_rpt}{secs},
             git_describe     => $self->{_rpt}{patchdescr},
             git_id           => $self->{_rpt}{patch},
+            smoke_branch     => $self->{_rpt}{smokebranch},
             hostname         => $si->host,
             lang             => $ENV{LANG},
             lc_all           => $ENV{LC_ALL},
@@ -1021,8 +1025,13 @@ sub preamble {
 
     my $os = $si->os;
 
+    my $branch = '';
+    if ($self->{_rpt}{smokebranch}) {
+        $branch = " branch $self->{_rpt}{smokebranch}";
+    }
+
     my $preamble = <<__EOH__;
-Automated smoke report for $Config{version} patch $self->{_rpt}{patchlevel}
+Automated smoke report for$branch $Config{version} patch $self->{_rpt}{patchlevel}
 $this_host: $cpu ($archname)
     on        $os
     using     $cinfo

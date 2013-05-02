@@ -151,6 +151,7 @@ my %vdirs = map {
 
 my %versions = (
     '5.8.x' => {
+        gbranch => 'maint-5.8',
         source  => 'perl5.git.perl.org::perl-5.8.x',
         server  => 'http://perl5.git.perl.org',
         sdir    => '/perl.git/snapshot/refs/heads/',
@@ -177,6 +178,7 @@ my %versions = (
     },
 
     '5.10.x' => {
+        gbranch => 'maint-5.10',
         source  => 'perl5.git.perl.org::perl-5.10.x',
         server  => 'http://perl5.git.perl.org',
         sdir    => '/perl.git/snapshot/refs/heads/',
@@ -203,6 +205,7 @@ my %versions = (
     },
 
     '5.12.x' => {
+        gbranch => 'maint-5.12',
         source  => 'perl5.git.perl.org::perl-5.12.x',
         server  => 'http://perl5.git.perl.org',
         sdir    => '/perl.git/snapshot/refs/heads/',
@@ -228,6 +231,7 @@ my %versions = (
         is56x   => 0,
     },
     '5.14.x' => {
+        gbranch => 'maint-5.14',
         source  => 'perl5.git.perl.org::perl-5.14.x',
         server  => 'http://perl5.git.perl.org',
         sdir    => '/perl.git/snapshot/refs/heads/',
@@ -253,6 +257,7 @@ my %versions = (
         is56x   => 0,
     },
     '5.16.x' => {
+        gbranch => 'maint-5.16',
         source  => 'perl5.git.perl.org::perl-5.16.x',
         server  => 'http://perl5.git.perl.org',
         sdir    => '/perl.git/snapshot/refs/heads/',
@@ -278,6 +283,7 @@ my %versions = (
         is56x   => 0,
     },
     'blead' => {
+        gbranch => 'blead',
         source  => 'perl5.git.perl.org::perl-current',
         server  => 'http://perl5.git.perl.org',
         sdir    => '/perl.git/snapshot/',
@@ -452,6 +458,16 @@ my %opt = (
             File::Spec->rel2abs(File::Spec->updir),
             'git-perl'
         ),
+    },
+    gitdfbranch => {
+        msg => "Which branch should be smoked by default?",
+        alt => [ ],
+        dft => 'blead',
+    },
+    gitbranchfile => {
+        msg => "Filename to put branchname for smoking in?",
+        alt => [ ],
+        dft => undef,
     },
 
     tar => {
@@ -1127,6 +1143,21 @@ SYNCER: {
 
         $arg = 'gitdir';
         $config{$arg} = prompt_dir($arg);
+
+        $config{gitdfbranch} = $versions{$pversion}{gbranch};
+        $arg = 'gitbranchfile';
+
+        $opt{$arg}{dft} = "$options{prefix}.gitbranch";
+        $config{$arg} = prompt_file($arg, 1);
+
+        if (open my $gb, '>', $config{gitbranchfile}) {
+            print {$gb} $config{gitdfbranch};
+            close $gb;
+            print "Wrote $config{gitbranchfile}...\n";
+        }
+        else {
+            print "Error writing to $config{gitbranchfile}: $!\n";
+        }
 
         last SYNCER;
     };
@@ -1868,7 +1899,8 @@ sub sort_configkeys {
         # Sync related
         qw( sync_type fsync rsync opts source tar server sdir sfile
             patchup pserver pdir unzip patchbin cleanup cdir hdir pfile
-            ftphost ftpusr ftppwd ftpsdir ftpcdir ),
+            ftphost ftpusr ftppwd ftpsdir ftpcdir
+            gitbin gitdir gitdfbranch gitbranchfile ),
 
         # OS specific make related
         qw( w32args w32cc w32make ),
@@ -1888,6 +1920,9 @@ sub sort_configkeys {
 
         # make fine-tuning
         qw( makeopt testmake harnessonly hasharness3 harness3opts ),
+
+        # user_notes
+        qw( user_notes un_position ),
 
         # ENV stuff
         qw( perl5lib delay_report ),

@@ -176,7 +176,8 @@ sub run_smoke {
     chdir $conf->{ddir} or die "Cannot chdir($conf->{ddir}): $!";
     unless ( $continue ) {
         $smoker->make_distclean( );
-        $smoker->ttylog( "Smoking patch $patch->[0] $patch->[-1]\n" ); 
+        $smoker->ttylog("Smoking patch $patch->[0] $patch->[1]\n"); 
+        $smoker->ttylog("Smoking branch $patch->[2]\n") if $patch->[2];
         do_manifest_check( $conf->{ddir}, $smoker );
         set_smoke_patchlevel( $conf->{ddir}, $patch->[0] );
     }
@@ -193,7 +194,7 @@ sub run_smoke {
         $smoker->smoke( $this_cfg, $Policy );
     }
 
-    $smoker->ttylog( "Finished smoking $patch->[0] $patch->[-1]\n" );
+    $smoker->ttylog( "Finished smoking $patch->[0] $patch->[1] $patch->[2]\n" );
     $smoker->mark_out;
 
     close LOG or do {
