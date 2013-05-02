@@ -17,7 +17,7 @@ use base 'Exporter';
     &grepccmsg &get_local_patches &set_local_patch
     &get_ncpu &get_smoked_Config &parse_report_Config 
     &get_regen_headers &run_regen_headers
-    &whereis &clean_filename
+    &whereis &clean_filename &read_logfile
     &calc_timeout &time_in_hhmm
     &do_pod2usage
     &set_vms_rooted_logical
@@ -25,6 +25,7 @@ use base 'Exporter';
 
 use Text::ParseWords;
 use File::Spec::Functions;
+use Encode qw ( decode );
 use File::Find;
 use Cwd;
 
@@ -374,6 +375,31 @@ sub get_cfg_filename {
     return undef;
 }
 
+=head2 read_logfile( )
+
+Read the logfile. If an argument is passed, force to (re)read the log
+If no argument is passed, return the stored log if available otherwise
+read the logfile
+
+=cut
+
+sub read_logfile
+{
+    my ($self, $logfile) = @_;
+
+    !$logfile && $self && $self->{log_file} and return $self->{log_file};
+
+    $logfile ||= $self->{lfile} or return undef;
+    open my $fh, "<", $logfile  or return undef;
+
+    local $/;
+    my $log = <$fh>;
+    my $es; eval { $es = decode( "utf-8",  $log, Encode::FB_CROAK ); };
+    $@ and  eval { $es = decode( "cp1252", $log, Encode::FB_CROAK ); };
+    close $fh;
+    return($@ ? $log : $es);
+}
+
 =head2 grepccmsg( $cc, $logfile, $verbose )
 
 This is a port of Jarkko Hietaniemi's grepccerr script.
@@ -464,12 +490,10 @@ sub grepccmsg {
 
     my( $indx, %error ) = ( 1 );
     my $smokelog = '';
-    local *LOGFH;
-    if ( open LOGFH, "< $logfile" ) {
-        $verbose and print "Reading logfile '$logfile'\n";
-        local $/;
-        $smokelog = <LOGFH>;
-        close LOGFH;
+    my $log = read_logfile(undef,$logfile);
+    if ($log) {
+	$smokelog = $log;
+        $verbose and print "Read logfile '$logfile'\n";
         $verbose and print "Pattern($cc): /$pat/\n";
     } else {
         $verbose and print "Skipping '$logfile' '$!'\n";

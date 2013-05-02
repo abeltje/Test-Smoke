@@ -2349,7 +2349,7 @@ Processing hints file hints/darwin.pl
 byterun.c: In function `byterun':
 byterun.c:906: warning: comparison is always false due to limited range of data type
 Note (probably harmless): No library found for -ldb
-DProf.xs:140: warning: `unused' attribute ignored
+DProf.xs:140: warning: ‘unused’ attribute ignored
 Writing compiled form
 14250 bytes in string tables
 4559 bytes (24.2%) saved spotting duplicates

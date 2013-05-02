@@ -11,9 +11,10 @@ use File::Spec::Functions;
 use JSON;
 use LWP::UserAgent;
 use POSIX qw( strftime );
+use Encode qw( decode encode );
 use Test::Smoke::SysInfo;
 use Text::ParseWords;
-use Test::Smoke::Util qw( grepccmsg get_smoked_Config
+use Test::Smoke::Util qw( grepccmsg get_smoked_Config read_logfile
                           time_in_hhmm get_local_patches );
 
 use constant USERNOTE_ON_TOP => 'top';
@@ -815,12 +816,8 @@ sub smokedb_data {
         if (   ($send_log eq "always")
             or ($send_log eq "on_fail" && $rpt_fail))
         {
-            local *FH;
-            if (open FH, "<", $rpt{lfile}) {
-                local $/;
-                $rpt{log_file} = <FH>;
-                close FH;
-            }
+            my $log = read_logfile($self, $rpt{lfile});
+            $log and $rpt{log_file} = $log;
         }
     }
     $rpt{out_file} = undef;

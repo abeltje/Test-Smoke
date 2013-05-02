@@ -1895,10 +1895,15 @@ regcomp.c:1618: warning: comparison is always false due to limited range of data
 pp_sys.c:311: warning: `S_emulate_eaccess' defined but not used
 byterun.c: In function `byterun':
 byterun.c:906: warning: comparison is always false due to limited range of data type
-DProf.xs:140: warning: `unused' attribute ignored
+DProf.xs:140: warning: =unused= attribute ignored
 re_comp.c: In function `S_study_chunk':
 re_comp.c:1618: warning: comparison is always false due to limited range of data type
 EOCCMSG
+    s/=unused=/\x{2018}unused\x{2019}/ for @ccmsg;
+
+    my $builder = Test::More->builder;
+    binmode $builder->output,         ":utf8";
+    binmode $builder->failure_output, ":utf8";
 
     # `stupid emacs
     ok my $ccmsg = $reporter->ccmessages, "Got compiler messages";
