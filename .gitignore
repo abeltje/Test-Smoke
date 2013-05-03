@@ -1,3 +1,4 @@
+/contrib
 /investigate
 /cover_db
 /TAGS
@@ -5,3 +6,6 @@ blib/
 sandbox/
 Makefile
 pm_to_blib
+tags
+*.swp
+MYMETA.*

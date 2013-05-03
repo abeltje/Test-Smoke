@@ -9,7 +9,7 @@ use Test::More;
 BEGIN {
     plan $] < 5.008
         ? ( skip_all => "Tests not supported on $]" )
-        : ( tests => 4 );
+        : ( tests => 6 );
 }
 
 my %files;
@@ -66,7 +66,7 @@ my $this_system = Test::Smoke::SysInfo::Generic();
     local *CORE::GLOBAL::close = sub (*) {
         my( $pkg ) = caller;
         no strict 'refs';
-        untie *{ "$pkg\:\:$_[0]" };
+        untie *{ "$pkg\:\:$_[0]" } if tied $_[0];
     };
     *Test::Smoke::SysInfo::__get_cpu_type = sub { 'i386' };
     $^W = 1;
@@ -109,6 +109,34 @@ my $this_system = Test::Smoke::SysInfo::Generic();
         _cpu      => 'Intel(R) Core(TM)2 CPU T5600 @ 1.83GHz (GenuineIntel 1000MHz)',
         _ncpu     => 2,
     }, "Read /proc/cpuinfo for duo i386";
+
+    $^W = 0;
+    *Test::Smoke::SysInfo::__get_cpu_type = sub { 'arm_v6' };
+    $^W = 1;
+
+    my $arm_v6 = Test::Smoke::SysInfo::Linux();
+
+    is_deeply $arm_v6, {
+        _host     => $this_system->{_host},
+        _os       => $this_system->{_os},
+        _cpu_type => 'arm_v6',
+        _cpu      => 'ARMv6-compatible processor rev 7 (v6l) (700 MHz)',
+        _ncpu     => 1,
+    }, "Read /proc/cpuinfo for ARM v6";
+
+    $^W = 0;
+    *Test::Smoke::SysInfo::__get_cpu_type = sub { 'arm_v7' };
+    $^W = 1;
+
+    my $arm_v7 = Test::Smoke::SysInfo::Linux();
+
+    is_deeply $arm_v7, {
+        _host     => $this_system->{_host},
+        _os       => $this_system->{_os},
+        _cpu_type => 'arm_v7',
+        _cpu      => 'ARMv7 Processor rev 2 (v7l) (300 MHz)',
+        _ncpu     => 1,
+    }, "Read /proc/cpuinfo for ARM v6";
 }
 
 # Assign file contents
@@ -198,6 +226,35 @@ wp		: yes
 flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe nx lm constant_tsc pni monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr lahf_lm
 bogomips	: 3657.62
 clflush size	: 64
+__EOINFO__
+    $files{arm_v6} = <<'__EOINFO__'; # RaspberryPI, raspbian
+Processor      : ARMv6-compatible processor rev 7 (v6l)
+BogoMIPS       : 697.95
+Features       : swp half thumb fastmult vfp edsp java tls 
+CPU implementer        : 0x41
+CPU architecture: 7
+CPU variant    : 0x0
+CPU part       : 0xb76
+CPU revision   : 7
+Hardware       : BCM2708
+Revision       : 000e
+Serial         : 00000000dc08448c
+__EOINFO__
+    $files{arm_v7} = <<'__EOINFO__'; # Archos 101IT, Android 2.2
+Processor      : ARMv7 Processor rev 2 (v7l)
+BogoMIPS       : 298.32
+Features       : swp half thumb fastmult vfp edsp neon vfpv3 
+CPU implementer        : 0x41
+CPU architecture: 7
+CPU variant    : 0x3
+CPU part       : 0xc08
+CPU revision   : 2
+Hardware       : Archos A101IT board
+Board          : 0005
+OMAP revision  : ES1.2
+Revision       : 0000
+Serial         : 0000000000000000
+Boot           : 4.04.000000
 __EOINFO__
 }
 

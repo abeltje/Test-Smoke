@@ -1,10 +1,7 @@
-#! perl
-use warnings;
+#! perl -w
 use strict;
 
-# $Id$
-
-# We need at least 5.9.5 for the readpipe() override
+# We need at least 5.9.5 for the CORE::GLOBEL::readpipe() override
 my $not595;
 BEGIN { eval qq/use 5.009005/; $not595 = $@ }
 
@@ -15,7 +12,7 @@ use Test::More $not595
 use Carp qw/ cluck /;
 our $DEBUG = 0;
 
-use_ok 'Test::Smoke::SysInfo';
+require Test::Smoke::SysInfo;
 
 my %output = (
     mini_intel => {
@@ -74,6 +71,9 @@ for my $model ( keys %output ) {
 
     local $^O = 'Darwin';
     my $info = Test::Smoke::SysInfo->new;
-    is $info->tsuname( 'm c p' ), $output{ $model }{uname},
-       "$output{ $model }{uname}";
+    is(
+        $info->tsuname( 'm c p' ),
+        $output{ $model }{uname},
+        "$output{ $model }{uname}"
+    );
 }

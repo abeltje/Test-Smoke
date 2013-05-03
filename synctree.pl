@@ -27,7 +27,7 @@ my %opt = (
 
 my $defaults = Test::Smoke::Syncer->config( 'all_defaults' );
 
-my %valid_type = map { $_ => 1 } qw( rsync snapshot copy hardlink forest ftp );
+my %valid_type = map { $_ => 1 } qw( rsync git snapshot copy hardlink forest ftp );
 
 =head1 NAME
 

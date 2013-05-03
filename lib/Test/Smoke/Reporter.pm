@@ -1,9 +1,8 @@
 package Test::Smoke::Reporter;
 use strict;
 
-# $Id$
 use vars qw( $VERSION );
-$VERSION = '0.050';
+$VERSION = '0.052';
 
 require File::Path;
 require Test::Smoke;
@@ -17,6 +16,8 @@ use Test::Smoke::SysInfo;
 use Text::ParseWords;
 use Test::Smoke::Util qw( grepccmsg get_smoked_Config read_logfile
                           time_in_hhmm get_local_patches );
+
+use constant USERNOTE_ON_TOP => 'top';
 
 my %CONFIG = (
     df_ddir         => curdir(),
@@ -37,6 +38,8 @@ my %CONFIG = (
 
     df_v            => 0,
     df_user_note    => '',
+    df_un_file      => undef,
+    df_un_position  => 'bottom', # != USERNOTE_ON_TOP for bottom
 );
 
 =head1 NAME
@@ -248,6 +251,9 @@ sub _parse {
             $rpt{patch}      = $pl || $patch;
             $rpt{patchdescr} = $descr || $pl;
             next;
+        }
+        if (/^Smoking branch (\S+)/) {
+            $rpt{smokebranch} = $1;
         }
 
         if (/^MANIFEST /) {
@@ -764,6 +770,8 @@ locally in the file mktest.jsn
 
 sub smokedb_data {
     my $self = shift;
+    $self->{v} and print "Gathering CoreSmokeDB information...\n";
+
     my %rpt  = map { $_ => $self->{$_} } keys %$self;
     $rpt{manifest_msgs}   = delete $rpt{_mani};
     $rpt{applied_patches} = [$self->registered_patches];
@@ -781,6 +789,7 @@ sub smokedb_data {
             duration         => $self->{_rpt}{secs},
             git_describe     => $self->{_rpt}{patchdescr},
             git_id           => $self->{_rpt}{patch},
+            smoke_branch     => $self->{_rpt}{smokebranch},
             hostname         => $si->host,
             lang             => $ENV{LANG},
             lc_all           => $ENV{LC_ALL},
@@ -790,7 +799,7 @@ sub smokedb_data {
             reporter         => $self->{_conf_args}{from},
             reporter_version => $VERSION,
             smoke_date       => __posixdate($self->{_rpt}{started}),
-            smoke_revision   => $Test::Smoke::REVISION,
+            smoke_revision   => $Test::Smoke::VERSION,
             smoker_version   => $Test::Smoke::Smoker::VERSION,
             smoke_version    => $Test::Smoke::VERSION,
             test_jobs        => $ENV{TEST_JOBS},
@@ -832,11 +841,15 @@ sub smokedb_data {
     my $json = JSON->new->utf8(1)->pretty(1)->encode(\%rpt);
 
     # write the json to file:
-    local *JSN;
-    if (open JSN, ">", catfile($self->{ddir}, $self->{jsnfile})) {
-        binmode(JSN);
-        print JSN $json;
-        close JSN;
+    my $jsn_file = catfile($self->{ddir}, $self->{jsnfile});
+    if (open my $jsn, ">", $jsn_file) {
+        binmode($jsn);
+        print {$jsn} $json;
+        close $jsn;
+        $self->{v} and print "Write to '$jsn_file': ok\n";
+    }
+    else {
+        print "Error creating '$jsn_file': $!\n";
     }
 
     return $self->{_json} = $json;
@@ -851,6 +864,7 @@ Return a string with the full report
 sub report {
     my $self = shift;
     return unless defined $self->{_outfile};
+    $self->_get_usernote();
 
     my $report = $self->preamble;
 
@@ -881,6 +895,29 @@ sub report {
 
     $report .= $self->signature;
     return $report;
+}
+
+=item $reporter->_get_usernote()
+
+Return $self->{user_note} if exists.
+
+Check if C<< $self->{un_file} >> exists, and read contents into C<<
+$self->{user_note} >>.
+
+=cut
+
+sub _get_usernote {
+    my $self = shift;
+
+    if (!$self->{user_note} && $self->{un_file}) {
+        if (open my $unf, '<', $self->{un_file}) {
+            $self->{user_note} = join('', <$unf>);
+        }
+        else {
+            print "Cannot read '$self->{un_file}': $!\n" if $self->{v};
+        }
+    }
+    $self->{user_note} =~ s/(?<=\S)\s*\z/\n/;
 }
 
 =item $reporter->ccinfo( )
@@ -971,21 +1008,28 @@ Use a port of Jarkko's F<grepccerr> script to report the compiler messages.
 
 sub ccmessages {
     my $self = shift;
+
     my $ccinfo = $self->{_rpt}{cinfo} || $self->{_ccinfo} || "cc";
     $ccinfo =~ s/^(.+)\s+version\s+.+/$1/;
 
     $^O =~ /^(?:linux|.*bsd.*|darwin)/ and $ccinfo = 'gcc';
     my $cc = $ccinfo =~ /(gcc|bcc32)/ ? $1 : $^O;
 
-    $self->{v} and print "Looking for cc messages: '$cc'\n";
-    my $errors = grepccmsg($cc, $self->{lfile}, $self->{v}) || [];
+    if (!$self->{_ccmessages_}) {
+
+        $self->{v} and print "Looking for cc messages: '$cc'\n";
+        $self->{_ccmessages_} = grepccmsg($cc, $self->{lfile}, $self->{v}) || [];
+    }
+
+    return @{$self->{_ccmessages_}} if wantarray;
+    return "" if !$self->{_ccmessages_};
 
     local $" = "\n";
-    return @$errors ? wantarray ? @$errors : <<EOERRORS : "";
+    return <<"    EOERRORS";
 
 Compiler messages($cc):
-@$errors
-EOERRORS
+@{$self->{_ccmessages_}}
+    EOERRORS
 }
 
 =item $reporter->preamble( )
@@ -1016,14 +1060,26 @@ sub preamble {
 
     my $os = $si->os;
 
-    return <<__EOH__;
-Automated smoke report for $Config{version} patch $self->{_rpt}{patchlevel}
+    my $branch = '';
+    if ($self->{_rpt}{smokebranch}) {
+        $branch = " branch $self->{_rpt}{smokebranch}";
+    }
+
+    my $preamble = <<__EOH__;
+Automated smoke report for$branch $Config{version} patch $self->{_rpt}{patchlevel}
 $this_host: $cpu ($archname)
     on        $os
     using     $cinfo
     smoketime $time_msg (average $savg_msg)
 
 __EOH__
+
+    if ($self->{un_position} eq USERNOTE_ON_TOP) {
+        (my $user_note = $self->{user_note}) =~ s/(?<=\S)\s*\z/\n/;
+        $preamble = "$user_note\n$preamble";
+    }
+
+    return $preamble;
 }
 
 =item $reporter->smoke_matrix( )
@@ -1225,14 +1281,20 @@ __EOL__
 sub signature {
     my $self = shift;
     my $this_pver = $^V ? sprintf "%vd", $^V : $];
-    my $build_info = "$Test::Smoke::VERSION build $Test::Smoke::REVISION";
-    (my $user_note = $self->{user_note} || "") =~ s/(\S)[\s\r\n]*\z/$1\n/;
-    return <<__EOS__
-$user_note
+    my $build_info = "$Test::Smoke::VERSION";
+
+    my $signature = <<"    __EOS__";
 -- 
 Report by Test::Smoke v$build_info running on perl $this_pver
 (Reporter v$VERSION / Smoker v$Test::Smoke::Smoker::VERSION)
-__EOS__
+    __EOS__
+
+    if ($self->{un_position} ne USERNOTE_ON_TOP) {
+        (my $user_note = $self->{user_note}) =~ s/(?<=\S)\s*\z/\n/;
+        $signature = "\n$user_note\n$signature";
+    }
+
+    return $signature;
 }
 
 1;

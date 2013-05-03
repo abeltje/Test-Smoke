@@ -1,0 +1,86 @@
+*** /snapshot/daily.1/phoenix/home/jv/wrk/Test-Smoke/smoke/Test/Smoke/SysInfo.pm	2012-03-18 09:13:54.000000000 +0100
+--- Test/Smoke/SysInfo.pm	2013-02-10 15:04:05.000000000 +0100
+***************
+*** 488,493 ****
+--- 488,494 ----
+  
+          $type =~ /sparc/ and return Linux_sparc( $type );
+          $type =~ /ppc/i  and return Linux_ppc(   $type );
++         $type =~ /arm/i  and return Linux_arm(   $type );
+  
+      }
+  
+***************
+*** 589,594 ****
+--- 590,660 ----
+      return {
+          _cpu_type => $type,
+          _cpu      => $cpu,
++         _ncpu     => $ncpu,
++         _host     => __get_hostname(),
++         _os       => __get_os(),
++     };
++ }
++ 
++ =head2 Linux_arm( )
++ 
++ Linux on ARM architecture.
++ 
++ Contents of /proc/cpuinfo on RaspberryPI, raspbian:
++ 
++   Processor      : ARMv6-compatible processor rev 7 (v6l)
++   BogoMIPS       : 697.95
++   Features       : swp half thumb fastmult vfp edsp java tls 
++   CPU implementer        : 0x41
++   CPU architecture: 7
++   CPU variant    : 0x0
++   CPU part       : 0xb76
++   CPU revision   : 7
++ 
++   Hardware       : BCM2708
++   Revision       : 000e
++   Serial         : 00000000dc08448c
++ 
++ Contents of /proc/cpuinfo on Archos 101IT, Android 2.2:
++ 
++   Processor      : ARMv7 Processor rev 2 (v7l)
++   BogoMIPS       : 298.32
++   Features       : swp half thumb fastmult vfp edsp neon vfpv3 
++   CPU implementer        : 0x41
++   CPU architecture: 7
++   CPU variant    : 0x3
++   CPU part       : 0xc08
++   CPU revision   : 2
++ 
++   Hardware       : Archos A101IT board
++   Board          : 0005
++   OMAP revision  : ES1.2
++   Revision       : 0000
++   Serial         : 0000000000000000
++   Boot           : 4.04.000000
++ 
++ =cut
++ 
++ sub Linux_arm {
++     my( $type, $cpu, $ncpu ) = @_;
++     $cpu ||= __get_cpu();
++     my $mhz;
++     local *CPUINFO;
++     if ( open CPUINFO, "< arm.cpuinfo" ) {
++         for ( <CPUINFO> ) {
++ 	    $cpu ||= $1, $ncpu++
++ 	      if /^Processor\s+:\s+(.*)/;
++ 	    # Don't have MHz, so use rounded up value of BogoMIPS.
++ 	    $mhz ||= 100 * int(($1+50)/100)
++ 	      if /^BogoMIPS\s+:\s+([0-9.]+)/;
++ 	}
++ 	close CPUINFO;
++     }
++     $cpu =~ s/\s+/ /g;
++     $cpu .= " " . $mhz . "MHz" if $mhz;
++     return {
++         _cpu_type => $type,
++         _cpu      => $cpu,
+          _ncpu     => $ncpu,
+          _host     => __get_hostname(),
+          _os       => __get_os(),

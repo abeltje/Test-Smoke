@@ -12,7 +12,7 @@ use_ok( 'Test::Smoke::Syncer' );
 
 my %df_rsync = (
     rsync => 'rsync',
-    source => 'public.activestate.com::perl-current',
+    source => 'perl5.git.perl.org::perl-current',
     opts   => '-az --delete',
     ddir   => File::Spec->canonpath(
         File::Spec->rel2abs('perl-current', abs_path(cwd()))

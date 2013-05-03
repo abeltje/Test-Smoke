@@ -1,8 +1,6 @@
 #!/usr/bin/perl -w
-
-eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}'
-if 0; # not running under some shell
 use strict;
+use 5.006001;
 
 use Config;
 use Carp;
@@ -24,7 +22,7 @@ use Test::Smoke::Util qw(do_pod2usage whereis);
 
 # $Id$
 use vars qw($VERSION $conf);
-$VERSION = '0.080';
+$VERSION = '0.081';
 
 use Getopt::Long;
 my %options = ( 
@@ -133,8 +131,8 @@ my %mailers = get_avail_mailers();
 my @mailers = sort keys %mailers;
 my @syncers = get_avail_sync();
 my $syncmsg = join "\n", @{ { 
-    rsync    => "\trsync - Use the rsync(1) program [preferred]",
     git      => "\tgit - Use a git-repository.",
+    rsync    => "\trsync - Use the rsync(1) program [preferred]",
     ftp      => "\tftp - Use Net::FTP to sync from APC [!slow!]",
     copy     => "\tcopy - Use File::Copy to copy from a local directory",
     hardlink => "\thardlink - Copy from a local directory using link()",
@@ -151,6 +149,7 @@ my %vdirs = map {
 
 my %versions = (
     '5.8.x' => {
+        gbranch => 'maint-5.8',
         source  => 'perl5.git.perl.org::perl-5.8.x',
         server  => 'http://perl5.git.perl.org',
         sdir    => '/perl.git/snapshot/refs/heads/',
@@ -177,6 +176,7 @@ my %versions = (
     },
 
     '5.10.x' => {
+        gbranch => 'maint-5.10',
         source  => 'perl5.git.perl.org::perl-5.10.x',
         server  => 'http://perl5.git.perl.org',
         sdir    => '/perl.git/snapshot/refs/heads/',
@@ -203,6 +203,7 @@ my %versions = (
     },
 
     '5.12.x' => {
+        gbranch => 'maint-5.12',
         source  => 'perl5.git.perl.org::perl-5.12.x',
         server  => 'http://perl5.git.perl.org',
         sdir    => '/perl.git/snapshot/refs/heads/',
@@ -228,6 +229,7 @@ my %versions = (
         is56x   => 0,
     },
     '5.14.x' => {
+        gbranch => 'maint-5.14',
         source  => 'perl5.git.perl.org::perl-5.14.x',
         server  => 'http://perl5.git.perl.org',
         sdir    => '/perl.git/snapshot/refs/heads/',
@@ -253,6 +255,7 @@ my %versions = (
         is56x   => 0,
     },
     '5.16.x' => {
+        gbranch => 'maint-5.16',
         source  => 'perl5.git.perl.org::perl-5.16.x',
         server  => 'http://perl5.git.perl.org',
         sdir    => '/perl.git/snapshot/refs/heads/',
@@ -278,6 +281,7 @@ my %versions = (
         is56x   => 0,
     },
     'blead' => {
+        gbranch => 'blead',
         source  => 'perl5.git.perl.org::perl-current',
         server  => 'http://perl5.git.perl.org',
         sdir    => '/perl.git/snapshot/',
@@ -453,6 +457,16 @@ my %opt = (
             'git-perl'
         ),
     },
+    gitdfbranch => {
+        msg => "Which branch should be smoked by default?",
+        alt => [ ],
+        dft => 'blead',
+    },
+    gitbranchfile => {
+        msg => "Filename to put branchname for smoking in?",
+        alt => [ ],
+        dft => undef,
+    },
 
     tar => {
         msg => "How should the snapshots be extracted?
@@ -624,6 +638,26 @@ EOT
         msg => 'Do you want to send the outfile with the report?',
         alt => [qw( always on_fail never )],
         dft => 'never',
+    },
+
+    # user_note
+    user_note => {
+        msg => "",
+        alt => [ ],
+        dft => undef,
+    },
+    un_file => {
+        msg => <<EOT,
+In which file will you store your personal notes?
+\t(Leave empty for none.)
+EOT
+        alt => [ ],
+        dft => undef,
+    },
+    un_position => {
+        msg => "Where do you want your personal notes in the report?",
+        alt => [qw/top bottom/],
+        dft => 'bottom',
     },
 
     # mail stuff
@@ -1128,6 +1162,21 @@ SYNCER: {
         $arg = 'gitdir';
         $config{$arg} = prompt_dir($arg);
 
+        $config{gitdfbranch} = $versions{$pversion}{gbranch};
+        $arg = 'gitbranchfile';
+
+        $opt{$arg}{dft} = "$options{prefix}.gitbranch";
+        $config{$arg} = prompt_file($arg, 1);
+
+        if (open my $gb, '>', $config{gitbranchfile}) {
+            print {$gb} $config{gitdfbranch};
+            close $gb;
+            print "Wrote $config{gitbranchfile}...\n";
+        }
+        else {
+            print "Error writing to $config{gitbranchfile}: $!\n";
+        }
+
         last SYNCER;
     };
 
@@ -1230,6 +1279,7 @@ PATCHER: {
     $config{patchbin} = $patchbin;
     print "\nFound [$config{patchbin}]";
     $arg = 'pfile';
+    $opt{$arg}{dft} = "$options{prefix}.patchup";
     $config{ $arg } = prompt_file( $arg, 1 );
 
     if ( $config{ $arg } ) {
@@ -1263,9 +1313,54 @@ in F<lib/> and F<ext/> and renaming of core-tests in F<t/>.
 
 =cut
 
-{
+SKIP_TESTS: {
     $arg = 'skip_tests';
-    $config{ $arg } = prompt_file( $arg, 1 );
+    $opt{$arg}{dft} = "$options{prefix}.skiptests";
+    $config{$arg} = prompt_file($arg, 1);
+    if ($config{$arg} && !-f $config{$arg}) {
+        if (open my $toskip, '>', $config{$arg}) {
+            print $toskip "# One test name on a line\n";
+            close $toskip;
+            print "Created skeleton '$config{$arg}'...\n";
+        }
+        else {
+            print "Error creating skeleton '$config{$arg}': $!\n";
+        }
+    }
+}
+
+=item user_note
+
+This gives you a way of adding personal information to the report.
+
+B<un_file> is the filename where the text to insert into the report is set.
+
+B<user_note> is the old way to add this text.
+
+B<un_position> specify if you want the user_note on TOP or at the BOTTOM of te
+report.
+
+=cut
+
+USER_NOTE: {
+    $arg = 'un_file';
+    $opt{$arg}{dft} = "$options{prefix}.usernote";
+    $config{$arg} = prompt_file($arg, 1);
+
+    last USER_NOTE if !$config{$arg};
+
+    if (!-f $config{$arg}) {
+        if (open my $un, '>', $config{$arg}) {
+            close $un;
+            print "Created empty '$config{$arg}'...\n";
+        }
+        else {
+            print "Error creating '$config{$arg}': $!\n";
+        }
+    }
+
+    $arg = 'un_position';
+    $config{$arg} = prompt($arg);
 }
 
 =item force_c_locale
@@ -1868,7 +1963,8 @@ sub sort_configkeys {
         # Sync related
         qw( sync_type fsync rsync opts source tar server sdir sfile
             patchup pserver pdir unzip patchbin cleanup cdir hdir pfile
-            ftphost ftpusr ftppwd ftpsdir ftpcdir ),
+            ftphost ftpusr ftppwd ftpsdir ftpcdir
+            gitbin gitdir gitorigin gitdfbranch gitbranchfile ),
 
         # OS specific make related
         qw( w32args w32cc w32make ),
@@ -1888,6 +1984,9 @@ sub sort_configkeys {
 
         # make fine-tuning
         qw( makeopt testmake harnessonly hasharness3 harness3opts ),
+
+        # user_notes
+        qw( user_note un_file un_position ),
 
         # ENV stuff
         qw( perl5lib delay_report ),
@@ -2288,9 +2387,9 @@ sub get_avail_sync {
 
     unshift @synctype, 'ftp' if $has_ftp;
 
-    unshift @synctype, 'git' if whereis('git');
-
     unshift @synctype, 'rsync' if whereis( 'rsync' );
+
+    unshift @synctype, 'git' if whereis('git');
 
     return @synctype;
 }

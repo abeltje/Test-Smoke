@@ -1,9 +1,8 @@
 package Test::Smoke::Mailer;
 use strict;
 
-# $Id$
 use vars qw( $VERSION $P5P $NOCC_RE);
-$VERSION = '0.014';
+$VERSION = '0.015';
 
 use Test::Smoke::Util qw( parse_report_Config );
 
@@ -22,20 +21,31 @@ my %CONFIG = (
     df_bcc           => '',
     df_ccp5p_onfail  => 0,
     df_mserver       => 'localhost',
+    df_msuser        => undef,
+    df_mspass        => undef,
 
     df_mailbin       => 'mail',
     mail             => [qw( bcc cc mailbin )],
+
     df_mailxbin      => 'mailx',
     mailx            => [qw( bcc cc mailxbin swcc swbcc )],
+
     df_sendemailbin  => 'sendemail',
-    sendemail        => [qw( from bcc cc sendemailbin mserver muser mpass )],
+    sendemail        => [qw( from bcc cc sendemailbin mserver msuser mspass )],
+
     df_sendmailbin   => 'sendmail',
     sendmail         => [qw( from bcc cc sendmailbin )],
     'Mail::Sendmail' => [qw( from bcc cc mserver )],
-    'MIME::Lite'     => [qw( from bcc cc mserver )],
+    'MIME::Lite'     => [qw( from bcc cc mserver msuser mspass )],
 
-    valid_mailer => { sendmail => 1, mail => 1, mailx => 1, sendemail => 1,
-                      'Mail::Sendmail' => 1, 'MIME::Lite' => 1, },
+    valid_mailer     => {
+        sendmail         => 1,
+        mail             => 1,
+        mailx            => 1,
+        sendemail        => 1,
+        'Mail::Sendmail' => 1,
+        'MIME::Lite'     => 1,
+    },
 );
 
 =head1 NAME
@@ -135,7 +145,7 @@ sub fetch_report {
 
     my @config = parse_report_Config( $self->{body} );
 
-    return sprintf "Smoke [%s] %s %s %s %s (%s)", @config[0, 1, 5, 2, 3, 4];
+    return sprintf "Smoke [%s] %s %s %s %s (%s)", @config[6, 1, 5, 2, 3, 4];
 }
 
 =item $mailer->error( )
@@ -365,8 +375,8 @@ Keys for C<%args>:
 
   * ddir
   * mserver
-  * muser
-  * mpass
+  * msuser
+  * mspass
   * sendemailbin
   * to
   * from
@@ -404,8 +414,8 @@ sub mail {
     $cmdline   .= qq| -t "$self->{to}"|;
     $cmdline   .= qq| -f "$self->{from}"| if $self->{from};
     $cmdline   .= qq| -s "$self->{mserver}"| if $self->{mserver};
-    $cmdline   .= qq| -xu "$self->{muser}"| if $self->{muser};
-    $cmdline   .= qq| -xp "$self->{mpass}"| if ($self->{mpass});
+    $cmdline   .= qq| -xu "$self->{msuser}"| if $self->{msuser};
+    $cmdline   .= qq| -xp "$self->{mspass}"| if defined $self->{mspass};
     $cmdline   .= qq| -o message-file="$self->{file}"|;
 
     $self->{v} > 1 and print "[$cmdline]\n";
@@ -513,6 +523,8 @@ Keys for C<%args>:
 
   * ddir
   * mserver
+  * msuser
+  * mspass
   * to
   * from
   * cc
@@ -553,8 +565,17 @@ sub mail {
     $message{Bcc}   = $self->{bcc} if $self->{bcc};
     $message{From} = $self->{from} if $self->{from};
 
-    MIME::Lite->send( smtp => $self->{mserver}, Debug => ( $self->{v} > 1 ) )
-        if $self->{mserver};
+    if ($self->{mserver}) {
+        my %authinfo = ();
+        $authinfo{AuthUser} = $self->{msuser} if $self->{msuser};
+        $authinfo{AuthPass} = $self->{mspass} if defined $self->{mspass};
+        MIME::Lite->send(
+            smtp       => $self->{mserver},
+            FromSender => $self->{from},
+            Debug      => ($self->{v} > 1),
+            %authinfo,
+        );
+    }
 
     my $ml_msg = MIME::Lite->new( %message );
     $ml_msg->attr( 'content-type.charset' => 'UTF8' )

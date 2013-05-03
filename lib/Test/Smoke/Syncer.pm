@@ -18,13 +18,13 @@ my %CONFIG = (
 # these settings have to do synctype==rsync
     df_rsync    => 'rsync', # you might want a path there
     df_opts     => '-az --delete',
-    df_source   => 'public.activestate.com::perl-current',
+    df_source   => 'perl5.git.perl.org::perl-current',
 
     rsync       => [qw( rsync source opts )],
 
 # these settings have to do with synctype==snapshot
     df_ftp      => 'Net::FTP',
-    df_server   => 'public.activestate.com',
+    df_server   => 'perl5.git.perl.org',
     df_sdir     => '/pub/apc/perl-current-snap',
     df_sfile    => '',
     df_snapext  => 'tar.gz',
@@ -33,7 +33,7 @@ my %CONFIG = (
         'Archive::Tar' : 'gzip -d -c %s | tar xf -' ),
 
     df_patchup  => 0,
-    df_pserver  => 'public.activestate.com',
+    df_pserver  => 'perl5.git.perl.org',
     df_pdir     => '/pub/apc/perl-current-diffs',
     df_ftpusr   => 'anonymous',
     df_ftppwd   => 'smokers@perl.org',
@@ -70,11 +70,13 @@ my %CONFIG = (
     ftp        => [qw( ftphost ftpusr ftppwd ftpsdir ftpcdir ftype )],
 
 # synctype: git
-    df_gitbin    => 'git',
-    df_gitorigin => 'git://perl5.git.perl.org/perl.git',
-    df_gitdir    => undef,
+    df_gitbin        => 'git',
+    df_gitorigin     => 'git://perl5.git.perl.org/perl.git',
+    df_gitdir        => undef,
+    df_gitdfbranch   => 'blead',
+    df_gitbranchfile => undef,
 
-    git => [qw( gitbin gitorigin gitdir )],
+    git => [qw( gitbin gitorigin gitdir gitdfbranch gitbranchfile )],
 
 # misc.
     valid_type => { rsync => 1, git => 1, snapshot => 1,
@@ -104,7 +106,7 @@ Test::Smoke::Syncer - OO interface for syncing the perl source-tree
 
 At this moment we support three basic types of syncing the perl source-tree.
 
-=over 4
+=over
 
 =item rsync
 
@@ -144,11 +146,7 @@ directory, which may prove faster than traditional B<make distclean>).
 
 =head1 METHODS
 
-=over 4
-
-=cut
-
-=item Test::Smoke::Syncer->new( $type, %sync_config )
+=head2 Test::Smoke::Syncer->new( $type, %sync_config )
 
 [ Constructor | Public ]
 
@@ -201,7 +199,7 @@ sub new {
 
 }
 
-=item Test::Smoke::Syncer->config( $key[, $value] )
+=head2 Test::Smoke::Syncer->config( $key[, $value] )
 
 [ Accessor | Public ]
 
@@ -233,7 +231,8 @@ sub config {
     return $CONFIG{ "df_$key" };
 }
 
-=item $syncer->_clear_souce_tree( [$tree_dir] )
+
+=head2 $syncer->_clear_souce_tree( [$tree_dir] )
 
 [ Method | private-ish ]
 
@@ -257,7 +256,7 @@ sub _clear_source_tree {
 
 }
 
-=item $syncer->_relocate_tree( $source_dir )
+=head2 $syncer->_relocate_tree( $source_dir )
 
 [ Method | Private-ish ]
 
@@ -286,24 +285,24 @@ sub _relocate_tree {
             return 0;
         };
         require File::Find;
-	File::Find::finddepth( sub {
+        File::Find::finddepth( sub {
 
             my $dest = File::Spec->canonpath( $File::Find::name );
             $dest =~ s/^\Q$source_dir//;
             $dest = File::Spec->catfile( $self->{ddir}, $dest );
 
             $self->{v} > 1 and print "move $_ $dest\n";
-	    File::Copy::move( $_, $dest );
+            File::Copy::move( $_, $dest );
         }, "./" );
         chdir $cwd or print "Cannot chdir($cwd) back: $!\n";
-	File::Path::rmtree( $source_dir, $self->{v} > 1 );
+        File::Path::rmtree( $source_dir, $self->{v} > 1 );
         $ok = ! -d $source_dir;
     }
     die "Can't move '$source_dir' to $self->{ddir}' ($!)" unless $ok;
     $self->{v} and print "OK\n";
 }
 
-=item $syncer->check_dot_patch( )
+=head2 $syncer->check_dot_patch( )
 
 [ Method | Public ]
 
@@ -369,7 +368,7 @@ sub check_dot_patch {
     return undef;
 }
 
-=item version_from_patchlevel_h( $ddir )
+=head2 version_from_patchlevel_h( $ddir )
 
 C<version_from_patchlevel_h()> returns a "dotted" version as derived 
 from the F<patchlevel.h> file in the distribution.
@@ -383,7 +382,7 @@ sub version_from_patchlevel_h {
     return Test::Smoke::Util::version_from_patchelevel( $self->{ddir} );
 }
 
-=item $syncer->clean_from_directory( $source_dir[, @leave_these] )
+=head2 $syncer->clean_from_directory( $source_dir[, @leave_these] )
 
 C<clean_from_directory()> uses File::Find to get the contents of
 C<$source_dir> and compare these to {ddir} and remove all other files.
@@ -419,7 +418,7 @@ sub clean_from_directory {
     }, $self->{ddir} );
 }
 
-=item $syncer->pre_sync
+=head2 $syncer->pre_sync
 
 C<pre_sync()> should be called by the C<sync()> methods to setup the
 sync environment. Currently only useful on I<OpenVMS>.
@@ -436,13 +435,18 @@ sub pre_sync {
     $self->{ddir} = 'TSP5SRC:[000000]';
 }
 
-# Set skeleton-sub
+=head2 $syncer->sync()
+
+Abstract method, to be overridden by each subclass.
+
+=cut
+
 sub sync { 
     require Carp; 
     Carp::croak( ref( $_[0] ) . "->sync() not yet implemented." );
 }
 
-=item $syncer->post_sync
+=head2 $syncer->post_sync
 
 C<post_sync()> should be called by the C<sync()> methods to unset the
 sync environment. Currently only useful on I<OpenVMS>.
@@ -463,15 +467,11 @@ sub post_sync {
 
 1;
 
-=back
-
 =head1 Test::Smoke::Syncer::Rsync
 
 This handles syncing with the B<rsync> program. 
 It should only be visible from the "parent-package" so no direct 
 user-calls on this.
-
-=over 4
 
 =cut
 
@@ -481,7 +481,7 @@ package Test::Smoke::Syncer::Rsync;
 
 use Cwd;
 
-=item Test::Smoke::Syncer::Rsync->new( %args )
+=head2 Test::Smoke::Syncer::Rsync->new( %args )
 
 This crates the new object. Keys for C<%args>:
 
@@ -500,7 +500,7 @@ sub new {
     return bless { @_ }, $class;
 }
 
-=item $object->sync( )
+=head2 $object->sync( )
 
 Do the actual sync using a call to the B<rsync> program.
 
@@ -540,15 +540,11 @@ sub sync {
     return $plevel;
 }
 
-=back
-
 =head1 Test::Smoke::Syncer::Snapshot
 
 This handles syncing from a snapshot with the B<Net::FTP> module. 
 It should only be visible from the "parent-package" so no direct 
 user-calls on this.
-
-=over 4
 
 =cut
 
@@ -560,7 +556,7 @@ use Cwd;
 use File::Path;
 use Test::Smoke::Util qw( whereis clean_filename );
 
-=item Test::Smoke::Syncer::Snapshot->new( %args )
+=head2 Test::Smoke::Syncer::Snapshot->new( %args )
 
 This crates the new object. Keys for C<%args>:
 
@@ -580,7 +576,7 @@ sub new {
     return bless { @_ }, $class;
 }
 
-=item $syncer->sync( )
+=head2 $syncer->sync( )
 
 Make a connection to the ftp server, change to the {sdir} directory.
 Get the list of snapshots (C<< /^perl@\d+\.tgz$/ >>) and determin the 
@@ -609,7 +605,7 @@ sub sync {
     return $plevel;
 }
 
-=item $syncer->_fetch_snapshot( )
+=head2 $syncer->_fetch_snapshot( )
 
 C<_fetch_snapshot()> checks to see if 
 C<< S<< $self->{server} =~ m|^https?://| >> && $self->{sfile} >>.
@@ -676,7 +672,7 @@ sub _fetch_snapshot {
     return $local_snap;
 }
 
-=item $syncer->_fetch_snapshot_HTTP( )
+=head2 $syncer->_fetch_snapshot_HTTP( )
 
 C<_fetch_snapshot_HTTP()> simply invokes C<< LWP::Simple::mirror() >>.
 
@@ -717,7 +713,7 @@ sub _fetch_snapshot_HTTP {
     }
 }
 
-=item __find_snap_name( $ftp, $snapext[, $verbose] )
+=head2 __find_snap_name( $ftp, $snapext[, $verbose] )
 
 [Not a method!]
 
@@ -746,7 +742,7 @@ sub __find_snap_name {
     return $snap_name;
 }
 
-=item $syncer->_extract_snapshot( )
+=head2 $syncer->_extract_snapshot( )
 
 C<_extract_snapshot()> checks the B<tar> attribute to find out how to 
 extract the snapshot. This could be an external command or the 
@@ -800,7 +796,7 @@ sub _extract_snapshot {
     }
 }
 
-=item $syncer->_extract_with_Archive_Tar( )
+=head2 $syncer->_extract_with_Archive_Tar( )
 
 C<_extract_with_Archive_Tar()> uses the B<Archive::Tar> and
 B<Compress::Zlib> modules to extract the snapshot. 
@@ -836,7 +832,7 @@ sub _extract_with_Archive_Tar {
     return $base_dir;
 }
 
-=item $syncer->_extract_with_external( )
+=head2 $syncer->_extract_with_external( )
 
 C<_extract_with_external()> uses C<< $self->{tar} >> as a sprintf() 
 template to build a command. Yes that might be dangerous!
@@ -879,7 +875,7 @@ sub _extract_with_external {
     return $base_dir;
 }
 
-=item __vms_untargz( $untargz, $tgzfile, $verbose )
+=head2 __vms_untargz( $untargz, $tgzfile, $verbose )
 
 Gunzip and extract the archive in C<$tgzfile> using a small DCL script
 
@@ -911,7 +907,7 @@ EO_UNTGZ
     return ! $ret;
 }
 
-=item $syncer->patch_a_snapshot( $patch_number )
+=head2 $syncer->patch_a_snapshot( $patch_number )
 
 C<patch_a_snapshot()> tries to fetch all the patches between
 C<$patch_number> and C<perl-current> and apply them. 
@@ -941,7 +937,7 @@ sub patch_a_snapshot {
     return $self->check_dot_patch;
 }
 
-=item $syncer->_get_patches( [$patch_number] )
+=head2 $syncer->_get_patches( [$patch_number] )
 
 C<_get_patches()> sets up the FTP connection and gets all patches 
 beyond C<$patch_number>. Remember that patch numbers  do not have to be 
@@ -1004,7 +1000,7 @@ sub _get_patches {
     return @patch_list;
 }
 
-=item $syncer->_apply_patches( @patch_list )
+=head2 $syncer->_apply_patches( @patch_list )
 
 C<_apply_patches()> calls the B<patch> program to apply the patch
 and updates B<.patch> accordingly.
@@ -1055,7 +1051,7 @@ sub _apply_patches {
     };
 }
 
-=item $syncer->_read_patch( $file )
+=head2 $syncer->_read_patch( $file )
 
 C<_read_patch()> unzips the patch and returns the contents.
 
@@ -1095,7 +1091,7 @@ sub _read_patch {
     return $content;
 }
 
-=item $syncer->_fix_dot_patch( $new_level );
+=head2 $syncer->_fix_dot_patch( $new_level );
 
 C<_fix_dot_patch()> updates the B<.patch> file with the new patch level.
 
@@ -1118,7 +1114,7 @@ sub _fix_dot_patch {
     return $self->check_dot_patch;
 }
 
-=item __get_directory_names( [$dir] )
+=head2 __get_directory_names( [$dir] )
 
 [This is B<not> a method]
 
@@ -1139,8 +1135,6 @@ sub __get_directory_names {
     return @dirs;
 }
 
-=back
-
 =head1 Test::Smoke::Syncer::Copy
 
 This handles syncing with the B<File::Copy> module from a local 
@@ -1148,15 +1142,13 @@ directory. It uses the B<MANIFEST> file is the source directory
 to determine which fiels to copy. The current source-tree removed 
 before the actual copying.
 
-=over 4
-
 =cut
 
 package Test::Smoke::Syncer::Copy;
 
 @Test::Smoke::Syncer::Copy::ISA = qw( Test::Smoke::Syncer );
 
-=item Test::Smoke::Syncer::Copy->new( %args )
+=head2 Test::Smoke::Syncer::Copy->new( %args )
 
 This crates the new object. Keys for C<%args>:
 
@@ -1173,7 +1165,7 @@ sub new {
     return bless { @_ }, $class;
 }
 
-=item $syncer->sync( )
+=head2 $syncer->sync( )
 
 This uses B<Test::Smoke::SourceTree> to do the actual copying.  After
 that it will clean up the source-tree (from F<MANIFEST>, but ignoring
@@ -1203,8 +1195,6 @@ sub sync {
     return $plevel;
 }
 
-=back
-
 =head1 Test::Smoke::Syncer::Hardlink
 
 This handles syncing by copying the source-tree from a local directory
@@ -1212,8 +1202,6 @@ using the B<link> function. This can be used as an alternative for
 B<make distclean>.
 
 Thanks to Nicholas Clark for donating this suggestion!
-
-=over 4
 
 =cut
 
@@ -1223,7 +1211,7 @@ package Test::Smoke::Syncer::Hardlink;
 
 require File::Find;
 
-=item Test::Smoke::Syncer::Hardlink->new( %args )
+=head2 Test::Smoke::Syncer::Hardlink->new( %args )
 
 Keys for C<%args>:
 
@@ -1245,7 +1233,7 @@ sub new {
     return bless \%args, $class;
 }
 
-=item $syncer->sync( )
+=head2 $syncer->sync( )
 
 C<sync()> uses the B<File::Find> module to make the hardlink forest in {ddir}.
 
@@ -1285,8 +1273,6 @@ sub sync {
     $self->post_sync;
     return $self->check_dot_patch();
 }
-
-=back
 
 =head1 Test::Smoke::Syncer::FTP
 
@@ -1402,6 +1388,7 @@ package Test::Smoke::Syncer::Git;
 @Test::Smoke::Syncer::Git::ISA = qw( Test::Smoke::Syncer );
 use Cwd;
 use File::Spec::Functions;
+use Test::Smoke::Util::Execute;
 
 =head2 Test::Smoke::Syncer::Git->new( %args )
 
@@ -1409,6 +1396,9 @@ Keys for C<%args>:
 
     * gitorigin
     * gitdir
+    * gitbin
+    * gitbranchfile
+    * gitdfbranch
 
 =cut
 
@@ -1438,41 +1428,101 @@ Do the actual syncing.
 sub sync {
     my $self = shift;
 
+    my $gitbin = Test::Smoke::Util::Execute->new(
+        command => $self->{gitbin},
+        verbose => $self->{v},
+    );
     use Carp;
     my $cwd = cwd();
     if ( ! -d $self->{gitdir} || ! -d catdir($self->{gitdir}, '.git') ) {
-        my $mainclone = system(
-            $self->{gitbin},
+        my $cloneout = $gitbin->run(
             clone => $self->{gitorigin},
             $self->{gitdir}
         );
-        if ( $mainclone != 0 ) {
-            require Carp;
-            Carp::croak("Cannot make the inital clone.");
+        if ( my $gitexit = $gitbin->exitcode ) {
+            croak("Cannot make inital clone: $self->{gitbin} exit $gitexit");
         }
+        $self->{v} and print $cloneout;
     }
 
+    my $gitbranch = $self->get_git_branch;
+    chdir $self->{gitdir} or croak("Cannot chdir($self->{gitdir}): $!");
+
+    # SMOKE_ME
+    my $gitout = $gitbin->run(pull => '--all');
+    $self->{v} and print $gitout;
+
+    $gitout = $gitbin->run(remote => prune => 'origin');
+    $self->{v} and print $gitout;
+
+    $gitout = $gitbin->run(checkout => $gitbranch, '2>&1');
+    $self->{v} and print $gitout;
+
+    chdir $cwd or croak("Cannot chdir($cwd): $!");
     # make the smoke clone
     if ( ! -d $self->{ddir} || ! -d catdir($self->{ddir}, '.git') ) {
         # It needs to be empty ...
-        my $smokeclone = system(
-            $self->{gitbin},
+        my $cloneout = $gitbin->run(
             clone         => $self->{gitdir},
             '--reference' => $self->{gitdir},
             $self->{ddir}
         );
-        if ( $smokeclone != 0 ) {
-            require Carp;
-            Carp::croak("Cannot make the smoke clone.");
+        if ( my $gitexit = $gitbin->exitcode ) {
+            croak("Cannot make smoke clone: $self->{gitbin} exit $gitexit");
         }
+        $self->{v} and print $cloneout;
     }
 
-    chdir $self->{ddir} or croak "Cannot chdir($self->{ddir}): $!";
-    system($self->{gitbin}, 'pull');
-    system("$^X Porting/make_dot_patch.pl > .patch");
+    chdir $self->{ddir} or croak("Cannot chdir($self->{ddir}): $!");
+
+    $gitout = $gitbin->run(reset => '--hard');
+    $self->{v} and print $gitout;
+
+    $gitout = $gitbin->run(clean => '-dfx');
+    $self->{v} and print $gitout;
+
+    $gitout = $gitbin->run(pull => '--all');
+    $self->{v} and print $gitout;
+
+    # SMOKE_ME
+    $gitout = $gitbin->run(checkout => $gitbranch, '2>&1');
+    $self->{v} and print $gitout;
+
+    my $mk_dot_patch = Test::Smoke::Util::Execute->new(
+        command => "$^X Porting/make_dot_patch.pl > .patch",
+        verbose => $self->{v},
+    );
+    my $perlout = $mk_dot_patch->run();
+    $self->{v} and print $perlout;
+
     chdir $cwd;
 
     return $self->check_dot_patch;
+}
+
+=head2 $git->get_git_branch()
+
+Reads the first line of the file set in B<gitbranchfile> and returns its
+value.
+
+=cut
+
+sub get_git_branch {
+    my $self = shift;
+
+    return $self->{gitdfbranch} if !$self->{gitbranchfile};
+    return $self->{gitdfbranch} if ! -f $self->{gitbranchfile};
+
+    if (open my $fh, '<', $self->{gitbranchfile}) {
+        $self->{v} > 1
+            and print "Reading branch to smoke from: '$self->{gitbranchfile}'\n";
+
+        my $branch = <$fh>;
+        close $fh;
+        return $branch;
+    }
+    $self->{v} > 0 and print "Error opening '$self->{gitbranchfile}': $!";
+    return $self->{gitdfbranch};
 }
 
 1;
@@ -1489,8 +1539,6 @@ destination.
 
 Thanks to Nicholas Clark for donating this idea.
 
-=over 4
-
 =cut
 
 package Test::Smoke::Syncer::Forest;
@@ -1498,7 +1546,7 @@ package Test::Smoke::Syncer::Forest;
 @Test::Smoke::Syncer::Forest::ISA = qw( Test::Smoke::Syncer );
 
 
-=item Test::Smoke::Syncer::Forest->new( %args )
+=head2 Test::Smoke::Syncer::Forest->new( %args )
 
 Keys for C<%args>:
 
@@ -1516,7 +1564,7 @@ sub new {
     return bless { @_ }, $class;
 }
 
-=item $syncer->sync( )
+=head2 $syncer->sync( )
 
 C<sync()> starts with a "traditional" sync according to {ftype} in {mdir}.
 It then creates a copy of {mdir} in {fdir} with hardlinks an tries to run
@@ -1569,8 +1617,6 @@ sub sync {
 
     return $plevel;
 }
-
-=back
 
 =head1 SEE ALSO
 
