@@ -48,7 +48,7 @@ SKIP: {
     my @conf = @{ $eg_config }{qw(version plevel os osvers arch sum branch)};
     
     is_deeply( \@config, \@conf, "Config..." );
-    my $subj = sprintf "Smoke [%s] %s %s %s %s (%s)", @conf[0, 1, 5, 2, 3, 4];
+    my $subj = sprintf "Smoke [%s] %s %s %s %s (%s)", @conf[6, 1, 5, 2, 3, 4];
     
     is( $subject, $subj, "Read the report: $subject" );
     is( $mailer->{body}, $report, "Report read back ok" );
@@ -90,7 +90,7 @@ SKIP: {
     my @conf = @{ $fail_cfg }{qw(version plevel os osvers arch sum branch)};
     
     is_deeply( \@config, \@conf, "Config..." );
-    my $subj = sprintf "Smoke [%s] %s %s %s %s (%s)", @conf[0, 1, 5, 2, 3, 4];
+    my $subj = sprintf "Smoke [%s] %s %s %s %s (%s)", @conf[6, 1, 5, 2, 3, 4];
 
     is( $subject, $subj, "Read the report: $subject" );
     is( $mailer->{body}, $report, "Report read back ok" );
@@ -133,7 +133,7 @@ SKIP: {
     my @conf = @{ $eg_config }{qw(version plevel os osvers arch sum branch)};
     
     is_deeply( \@config, \@conf, "Config..." );
-    my $subj = sprintf "Smoke [%s] %s %s %s %s (%s)", @conf[0, 1, 5, 2, 3, 4];
+    my $subj = sprintf "Smoke [%s] %s %s %s %s (%s)", @conf[6, 1, 5, 2, 3, 4];
 
     is( $subject, $subj, "Read the report: $subject" );
     is( $mailer->{body}, $report, "Report read back ok" );
@@ -160,7 +160,7 @@ SKIP: {
     my @conf = @{ $eg_config }{qw(version plevel os osvers arch sum branch)};
     
     is_deeply( \@config, \@conf, "Config..." );
-    my $subj = sprintf "Smoke [%s] %s %s %s %s (%s)", @conf[0, 1, 5, 2, 3, 4];
+    my $subj = sprintf "Smoke [%s] %s %s %s %s (%s)", @conf[6, 1, 5, 2, 3, 4];
 
     is( $subject, $subj, "Read the report: $subject" );
     is( $mailer->{body}, $report, "Report read back ok" );
@@ -189,7 +189,7 @@ SKIP: {
     my @conf = @{ $eg_config }{qw(version plevel os osvers arch sum branch)};
     
     is_deeply( \@config, \@conf, "Config..." );
-    my $subj = sprintf "Smoke [%s] %s %s %s %s (%s)", @conf[0, 1, 5, 2, 3, 4];
+    my $subj = sprintf "Smoke [%s] %s %s %s %s (%s)", @conf[6, 1, 5, 2, 3, 4];
 
     is( $subject, $subj, "Read the report: $subject" );
     is( $mailer->{body}, $report, "Report read back ok" );

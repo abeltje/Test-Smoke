@@ -42,7 +42,7 @@ use Test::Smoke::Reporter;
 
     like(
         $signature,
-        qr/^Blah\n\n/,
+        qr/^\nBlah\n\n/,
         "  user_note on top of signature"
     );
 }
