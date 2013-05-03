@@ -93,7 +93,7 @@ mynewversion=`perl -Ilib -MTest::Smoke -e 'print Test::Smoke->VERSION'`
 
 echo "Distribution for $mynewversion (was $myoldversion)"
 if [ "$NOAUTOCOMMIT" != "1" ]; then
-    git commit -m "Autocommit for distribution Test::Smoke $mynewversion"
+    git commit -m "Autocommit for distribution Test::Smoke $mynewversion" lib/Test/Smoke.pm
     git tag "Test-Smoke-$mynewversion"
     git push --all
 fi
@@ -106,4 +106,4 @@ if [ $? -gt 0 ] ; then
 fi
 make dist
 mv -v *.tar.gz $distdir
-
+make veryclean > /dev/null 2>&1
