@@ -6,6 +6,7 @@ private/
 klad/
 contrib/
 mkdist.sh
+release.sh
 provesmoke
 resmoke.pl
 roadmap.pod
