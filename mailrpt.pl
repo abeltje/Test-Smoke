@@ -29,8 +29,8 @@ my %opt = (
     ccp5p_onfail => undef,
     from         => undef,
     mserver      => undef,
-    muser        => undef,
-    mpass        => undef,
+    msuser       => undef,
+    mspass       => undef,
     v            => undef,
 
     rptfile      => 'mktest.rpt',

@@ -2,7 +2,7 @@ package Test::Smoke::Reporter;
 use strict;
 
 use vars qw( $VERSION );
-$VERSION = '0.051';
+$VERSION = '0.052';
 
 require File::Path;
 require Test::Smoke;
@@ -38,6 +38,7 @@ my %CONFIG = (
 
     df_v            => 0,
     df_user_note    => '',
+    df_un_file      => undef,
     df_un_position  => 'bottom', # != USERNOTE_ON_TOP for bottom
 );
 
@@ -769,6 +770,8 @@ locally in the file mktest.jsn
 
 sub smokedb_data {
     my $self = shift;
+    $self->{v} and print "Gathering CoreSmokeDB information...\n";
+
     my %rpt  = map { $_ => $self->{$_} } keys %$self;
     $rpt{manifest_msgs}   = delete $rpt{_mani};
     $rpt{applied_patches} = [$self->registered_patches];
@@ -796,7 +799,7 @@ sub smokedb_data {
             reporter         => $self->{_conf_args}{from},
             reporter_version => $VERSION,
             smoke_date       => __posixdate($self->{_rpt}{started}),
-            smoke_revision   => $Test::Smoke::REVISION,
+            smoke_revision   => $Test::Smoke::VERSION,
             smoker_version   => $Test::Smoke::Smoker::VERSION,
             smoke_version    => $Test::Smoke::VERSION,
             test_jobs        => $ENV{TEST_JOBS},
@@ -838,11 +841,15 @@ sub smokedb_data {
     my $json = JSON->new->utf8(1)->pretty(1)->encode(\%rpt);
 
     # write the json to file:
-    local *JSN;
-    if (open JSN, ">", catfile($self->{ddir}, $self->{jsnfile})) {
-        binmode(JSN);
-        print JSN $json;
-        close JSN;
+    my $jsn_file = catfile($self->{ddir}, $self->{jsnfile});
+    if (open my $jsn, ">", $jsn_file) {
+        binmode($jsn);
+        print {$jsn} $json;
+        close $jsn;
+        $self->{v} and print "Write to '$jsn_file': ok\n";
+    }
+    else {
+        print "Error creating '$jsn_file': $!\n";
     }
 
     return $self->{_json} = $json;
@@ -857,6 +864,7 @@ Return a string with the full report
 sub report {
     my $self = shift;
     return unless defined $self->{_outfile};
+    $self->_get_usernote();
 
     my $report = $self->preamble;
 
@@ -887,6 +895,29 @@ sub report {
 
     $report .= $self->signature;
     return $report;
+}
+
+=item $reporter->_get_usernote()
+
+Return $self->{user_note} if exists.
+
+Check if C<< $self->{un_file} >> exists, and read contents into C<<
+$self->{user_note} >>.
+
+=cut
+
+sub _get_usernote {
+    my $self = shift;
+
+    if (!$self->{user_note} && $self->{un_file}) {
+        if (open my $unf, '<', $self->{un_file}) {
+            $self->{user_note} = join('', <$unf>);
+        }
+        else {
+            print "Cannot read '$self->{un_file}': $!\n" if $self->{v};
+        }
+    }
+    $self->{user_note} =~ s/(?<=\S)\s*\z/\n/;
 }
 
 =item $reporter->ccinfo( )
@@ -977,21 +1008,28 @@ Use a port of Jarkko's F<grepccerr> script to report the compiler messages.
 
 sub ccmessages {
     my $self = shift;
+
     my $ccinfo = $self->{_rpt}{cinfo} || $self->{_ccinfo} || "cc";
     $ccinfo =~ s/^(.+)\s+version\s+.+/$1/;
 
     $^O =~ /^(?:linux|.*bsd.*|darwin)/ and $ccinfo = 'gcc';
     my $cc = $ccinfo =~ /(gcc|bcc32)/ ? $1 : $^O;
 
-    $self->{v} and print "Looking for cc messages: '$cc'\n";
-    my $errors = grepccmsg($cc, $self->{lfile}, $self->{v}) || [];
+    if (!$self->{_ccmessages_}) {
+
+        $self->{v} and print "Looking for cc messages: '$cc'\n";
+        $self->{_ccmessages_} = grepccmsg($cc, $self->{lfile}, $self->{v}) || [];
+    }
+
+    return @{$self->{_ccmessages_}} if wantarray;
+    return "" if !$self->{_ccmessages_};
 
     local $" = "\n";
-    return @$errors ? wantarray ? @$errors : <<EOERRORS : "";
+    return <<"    EOERRORS";
 
 Compiler messages($cc):
-@$errors
-EOERRORS
+@{$self->{_ccmessages_}}
+    EOERRORS
 }
 
 =item $reporter->preamble( )
@@ -1243,7 +1281,7 @@ __EOL__
 sub signature {
     my $self = shift;
     my $this_pver = $^V ? sprintf "%vd", $^V : $];
-    my $build_info = "$Test::Smoke::VERSION build $Test::Smoke::REVISION";
+    my $build_info = "$Test::Smoke::VERSION";
 
     my $signature = <<"    __EOS__";
 -- 
@@ -1253,7 +1291,7 @@ Report by Test::Smoke v$build_info running on perl $this_pver
 
     if ($self->{un_position} ne USERNOTE_ON_TOP) {
         (my $user_note = $self->{user_note}) =~ s/(?<=\S)\s*\z/\n/;
-        $signature = "$user_note\n$signature";
+        $signature = "\n$user_note\n$signature";
     }
 
     return $signature;

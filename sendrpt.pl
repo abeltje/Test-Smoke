@@ -2,7 +2,6 @@
 use strict;
 $| = 1;
 
-# $Id$
 use vars qw( $VERSION );
 $VERSION = '0.017';
 
@@ -24,10 +23,13 @@ use Getopt::Long;
 my %opt = (
     type         => undef,
     ddir         => undef,
-    to           => undef,    #'smokers-reports@perl.org',
+    to           => undef,
     cc           => undef,
     ccp5p_onfail => undef,
     from         => undef,
+    mserver      => undef,
+    msuser       => undef,
+    mspass       => undef,
     v            => undef,
 
     smokedb_url => undef,
@@ -101,7 +103,8 @@ GetOptions(
     \%opt => qw(
         type|t=s
         ddir|d=s
-        to=s      cc=s      bcc=s
+        to=s      cc=s      bcc=s     swcc=s swbcc=s
+        mserver=s msuser=s  mspass=s
 
         ccp5p_onfail!
         v|verbose=i
@@ -179,7 +182,7 @@ sub check_for_report {
     if ( defined $reporter->{_outfile} ) {
         $reporter->write_to_file;
     
-        unless ( -f $report ) {
+        if (!-f $report) {
             die "Hmmm... cannot find [$report]";
         }
         return 1;
@@ -191,17 +194,25 @@ sub check_for_report {
 
 sub check_for_json {
     my $jsnfile = File::Spec->catfile($opt{ddir}, $opt{jsnfile});
-    if (! -f $jsnfile or $opt{report}) { 
-        my $reporter = Test::Smoke::Reporter->new($conf);
-        return $reporter->smokedb_data();
+    if (-f $jsnfile) {
+        $opt{v} and print "Found [$jsnfile]\n";
+        if (! $opt{report}) {
+            open my $jsn, '<', $jsnfile or die "Cannot open($jsnfile): $!";
+            my $json = do {local $/; <$jsn> };
+            close $jsn;
+            $opt{v} and print "Using JSON from '$jsnfile'\n";
+            return $json;
+        }
+        else {
+            $opt{v} and print "Not reuising existing JSON, regenerate\n";
+        }
+    }
+    else {
+        $opt{v} and print "No json found in [$opt{ddir}]\n";
     }
 
-    $opt{v} and print "Found [$jsnfile]\n";
-    local *JSON;
-    open JSON, '<', $jsnfile or die "Cannot open($jsnfile): $!";
-    my $json = do {local $/; <JSON> };
-    close JSON;
-    return $json;
+    my $reporter = Test::Smoke::Reporter->new($conf);
+    return $reporter->smokedb_data();
 }
 
 =head1 SEE ALSO

@@ -1,10 +1,8 @@
 package Test::Smoke;
 use strict;
 
-# $Id$
-use vars qw( $VERSION $REVISION $conf @EXPORT );
+use vars qw($VERSION $conf @EXPORT);
 $VERSION  = '1.53';
-$REVISION = __get_ts_patchlevel();
 
 use base 'Exporter';
 @EXPORT  = qw( $conf &read_config &run_smoke );
@@ -201,29 +199,6 @@ sub run_smoke {
         require Carp;
         Carp::carp "Error on closing logfile: $!";
    };
-}
-
-=head2 __get_ts_patchlevel( )
-
-Read the contents of F<.patch>.
-
-=cut
-
-use FindBin;
-use File::Spec::Functions;
-
-sub __get_ts_patchlevel {
-    my( $rev ) = q$Rev$ =~ /(\d+)/;
-    if ( ! $rev && -d '.git' ) {
-       chomp( $rev = `git describe --all --long` );
-    }
-    my $dotpatch = catfile $FindBin::Bin, '.patch';
-    local *DOTPATCH;
-    open DOTPATCH, "< $dotpatch" or return $rev;
-    chomp( my $plevel = <DOTPATCH> );
-    close DOTPATCH;
-    ! defined $plevel or $plevel = $rev;
-    return $plevel > $rev ? $plevel : $rev;
 }
 
 1;
