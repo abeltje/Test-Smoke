@@ -130,12 +130,49 @@ sub __get_os {
             last;
         };
         $chk_os =~ /linux/i && do {
-            my $dist_re = '[-_](?:release|version)\b';
-            my( $distro ) = grep /$dist_re/ && !/\blsb-/ => glob( '/etc/*' );
-            last MOREOS unless $distro;
-            $distro =~ s|^/etc/||;
-            $distro =~ s/$dist_re//i;
-            $os .= " [$distro]" if $distro;
+            my( $dist_file ) = grep { -s $_ && !/\blsb-/ }
+                               glob( "/etc/*[-_][rRvV][eE][lLrR]*" ),
+                               "/etc/issue"
+                or last MOREOS;
+            (my $distro = $dist_file) =~ s{^/etc/}{};
+            $distro =~ s{[-_](?:release|version)\b}{}i;
+            if ( CORE::open my $fh, "<", $dist_file ) {
+                my @osi = <$fh>;
+                close $fh;
+                my %os = map { m/^\s*\U(\S+)\E\s*=\s*(.*)\s*$/ } @osi;
+                s/^"\s*(.*?)\s*"$/$1/ for values %os;
+                if ( $os{PRETTY_NAME} ) {
+                    $distro = $os{PRETTY_NAME}; # "openSUSE 12.1 (Asparagus) (x86_64)"
+                    $distro =~ s/\)\s+\(\w+\)\s*$/)/; # remove architectural part
+                }
+                elsif ( $os{VERSION} && $os{NAME} ) {
+                    $distro = qq{$os{NAME} $os{VERSION}};
+                }
+                elsif ( $os{VERSION} && $os{CODENAME} ) {
+                    $distro .= qq{ $os{VERSION} "$os{CODENAME}"};
+                }
+                elsif ( @osi && $osi[0] =~ m{^\s*([-A-Za-z0-9. ""/]+)} ) {
+                    # /etc/issue:
+                    # Welcome to openSUSE 11.2 "Emerald" - Kernel \r (\l).
+                    # Welcome to openSUSE 11.3 "Teal" - Kernel \r (\l).
+                    # Welcome to openSUSE 11.4 "Celadon" - Kernel \r (\l).
+                    # Welcome to openSUSE 12.1 "Asparagus" - Kernel \r (\l).
+                    # Welcome to openSUSE 12.2 "Mantis" - Kernel \r (\l).
+                    # Welcome to openSUSE 12.3 "Dartmouth" - Kernel \r (\l).
+                    # Ubuntu 10.04.4 LTS \n \l
+                    # Debian GNU/Linux wheezy/sid \n \l
+                    # Debian GNU/Linux 6.0 \n \l
+                    # /etc/redhat-release:
+                    # CentOS release 5.7 (Final)
+                    # Red Hat Enterprise Linux ES release 4 (Nahant Update 2)
+                    # /etc/debian_version:
+                    # 6.0.4
+                    # wheezy/sid
+                    ($distro = $1) =~ s/^Welcome\s+to\s+//i;
+                    $distro =~ s/\s+-\s+Kernel.*//i;
+                }
+            }
+            $distro =~ s/^\s*(.*\S)\s*$/$1/ and $os .= " [$distro]";
             last;
         };
         $chk_os =~ /solaris|sunos|osf/i && do {
