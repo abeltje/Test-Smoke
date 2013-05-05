@@ -157,6 +157,8 @@ sub __get_os {
                     # Welcome to openSUSE 11.3 "Teal" - Kernel \r (\l).
                     # Welcome to openSUSE 11.4 "Celadon" - Kernel \r (\l).
                     # Welcome to openSUSE 12.1 "Asparagus" - Kernel \r (\l).
+                    # Welcome to openSUSE 12.2 "Mantis" - Kernel \r (\l).
+                    # Welcome to openSUSE 12.3 "Dartmouth" - Kernel \r (\l).
                     # Ubuntu 10.04.4 LTS \n \l
                     # Debian GNU/Linux wheezy/sid \n \l
                     # Debian GNU/Linux 6.0 \n \l
