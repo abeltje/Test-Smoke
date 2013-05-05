@@ -91,9 +91,20 @@ myoldversion=`perl -Ilib -MTest::Smoke -e 'print Test::Smoke->VERSION'`
 perl -i -pe '/^\$VERSION\s*=\s*/ && s/(\d+\.\d+)/ $1 + 0.01 /e' lib/Test/Smoke.pm
 mynewversion=`perl -Ilib -MTest::Smoke -e 'print Test::Smoke->VERSION'`
 
+# Update the Changes file
+line="________________________________________________________________________________"
+cat <<EOF > Changes
+Changes on `date '+%Y-%m-%d'` for github repository at:
+`git remote show origin | grep 'URL:'`
+
+Enjoy!
+
+`git log --name-status --pretty="$line%n[%h] by %an on %aD%n%n%w(76,4,8)%+B"`
+EOF
+
 echo "Distribution for $mynewversion (was $myoldversion)"
 if [ "$NOAUTOCOMMIT" != "1" ]; then
-    git commit -m "Autocommit for distribution Test::Smoke $mynewversion" lib/Test/Smoke.pm
+    git commit -m "Autocommit for distribution Test::Smoke $mynewversion" lib/Test/Smoke.pm Changes
     git tag "Test-Smoke-$mynewversion"
     git push --all
 fi
