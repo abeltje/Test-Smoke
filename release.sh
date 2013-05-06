@@ -88,7 +88,7 @@ fi
 
 # Update the version in lib/Test/Smoke.pm
 myoldversion=`perl -Ilib -MTest::Smoke -e 'print Test::Smoke->VERSION'`
-perl -i -pe '/^\$VERSION\s*=\s*/ && s/(\d+\.\d+)/ $1 + 0.01 /e' lib/Test/Smoke.pm
+perl -i -pe '/^(?:our\s*)?\$VERSION\s*=\s*/ && s/(\d+\.\d+)/sprintf "%.2f", $1+0.01/e' lib/Test/Smoke.pm
 mynewversion=`perl -Ilib -MTest::Smoke -e 'print Test::Smoke->VERSION'`
 
 # Update the Changes file
