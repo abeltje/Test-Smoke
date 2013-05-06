@@ -76,7 +76,13 @@ If any error occured, C<< $self->exitcode >> is set.
 sub run {
     my $self = shift;
 
-    my $command = join(" ", $self->{command}, $self->arguments(@_));
+    my $command = join(
+        " ",
+        $self->{command},
+        map {
+            / / ? qq/"$_"/ : $_
+            } $self->arguments(@_)
+    );
     $self->verbose > 1 and printf "In pwd(%s) running:\nqx[%s]\n", cwd(), $command;
 
     my @output = qx/$command/;
