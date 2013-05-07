@@ -1,13 +1,52 @@
 package Test::Smoke::Mailer;
+use warnings;
 use strict;
+use Carp;
 
-use vars qw( $VERSION $P5P $NOCC_RE);
-$VERSION = '0.015';
+our $VERSION = '0.016';
 
-use Test::Smoke::Util qw( parse_report_Config );
+use Test::Smoke::Mailer::Sendmail;
+use Test::Smoke::Mailer::Mail_X;
+use Test::Smoke::Mailer::SendEmail;
+use Test::Smoke::Mailer::Mail_Sendmail;
+use Test::Smoke::Mailer::MIME_Lite;
 
-$P5P       = 'perl5-porters@perl.org';
-$NOCC_RE   = ' (?:PASS\b|FAIL\(X\))';
+=head1 NAME
+
+Test::Smoke::Mailer - Factory for objects to send the report.
+
+=head1 SYNOPSIS
+
+    use Test::Smoke::Mailer;
+
+    my %args = ( mhowto => 'smtp', mserver => 'smtp.your.domain' );
+    my $mailer = Test::Smoke::Mailer->new( $ddir, %args );
+
+    $mailer->mail or die "Problem in mailing: " . $mailer->error;
+
+=head1 DESCRIPTION
+
+This little wrapper still allows you to use the B<sendmail>, B<sendemail>,
+B<mail> or B<mailx> programs, but prefers to use the B<Mail::Sendmail>
+module (which comes with this distribution) to send the reports.
+
+=head1 METHODS
+
+=head2 Test::Smoke::Mailer->new( $mailer[, %args] )
+
+Can we provide sensible defaults for the mail stuff?
+
+    mhowto  => [Module::Name|sendmail|mail|mailx|sendemail]
+    mserver => an SMTP server || localhost
+    mbin    => the full path to the mail binary
+    mto     => list of addresses (comma separated!)
+    mfrom   => single address
+    mcc     => list of addresses (coma separated!)
+
+=cut
+
+our $P5P       = 'perl5-porters@perl.org';
+our $NOCC_RE   = ' (?:PASS\b|FAIL\(X\))';
 my %CONFIG = (
     df_mailer        => 'Mail::Sendmail',
     df_ddir          => undef,
@@ -48,51 +87,13 @@ my %CONFIG = (
     },
 );
 
-=head1 NAME
-
-Test::Smoke::Mailer - Wrapper to send the report.
-
-=head1 SYNOPSIS
-
-    use Test::Smoke::Mailer;
-
-    my %args = ( mhowto => 'smtp', mserver => 'smtp.your.domain' );
-    my $mailer = Test::Smoke::Mailer->new( $ddir, %args );
-
-    $mailer->mail or die "Problem in mailing: " . $mailer->error;
-
-=head1 DESCRIPTION
-
-This little wrapper still allows you to use the B<sendmail>, B<sendemail>,
-B<mail> or B<mailx> programs, but prefers to use the B<Mail::Sendmail>
-module (which comes with this distribution) to send the reports.
-
-=head1 METHODS
-
-=over 4
-
-=item Test::Smoke::Mailer->new( $mailer[, %args] )
-
-Can we provide sensible defaults for the mail stuff?
-
-    mhowto  => [Module::Name|sendmail|mail|mailx|sendemail]
-    mserver => an SMTP server || localhost
-    mbin    => the full path to the mail binary
-    mto     => list of addresses (comma separated!)
-    mfrom   => single address
-    mcc     => list of addresses (coma separated!)
-
-=cut
-
 sub  new {
-    my $proto = shift;
-    my $class = ref $proto || $proto;
+    my $class = shift;
 
     my $mailer = shift || $CONFIG{df_mailer};
 
-    unless ( exists $CONFIG{valid_mailer}->{ $mailer } ) {
-        require Carp;
-        Carp::croak( "Invalid mailer '$mailer'" );
+    if (! exists $CONFIG{valid_mailer}->{ $mailer } ) {
+        croak( "Invalid mailer '$mailer'" );
     };
 
     my %args_raw = @_ ? UNIVERSAL::isa( $_[0], 'HASH' ) ? %{ $_[0] } : @_ : ();
@@ -111,82 +112,26 @@ sub  new {
     DO_NEW: {
         local $_ = $mailer;
 
-        /^sendmail$/  && return Test::Smoke::Mailer::Sendmail->new( %fields );
-        /^mailx?$/ && return Test::Smoke::Mailer::Mail_X->new( %fields );
-        /^sendemail?$/ && return Test::Smoke::Mailer::SendEmail->new( %fields );
-        /^Mail::Sendmail$/ && 
-            return Test::Smoke::Mailer::Mail_Sendmail->new( %fields );
-        /^MIME::Lite$/ && 
-            return Test::Smoke::Mailer::MIME_Lite->new( %fields );
+        /^sendmail$/ && do {
+            return Test::Smoke::Mailer::Sendmail->new(%fields);
+        };
+        /^mailx?$/ && do {
+            return Test::Smoke::Mailer::Mail_X->new(%fields);
+        };
+        /^sendemail?$/ && do {
+            return Test::Smoke::Mailer::SendEmail->new(%fields);
+        };
+        /^Mail::Sendmail$/ && do {
+            return Test::Smoke::Mailer::Mail_Sendmail->new(%fields);
+        };
+        /^MIME::Lite$/ && do {
+            return Test::Smoke::Mailer::MIME_Lite->new(%fields);
+        };
     }
 
 }
 
-=item $mailer->fetch_report( )
-
-C<fetch_report()> reads B<mktest.rpt> from C<{ddir}> and return the
-subject line for the mail-message.
-
-=cut
-
-sub fetch_report {
-    my $self = shift;
-
-    $self->{file} = File::Spec->catfile( $self->{ddir}, $self->{rptfile} );
-
-    local *REPORT;
-    if ( open REPORT, "< $self->{file}" ) {
-        $self->{body} = do { local $/; <REPORT> };
-        close REPORT;
-    } else {
-        require Carp;
-        Carp::croak( "Cannot read '$self->{file}': $!" );
-    }
-
-    my @config = parse_report_Config( $self->{body} );
-
-    return sprintf "Smoke [%s] %s %s %s %s (%s)", @config[6, 1, 5, 2, 3, 4];
-}
-
-=item $mailer->error( )
-
-C<error()> returns the value of C<< $mailer->{error} >>.
-
-=cut
-
-sub error {
-    my $self = shift;
-
-    return $self->{error} || '';
-}
-
-=item $self->_get_cc( $subject )
-
-C<_get_cc()> implements the C<--ccp5p_onfail> option. It looks at the
-subject to see if the smoke FAILed and then adds the I<perl5-porters>
-mailing-list to the C<Cc:> field unless it is already part of C<To:>
-or C<Cc:>.
-
-The new behaviour is to only return C<Cc:> on fail. This is determined
-by the new global regex kept in C<< $Test::Smoke::Mailer::NOCC_RE >>.
-
-=cut
-
-sub _get_cc {
-    my( $self, $subject ) = @_;
-    return "" if $subject =~ m/$NOCC_RE/;
-
-    return $self->{cc} || "" unless $self->{ccp5p_onfail};
-
-    my $p5p = $Test::Smoke::Mailer::P5P or return $self->{cc};
-    my @cc = $self->{cc} ? $self->{cc} : ();
-
-    push @cc, $p5p unless $self->{to} =~ /\Q$p5p\E/ || 
-                          $self->{cc} =~ /\Q$p5p\E/;
-    return join ", ", @cc;
-}
-
-=item Test::Smoke::Mailer->config( $key[, $value] )
+=head2 Test::Smoke::Mailer->config( $key[, $value] )
 
 C<config()> is an interface to the package lexical C<%CONFIG>, 
 which holds all the default values for the C<new()> arguments.
@@ -216,386 +161,9 @@ sub config {
     return $CONFIG{ "df_$key" };
 }
 
-1;
-
-=back
-
-=head1 Test::Smoke::Mailer::Sendmail
-
-This handles sending the message by piping it to the B<sendmail> program.
-
-=over 4
-
-=cut
-
-package Test::Smoke::Mailer::Sendmail;
-
-@Test::Smoke::Mailer::Sendmail::ISA = qw( Test::Smoke::Mailer );
-
-=item Test::Smoke::Mailer::Sendmail->new( %args )
-
-Keys for C<%args>:
-
-  * ddir
-  * sendmailbin
-  * to
-  * from
-  * cc
-  * v
-
-=cut
-
-sub new {
-    my $proto = shift;
-    my $class = ref $proto || $proto;
-
-    return bless { @_ }, $class;
-}
-
-=item $mailer->mail( )
-
-C<mail()> sets up a header and body and pipes them to the B<sendmail>
-program.
-
-=cut
-
-sub mail {
-    my $self = shift;
-
-    my $subject   = $self->fetch_report();
-    my $cc = $self->_get_cc( $subject );
-    my $header = "To: $self->{to}\n";
-    $header   .= "From: $self->{from}\n" 
-        if exists $self->{from} && $self->{from};
-    $header   .= "Cc: $cc\n" if $cc;
-    $header   .= "Bcc: $self->{bcc}\n" if $self->{bcc};
-    $header   .= "Subject: $subject\n\n";
-
-    $self->{v} > 1 and print "[$self->{sendmailbin} -i -t]\n";
-    $self->{v} and print "Sending report to $self->{to} ";
-    local *MAILER;
-    if ( open MAILER, "| $self->{sendmailbin} -i -t " ) {
-        print MAILER $header, $self->{body};
-        close MAILER or
-            $self->{error} = "Error in pipe to sendmail: $! (" . $?>>8 . ")";
-    } else {
-        $self->{error} = "Cannot fork ($self->{sendmailbin}): $!";
-    }
-    $self->{v} and print $self->{error} ? "not OK\n" : "OK\n";
-
-    return ! $self->{error};
-}
-
-=back
-
-=head1 Test::Smoke::Mailer::Mail_X
-
-This handles sending the message with either the B<mail> or B<mailx> program.
-
-=over 4
-
-=cut
-
-package Test::Smoke::Mailer::Mail_X;
-
-@Test::Smoke::Mailer::Mail_X::ISA = qw( Test::Smoke::Mailer );
-
-=item Test::Smoke::Mailer::Mail_X->new( %args )
-
-Keys for C<%args>:
-
-  * ddir
-  * mailbin/mailxbin
-  * to
-  * cc
-  * v
-
-=cut
-
-sub new {
-    my $proto = shift;
-    my $class = ref $proto || $proto;
-
-    return bless { @_ }, $class;
-}
-
-=item $mailer->mail( )
-
-C<mail()> sets up the commandline and body and pipes it to either the 
-B<mail> or the B<mailx> program.
-
-=cut
-
-sub mail {
-    my $self = shift;
-
-    my $mailer = $self->{mailbin} || $self->{mailxbin};
-
-    my $subject = $self->fetch_report();
-    my $cc = $self->_get_cc( $subject );
-
-    my $cmdline = qq|$mailer -s '$subject'|;
-    $self->{swcc}  ||= '-c', $cmdline   .= qq| $self->{swcc} '$cc'| if $cc;
-    $self->{swbcc} ||= '-b', $cmdline   .= qq| $self->{swbcc} '$self->{bcc}'|
-        if $self->{bcc};
-    $cmdline   .= qq| $self->{to}|;
-
-    $self->{v} > 1 and print "[$cmdline]\n";
-    $self->{v} and print "Sending report to $self->{to} ";
-    local *MAILER;
-    if ( open MAILER, "| $cmdline " ) {
-        print MAILER $self->{body};
-        close MAILER or 
-            $self->{error} = "Error in pipe to '$mailer': $! (" . $?>>8 . ")";
-    } else {
-	$self->{error} = "Cannot fork '$mailer': $!";
-    }
-    $self->{v} and print $self->{error} ? "not OK\n" : "OK\n";
-
-    return ! $self->{error};
-}
-
-=back
-
-=head1 Test::Smoke::Mailer::SendEmail
-
-This handles sending the message with the B<sendEmail> program.
-
-=over 4
-
-=cut
-
-package Test::Smoke::Mailer::SendEmail;
-
-@Test::Smoke::Mailer::SendEmail::ISA = qw( Test::Smoke::Mailer );
-
-=item Test::Smoke::Mailer::SendEmail->new( %args )
-
-Keys for C<%args>:
-
-  * ddir
-  * mserver
-  * msuser
-  * mspass
-  * sendemailbin
-  * to
-  * from
-  * cc
-  * v
-
-=cut
-
-sub new {
-    my $proto = shift;
-    my $class = ref $proto || $proto;
-
-    return bless { @_ }, $class;
-}
-
-=item $mailer->mail( )
-
-C<mail()> sets up the commandline and body and passes it to the 
-B<sendemail> program.
-
-=cut
-
-sub mail {
-    my $self = shift;
-
-    my $mailer = $self->{sendemailbin};
-
-    my $subject = $self->fetch_report();
-    my $cc = $self->_get_cc( $subject );
-
-    my $cmdline = qq|$mailer -u "$subject"|;
-    $self->{swcc}  ||= '-cc',  $cmdline   .= qq| $self->{swcc} "$cc"| if $cc;
-    $self->{swbcc} ||= '-bcc', $cmdline   .= qq| $self->{swbcc} "$self->{bcc}"|
-        if $self->{bcc};
-    $cmdline   .= qq| -t "$self->{to}"|;
-    $cmdline   .= qq| -f "$self->{from}"| if $self->{from};
-    $cmdline   .= qq| -s "$self->{mserver}"| if $self->{mserver};
-    $cmdline   .= qq| -xu "$self->{msuser}"| if $self->{msuser};
-    $cmdline   .= qq| -xp "$self->{mspass}"| if defined $self->{mspass};
-    $cmdline   .= qq| -o message-file="$self->{file}"|;
-
-    $self->{v} > 1 and print "[$cmdline]\n";
-    $self->{v} and print "Sending report to $self->{to}\n";
-    system $cmdline;
-    if ($?) {
-        $self->{error} = "Error executing '$mailer': " . $?>>8;
-    }
-    $self->{v} and print $self->{error} ? "not OK\n" : "OK\n";
-
-    return ! $self->{error};
-}
-
-=back
-
-=head1 Test::Smoke::Mailer::Mail_Sendmail
-
-This handles sending the message using the B<Mail::Sendmail> module.
-
-=over 4
-
-=cut
-
-package Test::Smoke::Mailer::Mail_Sendmail;
-
-@Test::Smoke::Mailer::Mail_Sendmail::ISA =  qw( Test::Smoke::Mailer );
-
-=item Test::Smoke::Mailer::Mail_Sendmail->new( %args )
-
-Keys for C<%args>:
-
-  * ddir
-  * mserver
-  * to
-  * from
-  * cc
-  * v
-
-=cut
-
-sub new {
-    my $proto = shift;
-    my $class = ref $proto || $proto;
-
-    bless { @_ }, $class;
-}
-
-=item $mailer->mail( )
-
-C<mail()> sets up the message to be send by B<Mail::Sendmail>.
-
-=cut
-
-sub mail {
-    my $self = shift;
-
-    eval { require Mail::Sendmail; };
-
-    $self->{error} = $@ and return undef;
-
-    my $subject = $self->fetch_report();
-    my $cc = $self->_get_cc( $subject );
-
-    my %message = (
-        To      => $self->{to},
-        Subject => $subject,
-        Body    => $self->{body},
-    );
-    $message{cc}   = $cc if $cc;
-    $message{bcc}   = $self->{bcc} if $self->{bcc};
-    $message{from} = $self->{from} if $self->{from};
-    $message{smtp} = $self->{mserver} if $self->{mserver};
-
-    $message{ 'Content-type' } = qq!text/plain; charset="UTF8"!
-        if exists $ENV{LANG} && $ENV{LANG} =~ /utf-?8$/i;
-
-    $self->{v} > 1 and print "[Mail::Sendmail]\n";
-    $self->{v} and print "Sending report to $self->{to} ";
-
-    Mail::Sendmail::sendmail( %message ) or
-        $self->{error} = $Mail::Sendmail::error;
-
-    $self->{v} and print $self->{error} ? "not OK\n" : "OK\n";
-
-    return ! $self->{error};
-}
-
-=back
-
-=head1 Test::Smoke::Mailer::MIME_Lite
-
-This handles sending the message using the B<MIME::Lite> module.
-
-=over 4
-
-=cut
-
-package Test::Smoke::Mailer::MIME_Lite;
-
-@Test::Smoke::Mailer::MIME_Lite::ISA =  qw( Test::Smoke::Mailer );
-
-=item Test::Smoke::Mailer::MIME_Lite->new( %args )
-
-Keys for C<%args>:
-
-  * ddir
-  * mserver
-  * msuser
-  * mspass
-  * to
-  * from
-  * cc
-  * v
-
-=cut
-
-sub new {
-    my $proto = shift;
-    my $class = ref $proto || $proto;
-
-    bless { @_ }, $class;
-}
-
-=item $mailer->mail( )
-
-C<mail()> sets up the message to be send by B<MIME::Lite>.
-
-=cut
-
-sub mail {
-    my $self = shift;
-
-    eval { require MIME::Lite; };
-
-    $self->{error} = $@ and return undef;
-
-    my $subject = $self->fetch_report();
-    my $cc = $self->_get_cc( $subject );
-
-    my %message = (
-        To      => $self->{to},
-        Subject => $subject,
-        Type    => "TEXT",
-        Data    => $self->{body},
-    );
-    $message{Cc}   = $cc  if $cc;
-    $message{Bcc}   = $self->{bcc} if $self->{bcc};
-    $message{From} = $self->{from} if $self->{from};
-
-    if ($self->{mserver}) {
-        my %authinfo = ();
-        $authinfo{AuthUser} = $self->{msuser} if $self->{msuser};
-        $authinfo{AuthPass} = $self->{mspass} if defined $self->{mspass};
-        MIME::Lite->send(
-            smtp       => $self->{mserver},
-            FromSender => $self->{from},
-            Debug      => ($self->{v} > 1),
-            %authinfo,
-        );
-    }
-
-    my $ml_msg = MIME::Lite->new( %message );
-    $ml_msg->attr( 'content-type.charset' => 'UTF8' )
-        if exists $ENV{LANG} && $ENV{LANG} =~ /utf-?8$/i;
-
-    $self->{v} > 1 and print "[MIME::Lite]\n";
-    $self->{v} and print "Sending report to $self->{to} ";
-
-    $ml_msg->send or $self->{error} = "Problem sending mail";
-
-    $self->{v} and print $self->{error} ? "not OK\n" : "OK\n";
-
-    return ! $self->{error};
-}
-
-=back
-
 =head1 COPYRIGHT
 
-(c) 2002-2003, All rights reserved.
+(c) 2002-2013, All rights reserved.
 
   * Abe Timmerman <abeltje@cpan.org>
 

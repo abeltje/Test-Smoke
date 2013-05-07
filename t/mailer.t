@@ -38,7 +38,7 @@ SKIP: {
         cc   => 'abeltje@test-smoke.org',
     } );
 
-    isa_ok( $mailer, 'Test::Smoke::Mailer' );
+    isa_ok( $mailer, 'Test::Smoke::Mailer::Base' );
     isa_ok( $mailer, 'Test::Smoke::Mailer::Mail_Sendmail' );
 
     my $report = create_report( $eg_config );
@@ -80,7 +80,7 @@ SKIP: {
         cc   => 'abeltje@test-smoke.org',
     } );
 
-    isa_ok( $mailer, 'Test::Smoke::Mailer' );
+    isa_ok( $mailer, 'Test::Smoke::Mailer::Base' );
     isa_ok( $mailer, 'Test::Smoke::Mailer::Mail_Sendmail' );
 
     my $report = create_report( $fail_cfg );
@@ -123,7 +123,7 @@ SKIP: {
         mailbin => $bin,
     } );
 
-    isa_ok( $mailer, 'Test::Smoke::Mailer' );
+    isa_ok( $mailer, 'Test::Smoke::Mailer::Base' );
     isa_ok( $mailer, 'Test::Smoke::Mailer::Mail_X' );
 
     my $report = create_report( $eg_config );
@@ -150,7 +150,7 @@ SKIP: {
         mailbin => $bin,
     } );
 
-    isa_ok( $mailer, 'Test::Smoke::Mailer' );
+    isa_ok( $mailer, 'Test::Smoke::Mailer::Base' );
     isa_ok( $mailer, 'Test::Smoke::Mailer::Mail_X' );
 
     my $report = create_report( $eg_config );
@@ -179,7 +179,7 @@ SKIP: {
         mailbin => $bin,
     } );
 
-    isa_ok( $mailer, 'Test::Smoke::Mailer' );
+    isa_ok( $mailer, 'Test::Smoke::Mailer::Base' );
     isa_ok( $mailer, 'Test::Smoke::Mailer::Sendmail' );
 
     my $report = create_report( $eg_config );
