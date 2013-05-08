@@ -69,12 +69,15 @@ require_ok( 'Test::Smoke::SourceTree' );
 
 chdir 't';
 SKIP: {
-    my $syncer = Test::Smoke::Syncer->new( copy => { v => $ENV{SMOKE_VERBOSE},
-        ddir => $ddir,
-        cdir => $cdir, 
-    } );
+    my $syncer = Test::Smoke::Syncer->new(
+        copy => {
+            v    => $ENV{SMOKE_VERBOSE},
+            ddir => $ddir,
+            cdir => $cdir,
+        }
+    );
 
-    isa_ok( $syncer, 'Test::Smoke::Syncer' );
+    isa_ok( $syncer, 'Test::Smoke::Syncer::Base' );
     isa_ok( $syncer, 'Test::Smoke::Syncer::Copy' );
     $ENV{SMOKE_DEBUG} and diag Dumper $syncer;
 

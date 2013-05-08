@@ -157,7 +157,7 @@ require_ok 'Test::Smoke::SourceTree';
     } );
 
     isa_ok $sync, 'Test::Smoke::Syncer::FTP';
-    isa_ok $sync, 'Test::Smoke::Syncer';
+    isa_ok $sync, 'Test::Smoke::Syncer::Base';
 
     my $plevel = $sync->sync;
 

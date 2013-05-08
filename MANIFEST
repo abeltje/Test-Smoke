@@ -25,6 +25,14 @@ lib/Test/Smoke/smoke58x_dfconfig
 lib/Test/Smoke/Smoker.pm
 lib/Test/Smoke/SourceTree.pm
 lib/Test/Smoke/Syncer.pm
+lib/Test/Smoke/Syncer/Base.pm
+lib/Test/Smoke/Syncer/Copy.pm
+lib/Test/Smoke/Syncer/Forest.pm
+lib/Test/Smoke/Syncer/FTP.pm
+lib/Test/Smoke/Syncer/Git.pm
+lib/Test/Smoke/Syncer/Hardlink.pm
+lib/Test/Smoke/Syncer/Rsync.pm
+lib/Test/Smoke/Syncer/Snapshot.pm
 lib/Test/Smoke/SysInfo.pm
 lib/Test/Smoke/Util.pm
 lib/Test/Smoke/Util/Execute.pm

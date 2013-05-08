@@ -25,7 +25,7 @@ my $verbose = $ENV{SMOKE_VERBOSE} ? $ENV{SMOKE_VERBOSE} : 0;
         hdir => File::Spec->catdir(qw( t perl )),
     } );
 
-    isa_ok( $syncer, 'Test::Smoke::Syncer' );
+    isa_ok( $syncer, 'Test::Smoke::Syncer::Base' );
     isa_ok( $syncer, 'Test::Smoke::Syncer::Hardlink' );
 }
 
@@ -36,7 +36,7 @@ my $verbose = $ENV{SMOKE_VERBOSE} ? $ENV{SMOKE_VERBOSE} : 0;
     } ) };
 
     ok( $@, "croak on omitted {hdir}" );
-    like( $@, "/No source-directory.*?at \Q$0\E line 100/", "It's a croak()" );
+    like( $@, "/option 'hdir' missing.*?at \Q$0\E line 100/", "It's a croak()" );
 }
 
 SKIP: {
