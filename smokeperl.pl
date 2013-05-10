@@ -39,6 +39,7 @@ my %options = (
     patch        => 1,
     mail         => undef,
     smokedb_url  => undef,
+    ua_timeout   => undef,
     send_out     => "never",
     send_log     => "on_fail",
     archive      => undef,
@@ -274,6 +275,11 @@ sub sendrpt {
         require LWP::UserAgent;
         my $ua = LWP::UserAgent->new(
             agent => "Test::Smoke/$Test::Smoke::VERSION",
+            (
+                defined $conf->{ua_timeout}
+                    ? (timeout => $conf->{ua_timeout})
+                    : ()
+            ),
         );
         $conf->{v} and print "Posting to SmokeDB ($conf->{smokedb_url})\n";
         my $response = $ua->post(

@@ -33,6 +33,7 @@ my %opt = (
     v            => undef,
 
     smokedb_url => undef,
+    ua_timeout  => undef,
 
     rptfile    => 'mktest.rpt',
     jsnfile    => 'mktest.jsn',
@@ -160,6 +161,11 @@ if ($json && $opt{smokedb_url}) {
     require LWP::UserAgent;
     my $ua = LWP::UserAgent->new(
         agent => "Test::Smoke/$Test::Smoke::VERSION",
+        (
+            defined $opt{ua_timeout}
+                ? (timeout => $opt{ua_timeout})
+                : ()
+        ),
     );
     $opt{v} and print "Posting to SmokeDB ($opt{smokedb_url})\n";
     my $response = $ua->post($opt{smokedb_url}, {json => $json});

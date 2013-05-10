@@ -639,6 +639,11 @@ EOT
         alt => [qw( always on_fail never )],
         dft => 'never',
     },
+    ua_timeout => {
+        msg => '',
+        alt => [ ],
+        dft => undef,
+    },
 
     # user_note
     user_note => {
@@ -1462,6 +1467,9 @@ SMOKEDB: {
 
     $arg = 'send_out';
     $config{ $arg } = prompt( $arg );
+
+    $arg = 'ua_timeout';
+    $config{$arg} = $opt{$arg}{dft};
 }
 
 =item mail
@@ -1977,7 +1985,7 @@ sub sort_configkeys {
             swcc cc swbcc bcc ),
 
         #SmokeDB
-        qw( smokedb_url send_log send_out ),
+        qw( smokedb_url send_log send_out ua_timeout ),
 
         # Archive reports and logfile
         qw( adir lfile ),
