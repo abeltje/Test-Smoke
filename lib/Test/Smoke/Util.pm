@@ -836,7 +836,7 @@ sub get_ncpu {
             my @output = grep /^processor/ => `ioscan -fnkC processor`;
             $cpus = scalar @output;
             last OS_CHECK;
-	};
+        };
 
         /irix/i && do {
             my @output = grep /\s+processors?$/i => `hinv -c processor`;
@@ -852,7 +852,7 @@ sub get_ncpu {
             }
             $cpus = @output ? scalar @output : '';
             last OS_CHECK;
-	};
+        };
 
         /solaris|sunos|osf/i && do {
             my @output = grep /on-line/ => `psrinfo`;
@@ -870,6 +870,15 @@ sub get_ncpu {
             my @output = grep /CPU \d+ is in RUN state/ => `show cpu/active`;
             $cpus = @output ? scalar @output : '';
             last OS_CHECK;
+        };
+
+        /haiku/i && do {
+            eval { require Haiku::SysInfo };
+            if (!$@) {
+                my $hsi = Haiku::SysInfo->new();
+                $cpus = $hsi->cpu_count();
+                last OS_CHECK;
+            }
         };
 
         $cpus = "";

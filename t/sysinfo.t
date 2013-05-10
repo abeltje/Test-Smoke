@@ -1,9 +1,9 @@
 #! /usr/bin/perl -w
 use strict;
+$|++;
 
-# $Id$
-
-use Test::More tests => 55;
+use Test::More tests => 56;
+use Test::NoWarnings;
 my $verbose = 0;
 
 my $findbin;
@@ -21,7 +21,7 @@ ok defined &tsuname, "tsuname() imported";
     local $^O = 'Generic';
     my $si = Test::Smoke::SysInfo->new;
 
-    isa_ok $si => 'Test::Smoke::SysInfo';
+    isa_ok $si => 'Test::Smoke::SysInfo::Base';
     ok $si->cpu_type, $si->cpu_type;
     ok $si->cpu, $si->cpu;
     is $si->ncpu, '', "no ncpu";
@@ -32,7 +32,7 @@ ok defined &tsuname, "tsuname() imported";
 {
     my $si = Test::Smoke::SysInfo->new;
 
-    isa_ok $si => 'Test::Smoke::SysInfo';
+    isa_ok $si, 'Test::Smoke::SysInfo::Base';
     ok $si->cpu_type, "cpu_type: " . $si->cpu_type;
     ok $si->cpu,      "cpu: " . $si->cpu;
     SKIP: {
@@ -49,9 +49,9 @@ ok defined &tsuname, "tsuname() imported";
 
 {
     my $si = Test::Smoke::SysInfo->new;
-    isa_ok $si, 'Test::Smoke::SysInfo';
+    isa_ok $si, 'Test::Smoke::SysInfo::Base';
 
-    my $tsuname = join " ", map $si->{ "_$_" } => qw(
+    my $tsuname = join " ", map $si->$_ => qw(
         host os cpu ncpu cpu_type
     );
     is $si->tsuname(), $tsuname,       "tsuname()";

@@ -1,7 +1,6 @@
 #! perl -w
 use strict;
 
-# $Id$
 use Test::More;
 
 # 5.005xx doesn't support three argumented open()
@@ -37,14 +36,17 @@ BEGIN {
     };
 }
 
-use_ok 'Test::Smoke::SysInfo';
-my $this_system = Test::Smoke::SysInfo::Generic();
+use Test::Smoke::SysInfo::Linux;
+use Test::Smoke::SysInfo::Generic;
+my $this_system = Test::Smoke::SysInfo::Generic->new();
 
 {
+    our $CPU_TYPE = 'Generic';
     # redefine the CORE functions only locally
     local $^W; # no warnings 'redefine';
     local *CORE::GLOBAL::open = sub (*;$@) {
         local $^W = 1;
+
         my( $handle, $second, @args ) = @_;
         if ( defined $handle && ! ref $handle ) {
             my( $pkg ) = caller;
@@ -53,7 +55,7 @@ my $this_system = Test::Smoke::SysInfo::Generic();
         }
 
         if ( $second eq '< /proc/cpuinfo' ) {
-            my $fn = Test::Smoke::SysInfo::__get_cpu_type();
+            my $fn = $::CPU_TYPE;
 
             # we can do this fully qualified filehandle as we only use GLOBs
             # to keep up with 5.005xx
@@ -68,27 +70,30 @@ my $this_system = Test::Smoke::SysInfo::Generic();
         no strict 'refs';
         untie *{ "$pkg\:\:$_[0]" } if tied $_[0];
     };
-    *Test::Smoke::SysInfo::__get_cpu_type = sub { 'i386' };
+
+    *Test::Smoke::SysInfo::Base::get_cpu_type = sub {
+        my $self = shift;
+        return $self->{__cpu_type} = $::CPU_TYPE;
+    };
     $^W = 1;
 
-    my $i386 = Test::Smoke::SysInfo::Linux();
+    $CPU_TYPE = 'i386';
+    my $i386 = Test::Smoke::SysInfo::Linux->new();
 
-    is_deeply $i386, {
-        _host     => $this_system->{_host},
-        _os       => $this_system->{_os},
-        _cpu_type => 'i386',
+    is_deeply $i386->old_dump, {
+        _host     => $this_system->host,
+        _os       => $this_system->os,
+        _cpu_type => $CPU_TYPE,
         _cpu      => 'AMD Athlon(tm) 64 Processor 3200+ (AuthenticAMD 1000MHz)',
         _ncpu     => 1,
     }, "Read /proc/cpuinfo for i386";
 
 
-    $^W = 0;
-    *Test::Smoke::SysInfo::__get_cpu_type = sub { 'ppc' };
-    $^W = 1;
+    $CPU_TYPE = 'ppc';
 
-    my $ppc = Test::Smoke::SysInfo::Linux();
+    my $ppc = Test::Smoke::SysInfo::Linux->new();
 
-    is_deeply $ppc, {
+    is_deeply $ppc->old_dump, {
         _host     => $this_system->{_host},
         _os       => $this_system->{_os},
         _cpu_type => 'ppc',
@@ -96,27 +101,23 @@ my $this_system = Test::Smoke::SysInfo::Generic();
         _ncpu     => 1,
     }, "Read /proc/cpuinfo for ppc";
 
-    $^W = 0;
-    *Test::Smoke::SysInfo::__get_cpu_type = sub { 'i386_2' };
-    $^W = 1;
+    $CPU_TYPE = 'i386_2';
 
-    my $i386_2 = Test::Smoke::SysInfo::Linux();
+    my $i386_2 = Test::Smoke::SysInfo::Linux->new();
 
-    is_deeply $i386_2, {
+    is_deeply $i386_2->old_dump, {
         _host     => $this_system->{_host},
         _os       => $this_system->{_os},
         _cpu_type => 'i386_2',
         _cpu      => 'Intel(R) Core(TM)2 CPU T5600 @ 1.83GHz (GenuineIntel 1000MHz)',
-        _ncpu     => 2,
+        _ncpu     => "2 [4 cores]",
     }, "Read /proc/cpuinfo for duo i386";
 
-    $^W = 0;
-    *Test::Smoke::SysInfo::__get_cpu_type = sub { 'arm_v6' };
-    $^W = 1;
+    $CPU_TYPE = 'arm_v6';
 
-    my $arm_v6 = Test::Smoke::SysInfo::Linux();
+    my $arm_v6 = Test::Smoke::SysInfo::Linux->new();
 
-    is_deeply $arm_v6, {
+    is_deeply $arm_v6->old_dump, {
         _host     => $this_system->{_host},
         _os       => $this_system->{_os},
         _cpu_type => 'arm_v6',
@@ -124,19 +125,29 @@ my $this_system = Test::Smoke::SysInfo::Generic();
         _ncpu     => 1,
     }, "Read /proc/cpuinfo for ARM v6";
 
-    $^W = 0;
-    *Test::Smoke::SysInfo::__get_cpu_type = sub { 'arm_v7' };
-    $^W = 1;
+    $CPU_TYPE = 'arm_v7';
 
-    my $arm_v7 = Test::Smoke::SysInfo::Linux();
+    my $arm_v7 = Test::Smoke::SysInfo::Linux->new();
 
-    is_deeply $arm_v7, {
+    is_deeply $arm_v7->old_dump, {
         _host     => $this_system->{_host},
         _os       => $this_system->{_os},
         _cpu_type => 'arm_v7',
         _cpu      => 'ARMv7 Processor rev 2 (v7l) (300 MHz)',
         _ncpu     => 1,
     }, "Read /proc/cpuinfo for ARM v6";
+
+    $CPU_TYPE = 'i386_16';
+    my $i386_16 = Test::Smoke::SysInfo::Linux->new();
+
+    is_deeply $i386_16->old_dump, {
+        _host     => $this_system->host,
+        _os       => $this_system->os,
+        _cpu_type => $CPU_TYPE,
+        _cpu      => 'Intel(R) Xeon(R) CPU L5520 @ 2.27GHz (GenuineIntel 2268MHz)',
+        _ncpu     => "16 [64 cores]",
+    }, "Read /proc/cpuinfo for i386/16";
+
 }
 
 # Assign file contents
@@ -255,6 +266,424 @@ OMAP revision  : ES1.2
 Revision       : 0000
 Serial         : 0000000000000000
 Boot           : 4.04.000000
+__EOINFO__
+    $files{'i386_16'} = <<'__EOINFO__';
+processor	: 0
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 26
+model name	: Intel(R) Xeon(R) CPU           L5520  @ 2.27GHz
+stepping	: 5
+microcode	: 0x11
+cpu MHz		: 2268.000
+cache size	: 8192 KB
+physical id	: 0
+siblings	: 8
+core id		: 0
+cpu cores	: 4
+apicid		: 0
+initial apicid	: 0
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 11
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf pni dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm dca sse4_1 sse4_2 popcnt lahf_lm ida dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 4533.48
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 40 bits physical, 48 bits virtual
+power management:
+
+processor	: 1
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 26
+model name	: Intel(R) Xeon(R) CPU           L5520  @ 2.27GHz
+stepping	: 5
+microcode	: 0x11
+cpu MHz		: 2268.000
+cache size	: 8192 KB
+physical id	: 0
+siblings	: 8
+core id		: 1
+cpu cores	: 4
+apicid		: 2
+initial apicid	: 2
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 11
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf pni dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm dca sse4_1 sse4_2 popcnt lahf_lm ida dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 4533.48
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 40 bits physical, 48 bits virtual
+power management:
+
+processor	: 2
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 26
+model name	: Intel(R) Xeon(R) CPU           L5520  @ 2.27GHz
+stepping	: 5
+microcode	: 0x11
+cpu MHz		: 2268.000
+cache size	: 8192 KB
+physical id	: 0
+siblings	: 8
+core id		: 2
+cpu cores	: 4
+apicid		: 4
+initial apicid	: 4
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 11
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf pni dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm dca sse4_1 sse4_2 popcnt lahf_lm ida dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 4533.48
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 40 bits physical, 48 bits virtual
+power management:
+
+processor	: 3
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 26
+model name	: Intel(R) Xeon(R) CPU           L5520  @ 2.27GHz
+stepping	: 5
+microcode	: 0x11
+cpu MHz		: 2268.000
+cache size	: 8192 KB
+physical id	: 0
+siblings	: 8
+core id		: 3
+cpu cores	: 4
+apicid		: 6
+initial apicid	: 6
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 11
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf pni dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm dca sse4_1 sse4_2 popcnt lahf_lm ida dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 4533.48
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 40 bits physical, 48 bits virtual
+power management:
+
+processor	: 4
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 26
+model name	: Intel(R) Xeon(R) CPU           L5520  @ 2.27GHz
+stepping	: 5
+microcode	: 0x11
+cpu MHz		: 2268.000
+cache size	: 8192 KB
+physical id	: 1
+siblings	: 8
+core id		: 0
+cpu cores	: 4
+apicid		: 16
+initial apicid	: 16
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 11
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf pni dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm dca sse4_1 sse4_2 popcnt lahf_lm ida dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 4533.35
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 40 bits physical, 48 bits virtual
+power management:
+
+processor	: 5
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 26
+model name	: Intel(R) Xeon(R) CPU           L5520  @ 2.27GHz
+stepping	: 5
+microcode	: 0x11
+cpu MHz		: 2268.000
+cache size	: 8192 KB
+physical id	: 1
+siblings	: 8
+core id		: 1
+cpu cores	: 4
+apicid		: 18
+initial apicid	: 18
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 11
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf pni dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm dca sse4_1 sse4_2 popcnt lahf_lm ida dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 4533.35
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 40 bits physical, 48 bits virtual
+power management:
+
+processor	: 6
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 26
+model name	: Intel(R) Xeon(R) CPU           L5520  @ 2.27GHz
+stepping	: 5
+microcode	: 0x11
+cpu MHz		: 2268.000
+cache size	: 8192 KB
+physical id	: 1
+siblings	: 8
+core id		: 2
+cpu cores	: 4
+apicid		: 20
+initial apicid	: 20
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 11
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf pni dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm dca sse4_1 sse4_2 popcnt lahf_lm ida dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 4533.35
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 40 bits physical, 48 bits virtual
+power management:
+
+processor	: 7
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 26
+model name	: Intel(R) Xeon(R) CPU           L5520  @ 2.27GHz
+stepping	: 5
+microcode	: 0x11
+cpu MHz		: 2268.000
+cache size	: 8192 KB
+physical id	: 1
+siblings	: 8
+core id		: 3
+cpu cores	: 4
+apicid		: 22
+initial apicid	: 22
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 11
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf pni dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm dca sse4_1 sse4_2 popcnt lahf_lm ida dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 4533.35
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 40 bits physical, 48 bits virtual
+power management:
+
+processor	: 8
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 26
+model name	: Intel(R) Xeon(R) CPU           L5520  @ 2.27GHz
+stepping	: 5
+microcode	: 0x11
+cpu MHz		: 2268.000
+cache size	: 8192 KB
+physical id	: 0
+siblings	: 8
+core id		: 0
+cpu cores	: 4
+apicid		: 1
+initial apicid	: 1
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 11
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf pni dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm dca sse4_1 sse4_2 popcnt lahf_lm ida dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 4533.48
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 40 bits physical, 48 bits virtual
+power management:
+
+processor	: 9
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 26
+model name	: Intel(R) Xeon(R) CPU           L5520  @ 2.27GHz
+stepping	: 5
+microcode	: 0x11
+cpu MHz		: 2268.000
+cache size	: 8192 KB
+physical id	: 0
+siblings	: 8
+core id		: 1
+cpu cores	: 4
+apicid		: 3
+initial apicid	: 3
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 11
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf pni dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm dca sse4_1 sse4_2 popcnt lahf_lm ida dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 4533.48
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 40 bits physical, 48 bits virtual
+power management:
+
+processor	: 10
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 26
+model name	: Intel(R) Xeon(R) CPU           L5520  @ 2.27GHz
+stepping	: 5
+microcode	: 0x11
+cpu MHz		: 2268.000
+cache size	: 8192 KB
+physical id	: 0
+siblings	: 8
+core id		: 2
+cpu cores	: 4
+apicid		: 5
+initial apicid	: 5
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 11
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf pni dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm dca sse4_1 sse4_2 popcnt lahf_lm ida dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 4533.48
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 40 bits physical, 48 bits virtual
+power management:
+
+processor	: 11
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 26
+model name	: Intel(R) Xeon(R) CPU           L5520  @ 2.27GHz
+stepping	: 5
+microcode	: 0x11
+cpu MHz		: 2268.000
+cache size	: 8192 KB
+physical id	: 0
+siblings	: 8
+core id		: 3
+cpu cores	: 4
+apicid		: 7
+initial apicid	: 7
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 11
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf pni dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm dca sse4_1 sse4_2 popcnt lahf_lm ida dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 4533.48
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 40 bits physical, 48 bits virtual
+power management:
+
+processor	: 12
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 26
+model name	: Intel(R) Xeon(R) CPU           L5520  @ 2.27GHz
+stepping	: 5
+microcode	: 0x11
+cpu MHz		: 2268.000
+cache size	: 8192 KB
+physical id	: 1
+siblings	: 8
+core id		: 0
+cpu cores	: 4
+apicid		: 17
+initial apicid	: 17
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 11
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf pni dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm dca sse4_1 sse4_2 popcnt lahf_lm ida dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 4533.35
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 40 bits physical, 48 bits virtual
+power management:
+
+processor	: 13
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 26
+model name	: Intel(R) Xeon(R) CPU           L5520  @ 2.27GHz
+stepping	: 5
+microcode	: 0x11
+cpu MHz		: 2268.000
+cache size	: 8192 KB
+physical id	: 1
+siblings	: 8
+core id		: 1
+cpu cores	: 4
+apicid		: 19
+initial apicid	: 19
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 11
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf pni dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm dca sse4_1 sse4_2 popcnt lahf_lm ida dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 4533.35
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 40 bits physical, 48 bits virtual
+power management:
+
+processor	: 14
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 26
+model name	: Intel(R) Xeon(R) CPU           L5520  @ 2.27GHz
+stepping	: 5
+microcode	: 0x11
+cpu MHz		: 2268.000
+cache size	: 8192 KB
+physical id	: 1
+siblings	: 8
+core id		: 2
+cpu cores	: 4
+apicid		: 21
+initial apicid	: 21
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 11
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf pni dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm dca sse4_1 sse4_2 popcnt lahf_lm ida dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 4533.35
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 40 bits physical, 48 bits virtual
+power management:
+
+processor	: 15
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 26
+model name	: Intel(R) Xeon(R) CPU           L5520  @ 2.27GHz
+stepping	: 5
+microcode	: 0x11
+cpu MHz		: 2268.000
+cache size	: 8192 KB
+physical id	: 1
+siblings	: 8
+core id		: 3
+cpu cores	: 4
+apicid		: 23
+initial apicid	: 23
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 11
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf pni dtes64 monitor ds_cpl vmx est tm2 ssse3 cx16 xtpr pdcm dca sse4_1 sse4_2 popcnt lahf_lm ida dtherm tpr_shadow vnmi flexpriority ept vpid
+bogomips	: 4533.35
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 40 bits physical, 48 bits virtual
+power management:
+
 __EOINFO__
 }
 

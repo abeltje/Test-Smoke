@@ -12,7 +12,7 @@ use Test::More $not595
 use Carp qw/ cluck /;
 our $DEBUG = 0;
 
-require Test::Smoke::SysInfo;
+require Test::Smoke::SysInfo::Darwin;
 
 my %output = (
     mini_intel => {
@@ -51,6 +51,27 @@ Hardware:
       Boot ROM Version: 4.8.5f0
 __EOOUT__
 
+    macbook_pro => {
+        uname => 'MacBook Pro (2.4 GHz) 1 [2 cores] Intel Core 2 Duo',
+        output => <<__EOOUT__},
+Hardware:
+
+    Hardware Overview:
+
+      Model Name: MacBook Pro
+      Model Identifier: MacBookPro7,1
+      Processor Name: Intel Core 2 Duo
+      Processor Speed: 2.4 GHz
+      Number Of Processors: 1
+      Total Number Of Cores: 2
+      L2 Cache: 3 MB
+      Memory: 8 GB
+      Bus Speed: 1.07 GHz
+      Boot ROM Version: MBP71.0039.B0B
+      SMC Version (system): 1.62f7
+      Sudden Motion Sensor:
+          State: Enabled
+__EOOUT__
 );
 
 our $OUTPUT;
@@ -70,7 +91,7 @@ for my $model ( keys %output ) {
     $OUTPUT = $output{ $model }{output};
 
     local $^O = 'Darwin';
-    my $info = Test::Smoke::SysInfo->new;
+    my $info = Test::Smoke::SysInfo::Darwin->new;
     is(
         $info->tsuname( 'm c p' ),
         $output{ $model }{uname},
