@@ -14,15 +14,19 @@ use File::Path;
 # Some strange stuff happens when WriteMakefile() is called
 # on a non-clean distribution, cleanup before
 if (-f 'Makefile') {
-local *SAVEERR; open SAVEERR, ">&STDERR";
-local *SAVEOUT; open SAVEOUT, ">&STDOUT";
-close STDERR; close STDOUT;
+    local *SAVEERR; open SAVEERR, ">&STDERR";
+    local *SAVEOUT; open SAVEOUT, ">&STDOUT";
+    close STDERR; close STDOUT;
 
-my $opt = $^O eq 'VMS' ? '/IGNORE' : ' -i';
-system "$Config{make}$opt distclean";
+    my $opt = $^O eq 'VMS'
+        ? '/IGNORE'
+        : $^O eq 'haiku'
+            ? ''
+            : ' -i';
+    system "$Config{make}$opt distclean";
 
-open STDOUT, ">&SAVEOUT"; close SAVEOUT;
-open STDERR, ">&SAVEERR"; close SAVEERR;
+    open STDOUT, ">&SAVEOUT"; close SAVEOUT;
+    open STDERR, ">&SAVEERR"; close SAVEERR;
 }
 
 my $mmver = ExtUtils::MakeMaker->VERSION;
@@ -69,7 +73,7 @@ for ($^O) {
     };
     /haiku/ && do {
         %extra_deps = (
-            'Haiki::SysInfo' => 0,
+            'Haiku::SysInfo' => 0,
         );
         last;
     };
