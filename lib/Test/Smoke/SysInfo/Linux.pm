@@ -4,6 +4,18 @@ use strict;
 
 use base 'Test::Smoke::SysInfo::Base';
 
+=head1 NAME
+
+Test::Smoke::SysInfo::Haiku - Object for specific Haiku info.
+
+=head1 DESCRIPTION
+
+=head2 $si->prepare_sysinof()
+
+Use os-specific tools to find out more about the system.
+
+=cut
+
 sub prepare_sysinfo {
     my $self = shift;
     $self->SUPER::prepare_sysinfo();
@@ -19,6 +31,12 @@ sub prepare_sysinfo {
     }
     return $self;
 }
+
+=head2 $si->prepare_os()
+
+Use os-specific tools to find out more about the operating system.
+
+=cut
 
 sub prepare_os {
     my $self = shift;
@@ -75,6 +93,26 @@ sub prepare_os {
     $self->{__os} = $os;
 }
 
+=head2 $si->linux_generic
+
+Check C</proc/cpuinfo> for these keys:
+
+=over
+
+=item 'processor'  (count occurrence for __cpu_count)
+
+=item 'model name' (part of __cpu)
+
+=item 'vendor_id'  (part of __cpu)
+
+=item 'cpu mhz'    (part of __cpu)
+
+=item 'cpu cores'  (add values to add to __cpu_count)
+
+=back
+
+=cut
+
 sub linux_generic {
     my $self = shift;
 
@@ -94,6 +132,22 @@ sub linux_generic {
 
 }
 
+=head2 $si->linux_arm
+
+Check C</proc/cpuinfo> for these keys:
+
+=over
+
+=item 'processor'  (count occurrence for __cpu_count)
+
+=item 'Processor' (part of __cpu)
+
+=item 'BogoMIPS'  (part of __cpu)
+
+=back
+
+=cut
+
 sub linux_arm {
     my $self = shift;
 
@@ -106,6 +160,26 @@ sub linux_arm {
     $cpu .= " ($mhz MHz)" if $mhz;
     $self->{__cpu} = $cpu;
 }
+
+=head2 $si->linux_ppc
+
+Check C</proc/cpuinfo> for these keys:
+
+=over
+
+=item 'processor'  (count occurrence for __cpu_count)
+
+=item 'cpu'     (part of __cpu)
+
+=item 'machine' (part of __cpu)
+
+=item 'clock'   (part of __cpu)
+
+=item 'detected' (alters machine if present)
+
+=back
+
+=cut
 
 sub linux_ppc {
     my $self = shift;
@@ -124,6 +198,22 @@ sub linux_ppc {
     $self->{__cpu} = sprintf "%s %s (%s)", map $info{ $_ } => @parts;
 }
 
+=head2 $si->linux_sparc
+
+Check C</proc/cpuinfo> for these keys:
+
+=over
+
+=item 'processor'  (count occurrence for __cpu_count)
+
+=item 'cpu'        (part of __cpu)
+
+=item 'Cpu0ClkTck' (part of __cpu)
+
+=back
+
+=cut
+
 sub linux_sparc {
     my $self = shift;
 
@@ -140,6 +230,12 @@ sub linux_sparc {
     $self->{__cpu} = $cpu;
 }
 
+=head2 $si->prepare_proc_cpuinfo
+
+Read the complete C<< /proc/cpuinfo >>.
+
+=cut
+
 sub prepare_proc_cpuinfo {
     my $self = shift;
 
@@ -151,12 +247,24 @@ sub prepare_proc_cpuinfo {
     }
 }
 
+=head2 $si->count_in_cpuinfo($regex)
+
+Returns the number of lines $regex matches for.
+
+=cut
+
 sub count_in_cpuinfo {
     my $self = shift;
     my ($regex) = @_;
 
     return scalar grep /$regex/, $self->_proc_cpuinfo();
 }
+
+=head2 $si->from_cpuinfo($key)
+
+Returns the first value of that key in C<< /proc/cpuinfo >>.
+
+=cut
 
 sub from_cpuinfo {
     my $self = shift;
@@ -171,3 +279,30 @@ sub from_cpuinfo {
 }
 
 1;
+
+=head1 COPYRIGHT
+
+(c) 2002-2013, Abe Timmerman <abeltje@cpan.org> All rights reserved.
+
+With contributions from Jarkko Hietaniemi, Merijn Brand, Campo
+Weijerman, Alan Burlison, Allen Smith, Alain Barbet, Dominic Dunlop,
+Rich Rauenzahn, David Cantrell.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+See:
+
+=over 4
+
+=item * L<http://www.perl.com/perl/misc/Artistic.html>
+
+=item * L<http://www.gnu.org/copyleft/gpl.html>
+
+=back
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=cut

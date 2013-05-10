@@ -43,6 +43,32 @@ sub new {
     return $self;
 }
 
+=head2 $si->prepare_sysinfo()
+
+This method should be overridden by platform specific subclasses.
+
+The generic information is taken from C<< POSIX::uname() >>.
+
+=over
+
+=item $self->_hostname  => (POSIX::uname)[1]
+
+=item $self->_os        => join(" - ", (POSIX::uname)[0,2]
+
+=item $self->_osname    => (POSIX::uname)[0]
+
+=item $self->_osvers    => (POSIX::uname)[2]
+
+=item $self->_cpu_type  => (POSIX::uname)[4]
+
+=item $self->_cpu       => (POSIX::uname)[4]
+
+=itum $self->_cpu_count => ''
+
+=back
+
+=cut
+
 sub prepare_sysinfo {
     my $self = shift;
     my @uname = POSIX::uname();
@@ -64,7 +90,7 @@ sub prepare_sysinfo {
 
 =head2 $si->get_os()
 
-Returns the joint value of C<< (POSIX::uname)[0,2] >>.
+Returns $self->_os
 
 =cut
 
@@ -75,7 +101,7 @@ sub get_os {
 
 =head2 $si->get_hostname()
 
-Returns the value of C<< (POSIX::uname)[1] >>.
+Returns $self->_hostname
 
 =cut
 
@@ -86,7 +112,7 @@ sub get_hostname {
 
 =head2 $si->get_cpu_type()
 
-Retuns the value of C<< (POSIX::uname)[4] >>.
+Returns $self->_cpu_type
 
 =cut
 
@@ -97,7 +123,7 @@ sub get_cpu_type {
 
 =head2 $si->get_cpu()
 
-Returns the value of C<< $selfs->get_cpu_type() >>.
+Returns $self->_cpu
 
 =cut
 
@@ -108,7 +134,7 @@ sub get_cpu {
 
 =head2 $si->get_cpu_count()
 
-Returns an empty string by default.
+Returns $self->_cpu_count
 
 =cut
 
@@ -176,3 +202,30 @@ sub AUTOLOAD {
 }
 
 1;
+
+=head1 COPYRIGHT
+
+(c) 2002-2013, Abe Timmerman <abeltje@cpan.org> All rights reserved.
+
+With contributions from Jarkko Hietaniemi, Merijn Brand, Campo
+Weijerman, Alan Burlison, Allen Smith, Alain Barbet, Dominic Dunlop,
+Rich Rauenzahn, David Cantrell.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+See:
+
+=over 4
+
+=item * L<http://www.perl.com/perl/misc/Artistic.html>
+
+=item * L<http://www.gnu.org/copyleft/gpl.html>
+
+=back
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=cut

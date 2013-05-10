@@ -4,6 +4,18 @@ use strict;
 
 use base 'Test::Smoke::SysInfo::Base';
 
+=head1 NAME
+
+Test::Smoke::SysInfo::HPUX - Object for specific HP-UX info.
+
+=head1 DESCRIPTION
+
+=head2 $si->prepare_sysinof()
+
+Use os-specific tools to find out more about the system.
+
+=cut
+
 sub prepare_sysinfo {
     my $self = shift;
     $self->SUPER::prepare_sysinfo;
@@ -15,11 +27,11 @@ sub prepare_sysinfo {
     # ioscan is always available
     $self->{__cpu_count} = grep /^processor/ => `/usr/sbin/ioscan -knfCprocessor`;
 
-    $self->prepare_cpu_type();
+    $self->_prepare_cpu_type();
     return $self;
 }
 
-sub prepare_cpu_type {
+sub _prepare_cpu_type {
     my $self = shift;
 
     my $parisc = 0;
@@ -99,3 +111,30 @@ sub prepare_cpu_type {
 }
 
 1;
+
+=head1 COPYRIGHT
+
+(c) 2002-2013, Abe Timmerman <abeltje@cpan.org> All rights reserved.
+
+With contributions from Jarkko Hietaniemi, Merijn Brand, Campo
+Weijerman, Alan Burlison, Allen Smith, Alain Barbet, Dominic Dunlop,
+Rich Rauenzahn, David Cantrell.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+See:
+
+=over 4
+
+=item * L<http://www.perl.com/perl/misc/Artistic.html>
+
+=item * L<http://www.gnu.org/copyleft/gpl.html>
+
+=back
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=cut

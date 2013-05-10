@@ -2,11 +2,10 @@ package Test::Smoke::SysInfo;
 use warnings;
 use strict;
 
-use vars qw( $VERSION @EXPORT_OK );
-$VERSION = '0.043';
+our $VERSION = '0.043';
 
 use base 'Exporter';
-@EXPORT_OK = qw( &sysinfo &tsuname );
+our @EXPORT_OK = qw( &sysinfo &tsuname );
 
 use Test::Smoke::SysInfo::AIX;
 use Test::Smoke::SysInfo::BSD;
@@ -54,7 +53,7 @@ smoking.
 
 =head2 Test::Smoke::SysInfo->new( )
 
-Dispatch to one of the OS-specific subs.
+Factory method, with fallback to the information in C<< POSIX::uname() >>.
 
 =cut
 
@@ -117,7 +116,7 @@ L<Test::Smoke::Smoker>, L<Test::Smoke::Reporter>
 
 =head1 COPYRIGHT
 
-(c) 2002-2006, Abe Timmerman <abeltje@cpan.org> All rights reserved.
+(c) 2002-2013, Abe Timmerman <abeltje@cpan.org> All rights reserved.
 
 With contributions from Jarkko Hietaniemi, Merijn Brand, Campo
 Weijerman, Alan Burlison, Allen Smith, Alain Barbet, Dominic Dunlop,
