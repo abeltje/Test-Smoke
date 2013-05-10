@@ -6,6 +6,7 @@ SKIPPRIVATE=0
 SKIPTESTS=0
 SKIPALLTESTS=0
 NOAUTOCOMMIT=0
+TESTMODEONLY=0
 
 for argv ; do
     case $argv in
@@ -22,6 +23,8 @@ for argv ; do
         -skiptests)     SKIPTESTS=1
             ;;
         -noautocommit)  NOAUTOCOMMIT=1
+            ;;
+        -test|-t)             TESTMODEONLY=1
             ;;
         *)              echo "Warning: unknown option: '$argv'";
             ;;
@@ -84,6 +87,11 @@ if [ "$SKIPALLTESTS" != "1" ] ; then
     fi
 else
     echo "Skipped all tests"
+fi
+
+if [ "$TESTMODEONLY" == "1" ] ; then
+    echo "Running in test-mode, exiting"
+    exit 0
 fi
 
 # Update the version in lib/Test/Smoke.pm
