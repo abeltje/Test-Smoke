@@ -19,6 +19,7 @@ Use os-specific tools to find out more about the system.
 sub prepare_sysinfo {
     my $self = shift;
     $self->SUPER::prepare_sysinfo();
+    $self->prepare_os();
 
     local $ENV{PATH} = "/usr/sbin:$ENV{PATH}";
 
@@ -26,10 +27,9 @@ sub prepare_sysinfo {
     my( $psrinfo ) = grep /the .* operates .* [gm]hz/ix => @psrinfo;
     my( $type, $speed, $magnitude ) =
         $psrinfo =~ /the (.+) processor.*at (.+?)\s*([GM]hz)/i;
-
     $type =~ s/(v9)$/ $1 ? "64" : ""/e;
 
-    my $cpu = $self->_get_cpu();
+    my $cpu = $self->_cpu();
 
     if ( -d "/usr/platform" ) { # Solaris but not OSF/1.
         chomp( my $platform = `uname -i` );
