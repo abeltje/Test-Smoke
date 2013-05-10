@@ -1,5 +1,4 @@
 #! /usr/bin/perl -w
-# $Id$
 use strict;
 use 5.006;
 use ExtUtils::MakeMaker;
@@ -14,7 +13,7 @@ use File::Path;
 
 # Some strange stuff happens when WriteMakefile() is called
 # on a non-clean distribution, cleanup before
-MAKE_DISTCLEAN: {
+if (-f 'Makefile') {
     local *SAVEERR; open SAVEERR, ">&STDERR";
     local *SAVEOUT; open SAVEOUT, ">&STDOUT";
     close STDERR; close STDOUT;
@@ -46,25 +45,44 @@ unless ( @ARGV ) {
         $dft_install
     );
 
-    %install = ( PREFIX => $install_dir, $iscript => $install_dir,
-#                 LIB   => File::Spec->catdir( $install_dir, 'lib' ) );
-                 LIB   => $install_dir );
+    %install = (
+        PREFIX   => $install_dir,
+        $iscript => $install_dir,
+        LIB      => $install_dir
+    );
 }
-my @scripts = qw( synctree.pl patchtree.pl mailrpt.pl W32Configure.pl
-                  configsmoke.pl smokeperl.pl runsmoke.pl sendrpt.pl
-                  archiverpt.pl smokestatus.pl chkbcfg.pl );
+my @scripts = qw(
+    synctree.pl patchtree.pl mailrpt.pl W32Configure.pl
+    configsmoke.pl smokeperl.pl runsmoke.pl sendrpt.pl
+    archiverpt.pl smokestatus.pl chkbcfg.pl sysinfo.pl
+);
 -f catfile( $findbin, '.patch' ) and push @scripts, '.patch';
+
+my %exta_deps;
+for ($^O) {
+    /MSWin32/ && do {
+        %extra_deps = (
+            'Win32' => 0,
+            'Win32::TieRegistry' => 0,
+        );
+        last;
+    };
+    /haiku/ && do {
+        %extra_deps = (
+            'Haiki::SysInfo' => 0,
+        );
+        last;
+    };
+}
 
 WriteMakefile(
     NAME          => "Test-Smoke",
     DISTNAME      => "Test-Smoke",
     VERSION_FROM  => "lib/Test/Smoke.pm",
-    $] >= 5.005 ? (
     AUTHOR        => 'H.Merijn Brand <h.m.brand@hccnet.nl>, '.
                      'Nicholas Clark <nick@plum.flirble.org> and ' .
                      'Abe Timmerman <abeltje@cpan.org>',
     ABSTRACT_FROM => 'lib/Test/Smoke.pm',
-    ) : (),
 
     dist => {
         COMPRESS => "gzip -9f",
@@ -75,6 +93,7 @@ WriteMakefile(
         'Test::More'     => 0,
         'JSON'           => 0,
         'LWP::UserAgent' => 0,
+        %extra_deps,
     },
     PMLIBDIRS     => [qw/ lib inc /],
     EXE_FILES     => \@scripts,
