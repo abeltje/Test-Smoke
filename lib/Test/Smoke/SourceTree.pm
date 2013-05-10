@@ -191,21 +191,26 @@ sub check_MANIFEST {
     my $cwd = cwd();
     chdir $$self or die "Cannot chdir($$self): $!";
     require File::Find;
-    File::Find::find( sub {
-        -f or return;
-        my $cpath = File::Spec->canonpath( $File::Find::name );
-        my( undef, $dirs, $file ) = File::Spec->splitpath( $cpath );
-        my @dirs = grep $_ && length $_ => File::Spec->splitdir( $dirs );
-        $^O eq 'VMS' and $file =~ s/\.$//;
-        my $mani_name = join '/', @dirs, $file;
-        $NOCASE and $mani_name = uc $mani_name;
-        if ( exists $manifest{ $mani_name } ) {
-            delete $manifest{ $mani_name };
-        } else {
-            $manifest{ $mani_name } = ST_UNDECLARED
-                unless exists $ignore{ $mani_name };
-        }
-    }, '.' );
+    File::Find::find(
+        sub {
+            -f or return;
+            my $cpath = File::Spec->canonpath($File::Find::name);
+            my (undef, $dirs, $file) = File::Spec->splitpath($cpath);
+            my @dirs = grep $_ && length $_ => File::Spec->splitdir($dirs);
+            $^O eq 'VMS' and $file =~ s/\.$//;
+            my $mani_name = join '/', @dirs, $file;
+            $NOCASE and $mani_name = uc $mani_name;
+            if (exists $manifest{$mani_name}) {
+                delete $manifest{$mani_name};
+            }
+            else {
+                if (!grep $mani_name =~ /$_/, keys %ignore) {
+                    $manifest{$mani_name} = ST_UNDECLARED;
+                }
+            }
+        },
+        '.'
+    );
     chdir $cwd;
 
     return \%manifest;

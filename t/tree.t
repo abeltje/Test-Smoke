@@ -28,6 +28,7 @@ sub MANIFEST_from_dir($) {
 
     find sub {
         -f or return;
+        $_ eq '.gitignore' and return;
         my $relfile = canonpath( $File::Find::name );
         my( undef, $dirs, $file ) = splitpath( $relfile );
         my @dirs = grep $_ && length $_ => splitdir( $dirs );
