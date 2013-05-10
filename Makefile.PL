@@ -14,47 +14,47 @@ use File::Path;
 # Some strange stuff happens when WriteMakefile() is called
 # on a non-clean distribution, cleanup before
 if (-f 'Makefile') {
-    local *SAVEERR; open SAVEERR, ">&STDERR";
-    local *SAVEOUT; open SAVEOUT, ">&STDOUT";
-    close STDERR; close STDOUT;
+local *SAVEERR; open SAVEERR, ">&STDERR";
+local *SAVEOUT; open SAVEOUT, ">&STDOUT";
+close STDERR; close STDOUT;
 
-    my $opt = $^O eq 'VMS' ? '/IGNORE' : ' -i';
-    system "$Config{make}$opt distclean";
+my $opt = $^O eq 'VMS' ? '/IGNORE' : ' -i';
+system "$Config{make}$opt distclean";
 
-    open STDOUT, ">&SAVEOUT"; close SAVEOUT;
-    open STDERR, ">&SAVEERR"; close SAVEERR;
+open STDOUT, ">&SAVEOUT"; close SAVEOUT;
+open STDERR, ">&SAVEERR"; close SAVEERR;
 }
 
 my $mmver = ExtUtils::MakeMaker->VERSION;
 
 my $iscript = 'INSTALLSITESCRIPT';
 unless ( eval "$mmver" >= eval "6.30_01" ) {
-    print "You are running MakeMaker v$mmver: fix INSTALLSCRIPT\n";
-    $iscript = 'INSTALLSCRIPT';
+print "You are running MakeMaker v$mmver: fix INSTALLSCRIPT\n";
+$iscript = 'INSTALLSCRIPT';
 }
 
 my %install = ( );
 unless ( @ARGV ) {
-    my $dft_install = exists $ENV{SMOKE_INSTDIR} && $ENV{SMOKE_INSTDIR} ne ""
-        ? $ENV{SMOKE_INSTDIR}
-        : catdir( updir(), 'smoke' );
-    $dft_install = rel2abs( $dft_install );
+my $dft_install = exists $ENV{SMOKE_INSTDIR} && $ENV{SMOKE_INSTDIR} ne ""
+    ? $ENV{SMOKE_INSTDIR}
+    : catdir( updir(), 'smoke' );
+$dft_install = rel2abs( $dft_install );
 
-    my $install_dir = dir_prompt( 
-        "Where would you like to install Test::Smoke?\n",
-        $dft_install
-    );
+my $install_dir = dir_prompt( 
+    "Where would you like to install Test::Smoke?\n",
+    $dft_install
+);
 
-    %install = (
-        PREFIX   => $install_dir,
-        $iscript => $install_dir,
-        LIB      => $install_dir
-    );
+%install = (
+    PREFIX   => $install_dir,
+    $iscript => $install_dir,
+    LIB      => $install_dir
+);
 }
 my @scripts = qw(
-    synctree.pl patchtree.pl mailrpt.pl W32Configure.pl
-    configsmoke.pl smokeperl.pl runsmoke.pl sendrpt.pl
-    archiverpt.pl smokestatus.pl chkbcfg.pl sysinfo.pl
+synctree.pl patchtree.pl mailrpt.pl W32Configure.pl
+configsmoke.pl smokeperl.pl runsmoke.pl sendrpt.pl
+archiverpt.pl smokestatus.pl chkbcfg.pl sysinfo.pl
 );
 -f catfile( $findbin, '.patch' ) and push @scripts, '.patch';
 
