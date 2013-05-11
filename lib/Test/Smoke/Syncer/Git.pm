@@ -62,7 +62,7 @@ sub sync {
         if ( my $gitexit = $gitbin->exitcode ) {
             croak("Cannot make inital clone: $self->{gitbin} exit $gitexit");
         }
-        $self->{v} and print $cloneout;
+        $self->{v} > 1 and print $cloneout;
     }
 
     my $gitbranch = $self->get_git_branch;
@@ -70,13 +70,13 @@ sub sync {
 
     # SMOKE_ME
     my $gitout = $gitbin->run(pull => '--all');
-    $self->{v} and print $gitout;
+    $self->{v} > 1 and print $gitout;
 
     $gitout = $gitbin->run(remote => prune => 'origin');
-    $self->{v} and print $gitout;
+    $self->{v} > 1 and print $gitout;
 
     $gitout = $gitbin->run(checkout => $gitbranch, '2>&1');
-    $self->{v} and print $gitout;
+    $self->{v} > 1 and print $gitout;
 
     chdir $cwd or croak("Cannot chdir($cwd): $!");
     # make the smoke clone
@@ -90,30 +90,30 @@ sub sync {
         if ( my $gitexit = $gitbin->exitcode ) {
             croak("Cannot make smoke clone: $self->{gitbin} exit $gitexit");
         }
-        $self->{v} and print $cloneout;
+        $self->{v} > 1 and print $cloneout;
     }
 
     chdir $self->{ddir} or croak("Cannot chdir($self->{ddir}): $!");
 
     $gitout = $gitbin->run(reset => '--hard');
-    $self->{v} and print $gitout;
+    $self->{v} > 1 and print $gitout;
 
     $gitout = $gitbin->run(clean => '-dfx');
-    $self->{v} and print $gitout;
+    $self->{v} > 1 and print $gitout;
 
     $gitout = $gitbin->run(pull => '--all');
-    $self->{v} and print $gitout;
+    $self->{v} > 1 and print $gitout;
 
     # SMOKE_ME
     $gitout = $gitbin->run(checkout => $gitbranch, '2>&1');
-    $self->{v} and print $gitout;
+    $self->{v} > 1 and print $gitout;
 
     my $mk_dot_patch = Test::Smoke::Util::Execute->new(
         command => "$^X Porting/make_dot_patch.pl > .patch",
         verbose => $self->{v},
     );
     my $perlout = $mk_dot_patch->run();
-    $self->{v} and print $perlout;
+    $self->{v} > 1 and print $perlout;
 
     chdir $cwd;
 

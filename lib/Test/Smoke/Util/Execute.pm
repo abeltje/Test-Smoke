@@ -83,7 +83,8 @@ sub run {
             / / ? qq/"$_"/ : $_
             } $self->arguments(@_)
     );
-    $self->verbose > 1 and printf "In pwd(%s) running:\nqx[%s]\n", cwd(), $command;
+    $self->verbose > 1 and printf "In pwd(%s) running:\n", cwd();
+    $self->verbose and printf "qx[%s]\n", $command;
 
     my @output = qx/$command/;
     $self->{exitcode} = $? >> 8;
