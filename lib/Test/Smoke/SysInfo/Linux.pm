@@ -239,10 +239,9 @@ Read the complete C<< /proc/cpuinfo >>.
 sub prepare_proc_cpuinfo {
     my $self = shift;
 
-    local *PCI;
-    if (open PCI, "< /proc/cpuinfo") {
-        chomp($self->{__proc_cpuinfo} = [<PCI>]);
-        close PCI;
+    if (open my $pci, "< /proc/cpuinfo") {
+        chomp($self->{__proc_cpuinfo} = [<$pci>]);
+        close $pci;
         return 1;
     }
 }

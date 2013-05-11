@@ -16,11 +16,17 @@ BEGIN {
     # redefine the CORE functions to mimic themselfs at compile-time
     # so we can re-redefine them at run-time
     *CORE::GLOBAL::open = sub (*;$@) {
-        my( $handle, $second, @args ) = @_;
+        my ($handle, $second, @args) = @_;
+        my ($pkg) = caller;
         if ( defined $handle && ! ref $handle ) {
-            my( $pkg ) = caller;
             no strict 'refs';
             $handle = \*{ "$pkg\:\:$handle" };
+        }
+        elsif ( !defined $handle ) {    # undefined scalar, provide GLOBref
+            $_[0] = $handle = do {
+                no strict 'refs';
+                \*{ sprintf "%s::NH%d%d%d", $pkg, $$, time, rand 100 };
+            };
         }
         CORE::open $handle, $second, @args;
     };
@@ -47,11 +53,17 @@ my $this_system = Test::Smoke::SysInfo::Generic->new();
     local *CORE::GLOBAL::open = sub (*;$@) {
         local $^W = 1;
 
-        my( $handle, $second, @args ) = @_;
-        if ( defined $handle && ! ref $handle ) {
-            my( $pkg ) = caller;
+        my ($handle, $second, @args) = @_;
+        my ($pkg) = caller;
+        if ( defined $handle && !ref $handle ) {
             no strict 'refs';
-            $handle = *{ "$pkg\:\:$handle" };
+            $handle = \*{"$pkg\:\:$handle"};
+        }
+        elsif ( !defined $handle ) {    # undefined scalar, provide GLOBref
+            $_[0] = $handle = do {
+                no strict 'refs';
+                \*{ sprintf "%s::NH%d%d%d", $pkg, $$, time, rand 100 };
+            };
         }
 
         if ( $second eq '< /proc/cpuinfo' ) {
@@ -60,9 +72,10 @@ my $this_system = Test::Smoke::SysInfo::Generic->new();
             # we can do this fully qualified filehandle as we only use GLOBs
             # to keep up with 5.005xx
             no strict 'refs';
-            tie *$handle, 'ReadProc', $files{ $fn };
-        } else {
-            CORE::open \$handle, $second, @args;
+            tie *$handle, 'ReadProc', $files{$fn};
+        }
+        else {
+            CORE::open $handle, $second, @args;
         }
     };
     local *CORE::GLOBAL::close = sub (*) {
@@ -79,6 +92,7 @@ my $this_system = Test::Smoke::SysInfo::Generic->new();
 
     $CPU_TYPE = 'i386';
     my $i386 = Test::Smoke::SysInfo::Linux->new();
+    $this_system->{_os} = $i386->_os;
 
     is_deeply $i386->old_dump, {
         _host     => $this_system->host,
@@ -94,8 +108,8 @@ my $this_system = Test::Smoke::SysInfo::Generic->new();
     my $ppc = Test::Smoke::SysInfo::Linux->new();
 
     is_deeply $ppc->old_dump, {
-        _host     => $this_system->{_host},
-        _os       => $this_system->{_os},
+        _host     => $this_system->host,
+        _os       => $this_system->os,
         _cpu_type => 'ppc',
         _cpu      => '7400, altivec supported PowerMac G4 (400.000000MHz)',
         _ncpu     => 1,
@@ -106,8 +120,8 @@ my $this_system = Test::Smoke::SysInfo::Generic->new();
     my $i386_2 = Test::Smoke::SysInfo::Linux->new();
 
     is_deeply $i386_2->old_dump, {
-        _host     => $this_system->{_host},
-        _os       => $this_system->{_os},
+        _host     => $this_system->host,
+        _os       => $this_system->os,
         _cpu_type => 'i386_2',
         _cpu      => 'Intel(R) Core(TM)2 CPU T5600 @ 1.83GHz (GenuineIntel 1000MHz)',
         _ncpu     => "2 [4 cores]",
@@ -118,8 +132,8 @@ my $this_system = Test::Smoke::SysInfo::Generic->new();
     my $arm_v6 = Test::Smoke::SysInfo::Linux->new();
 
     is_deeply $arm_v6->old_dump, {
-        _host     => $this_system->{_host},
-        _os       => $this_system->{_os},
+        _host     => $this_system->host,
+        _os       => $this_system->os,
         _cpu_type => 'arm_v6',
         _cpu      => 'ARMv6-compatible processor rev 7 (v6l) (700 MHz)',
         _ncpu     => 1,
@@ -130,8 +144,8 @@ my $this_system = Test::Smoke::SysInfo::Generic->new();
     my $arm_v7 = Test::Smoke::SysInfo::Linux->new();
 
     is_deeply $arm_v7->old_dump, {
-        _host     => $this_system->{_host},
-        _os       => $this_system->{_os},
+        _host     => $this_system->host,
+        _os       => $this_system->os,
         _cpu_type => 'arm_v7',
         _cpu      => 'ARMv7 Processor rev 2 (v7l) (300 MHz)',
         _ncpu     => 1,
