@@ -36,6 +36,7 @@ lib/Test/Smoke/Syncer/Snapshot.pm
 lib/Test/Smoke/SysInfo.pm
 lib/Test/Smoke/SysInfo/AIX.pm
 lib/Test/Smoke/SysInfo/Base.pm
+lib/Test/Smoke/SysInfo/Cygwin.pm
 lib/Test/Smoke/SysInfo/BSD.pm
 lib/Test/Smoke/SysInfo/Darwin.pm
 lib/Test/Smoke/SysInfo/Generic.pm
