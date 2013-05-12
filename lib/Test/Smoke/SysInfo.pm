@@ -9,6 +9,7 @@ our @EXPORT_OK = qw( &sysinfo &tsuname );
 
 use Test::Smoke::SysInfo::AIX;
 use Test::Smoke::SysInfo::BSD;
+use Test::Smoke::SysInfo::Cygwin;
 use Test::Smoke::SysInfo::Darwin;
 use Test::Smoke::SysInfo::Generic;
 use Test::Smoke::SysInfo::Haiku;
@@ -61,16 +62,17 @@ sub new {
     my $factory = shift;
 
     for ( $^O ) {
-        /aix/i                    && return Test::Smoke::SysInfo::AIX->new();
-        /bsd/i                    && return Test::Smoke::SysInfo::BSD->new();
-        /darwin/i                 && return Test::Smoke::SysInfo::Darwin->new();
-        /haiku/                   && return Test::Smoke::SysInfo::Haiku->new();
-        /hp-?ux/i                 && return Test::Smoke::SysInfo::HPUX->new();
-        /irix/i                   && return Test::Smoke::SysInfo::Irix->new();
-        /linux/i                  && return Test::Smoke::SysInfo::Linux->new();
-        /solaris|sunos|osf/i      && return Test::Smoke::SysInfo::Solaris->new();
-        /VMS/                     && return Test::Smoke::SysInfo::VMS->new();
-        /cygwin|mswin32|windows/i && return Test::Smoke::SysInfo::Windows->new();
+        /aix/i               && return Test::Smoke::SysInfo::AIX->new();
+        /bsd/i               && return Test::Smoke::SysInfo::BSD->new();
+        /cygwin/i            && return Test::Smoke::SysInfo::Cygwin->new();
+        /darwin/i            && return Test::Smoke::SysInfo::Darwin->new();
+        /haiku/              && return Test::Smoke::SysInfo::Haiku->new();
+        /hp-?ux/i            && return Test::Smoke::SysInfo::HPUX->new();
+        /irix/i              && return Test::Smoke::SysInfo::Irix->new();
+        /linux/i             && return Test::Smoke::SysInfo::Linux->new();
+        /solaris|sunos|osf/i && return Test::Smoke::SysInfo::Solaris->new();
+        /VMS/                && return Test::Smoke::SysInfo::VMS->new();
+        /mswin32|windows/i   && return Test::Smoke::SysInfo::Windows->new();
     }
     return Test::Smoke::SysInfo::Generic->new();;
 }
