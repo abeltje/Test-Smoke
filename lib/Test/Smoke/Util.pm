@@ -181,6 +181,7 @@ sub Configure_win32 {
         "-DINST_ARCH"           => "INST_ARCH",
         "-Dcf_email"            => "EMAIL",
         "-DCCTYPE"              => "CCTYPE",
+        "-DWIN64"               => "WIN64",
         "-Dgcc_v3_2"            => "USE_GCC_V3_2",
         "-Dbccold"              => "BCCOLD",
         "-DCCHOME"              => "CCHOME",
@@ -194,14 +195,14 @@ sub Configure_win32 {
 # (true) => enable option when no override (change value, unless
 #           $key =~ /^(?:PERL|USE)_/) (forced default)
     my %opts = (
-	USE_MULTI	=> 0,
-	USE_ITHREADS	=> 0,
-	USE_IMP_SYS	=> 0,
-	USE_PERLIO	=> 1, # useperlio should be the default!
+        USE_MULTI       => 0,
+        USE_ITHREADS    => 0,
+        USE_IMP_SYS     => 0,
+        USE_PERLIO      => 1, # useperlio should be the default!
         PERL_MALLOC     => 0,
         USE_LARGE_FILES => 0,
         BUILD_STATIC    => 0,
-	USE_DEBUGGING	=> 0,
+        USE_DEBUGGING   => 0,
         INST_DRV        => undef,
         INST_TOP        => undef,
         INST_VER        => '',
@@ -211,6 +212,7 @@ sub Configure_win32 {
         USE_GCC_V3_2    => 0,
         BCCOLD          => 0,
         CCHOME          => undef,
+        WIN64           => undef,
         IS_WIN95        => 0,
         CRYPT_SRC       => undef,
         CRYPT_LIB       => undef,
@@ -226,15 +228,15 @@ sub Configure_win32 {
     $command =~ m{^\s*\./Configure\s+(.*)} or die "unable to parse command";
     my $cmdln = $1;
     foreach ( quotewords( '\s+', 1, $cmdln ) ) {
-	m/^-[des]{1,3}$/ and next;
-	m/^-Dusedevel$/  and next;
+        m/^-[des]{1,3}$/ and next;
+        m/^-Dusedevel$/  and next;
         if ( /^-Accflags=(['"]?)(.+)\1/ ) { #emacs' syntaxhighlite
            push @buildopt, $2;
            next;
         }
         my( $option, $value ) = /^(-[DU]\w+)(?:=(.+))?$/;
-	die "invalid option '$_'" unless exists $opt_map{$option};
-	$opts{$opt_map{$option}} = $value ? $value : 1;
+        die "invalid option '$_'" unless exists $opt_map{$option};
+        $opts{$opt_map{$option}} = $value ? $value : 1;
         $option =~ /^-U/ and $opts{$opt_map{$option}} = 0;
     }
 
@@ -262,7 +264,6 @@ sub Configure_win32 {
 
     open ORG, "< $in"  or die "unable to open '$in': $!";
     open NEW, "> $out" or die "unable to open '$out': $!";
-    binmode NEW;
     my $donot_change = 0;
     while (<ORG>) {
         if ( $donot_change ) {
@@ -307,7 +308,7 @@ sub Configure_win32 {
                 }
             }
         }
-	print NEW $_;
+        print NEW $_;
     }
     close ORG;
     close NEW;

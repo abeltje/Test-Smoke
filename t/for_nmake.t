@@ -26,6 +26,7 @@ Configure_win32( './Configure ' . $config, 'nmake' );
 
 ok( -f $smoke_mk, "New makefile ($config)" );
 my $extra_len = length( "\t\tconfig_args=$dft_args\t~\t\\\n" );
+$^O eq 'MSWin32' and $extra_len++;
 is( -s 'win32/Makefile', (-s $smoke_mk ) - $extra_len,
     "Sizes are equal for standard options (-Duseithreads)" );
 

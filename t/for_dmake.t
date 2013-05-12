@@ -26,6 +26,7 @@ Configure_win32( './Configure ' . $config, 'dmake' );
 ok( -f $smoke_mk, "New makefile ($config)" );
 
 my $extra_len = length( "\t\tconfig_args=$dft_args\t~\t\\\n" );
+$^O eq 'MSWin32' and $extra_len++;
 # To help the Win9[58] build, we must "genmk95.pl smoke.mk makefile.95"
 # We know about 2 times: s/\bmakefile.mk\b/smoke.mk/ (in testfile!)
 $extra_len -= 2 * (length( 'makefile.mk') - length( 'smoke.mk' ));
