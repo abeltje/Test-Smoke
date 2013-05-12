@@ -78,6 +78,9 @@ for ($^O) {
         last;
     };
 }
+if ($] < 5.008) { # Encode is core from 5.8.0
+    $extra_deps{'Encode'} = 0;
+}
 
 WriteMakefile(
     NAME          => "Test-Smoke",
@@ -93,10 +96,11 @@ WriteMakefile(
         SUFFIX   => ".gz",
         },
     PREREQ_PM     => {
-        'File::Spec'     => 0.82,
-        'Test::More'     => 0,
-        'JSON'           => 0,
-        'LWP::UserAgent' => 0,
+        'File::Spec'       => 0.82,
+        'Test::More'       => 0,
+        'JSON'             => 0,
+        'LWP::UserAgent'   => 0,
+        'Test::NoWarnings' => 0,
         %extra_deps,
     },
     PMLIBDIRS     => [qw/ lib inc /],
