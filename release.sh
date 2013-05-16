@@ -7,6 +7,11 @@ SKIPTESTS=0
 SKIPALLTESTS=0
 NOAUTOCOMMIT=0
 TESTMODEONLY=0
+distdir=./
+UNAME=`uname -n | perl -ne '/^([^.]+)/ and print $1'`
+if [ $UNAME == "diefenbaker" ] ; then
+    distdir=~/distro
+fi
 
 for argv ; do
     case $argv in
@@ -24,19 +29,30 @@ for argv ; do
             ;;
         -noautocommit)  NOAUTOCOMMIT=1
             ;;
-        -test|-t)             TESTMODEONLY=1
+        -test|-t)       TESTMODEONLY=1
             ;;
-        *)              echo "Warning: unknown option: '$argv'";
-            ;;
+        -*)   if test "$argv" == "-help" || test "$argv" == "-h" ; then
+                  echo ""
+              else
+                  echo "Unknown argument '$argv'"
+              fi
+              cat <<EOF && exit;;
+Usage: $0 [-t] [-d=<directory]
+
+    -t              Run tests only, do not make a tarball
+    -d=<directory>  Taret directory for the tarball ($distdir)
+    -b=<gitbranch>  Check the current branch against <gitbranch> (master)
+    -skipstatus     Skip 'git status' (everything must be checked in)
+    -skippalltests  Do not run any test
+    -skipprivate    Do not run the tests in private/
+    -skiptests      Do not run the tests in t/
+    -noautocommit   Do not commit version-bump and Changelog (with tag)
+    -help           This message
+EOF
     esac
 done
 
 # Set the directory where distributions are kept
-distdir=./
-UNAME=`uname -n | perl -ne '/^([^.]+)/ and print $1'`
-if [ $UNAME == "diefenbaker" ] ; then
-    distdir=~/distro
-fi
 if [ "$DIST_DIR" != "" ] ; then
     distdir=$DIST_DIR
 fi
@@ -50,14 +66,18 @@ if [ "$mybranch" != "$GITBRANCH" ] ; then
 fi
 
 # Check git status -s
+mystatus=`git status -s`
 if [ "$SKIPSTATUS" != "1" ] ; then
-    mystatus=`git status -s`
     if [ "$mystatus" != "" ] ; then
         echo "Status not clean: $mystatus";
         exit 15
     fi
 else
-    echo "Skipping 'git status -s'"
+    if [ "$mystatus" != "" ] ; then
+        echo "'git status -s' not clean: $mystatus";
+    else
+        echo "'git status -s' was clean!"
+    fi
 fi
 
 if [ -f "Makefile" ] ; then
