@@ -2,7 +2,7 @@
 use strict;
 $|++;
 
-use Test::More 'no_plan';
+use Test::More;
 use ExtUtils::Manifest qw/ manicheck filecheck /;
 $ExtUtils::Manifest::Quiet = 1;
 
@@ -20,4 +20,4 @@ ok(!@extra, "No extra files in MANIFEST");
 
 BAIL_OUT("FIX MANIFEST FIRST!") if @missing || @extra;
 
-#done_testing();
+done_testing();
