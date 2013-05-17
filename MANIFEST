@@ -63,7 +63,6 @@ smokeperl.pl
 smokestatus.pl
 synctree.pl
 sysinfo.pl
-t/00-manifest.t
 t/buildcfg.t
 t/cfgstuff.t
 t/for_dmake.t
@@ -101,6 +100,7 @@ t/grepccmsg.t
 t/logs/gcc2722.log
 t/logs/hpux1020.log
 t/logs/hpux1111.log
+t/logs/icc102.log
 t/logs/mingw.log
 t/logs/solaris.log
 t/logs/w32bcc32.log
