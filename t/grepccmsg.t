@@ -2,8 +2,6 @@
 use strict;
 $| = 1;
 
-# $Id$
-
 my $findbin;
 use File::Basename;
 BEGIN { $findbin = dirname $0; }
@@ -26,6 +24,10 @@ BEGIN {
           wcnt =>  2, ecnt => 0, lcnt => 2 },
         { file => 'mingw.log',    type => 'gcc',
           wcnt =>  1, ecnt => 0, lcnt => 32 }, 
+        { file => 'icc102.log',   type => 'icc',
+          wcnt =>  5, ecnt => 2, lcnt => 7 },
+        { file => 'icc102.log',   type => 'icpc',
+          wcnt =>  5, ecnt => 2, lcnt => 7 },
     );
 
     plan tests => 1 + 5 * @logs + 1;

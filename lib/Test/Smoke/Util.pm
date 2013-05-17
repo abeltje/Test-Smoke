@@ -485,6 +485,14 @@ sub grepccmsg {
             # Warning Wnnn filename line: warning description
             # Error Ennn:: error description
             '(^(?:(?:Warning W)|(?:Error E))\d+ .+? \d+: .+?$)',
+
+	'icc' => # Intel C on Linux
+	    # pp_sys.c(4412): warning #num: text
+            #       SETi( getpriority(which, who) );
+            #       ^
+	    '(^.*?\([0-9]+\): (?:warning #[0-9]+|error): .+$)',
+	'icpc' => # Intel C++
+	    '(^.*?\([0-9]+\): (?:warning #[0-9]+|error): .+$)',
     );
     exists $OS2PAT{ lc $cc } or $cc = 'gcc';
     my $pat = $OS2PAT{ lc $cc };
