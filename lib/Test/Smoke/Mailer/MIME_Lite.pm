@@ -16,6 +16,7 @@ Keys for C<%args>:
 
   * ddir
   * mserver
+  * msport
   * msuser
   * mspass
   * to
@@ -57,6 +58,7 @@ sub mail {
         $authinfo{AuthPass} = $self->{mspass} if defined $self->{mspass};
         MIME::Lite->send(
             smtp       => $self->{mserver},
+            Port       => ($self->{msport} || 25),
             FromSender => $self->{from},
             Debug      => ($self->{v} > 1),
             %authinfo,
