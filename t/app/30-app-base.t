@@ -1,0 +1,257 @@
+#! perl -w
+use strict;
+
+use Test::More 'no_plan';
+use Test::NoWarnings;
+
+BEGIN {
+    no warnings 'redefine';
+    *CORE::GLOBAL::exit = sub (;$) {
+        die sprintf "exit(%s) called\n", (shift||'');
+    };
+}
+
+use Data::Dumper;
+use Test::Smoke::App::AppOption;
+
+{
+    create_config('smokeme_config', mybin2 => '/usr/bin/mybin2', '-v', 1);
+    local @ARGV = ('-v=2', '--test1', 'app2', '-c', 'smokeme');
+    my $app = Test::Smoke::App::Test1->new(
+        allow => [qw/app1 app2 Module::App3/],
+        special_options => {
+            app1 => [
+                Test::Smoke::App::AppOption->new(name => '1gogo'),
+                Test::Smoke::App::AppOption->new(
+                    name    => 'mybin2',
+                    option  => '=s',
+                    default => '/usr/local/bin/mybin2',
+                ),
+            ],
+            app2 => [
+                Test::Smoke::App::AppOption->new(
+                    name    => '2gogo',
+                    option  => '!',
+                    default => 1,
+                ),
+                Test::Smoke::App::AppOption->new(
+                    name    => 'mybin2',
+                    option  => '=s',
+                    default => '/usr/local/bin/mybin2',
+                ),
+            ],
+        },
+    );
+    isa_ok($app, 'Test::Smoke::App::Base');
+    isa_ok($app, 'Test::Smoke::App::Test1');
+
+    is($app->option('verbose'), 2, "verbose level 2");
+    is($app->option('test1'), 'app2', "self-type ok");
+    is($app->option('2gogo'), 1, "default option for app2");
+    is($app->option('configfile'), 'smokeme_config', "Configuration file");
+    is(
+        $app->option('mybin2'),
+        '/usr/bin/mybin2',
+        "cfgfile overrides default"
+    );
+
+    eval { $app->option('invalid') };
+    like(
+        $@,
+        qr/Invalid option 'invalid' \(test1 => app2\)/,
+        "We know about invalid options"
+    );
+    eval { $app->option('1gogo') };
+    like(
+        $@,
+        qr/Option '1gogo' is invalid for test1 => 'app2'/,
+        "We know about special invalid options"
+    );
+
+    is_deeply(
+        {$app->options},
+        {
+            configfile  => 'smokeme_config',
+            verbose     => 2,
+            test1       => 'app2',
+            mybin2      => '/usr/bin/mybin2',
+            '2gogo'     => 1,
+        },
+        "Getting relevant options"
+    );
+
+    # Test the logging
+    {
+        open my $log, '>', \my $logfile;
+        my $stdout = select $log;
+        $app->run1("no newline %s", 'single value');
+        select $stdout;
+        is($logfile, "no newline single value\n", "log_info() no newline");
+    }
+    {
+        open my $log, '>', \my $logfile;
+        my $stdout = select $log;
+        $app->run1("With newline %s\n\n", 'single value');
+        select $stdout;
+        is($logfile, "With newline single value\n\n", "log_info() 2newline");
+    }
+    {
+        open my $log, '>', \my $logfile;
+        my $stdout = select $log;
+        $app->run2("no newline %s", 'single value');
+        select $stdout;
+        is($logfile, "no newline single value\n", "log_debug() no newline");
+    }
+    {
+        open my $log, '>', \my $logfile;
+        my $stdout = select $log;
+        $app->run2("With newline %s\n", 'single value');
+        select $stdout;
+        is($logfile, "With newline single value\n", "log_debug() newline");
+    }
+    {
+        $app->final_options->{verbose} = 0;
+        is($app->option('verbose'), 0, "No verbosity");
+        open my $log, '>', \my $logfile;
+        my $stdout = select $log;
+        $app->run1("no newline %s", 'single value');
+        select $stdout;
+        is($logfile, undef, "no log_info() without verbose");
+
+        $app->final_options->{verbose} = 1;
+        is($app->option('verbose'), 1, "verbose == 1");
+        select $log;
+        $app->run2("With newline %s", 'single value');
+        select $stdout;
+        is($logfile, undef, "no log_debug() without verbose 2+");
+    }
+    unlink 'smokeme_config';
+}
+
+{
+    my $app;
+    my $helptxt;
+    {
+        no warnings 'redefine';
+        local *CORE::GLOBAL::exit = sub (;$) {
+            return shift
+        };
+        local *STDOUT;
+        open STDOUT, '>', \$helptxt;
+        
+        local @ARGV = ('--help', '--test1', 'app');
+        $app = Test::Smoke::App::Test1->new(allow => ['app']);
+        isa_ok($app, 'Test::Smoke::App::Test1');
+    }
+    like(
+        $helptxt,
+        qr/test1=s <app>\s+ - application variation/,
+        "Helptext after --help"
+    );
+    is($app->auto_name, 'test1', "->auto_name as instance method");
+}
+
+{ # This is to test the non-existence of the configfile
+    local @ARGV = ('-v=2', '--test1', 'app2', '-c', 'smokeme');
+    my $app = Test::Smoke::App::Test1->new(allow => ['app2']);
+    isa_ok($app, 'Test::Smoke::App::Test1');
+    is_deeply($app->from_configfile, {}, "No configfile");
+}
+
+{ # This is to test the existence of a bad configfile
+    local $SIG{__WARN__} = sub { };
+    local @ARGV = ('-v=2', '--test1', 'app2', '-c', 'smokeme');
+    open my $fh, '>', 'smokeme.config';
+    print $fh "mybin2 : /usr/bin/mybin2\n";
+    close $fh;
+    my $app = Test::Smoke::App::Test1->new(allow => ['app2']);
+    isa_ok($app, 'Test::Smoke::App::Test1');
+    like(
+        $app->configfile_error,
+        qr/syntax error/,
+        "configfile error"
+    );
+    unlink 'smokeme.config';
+}
+
+{ # This is to test the precise existence of the configfile
+    create_config('smokeme_config', mybin2 => '/usr/bin/mybin2');
+    local @ARGV = ('-c', 'smokeme_config');
+    my $app = Test::Smoke::App::Test1->new();
+    isa_ok($app, 'Test::Smoke::App::Test1');
+    is_deeply(
+        $app->from_configfile,
+        {mybin2 => '/usr/bin/mybin2'},
+        "Got configfile"
+    ) or diag $app->configfile_error;
+    unlink 'smokeme_config';
+}
+
+{
+    my $exitval;
+    no warnings 'redefine';
+    local *CORE::GLOBAL::exit = sub { $exitval = shift };
+    my $stdout;
+    {
+        local @ARGV = ('-v', 3);
+        local *STDOUT;
+        open STDOUT, '>', \$stdout;
+        my $app = Test::Smoke::App::Test1->new();
+    }
+    is($exitval, 1, "Program exit value 1");
+    is(
+        $stdout,
+        "Invalid value '3' for option 'verbose'\n",
+        "Diagnostic output invalid option values"
+    );
+}
+
+{ # --show_config
+    my $exitval;
+    no warnings 'redefine';
+    local *CORE::GLOBAL::exit = sub { $exitval = shift };
+    local @ARGV = ('--show-config', '-v', '1');
+    my $stdout;
+    {
+        local *STDOUT;
+        open STDOUT, '>', \$stdout;
+        my $app = Test::Smoke::App::Test1->new();
+    }
+    is($stdout, <<'    EODUMP', "--show-config");
+Show configuration requested:
+  Option              | Value
+----------------------+--------------------------------------------
+  configfile          | ?
+  verbose             | 1
+    EODUMP
+    is($exitval, 0, "ExitValue 0");
+}
+
+# done_testing();
+
+sub create_config {
+    my ($name, %options) = @_;
+
+    my $dump = Data::Dumper->new([\%options], ['conf'])->Dump;
+    open my $fh, '>', $name or die "Cannot create '$name': $!";
+    print $fh $dump;
+    close $fh or die "Error writing to '$name': $!";
+    return 1;
+}
+
+package Test::Smoke::App::Test1;
+use warnings;
+use strict;
+
+use base 'Test::Smoke::App::Base';
+
+sub run1 {
+    my $self = shift;
+    $self->log_info(@_);
+}
+
+sub run2 {
+    my $self = shift;
+    $self->log_debug(@_);
+}
+1;
