@@ -1,0 +1,543 @@
+package Test::Smoke::App::Base;
+use warnings;
+use strict;
+use Carp;
+
+use base 'Test::Smoke::ObjectBase';
+
+use Getopt::Long;
+use Test::Smoke::App::AppOption;
+use Test::Smoke::App::AppOptionCollection;
+
+=head1 NAME
+
+Test::Smoke::App - Framework for Test::Smoke applications.
+
+=head1 SYNOPSIS
+
+    package Test::Smoke::Mailer;
+    use base 'Test::Smoke::App';
+    sub run {...}
+
+=head1 DESCRIPTION
+
+  use Test::Smoke::App::Mailer;
+  my $mailer = Test::Smoke::App::Mailer->new(
+      allow => [qw/sendmail MIME::Lite Mail::Sendmail/],
+      genral_options => [
+          Test::Smoke::AppOption->new(
+              name    => 'verbose',
+              option  => '|v=i',
+              default => 0,
+              helptxt => 'Set verbosity level',
+          ),
+  
+      ],
+      special_options => {
+          'MIME::Lite' => [
+              $MSERVER_OPT,
+              $MSPORT_OPT,
+              $MSUSER_OPT,
+              $MSPASS_OPT,
+          ],
+          'sendmail' => [
+          ],
+      },
+  );
+  
+  $mailer->run();
+
+=head2 Test::Smoke::App->new(%arguments)
+
+=head3 Arguments
+
+Named:
+
+=over
+
+=item allow => $arrayref_with_allowed_values_or_undef
+
+=item default => $default (optional)
+
+=item general_options => $list_of_test_smoke_appoptions
+
+These options are always valid.
+
+=item special_options => $hashref
+
+This is a hashref with the values of the C<allow>-array, that hold a list of
+L<Test::Smoke::AppOptions>.
+
+=back
+
+=head3 Exceptions
+
+None.
+
+=cut
+
+sub new {
+    my $class = shift;
+    my %raw_args = @_;
+
+    my $struct = {
+        _name            => $class->auto_name(),
+        _allow           => undef,
+        _default         => undef,
+        _general_options => [],
+        _special_options => {},
+        _final_options   => {},
+    };
+
+    for my $known (keys %$struct) {
+        (my $key = $known) =~ s/^_//;
+        $struct->{$known} = delete $raw_args{$key} if exists $raw_args{$key};
+    }
+
+    my $self = bless $struct, $class;
+
+    $self->process_options();
+    return $self;
+}
+
+=head2 Test::Smoke::App->auto_name()
+
+Class and Instance method.
+
+=head3 Arguments
+
+None.
+
+=head3 Returns
+
+The last part of the Package-name in lowercase.
+
+=head3 Exceptions
+
+None.
+
+=cut
+
+sub auto_name {
+    my $class = shift;
+    ref($class) and $class = ref($class);
+    (my $app_name = $class) =~ s/.*:://;
+    return lc $app_name;
+}
+
+=head2 Test::Smoke::App::Base->configfile_option()
+
+Returns a L<Test::Smoke::App::AppOption> for 'configfile'.
+
+=cut
+
+sub configfile_option {
+    my $class = shift;
+    return Test::Smoke::App::AppOption->new(
+        name     => 'configfile',
+        option   => 'config|c=s',
+        helptext => "Set the name/prefix of the configfile\n",
+    );
+}
+
+=head2 Test::Smoke::App::Base->verbose_option()
+
+Returns a L<Test::Smoke::App::AppOption> for 'verbose'.
+
+=cut
+
+sub verbose_option {
+    my $class = shift;
+    return Test::Smoke::App::AppOption->new(
+        name     => 'verbose',
+        option   => 'v=i',
+        allow    => [0, 1, 2],
+        default  => 0,
+        helptext => 'Set verbosity level.',
+    );
+}
+
+=head2 $app->myname_option()
+
+=cut
+
+sub myname_option {
+    my $self = shift;
+    return Test::Smoke::App::AppOption->new(
+        name     => $self->name,
+        option   => '=s',
+        allow    => $self->allow,
+        default  => $self->default,
+        helptext => "application variation",
+    );
+}
+
+=head2 $app->show_config_option
+
+=cut
+
+sub show_config_option {
+    return Test::Smoke::App::AppOption->new(
+        name => 'show_config',
+        option => 'show-config',
+        helptext => "Show all about config vars.",
+    );
+}
+
+=head2 $app->process_options()
+
+This process constists of three (3) steps:
+
+=over
+
+=item 1. pre_process_options
+
+This step organizes the options in a AppOptionCollection.
+
+=item 2. get_options
+
+This step processes the arguments passed on the command line.
+
+=item 3. post_process_options
+
+This step integrates the arguments, their coded-defaults, config-file values
+and command-line overrides.
+
+=back
+
+=head3 Arguments
+
+None.
+
+=head3 Returns
+
+The object-instance.
+
+=head3 Exceptions
+
+None.
+
+=cut
+
+sub process_options {
+    my $self = shift;
+
+    $self->{_opt_collection} = Test::Smoke::App::AppOptionCollection->new();
+
+    $self->_pre_process_options();
+    $self->_get_options();
+    $self->_post_process_options();
+
+    return $self;
+}
+
+=head2 $app->option($option)
+
+Return the value of an option.
+
+=head3 Argumens
+
+Positional.
+
+=over
+
+=item $option_name
+
+=back
+
+=head3 Returns
+
+The value of that option if applicable.
+
+=head3 Exceptions
+
+=over
+
+=item B<Invalid option 'blah' ($name => $type)>
+
+=item B<Option 'blah' is invalid for $name => $type>
+
+=back
+
+=cut
+
+sub option {
+    my $self = shift;
+    my ($option) = @_;
+
+    my $opts = $self->final_options;
+    my $name = $self->name;
+    my $type = $opts->{$name};
+    if (exists $opts->{$option}) {
+        my $is_general = grep $_->name eq $option, @{$self->general_options};
+        return $opts->{$option} if $is_general;
+
+        my $specials = $self->special_options->{$type};
+        my $is_special = grep $_->name eq $option, @$specials;
+        return $opts->{$option} if $is_special;
+
+        croak("Option '$option' is invalid for $name => '$type'");
+    }
+    croak("Invalid option '$option' ($name => $type)");
+}
+
+sub _find_option {
+    my $self = shift;
+    my ($option) = @_;
+
+    my ($oo) = grep $_->name eq $option, @{$self->general_options};
+    return $oo if $oo;
+
+    return if !$self->allow();
+    my $type = $self->final_options->{$self->name};
+    my $specials = $self->special_options->{$type};
+    ($oo) = grep $_->name eq $option, @$specials;
+
+    return $oo;
+}
+
+=head2 $app->options()
+
+=head3 Arguments
+
+None.
+
+=head3 Returns
+
+A hash (list) of all options that apply to this instance of the app.
+
+=head3 Exceptions
+
+None.
+
+=cut
+
+sub options {
+    my $self = shift;
+
+    my %options;
+    my $name = $self->name;
+
+    # collect all general options
+    for my $opt (@{ $self->general_options }) {
+        next if $opt->name =~ /^(?:help|show_config)$/;
+        $options{$opt->name} = $self->option($opt->name);
+    }
+    # collect all special_options for $self->option($self->name).
+    if ($self->allow && @{$self->allow}) {
+        my $type     = $self->option($name);
+        my $specials = $self->special_options->{$type};
+        for my $opt (@$specials) {
+            $options{$opt->name} = $self->option($opt->name);
+        }
+    }
+    return %options;
+}
+
+sub _pre_process_options {
+    my $self = shift;
+
+    unshift @{$self->general_options}, $self->myname_option
+        if $self->allow;
+    unshift @{$self->general_options}, $self->configfile_option;
+    push @{$self->general_options}, $self->show_config_option;
+    push @{$self->general_options}, $self->verbose_option;
+
+    for my $thisopt (@{$self->general_options}) {
+        $self->opt_collection->add($thisopt);
+    }
+
+    for my $special (sort keys %{$self->special_options}) {
+        $self->opt_collection->add_helptext(
+            sprintf("\nOptions for '%s':\n", $special)
+        );
+        my $specials = $self->special_options->{$special};
+        for my $thisopt (@$specials) {
+            $self->opt_collection->add($thisopt);
+        }
+    }
+
+    my $helptext = $self->opt_collection->helptext;
+    my $help_option = Test::Smoke::App::AppOption->new(
+        name    => 'help',
+        option  => 'h',
+        default => sub {
+            print "Usage: $0 [options]\n\n$helptext";
+            exit(0);
+        },
+        helptext => 'This message.',
+    );
+    push @{$self->general_options}, $help_option;
+    $self->opt_collection->add($help_option);
+
+    %{$self->{_dft_options}} = %{$self->opt_collection->options_with_default};
+}
+
+sub _get_options {
+    my $self = shift;
+
+    %{$self->{_cli_options}} = %{$self->opt_collection->options_for_cli};
+
+    GetOptions(
+        $self->cli_options,
+        @{ $self->opt_collection->options_list },
+    );
+}
+
+sub _post_process_options {
+    my $self = shift;
+
+    $self->_obtain_config_file;
+    %{$self->final_options} = %{$self->cli_options};
+
+    # now combine with configfile
+    $self->final_options(
+        {
+            %{$self->opt_collection->all_options},
+            %{$self->dft_options},
+            %{$self->from_configfile},
+            %{$self->cli_options},
+        }
+    );
+    my @errors;
+    my %check_options = $self->options;
+    for my $opt (keys %check_options) {
+        my $oo = $self->_find_option($opt);
+        my $value = $self->final_options->{$opt};
+        $value = '<undef>' if !defined $value;
+        push(
+            @errors,
+            sprintf("Invalid value '%s' for option '%s'", $value, $opt)
+        ) if !$oo->allowed($self->final_options->{$opt});
+    }
+    if (@errors) {
+        print "$_\n" for @errors;
+        exit(1);
+    }
+
+    if ($self->final_options->{show_config}) {
+        print "Show configuration requested:\n";
+        print
+            sprintf(
+                "  %-20s| %s\n",
+                'Option',
+                'Value'
+            );
+        print "----------------------+--------------------------------------------\n";
+        my %options = $self->options;
+        for my $opt (sort keys %options) {
+            printf "  %-20s| %s\n",
+                $opt,
+                $self->option($opt) || '?';
+        }
+        exit(0);
+    }
+}
+
+sub _obtain_config_file {
+    my $self = shift;
+    $self->{_from_configfile} = {};
+
+    my $cf_name = $self->cli_options->{'configfile'};
+    return if !$cf_name;
+
+    if (!-f $cf_name) {
+        for my $ext (qw/_config .config/) {
+            if (-f "${cf_name}${ext}") { $cf_name .= $ext; last }
+        }
+    }
+
+    if (-f $cf_name) {
+        $self->cli_options->{'configfile'} = $cf_name;
+
+        # Read the config-file in a localized environment
+        our $conf;
+        local $conf;
+        delete $INC{$cf_name};
+        eval { local $^W; require $cf_name };
+        $self->{_configfile_error} = $@;
+        %{$self->from_configfile} = %{ $conf || {} };
+        delete $INC{$cf_name};
+        $self->from_configfile->{verbose} = delete($self->from_configfile->{v})
+            if exists $self->from_configfile->{v};
+    }
+    else {
+        $self->{_configfile_error} = "Could not find a configfile for '$cf_name'.";
+    }
+}
+
+=head2 $app->log_info($fmt, @values)
+
+C<< prinf $fmt, @values >> to the currently selected filehandle if the 'verbose'
+option is set.
+
+=head3 Arguments
+
+Positional.
+
+=over
+
+=item $fmt => a (s)printf format
+
+The format gets an extra new line if one wasn't present.
+
+=item @values => optional vaules for the template.
+
+=back
+
+=head3 Returns
+
+use in void context.
+
+=head3 Exceptions
+
+None.
+
+=cut
+
+sub log_info {
+    my $self = shift;
+    return if !$self->option('verbose');
+    my ($fmt, @args) = @_;
+    $fmt .= "\n" if $fmt !~ /\n\z/;
+    printf $fmt, @args;
+}
+
+=head2 $app->log_debug($fmt, @values)
+
+C<< prinf $fmt, @values >> to the currently selected filehandle if the 'verbose'
+option is set to a value > 1.
+
+=head3 Arguments
+
+Positional.
+
+=over
+
+=item $fmt => a (s)printf format
+
+The format gets an extra new line if one wasn't present.
+
+=item @values => optional vaules for the template.
+
+=back
+
+=head3 Returns
+
+use in void context.
+
+=head3 Exceptions
+
+None.
+
+=cut
+
+sub log_debug {
+    my $self = shift;
+    return if $self->option('verbose') < 2;
+    my ($fmt, @args) = @_;
+    $fmt .= "\n" if $fmt !~ /\n\z/;
+    printf $fmt, @args;
+}
+
+1;

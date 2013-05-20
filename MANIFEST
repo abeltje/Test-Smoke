@@ -4,6 +4,12 @@ chkbcfg.pl
 configsmoke.pl
 inc/Mail/Sendmail.pm
 lib/Test/Smoke.pm
+lib/Test/Smoke/App/AppOption.pm
+lib/Test/Smoke/App/AppOptionCollection.pm
+lib/Test/Smoke/App/Base.pm
+lib/Test/Smoke/App/Options.pm
+lib/Test/Smoke/App/SendReport.pm
+lib/Test/Smoke/App/Syncer.pm
 lib/Test/Smoke/BuildCFG.pm
 lib/Test/Smoke/FAQ
 lib/Test/Smoke/FTPClient.pm
@@ -14,6 +20,11 @@ lib/Test/Smoke/Mailer/Mail_X.pm
 lib/Test/Smoke/Mailer/MIME_Lite.pm
 lib/Test/Smoke/Mailer/SendEmail.pm
 lib/Test/Smoke/Mailer/Sendmail.pm
+lib/Test/Smoke/ObjectBase.pm
+lib/Test/Smoke/Poster.pm
+lib/Test/Smoke/Poster/Base.pm
+lib/Test/Smoke/Poster/HTTP_Lite.pm
+lib/Test/Smoke/Poster/LWP_UserAgent.pm
 lib/Test/Smoke/maint_dfconfig
 lib/Test/Smoke/Patcher.pm
 lib/Test/Smoke/perl58x.cfg
@@ -63,6 +74,10 @@ smokeperl.pl
 smokestatus.pl
 synctree.pl
 sysinfo.pl
+t/app/00-appobjects.t
+t/app/10-appoptions.t
+t/app/20-appoptioncollection.t
+t/app/30-app-base.t
 t/buildcfg.t
 t/cfgstuff.t
 t/for_dmake.t
