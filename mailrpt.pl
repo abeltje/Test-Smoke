@@ -29,6 +29,7 @@ my %opt = (
     ccp5p_onfail => undef,
     from         => undef,
     mserver      => undef,
+    msport       => 25,
     msuser       => undef,
     mspass       => undef,
     v            => undef,
@@ -124,7 +125,7 @@ GetOptions( \%opt,
     'type|t=s', 'ddir|d=s', 'to=s', 'cc=s', 'bcc=s', 'ccp5p_onfail!',
     'v|verbose=i',
 
-    'from=s', 'mserver=s', 'muser=s', 'mpass=s',
+    'from=s', 'mserver=s', 'msport=i', 'msuser=s', 'mspass=s',
 
     'help|h', 'man',
 

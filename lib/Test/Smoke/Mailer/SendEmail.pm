@@ -16,6 +16,7 @@ Keys for C<%args>:
 
   * ddir
   * mserver
+  * msport
   * msuser
   * mspass
   * sendemailbin
@@ -47,7 +48,15 @@ sub mail {
         if $self->{bcc};
     $cmdline   .= qq| -t "$self->{to}"|;
     $cmdline   .= qq| -f "$self->{from}"| if $self->{from};
-    $cmdline   .= qq| -s "$self->{mserver}"| if $self->{mserver};
+
+    if ($self->{mserver}) {
+        my $mserver = $self->{mserver};
+        if ($self->{msport}) {
+            $mserver .= ":$self->{msport}";
+        }
+        $cmdline .= qq| -s "$mserver"|;
+    }
+
     $cmdline   .= qq| -xu "$self->{msuser}"| if $self->{msuser};
     $cmdline   .= qq| -xp "$self->{mspass}"| if defined $self->{mspass};
     $cmdline   .= qq| -o message-file="$self->{file}"|;
