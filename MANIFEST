@@ -13,6 +13,7 @@ lib/Test/Smoke/App/Syncer.pm
 lib/Test/Smoke/BuildCFG.pm
 lib/Test/Smoke/FAQ
 lib/Test/Smoke/FTPClient.pm
+lib/Test/Smoke/LogMixin.pm
 lib/Test/Smoke/Mailer.pm
 lib/Test/Smoke/Mailer/Base.pm
 lib/Test/Smoke/Mailer/Mail_Sendmail.pm
@@ -151,4 +152,6 @@ t/util-execute.t
 t/util_times.t
 t/vms_rl.t
 t/win32/makefile.mk
+tssendrpt.pl
+tssynctree.pl
 W32Configure.pl

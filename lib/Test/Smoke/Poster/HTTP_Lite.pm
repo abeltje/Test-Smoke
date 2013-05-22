@@ -1,6 +1,7 @@
 package Test::Smoke::Poster::HTTP_Lite;
 use warnings;
 use strict;
+use Carp;
 
 use base 'Test::Smoke::Poster::Base';
 
@@ -43,10 +44,14 @@ sub post {
 
     $self->ua->prepare_post({ json => $self->get_json });
     $self->ua->add_req_header('User-Agent', $self->agent_string);
+    $self->ua->request($self->smokedb_url) or croak("CoreSmokeDB: $!");
 
-    $self->ua->request($self->smokedb_url);
-
-    return json_decode($self->ua->body)->{id};
+    my $body = decode_json($self->ua->body);
+    if (exists $body->{error}) {
+        $self->log_info("CoreSmokeDB: %s", $body->{error});
+        return;
+    }
+    return $body->{id};
 }
 
 1;

@@ -3,6 +3,8 @@ use warnings;
 use strict;
 use Carp;
 
+use Cwd qw/:DEFAULT abs_path/;
+use File::Spec::Functions qw/:DEFAULT rel2abs/;
 use Test::Smoke::Poster::HTTP_Lite;
 use Test::Smoke::Poster::LWP_UserAgent;
 
@@ -30,7 +32,7 @@ my %CONFIG = (
     df_poster  => 'LWP::UserAgent',
     df_ddir    => undef,
     df_jsnfile => 'mktest.jsn',
-    df_v       => undef,
+    df_v       => 0,
 
     df_smokedb_url => 'http://perl5.test-smoke.org/report',
 
@@ -62,7 +64,7 @@ Check arguments and return an instance of $poster_type.
 
 sub new {
     my $factory = shift;
-    my $poster = lc(shift || $CONFIG{df_poster});
+    my $poster = shift || $CONFIG{df_poster};
 
     my %args = ref $_[0] eq 'HASH' ? %{$_[0]} : @_;
 
@@ -70,10 +72,10 @@ sub new {
         my $value = exists $args{$_} ? $args{ $_ } : $CONFIG{ "df_$_" };
         ( $_ => $value )
     } ( @{ $CONFIG{general_options} }, @{ $CONFIG{$poster}{allowed} } );
-    if ( ! File::Spec->file_name_is_absolute( $fields{ddir} ) ) {
-        $fields{ddir} = File::Spec->catdir( abs_path(), $fields{ddir} );
+    if ( ! file_name_is_absolute( $fields{ddir} ) ) {
+        $fields{ddir} = catdir( abs_path(), $fields{ddir} );
     }
-    $fields{ddir} = File::Spec->rel2abs( $fields{ddir}, abs_path() );
+    $fields{ddir} = rel2abs( $fields{ddir}, abs_path() );
 
     my @missing;
     for my $required (@{ $CONFIG{$poster}{required} }) {
