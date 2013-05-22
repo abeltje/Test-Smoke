@@ -105,6 +105,9 @@ WriteMakefile(
     },
     PMLIBDIRS     => [qw/ lib inc /],
     EXE_FILES     => \@scripts,
+    test          => {
+        TESTS => 't/*.t t/app/*.t',
+    },
     %install
 );
 

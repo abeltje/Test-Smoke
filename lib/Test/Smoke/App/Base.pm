@@ -78,12 +78,10 @@ None.
 
 sub new {
     my $class = shift;
-    my %raw_args = @_;
+    my %args = @_;
 
     my $struct = {
-        _name            => $class->auto_name(),
-        _allow           => undef,
-        _default         => undef,
+        _main_options    => [],
         _general_options => [],
         _special_options => {},
         _final_options   => {},
@@ -91,38 +89,13 @@ sub new {
 
     for my $known (keys %$struct) {
         (my $key = $known) =~ s/^_//;
-        $struct->{$known} = delete $raw_args{$key} if exists $raw_args{$key};
+        $struct->{$known} = delete $args{$key} if exists $args{$key};
     }
 
     my $self = bless $struct, $class;
 
     $self->process_options();
     return $self;
-}
-
-=head2 Test::Smoke::App->auto_name()
-
-Class and Instance method.
-
-=head3 Arguments
-
-None.
-
-=head3 Returns
-
-The last part of the Package-name in lowercase.
-
-=head3 Exceptions
-
-None.
-
-=cut
-
-sub auto_name {
-    my $class = shift;
-    ref($class) and $class = ref($class);
-    (my $app_name = $class) =~ s/.*:://;
-    return lc $app_name;
 }
 
 =head2 Test::Smoke::App::Base->configfile_option()
@@ -154,21 +127,6 @@ sub verbose_option {
         allow    => [0, 1, 2],
         default  => 0,
         helptext => 'Set verbosity level.',
-    );
-}
-
-=head2 $app->myname_option()
-
-=cut
-
-sub myname_option {
-    my $self = shift;
-    return Test::Smoke::App::AppOption->new(
-        name     => $self->name,
-        option   => '=s',
-        allow    => $self->allow,
-        default  => $self->default,
-        helptext => "application variation",
     );
 }
 
@@ -266,34 +224,43 @@ sub option {
     my ($option) = @_;
 
     my $opts = $self->final_options;
-    my $name = $self->name;
-    my $type = $opts->{$name};
     if (exists $opts->{$option}) {
+        my $is_main = grep $_->name eq $option, @{$self->main_options};
+        return $opts->{$option} if $is_main;
+
         my $is_general = grep $_->name eq $option, @{$self->general_options};
         return $opts->{$option} if $is_general;
 
-        my $specials = $self->special_options->{$type};
-        my $is_special = grep $_->name eq $option, @$specials;
-        return $opts->{$option} if $is_special;
+        for my $mainopt (@{$self->main_options}) {
+            my $type = $opts->{$mainopt->name};
+            my $specials = $self->special_options->{$type};
+            my $is_special = grep $_->name eq $option, @$specials;
+            return $opts->{$option} if $is_special;
+        }
 
-        croak("Option '$option' is invalid for $name => '$type'");
+        croak("Option '$option' is not valid.");
     }
-    croak("Invalid option '$option' ($name => $type)");
+    croak("Invalid option '$option'");
 }
 
 sub _find_option {
     my $self = shift;
     my ($option) = @_;
 
-    my ($oo) = grep $_->name eq $option, @{$self->general_options};
+    my ($oo) = grep $_->name eq $option, @{$self->main_options};
     return $oo if $oo;
 
-    return if !$self->allow();
-    my $type = $self->final_options->{$self->name};
-    my $specials = $self->special_options->{$type};
-    ($oo) = grep $_->name eq $option, @$specials;
+    ($oo) = grep $_->name eq $option, @{$self->general_options};
+    return $oo if $oo;
 
-    return $oo;
+    for my $mo (@{$self->main_options}) {
+        my $type = $self->final_options->{$mo->name};
+        my $specials = $self->special_options->{$type};
+        ($oo) = grep $_->name eq $option, @$specials;
+        return $oo if $oo;
+    }
+
+    return;
 }
 
 =head2 $app->options()
@@ -316,35 +283,36 @@ sub options {
     my $self = shift;
 
     my %options;
-    my $name = $self->name;
-
-    # collect all general options
-    for my $opt (@{ $self->general_options }) {
-        next if $opt->name =~ /^(?:help|show_config)$/;
-        $options{$opt->name} = $self->option($opt->name);
-    }
-    # collect all special_options for $self->option($self->name).
-    if ($self->allow && @{$self->allow}) {
-        my $type     = $self->option($name);
+    for my $opt (@{$self->main_options}) {
+        my $type = $self->option($opt->name);
+        $options{$opt->name} = $type;
         my $specials = $self->special_options->{$type};
         for my $opt (@$specials) {
             $options{$opt->name} = $self->option($opt->name);
         }
     }
+    # collect all general options
+    for my $opt (@{ $self->general_options }) {
+        next if $opt->name =~ /^(?:help|show_config)$/;
+        $options{$opt->name} = $self->option($opt->name);
+    }
+
     return %options;
 }
 
 sub _pre_process_options {
     my $self = shift;
 
-    unshift @{$self->general_options}, $self->myname_option
-        if $self->allow;
     unshift @{$self->general_options}, $self->configfile_option;
     push @{$self->general_options}, $self->show_config_option;
     push @{$self->general_options}, $self->verbose_option;
+    for my $opt (@{$self->general_options}) {
+        $self->opt_collection->add($opt);
+    }
 
-    for my $thisopt (@{$self->general_options}) {
-        $self->opt_collection->add($thisopt);
+    $self->opt_collection->add_helptext("\n");
+    for my $opt (@{$self->main_options}) {
+        $self->opt_collection->add($opt);
     }
 
     for my $special (sort keys %{$self->special_options}) {

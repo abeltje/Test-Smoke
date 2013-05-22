@@ -8,8 +8,9 @@ my $opt = 'Test::Smoke::App::AppOption';
 
 sub syncer_config { # synctree.pl
     return (
-        allow => [qw/git rsync copy/],
-        default => 'git',
+        main_options => [
+            syncer(),
+        ],
         general_options => [
             ddir(),
         ],
@@ -35,8 +36,9 @@ sub syncer_config { # synctree.pl
 
 sub mailer_config { # mailrpt.pl
     return (
-        allow => [qw/sendmail mail mailx sendemail Mail::Sendmail MIME::Lite/],
-        default => 'Mail::Sendmail',
+        main_options => [
+            mail_type(),
+        ],
         general_options => [
             ddir(),
             to(),
@@ -80,7 +82,9 @@ sub mailer_config { # mailrpt.pl
 
 sub poster_config {
     return (
-        allow => [qw/LWP::UserAgent HTTP::Lite/],
+        main_options => [
+            poster(),
+        ],
         general_options => [
             ddir(),
             smokedb_url(),
@@ -122,20 +126,7 @@ sub reporter_config {
 sub sendreport_config {
     # merge: mailer_config, poster_config and reporter_config.
     my %mc = mailer_config();
-    my $mail_type = $opt->new(
-        name => 'mail_type',
-        option => 'mailer=s',
-        allow => $mc{allow},
-        helptext => "The type of mailsystem to use.",
-    );
     my %pc = poster_config();
-    my $poster = $opt->new(
-        name => 'poster',
-        option => '=s',
-        allow => $pc{allow},
-        default => 'LWP::UserAgent',
-        helptext => "The type of HTTP post system to use.",
-    );
     my %rc = reporter_config();
     my %g_o;
     for my $opt ( @{$mc{general_options}}
@@ -151,8 +142,10 @@ sub sendreport_config {
     for my $so (keys %{$pc{special_options}}) {
         $s_o{$so} = $pc{special_options}{$so};
     }
+
     return (
-        general_options => [$mail_type, $poster, values %g_o],
+        main_options    => [mail_type(), poster() ],
+        general_options => [values %g_o],
         special_options => \%s_o,
     );
 }
@@ -162,6 +155,35 @@ sub smoker_config {
         general_options => [
             ddir(),
         ],
+    );
+}
+
+sub syncer {
+    return $opt->new(
+        name     => 'syncer',
+        allow    => [qw/git rsync copy/],
+        default  => 'git',
+        helptext => 'The source tree sync method.',
+    );
+}
+
+sub mail_type {
+    my $mail_type = $opt->new(
+        name   => 'mail_type',
+        option => 'mailer=s',
+        allow  => [qw/sendmail mail mailx sendemail Mail::Sendmail MIME::Lite/],
+        default  => 'Mail::Sendmail',
+        helptext => "The type of mailsystem to use.",
+    );
+}
+
+sub poster {
+    return $opt->new(
+        name     => 'poster',
+        option   => '=s',
+        allow    => [qw/LWP::UserAgent HTTP::Lite/],
+        default  => 'LWP::UserAgent',
+        helptext => "The type of HTTP post system to use.",
     );
 }
 

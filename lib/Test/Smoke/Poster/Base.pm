@@ -4,6 +4,7 @@ use strict;
 use Carp;
 
 use base 'Test::Smoke::ObjectBase';
+use Test::Smoke::LogMixin;
 
 require Test::Smoke;
 
@@ -98,11 +99,13 @@ File I/O.
 sub get_json {
     my $self = shift;
 
-    my $json_file = catfile($self->{ddir}, $self->{jsnfile});
+    my $json_file = catfile($self->ddir, $self->jsnfile);
+    $self->log_debug("Reading from (%s)", $json_file);
     open my $fh, '<', $json_file or die "Cannot open($json_file): $!";
     my $json = do { local $/; <$fh> };
     close $fh;
 
+    $self->log_debug("$json");
     return $json;
 }
 

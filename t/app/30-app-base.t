@@ -15,10 +15,29 @@ use Data::Dumper;
 use Test::Smoke::App::AppOption;
 
 {
-    create_config('smokeme_config', mybin2 => '/usr/bin/mybin2', '-v', 1);
+    create_config(
+        'smokeme_config',
+        mybin2 => '/usr/bin/mybin2',
+        v      => 1,
+        ping   => 'pang',
+        noway  => 'right',
+    );
     local @ARGV = ('-v=2', '--test1', 'app2', '-c', 'smokeme');
     my $app = Test::Smoke::App::Test1->new(
-        allow => [qw/app1 app2 Module::App3/],
+        main_options => [
+            Test::Smoke::App::AppOption->new(
+                name => 'test1',
+                option => '=s',
+                allow => [qw/app1 app2 Module::App3/],
+                helptext => 'Test types.',
+            ),
+            Test::Smoke::App::AppOption->new(
+                name => 'ping',
+                option => '=s',
+                default => 'pong',
+                allow => ['pong', 'pang'],
+            ),
+        ],
         special_options => {
             app1 => [
                 Test::Smoke::App::AppOption->new(name => '1gogo'),
@@ -58,13 +77,13 @@ use Test::Smoke::App::AppOption;
     eval { $app->option('invalid') };
     like(
         $@,
-        qr/Invalid option 'invalid' \(test1 => app2\)/,
+        qr/Invalid option 'invalid'/,
         "We know about invalid options"
     );
     eval { $app->option('1gogo') };
     like(
         $@,
-        qr/Option '1gogo' is invalid for test1 => 'app2'/,
+        qr/Option '1gogo' is not valid/,
         "We know about special invalid options"
     );
 
@@ -76,6 +95,7 @@ use Test::Smoke::App::AppOption;
             test1       => 'app2',
             mybin2      => '/usr/bin/mybin2',
             '2gogo'     => 1,
+            ping        => 'pang',
         },
         "Getting relevant options"
     );
@@ -140,20 +160,36 @@ use Test::Smoke::App::AppOption;
         open STDOUT, '>', \$helptxt;
         
         local @ARGV = ('--help', '--test1', 'app');
-        $app = Test::Smoke::App::Test1->new(allow => ['app']);
+        $app = Test::Smoke::App::Test1->new(
+            main_options => [
+                Test::Smoke::App::AppOption->new(
+                    name => 'test1',
+                    option => '=s',
+                    allow => ['app'],
+                    helptext => 'Test1 variation',
+                ),
+            ],
+        );
         isa_ok($app, 'Test::Smoke::App::Test1');
     }
     like(
         $helptxt,
-        qr/test1=s <app>\s+ - application variation/,
+        qr/test1=s <app>\s+ - Test1 variation/,
         "Helptext after --help"
     );
-    is($app->auto_name, 'test1', "->auto_name as instance method");
 }
 
 { # This is to test the non-existence of the configfile
     local @ARGV = ('-v=2', '--test1', 'app2', '-c', 'smokeme');
-    my $app = Test::Smoke::App::Test1->new(allow => ['app2']);
+    my $app = Test::Smoke::App::Test1->new(
+        main_options => [
+            Test::Smoke::App::AppOption->new(
+                name => 'test1',
+                option => '=s',
+                allow => ['app2']
+            ),
+        ],
+    );
     isa_ok($app, 'Test::Smoke::App::Test1');
     is_deeply($app->from_configfile, {}, "No configfile");
 }
@@ -164,7 +200,15 @@ use Test::Smoke::App::AppOption;
     open my $fh, '>', 'smokeme.config';
     print $fh "mybin2 : /usr/bin/mybin2\n";
     close $fh;
-    my $app = Test::Smoke::App::Test1->new(allow => ['app2']);
+    my $app = Test::Smoke::App::Test1->new(
+        main_options => [
+            Test::Smoke::App::AppOption->new(
+                name => 'test1',
+                option => '=s',
+                allow => ['app2'],
+            ),
+        ],
+    );
     isa_ok($app, 'Test::Smoke::App::Test1');
     like(
         $app->configfile_error,

@@ -97,7 +97,7 @@ if [ "$SKIPALLTESTS" != "1" ] ; then
     fi
     if [ "$SKIPtests" != "1" ] ; then
         # Run the public testsuite
-        prove -wl t/*.t
+        prove -wl t/app/*.t t/*.t
         if [ $? -gt 0 ] ; then
             echo "Public tests not ok: $?"
             exit 25
