@@ -30,10 +30,13 @@ P not ok 43 # SKIP see perldelta583
 P base/cond...................................ok    0.060s
 P base/cond...................................ok       60 ms
 P cc: warning 983: The -lc library specified on the command line is also added automatically by the compiler driver.  
+F t/porting/pending-author ...................................... FAILED at test 1
+P t/porting/perlfunc ............................................ ok
+P t/lib/cygwin .................................................. skipped
     EOT
 }
 
-use Test::More tests => 1 + @tests;
+use Test::More tests => 2 + @tests;
 
 use_ok 'Test::Smoke::Util', 'skip_filter';
 
@@ -45,4 +48,27 @@ for my $test ( @tests ) {
     } else {
         ok( !skip_filter( $line ), "F: $line" );
     }
+}
+
+{
+    my $outputfile = 't/logs/5.19.0-make._test.stdout';
+    open my $tst, '<', $outputfile or die "Cannot open($outputfile): $!";
+
+    my @nok;
+    while (<$tst>) {
+        chomp;
+        skip_filter($_) and next;
+        m/^u=.*tests=/ and next;        
+        (my $tname = $_) =~ s/\s*\.+.*/.t/;
+        push @nok, $tname;
+    }
+    close $tst;
+
+    is_deeply(
+        \@nok,
+        [
+            't/porting/pending-author.t',
+        ],
+        "Grep()ed all failing tests"
+    );
 }
