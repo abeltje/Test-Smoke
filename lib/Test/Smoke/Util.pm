@@ -1286,6 +1286,8 @@ sub skip_filter {
     local( $_ ) = @_;
     # Still to be extended
     return m,^ *$, ||
+    m,^\t, ||
+    m,^PERL=./perl\s+./runtests choose, ||
     m,^	AutoSplitting, ||
     m,^\./miniperl , ||
     m,^\s*autosplit_lib, ||
@@ -1302,7 +1304,7 @@ sub skip_filter {
     m,^lib/ftmp-security....File::Temp::_gettemp: Parent directory \((\.|/tmp/)\) is not safe, ||
     m,^File::Temp::_gettemp: Parent directory \((\.|/tmp/)\) is not safe, ||
     m,^ok$, ||
-    m,^[-a-zA-Z0-9_/]+\.*(ok|skipping test on this platform)$, ||
+    m,^[-a-zA-Z0-9_/.]+\s*\.*\s*(ok|skipped|skipping test on this platform)$, ||
     m,^(xlc|cc_r) -c , ||
 #    m,^\s+$testdir/, ||
     m,^sh mv-if-diff\b, ||
@@ -1333,7 +1335,6 @@ sub skip_filter {
     m,dmake\.exe:?\s+-S, ||
     m,^\s+\d+/\d+ skipped: , ||
     m,^\s+all skipped: , ||
-    m,\.+skipped$, ||
     m,^\s*pl2bat\.bat [\w\\]+, ||
     m,^Making , ||
     m,^Skip , ||
