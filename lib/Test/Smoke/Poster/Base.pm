@@ -99,14 +99,25 @@ File I/O.
 sub get_json {
     my $self = shift;
 
-    my $json_file = catfile($self->ddir, $self->jsnfile);
+    my $json_file = $self->json_filename();
     $self->log_debug("Reading from (%s)", $json_file);
     open my $fh, '<', $json_file or die "Cannot open($json_file): $!";
     my $json = do { local $/; <$fh> };
     close $fh;
 
-    $self->log_debug("$json");
     return $json;
+}
+
+=head2 $poster->json_filename()
+
+Returns the the fully qualified file name of the jsonfile.
+
+=cut
+
+sub json_filename {
+    my $self = shift;
+
+    return catfile($self->ddir, $self->jsnfile);
 }
 
 =head2 $poster->post()

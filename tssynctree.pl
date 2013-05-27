@@ -1,6 +1,8 @@
 #! /usr/bin/perl -w
 use strict;
 
+use lib 'lib';
+
 use Test::Smoke::App::Options;
 use Test::Smoke::App::Syncer;
 

@@ -5,7 +5,9 @@ use Carp;
 
 use Cwd qw/:DEFAULT abs_path/;
 use File::Spec::Functions qw/:DEFAULT rel2abs/;
+use Test::Smoke::Poster::Curl;
 use Test::Smoke::Poster::HTTP_Lite;
+use Test::Smoke::Poster::HTTP_Tiny;
 use Test::Smoke::Poster::LWP_UserAgent;
 
 =head1 NAME
@@ -29,14 +31,14 @@ Returns a instance of the object-class requested.
 =cut
 
 my %CONFIG = (
-    df_poster  => 'LWP::UserAgent',
+    df_poster  => 'HTTP::Tiny',
     df_ddir    => undef,
     df_jsnfile => 'mktest.jsn',
     df_v       => 0,
 
     df_smokedb_url => 'http://perl5.test-smoke.org/report',
 
-    df_ua_timeout => 30,
+    df_ua_timeout => undef,
 
     'LWP::UserAgent' => {
         allowed  => [qw/ua_timeout/],
@@ -48,11 +50,23 @@ my %CONFIG = (
         required => [],
         class => 'Test::Smoke::Poster::HTTP_Lite',
     },
+    'HTTP::Tiny' => {
+        allowed => [],
+        required => [],
+        class => 'Test::Smoke::Poster::HTTP_Tiny',
+    },
+    'curl' => {
+        allowed => [qw/curlbin/],
+        required => [qw/curlbin/],
+        class => 'Test::Smoke::Poster::Curl',
+    },
 
     valid_type => {
         'LWP::UserAgent' => 1,
-        'HTTP::Lite'     => 1
+        'HTTP::Lite'     => 1,
+        'HTTP::Tiny'     => 1,
     },
+
     general_options => [qw/ddir jsnfile v smokedb_url/],
 );
 

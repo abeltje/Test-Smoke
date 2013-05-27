@@ -33,7 +33,7 @@ sub new {
 
     my %extra_args;
     if (defined $self->ua_timeout) {
-        $extra_args{timeout} = $self->au_timeout;
+        $extra_args{timeout} = $self->ua_timeout;
     }
     $self->{_ua} = LWP::UserAgent->new(
         agent => $self->agent_string(),
@@ -59,7 +59,7 @@ sub post {
         { json => $json }
     );
 
-    return json_decode($response->content)->{id};
+    return decode_json($response->content)->{id};
 }
 
 1;

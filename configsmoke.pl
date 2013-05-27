@@ -621,6 +621,11 @@ EOT
     },
 
     # Test::Smoke::Gateway database
+    poster => {
+        msg => "The type of HTTP POST system to use.",
+        alt => [get_avail_posters()],
+        dft => '',
+    },
     smokedb_url => {
         msg => <<EOT,
 Send smoke results to the SmokeDB? (url)
@@ -1441,26 +1446,35 @@ Please send in the smoke-logfile for failures.
 
 =cut
 
-$arg = 'smokedb_url';
 SMOKEDB: {
     eval q{require JSON;};
     my $has_json = !$@;
     if ( !$has_json ) {
-        $config{ $arg } = "";
+        $config{smokedb_url} = $config{poster} = "";
         print "Could not find 'JSON', please install.\n";
         last SMOKEDB;
     }
 
-    eval q{require LWP::UserAgent;};
-    my $has_lwp_useragent = !$@;
-    if ( !$has_lwp_useragent ) {
-        $config{ $arg } = "";
-        print "Could not find 'LWP::UserAgent', please install.\n";
+    if (!@{ $opt{poster}{alt} }) {
+        $config{smokedb_url} = $config{poster} = "";
+        print "Could not find a HTTP poster, no CoreSmokeDB.\n";
         last SMOKEDB;
     }
 
+    $arg = 'smokedb_url';
     $config{ $arg } = prompt( $arg );
-    last SMOKEDB if !$config{ $arg };
+    if (! $config{$arg}) {
+        $config{smokedb_url} = $config{poster} = "";
+        last SMOKEDB;
+    }
+
+    $arg = 'poster';
+    $config{$arg} = prompt($arg);
+    if (! $config{$arg}) {
+        $config{smokedb_url} = $config{poster} = "";
+        last SMOKEDB;
+    }
+    $config{curlbin} = whereis('curl') if $config{poster} eq 'curl';
 
     $arg = 'send_log';
     $config{ $arg } = prompt( $arg );
@@ -2376,6 +2390,23 @@ EORENICE
 # (renice -n 20 \$\$ >/dev/null 2>&1) || (renice 20 \$\$ >/dev/null 2>&1)
 EOCOMMENT
 
+}
+
+sub get_avail_posters {
+    my @posters;
+
+    eval { local $^W; require HTTP::Tiny };
+    push @posters, 'HTTP::Tiny' if !$@;
+
+    eval { local $^W; require LWP::UserAgent };
+    push @posters, 'LWP::UserAgent' if !$@;
+
+    eval { local $^W; require HTTP::Lite };
+    push @posters, 'HTTP::Lite' if !$@;
+
+    push @posters, 'curl', if whereis('curl');
+
+    return @posters;
 }
 
 sub get_avail_sync {

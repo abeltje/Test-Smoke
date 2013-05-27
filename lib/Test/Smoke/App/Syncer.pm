@@ -11,7 +11,7 @@ sub new {
     my $self = $class->SUPER::new(@_);
 
     $self->{_syncer} = Test::Smoke::Syncer->new(
-        $self->option($self->name),
+        $self->option('syncer'),
         $self->options,
         v => $self->option('verbose'),
     );

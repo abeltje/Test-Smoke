@@ -310,18 +310,17 @@ sub _pre_process_options {
         $self->opt_collection->add($opt);
     }
 
-    $self->opt_collection->add_helptext("\n");
-    for my $opt (@{$self->main_options}) {
+    for my $opt (sort {$a->name cmp $b->name} @{$self->main_options}) {
+        $self->opt_collection->add_helptext("\n");
         $self->opt_collection->add($opt);
-    }
-
-    for my $special (sort keys %{$self->special_options}) {
-        $self->opt_collection->add_helptext(
-            sprintf("\nOptions for '%s':\n", $special)
-        );
-        my $specials = $self->special_options->{$special};
-        for my $thisopt (@$specials) {
-            $self->opt_collection->add($thisopt);
+        for my $special (sort {lc($a) cmp lc($b)} @{$opt->allow}) {
+            $self->opt_collection->add_helptext(
+                sprintf("\nOptions for '%s':\n", $special)
+            );
+            my $specials = $self->special_options->{$special};
+            for my $thisopt (@$specials) {
+                $self->opt_collection->add($thisopt);
+            }
         }
     }
 
@@ -432,6 +431,41 @@ sub _obtain_config_file {
     else {
         $self->{_configfile_error} = "Could not find a configfile for '$cf_name'.";
     }
+}
+
+=head2 $app->log_warn($fmt, @values)
+
+C<< prinf $fmt, @values >> to the currently selected filehandle.
+
+=head3 Arguments
+
+Positional.
+
+=over
+
+=item $fmt => a (s)printf format
+
+The format gets an extra new line if one wasn't present.
+
+=item @values => optional vaules for the template.
+
+=back
+
+=head3 Returns
+
+use in void context.
+
+=head3 Exceptions
+
+None.
+
+=cut
+
+sub log_warn {
+    my $self = shift;
+    my ($fmt, @args) = @_;
+    $fmt .= "\n" if $fmt !~ /\n\z/;
+    printf $fmt, @args;
 }
 
 =head2 $app->log_info($fmt, @values)

@@ -34,7 +34,7 @@ sub syncer_config { # synctree.pl
     );
 }
 
-sub mailer_config { # mailrpt.pl
+sub mailer_config { # mailing reports
     return (
         main_options => [
             mail_type(),
@@ -80,7 +80,7 @@ sub mailer_config { # mailrpt.pl
     );
 }
 
-sub poster_config {
+sub poster_config { # posting to CoreSmokeDB
     return (
         main_options => [
             poster(),
@@ -96,11 +96,15 @@ sub poster_config {
                 ua_timeout(),
             ],
             'HTTP::Lite' => [],
+            'HTTP::Tiny' => [],
+            'curl' => [
+                curlbin(),
+            ],
         },
     );
 }
 
-sub reporter_config {
+sub reporter_config { # needed for sending out reports
     return (
         general_options => [
             ddir(),
@@ -123,7 +127,7 @@ sub reporter_config {
     );
 }
 
-sub sendreport_config {
+sub sendreport_config { # sendreport.pl
     # merge: mailer_config, poster_config and reporter_config.
     my %mc = mailer_config();
     my %pc = poster_config();
@@ -150,13 +154,49 @@ sub sendreport_config {
     );
 }
 
-sub smoker_config {
+sub runsmoke_config { # runsmoke.pl
     return (
         general_options => [
             ddir(),
+            outfile(),
+            rptfile(),
+            jsnfile(),
+            killtime(),
+            makeopt(),
+            testmake(),
+            defaultenv(),
+            cfg(),
+            harnessonly(),
+            harness3opts(),
+            opt_continue(),
+            is56x(),
+            locale(),
+            force_c_locale(),
+            is_win32(),
+            w32cc(),
+            w32make(),
+            is_vms(),
         ],
     );
 }
+
+sub archiver_config {
+    return (
+        general_options => [
+            archive(),
+            ddir(),
+            adir(),
+            outfile(),
+            rptfile(),
+            jsnfile(),
+            lfile(),
+        ],
+    );
+}
+
+###########################################################
+#####              Individual options                 #####
+###########################################################
 
 sub syncer {
     return $opt->new(
@@ -165,6 +205,12 @@ sub syncer {
         default  => 'git',
         helptext => 'The source tree sync method.',
     );
+}
+
+sub fsync { # How to sync the mdir for Forest.
+    my $s = syncer();
+    $s->name('fsync');
+    return $s;
 }
 
 sub mail_type {
@@ -181,8 +227,8 @@ sub poster {
     return $opt->new(
         name     => 'poster',
         option   => '=s',
-        allow    => [qw/LWP::UserAgent HTTP::Lite/],
-        default  => 'LWP::UserAgent',
+        allow    => [qw/LWP::UserAgent HTTP::Lite HTTP::Tiny curl/],
+        default  => 'HTTP::Tiny',
         helptext => "The type of HTTP post system to use.",
     );
 }
@@ -209,7 +255,7 @@ sub outfile {
         name => 'outfile',
         option => '=s',
         default => 'mktest.out',
-        helptext => 'Name of the file to store the email report in.',
+        helptext => 'Name of the file to store the raw smoke log in.',
     );
 }
 
@@ -444,11 +490,35 @@ sub rsyncsource {
     );
 }
 
-sub cdir {
+sub cdir { # cdir => ddir
     return $opt->new(
         name => 'cdir',
         option => '=s',
         helptext => "The local directory from where to copy the perlsources.",
+    );
+}
+
+sub fdir { # mdir => fdir => ddir
+    return $opt->new(
+        name => 'fdir',
+        option => '=s',
+        helptext => "The local directory to build the hardlink Forest from.",
+    );
+}
+
+sub hdir { # hdir => ddir
+    return $opt->new(
+        name => 'hdir',
+        option => '=s',
+        helptext => "The local directory to hardlink from.",
+    );
+}
+
+sub mdir { # mdir => fdir => ddir
+    return $opt->new(
+        name => 'mdir',
+        option => '=s',
+        helptext => "The master directory of the Hardlink-Forest.",
     );
 }
 
@@ -476,6 +546,15 @@ sub ua_timeout {
         option => '=i',
         default => 30,
         helptext => "The timeout to set the UserAgent.",
+    );
+}
+
+sub curlbin {
+    return $opt->new(
+        name => 'curlbin',
+        option => '=s',
+        default => 'curl',
+        helptext => "The fqp for the curl program.",
     );
 }
 
@@ -523,6 +602,14 @@ sub locale {
     );
 }
 
+sub force_c_locale {
+    return $opt->new(
+        name => 'force_c_locale',
+        default => 0,
+        helptext => "Run test suite under the C locale only.",
+    );
+}
+
 sub defaultenv {
     return $opt->new(
         name => 'defaultenv',
@@ -565,6 +652,15 @@ sub harness3opts {
     );
 }
 
+sub harness_destruct {
+    return $opt->new(
+        name => 'harness_destruct',
+        option => 'harness-destruct=i',
+        default => 2,
+        helptext => "Sets \$ENV{PERL_DESTRUCT_LEVEL} for 'make test_harness'.",
+    );
+}
+
 sub user_note {
     return $opt->new(
         name => 'user_note',
@@ -588,6 +684,109 @@ sub un_position {
         allow => ['top', 'bottom'],
         default => 'bottom',
         helptext => "Position of the 'user_note' in the smoke report.",
+    );
+}
+
+sub opt_continue {
+    return $opt->new(
+        name => 'continue',
+        option => '',
+        default => 0,
+        helptext => "Continue where last smoke left-off.",
+    );
+}
+
+sub is_vms {
+    return $opt->new(
+        name => 'is_vms',
+        default => ($^O eq 'VMS'),
+        helptext => "Internal, shows we're on VMS",
+    );
+}
+
+sub vmsmake {
+    return $opt->new(
+        name => 'vmsmake',
+        option => '=s',
+        default => 'MMK',
+        helptext => "The make program on VMS.",
+    )
+}
+
+sub is_win32 {
+    return $opt->new(
+        name => 'is_win32',
+        default => ($^O eq 'MSWin32'),
+        helptext => "Internal, shows we're on MSWin32",
+    );
+}
+
+sub w32cc {
+    return $opt->new(
+        name => 'w32cc',
+        opt => '=s',
+        helptext => "The compiler on MSWin32.",
+    );
+}
+
+sub w32make {
+    return $opt->new(
+        name => 'w32make',
+        opt => '=s',
+        default => 'dmake',
+        helptext => "The make program on MSWin32.",
+    );
+}
+
+sub w32args {
+    return $opt->new(
+        name => 'w32args',
+        option => '=s@',
+        default => [],
+        helptext => "Extra options to pass to W32Configure.",
+    )
+}
+
+sub makeopt {
+    return $opt->new(
+        name => 'makeopt',
+        option => '=s',
+        helptext => "Extra option to pass to make.",
+    );
+}
+
+sub testmake { # This was an Alan Burlison request.
+    return $opt->new(
+        name => 'testmake',
+        option => '=s',
+        helptext => "A different make program for 'make test'.",
+    );
+}
+
+sub killtime {
+    return $opt->new(
+        name => 'killtime',
+        option => '=s',
+        default => undef,
+        allow => [undef, '', qr/^\+?[0-9]{1,2}:[0-9]{2}$/],
+        helptext => "The absolute or relative time the smoke may run.",
+    );
+}
+
+sub archive {
+    return $opt->new(
+        name => 'archive',
+        option => '!',
+        default => 1,
+        helptext => "Archive files after a smokerun.",
+    );
+}
+
+sub adir {
+    return $opt->new(
+        name => 'adir',
+        option => '=s',
+        helptext => "Directory to archive the smoker files in.",
     );
 }
 
