@@ -183,11 +183,14 @@ sub Configure_win32 {
         "-DCCTYPE"              => "CCTYPE",
         "-DWIN64"               => "WIN64",
         "-Dgcc_v3_2"            => "USE_GCC_V3_2",
+        "-DGCC_4XX"             => "GCC_4XX",
+        "-DGCCHELPERDLL"        => "GCCHELPERDLL",
         "-Dbccold"              => "BCCOLD",
         "-DCCHOME"              => "CCHOME",
         "-DIS_WIN95"            => "IS_WIN95",
         "-DCRYPT_SRC"           => "CRYPT_SRC",
         "-DCRYPT_LIB"           => "CRYPT_LIB",
+        "-DEXTRALIBDIRS"        => "EXTRALIBDIRS",
     );
 # %opts hash-values:
 # undef  => leave option as-is when no override (makefile default)
@@ -195,12 +198,12 @@ sub Configure_win32 {
 # (true) => enable option when no override (change value, unless
 #           $key =~ /^(?:PERL|USE)_/) (forced default)
     my %opts = (
-        USE_MULTI       => 0,
-        USE_ITHREADS    => 0,
-        USE_IMP_SYS     => 0,
+        USE_MULTI       => 0, # default define
+        USE_ITHREADS    => 0, # default define
+        USE_IMP_SYS     => 0, # default define
         USE_PERLIO      => 1, # useperlio should be the default!
+        USE_LARGE_FILES => 0, # default define
         PERL_MALLOC     => 0,
-        USE_LARGE_FILES => 0,
         BUILD_STATIC    => 0,
         USE_DEBUGGING   => 0,
         INST_DRV        => undef,
@@ -210,15 +213,17 @@ sub Configure_win32 {
         EMAIL           => undef,  # used to be $smoker,
         CCTYPE          => undef,  # used to be $win32_cctype,
         USE_GCC_V3_2    => 0,
+        GCC_4XX         => 0,
+        GCCHELPERDLL    => undef,
         BCCOLD          => 0,
         CCHOME          => undef,
         WIN64           => undef,
         IS_WIN95        => 0,
         CRYPT_SRC       => undef,
         CRYPT_LIB       => undef,
+        EXTRALIBDIRS    => undef,
     );
-#    my $def_re = qr/((?:(?:PERL|USE|IS)_\w+)|BCCOLD)/;
-    my $def_re = '((?:(?:PERL|USE|IS)_\w+)|BCCOLD)';
+    my $def_re = qr/((?:(?:PERL|USE|IS|GCC)_\w+)|BCCOLD)/;
     my @w32_opts = grep ! /^$def_re/, keys %opts;
     my $config_args = join " ", 
         grep /^-[DU][a-z_]+/, quotewords( '\s+', 1, $command );
@@ -254,6 +259,9 @@ sub Configure_win32 {
 
     # If you -Dgcc_v3_2 you 'll *want* CCTYPE = GCC
     $opts{CCTYPE} = "GCC" if $opts{USE_GCC_V3_2};
+
+    # If you -DGCC_4XX you 'll *want* CCTYPE = GCC
+    $opts{CCTYPE} = "GCC" if $opts{GCC_4XX};
 
     # If you -Dbccold you 'll *want* CCTYPE = BORLAND
     $opts{CCTYPE} = "BORLAND" if $opts{BCCOLD};
