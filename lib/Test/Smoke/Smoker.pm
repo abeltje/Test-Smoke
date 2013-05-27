@@ -1,15 +1,14 @@
 package Test::Smoke::Smoker;
+use warnings;
 use strict;
 
-# $Id$
-use vars qw( $VERSION );
-$VERSION = '0.045';
+our $VERSION = '0.046';
 
+use Config;
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
-use Config;
 use Test::Smoke::Util qw( get_smoked_Config skip_filter );
-require Carp;
+
 BEGIN { eval q{ use Time::HiRes qw( time ) } }
 
 my %CONFIG = (
@@ -122,7 +121,8 @@ sub new {
     my $fh = shift;
 
     unless ( ref $fh eq 'GLOB' ) {
-        Carp::croak( sprintf "Usage: %s->new( \\*FH, %%args )", __PACKAGE__);
+        require Carp;
+        Carp::croak(sprintf "Usage: %s->new( \\*FH, %%args )", __PACKAGE__);
     }
 
     my %args_raw = @_ ? UNIVERSAL::isa( $_[0], 'HASH' ) ? %{ $_[0] } : @_ : ();
@@ -514,9 +514,9 @@ sub make_test {
         unless ( $self->{run} ) {
             $self->ttylog( "bailing out (--norun)...\n" );
             next;
-	}
+        }
 
-	if  ( $self->{harnessonly} ) {
+        if  ( $self->{harnessonly} ) {
 
             $self->{harness3opts} and
                 local $ENV{HARNESS_OPTIONS} = $self->{harness3opts};
@@ -683,7 +683,8 @@ sub _run_harness_target {
 
     close $tst or do {
         my $error = $! || ( $? >> 8);
-        Carp::carp( "\nerror while running harness target '$target': $error" );
+        require Carp;
+        Carp::carp("\nerror while running harness target '$target': $error");
     };
 
     $self->ttylog( "\n", join( "", @failed ), "\n" );
@@ -784,7 +785,8 @@ sub _run_harness3_target {
 
     close $tst or do {
         my $error = $! || ( $? >> 8);
-        Carp::carp( "\nerror while running harness target '$target': $error" );
+        require Carp;
+        Carp::carp("\nerror while running harness target '$target': $error" );
     };
 
     $self->ttylog( "\n", join( "", @failed ), "\n" );
@@ -793,7 +795,10 @@ sub _run_harness3_target {
 
 sub _run_TEST_target {
     my( $self, $target, $extend ) = @_;
-    !$target and Carp::Confess( "No target in _run_TEST_target" );
+    !$target and do {
+        require Carp;
+        Carp::confess("No target in _run_TEST_target");
+    };
 
     my @nok;
     my $tst = $self->_make_fork( $target );
@@ -817,7 +822,7 @@ sub _run_TEST_target {
     }
     close $tst or do {
         my $error = $! || ( $? >> 8);
-        Carp::carp("\nError while reading test-results: $error");
+        $self->ttylog("\nError while reading test-results: $error");
     };
 
 #    $self->log( map { "    $_" } @nok );
@@ -1068,7 +1073,7 @@ sub set_skip_tests {
         @libext and $self->change_manifest( \@libext, $unset );
     } else {
         require Carp;
-        Carp::carp( "Cannot open($self->{skip_tests}): $!" );
+        Carp::carp("Cannot open($self->{skip_tests}): $!");
     }
 }
 
@@ -1090,14 +1095,14 @@ sub change_manifest {
             unlink $mani_org;
             rename $mani_new, $mani_org;
             chmod $perms, $mani_org;
-	}
+        }
     } else {
         my $perms = (stat $mani_org)[2] & 07777;
         chmod 0755, $mani_org;
         rename $mani_org, $mani_new or do {
             chmod $perms, $mani_org;
             require Carp;
-	    Carp::carp("No skip of lib or ext tests [rename($mani_new): $!]");
+            Carp::carp("No skip of lib or ext tests [rename($mani_new): $!]");
             return;
         };
         local( *MANIO, *MANIN );
@@ -1206,6 +1211,7 @@ sub _make_fork {
         $ok = open TST, $cmd or $err = $!;
     }
     $ok or do {
+        require Carp;
         Carp::carp("Cannot fork '$cmd': $err");
         return 0;
     };

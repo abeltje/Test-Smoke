@@ -78,8 +78,10 @@ sub new {
     if (!defined($struct->{_name}) || !length($struct->{_name})) {
         croak("Required option 'name' not given.");
     }
-    if (defined($struct->{_allow}) and (ref($struct->{_allow}) ne 'ARRAY')) {
-        croak("Option 'allow' must be an ArrayRef when set");
+    if (    defined($struct->{_allow})
+        and (ref($struct->{_allow}) !~ /^(?:ARRAY|Regexp|CODE)$/))
+    {
+        croak("Option 'allow' must be an ArrayRef|CodeRef|RegExp when set");
     }
     # had_default(): order == code < configfile < commandline
 
@@ -127,8 +129,8 @@ sub allowed {
     return 1 if !defined $self->allow;
 
     my ($value, $allow) = @_;
+    $allow = $self->allow if @_ == 1;
     GIVEN: {
-        $allow = $self->allow if @_ == 1;
         local $_ = ref($allow);
 
         /^ARRAY$/ && do {
@@ -177,10 +179,19 @@ sub gol_option {
 sub show_helptext {
     my $self = shift;
 
-    my @option = ('--' . $self->gol_option);
+    my $prefix = '--';
+    if ($self->option =~ /!$/) {
+        $prefix .= '[no]';
+    }
+    my @option = ($prefix . $self->gol_option);
 
-    if ($self->allow && @{$self->allow}) {
-        my $allowed = join('|', @{$self->allow});
+    if (defined($self->allow) && ref($self->allow) eq 'ARRAY') {
+        my @values = sort {
+            lc($a) cmp lc($b)
+        } map
+            defined($_) ? $_ : "'undef'"
+        , @{$self->allow};
+        my $allowed = join('|', @values);
         push @option, "<$allowed>";
     }
 
