@@ -50,7 +50,7 @@ use Test::Smoke::App::AppOption;
         $o->show_helptext,
         sprintf(
             $Test::Smoke::App::AppOption::HTFMT,
-            '--klad|k=s <bling|blang>',
+            '--klad|k=s <blang|bling>',
             "This message"
         ),
         "show_helptext with allowed"
@@ -68,7 +68,7 @@ use Test::Smoke::App::AppOption;
         $o->show_helptext,
         sprintf(
             $Test::Smoke::App::AppOption::HTFMT,
-            '--klad|k=s <bling|blang>',
+            '--klad|k=s <blang|bling>',
             "This message too"
         ),
         "show_helptext with allowed"
@@ -123,7 +123,7 @@ use Test::Smoke::App::AppOption;
     };
     like(
         $@,
-        qr/^Option 'allow' must be an ArrayRef when set/,
+        qr/^Option 'allow' must be an ArrayRef\|CodeRef\|RegExp when set/,
         "Check for 'allow'"
     );
 }

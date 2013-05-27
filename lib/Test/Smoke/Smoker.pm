@@ -822,7 +822,7 @@ sub _run_TEST_target {
     }
     close $tst or do {
         my $error = $! || ( $? >> 8);
-        $self->ttylog("\nError while reading test-results: $error");
+        $self->tty("\nError while reading test-results: $error");
     };
 
 #    $self->log( map { "    $_" } @nok );

@@ -6,10 +6,13 @@ inc/Mail/Sendmail.pm
 lib/Test/Smoke.pm
 lib/Test/Smoke/App/AppOption.pm
 lib/Test/Smoke/App/AppOptionCollection.pm
+lib/Test/Smoke/App/Archiver.pm
 lib/Test/Smoke/App/Base.pm
 lib/Test/Smoke/App/Options.pm
+lib/Test/Smoke/App/RunSmoke.pm
 lib/Test/Smoke/App/SendReport.pm
 lib/Test/Smoke/App/Syncer.pm
+lib/Test/Smoke/Archiver.pm
 lib/Test/Smoke/BuildCFG.pm
 lib/Test/Smoke/FAQ
 lib/Test/Smoke/FTPClient.pm
@@ -24,7 +27,9 @@ lib/Test/Smoke/Mailer/Sendmail.pm
 lib/Test/Smoke/ObjectBase.pm
 lib/Test/Smoke/Poster.pm
 lib/Test/Smoke/Poster/Base.pm
+lib/Test/Smoke/Poster/Curl.pm
 lib/Test/Smoke/Poster/HTTP_Lite.pm
+lib/Test/Smoke/Poster/HTTP_Tiny.pm
 lib/Test/Smoke/Poster/LWP_UserAgent.pm
 lib/Test/Smoke/maint_dfconfig
 lib/Test/Smoke/Patcher.pm
@@ -113,6 +118,7 @@ t/gccmsg.out
 t/get_cpus.t
 t/get_patch.t
 t/grepccmsg.t
+t/logs/5.19.0-make._test.stdout
 t/logs/gcc2722.log
 t/logs/hpux1020.log
 t/logs/hpux1111.log
@@ -128,6 +134,7 @@ t/patcher.t
 t/patcher_forest.t
 t/pc09.out
 t/policy.t
+t/poster-post.t
 t/regenstuff.t
 t/report-usernote.t
 t/reporter.t
@@ -152,6 +159,8 @@ t/util-execute.t
 t/util_times.t
 t/vms_rl.t
 t/win32/makefile.mk
+tsarchive.pl
+tsrunsmoke.pl
 tssendrpt.pl
 tssynctree.pl
 W32Configure.pl

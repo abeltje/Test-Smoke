@@ -185,7 +185,9 @@ sub show_helptext {
     }
     my @option = ($prefix . $self->gol_option);
 
-    if (defined($self->allow) && ref($self->allow) eq 'ARRAY') {
+    if (   defined($self->allow)
+        && ref($self->allow) eq 'ARRAY' && @{$self->allow})
+    {
         my @values = sort {
             lc($a) cmp lc($b)
         } map
