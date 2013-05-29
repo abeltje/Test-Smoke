@@ -114,6 +114,10 @@ The patch-resource can also be specified in four (4) ways.
 
 =back
 
+=head2 TRY_REGEN_HEADERS
+
+Constant 1.
+
 =head1 METHODS
 
 =over 4

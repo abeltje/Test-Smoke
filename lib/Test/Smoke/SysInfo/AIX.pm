@@ -10,7 +10,7 @@ Test::Smoke::SysInfo::AIX - Object for specific AIX info.
 
 =head1 DESCRIPTION
 
-=head2 $si->prepare_sysinof()
+=head2 $si->prepare_sysinfo()
 
 Use os-specific tools to find out more about the system.
 

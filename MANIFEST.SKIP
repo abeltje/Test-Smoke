@@ -2,7 +2,7 @@
 ~$
 \.swp$
 .gitignore
-private/
+xt/
 klad/
 contrib/
 mkdist.sh

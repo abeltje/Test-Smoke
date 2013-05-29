@@ -6,11 +6,11 @@ use lib 'lib';
 use Test::Smoke::App::Options;
 use Test::Smoke::App::RunSmoke;
 
-my $smoker = Test::Smoke::App::RunSmoke->new(
+my $app = Test::Smoke::App::RunSmoke->new(
     Test::Smoke::App::Options->runsmoke_config()
 );
 
-if (my $error = $smoker->configfile_error) {
+if (my $error = $app->configfile_error) {
     die "$error\n";
 }
-$smoker->run();
+$app->run();

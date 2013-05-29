@@ -6,11 +6,11 @@ use base 'Test::Smoke::SysInfo::Base';
 
 =head1 NAME
 
-Test::Smoke::SysInfo::Windows - Object for specific Windows/cygwin info.
+Test::Smoke::SysInfo::Windows - Object for specific Windows info.
 
 =head1 DESCRIPTION
 
-=head2 $si->prepare_sysinof()
+=head2 $si->prepare_sysinfo()
 
 Use os-specific tools to find out more about the system.
 

@@ -10,6 +10,42 @@ use File::Path;
 use File::Spec::Functions;
 use Test::Smoke::Util qw/get_patch/;
 
+=head1 NAME
+
+Test::Smoke::Archiver - Archive the smoke files.
+
+=head1 DESCRIPTION
+
+=head2 Test::Smoke::Archiver->new(%arguments)
+
+=head3 Arguments
+
+=over
+
+=item archive => [0|1]
+
+=item ddir => $smoke_destination_directory
+
+=item adir => $archive_destination_directory
+
+=item outfile => 'mktest.out'
+
+=item rptfile => 'mktest.rpt'
+
+=item jsnfile => 'mktest.jsn'
+
+=item lfile => $logfile_name
+
+=item v => [0|1|2]
+
+=back
+
+=head3 Returns
+
+The instance...
+
+=cut
+
 my %CONFIG = (
     df_archive => 1,
     df_ddir    => '.',
@@ -38,6 +74,12 @@ sub new {
     return $self;
 }
 
+=head2 $archiver->archive_files()
+
+Copy files.
+
+=cut
+
 sub archive_files {
     my $self = shift;
     if (!$self->archive) {
@@ -61,6 +103,10 @@ sub archive_files {
     }
 }
 
+=head2 $archiver->archive_rpt
+
+=cut
+
 sub archive_rpt {
     my $self = shift;
     my $src = catfile($self->ddir, $self->rptfile);
@@ -81,6 +127,10 @@ sub archive_rpt {
     }
     return $success;
 }
+
+=head2 $archiver->archive_out
+
+=cut
 
 sub archive_out {
     my $self = shift;
@@ -103,6 +153,10 @@ sub archive_out {
     return $success;
 }
 
+=head2 $archiver->archive_jsn
+
+=cut
+
 sub archive_jsn {
     my $self = shift;
     my $src = catfile($self->ddir, $self->jsnfile);
@@ -123,6 +177,10 @@ sub archive_jsn {
     }
     return $success;
 }
+
+=head2 $archiver->archive_log
+
+=cut
 
 sub archive_log {
     my $self = shift;
@@ -146,3 +204,30 @@ sub archive_log {
 }
 
 1;
+
+=head1 COPYRIGHT
+
+(c) 2002-2013, Abe Timmerman <abeltje@cpan.org> All rights reserved.
+
+With contributions from Jarkko Hietaniemi, Merijn Brand, Campo
+Weijerman, Alan Burlison, Allen Smith, Alain Barbet, Dominic Dunlop,
+Rich Rauenzahn, David Cantrell.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+See:
+
+=over 4
+
+=item * L<http://www.perl.com/perl/misc/Artistic.html>
+
+=item * L<http://www.gnu.org/copyleft/gpl.html>
+
+=back
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=cut

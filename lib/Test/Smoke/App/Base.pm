@@ -11,39 +11,44 @@ use Test::Smoke::App::AppOptionCollection;
 
 =head1 NAME
 
-Test::Smoke::App - Framework for Test::Smoke applications.
+Test::Smoke::App::Base - Baseclass for Test::Smoke::App::* applications.
 
 =head1 SYNOPSIS
 
-    package Test::Smoke::Mailer;
-    use base 'Test::Smoke::App';
+    package Test::Smoke::App::Mailer;
+    use base 'Test::Smoke::App::Base';
     sub run {...}
 
 =head1 DESCRIPTION
 
-  use Test::Smoke::App::Mailer;
-  my $mailer = Test::Smoke::App::Mailer->new(
-      allow => [qw/sendmail MIME::Lite Mail::Sendmail/],
-      genral_options => [
-          Test::Smoke::AppOption->new(
-              name    => 'verbose',
-              option  => '|v=i',
-              default => 0,
-              helptxt => 'Set verbosity level',
-          ),
-  
-      ],
-      special_options => {
-          'MIME::Lite' => [
-              $MSERVER_OPT,
-              $MSPORT_OPT,
-              $MSUSER_OPT,
-              $MSPASS_OPT,
-          ],
-          'sendmail' => [
-          ],
-      },
-  );
+    use Test::Smoke::App::Mailer;
+    my $mailer = Test::Smoke::App::Mailer->new(
+        main_options => [
+            Test::Smoke::App::AppOption->new(
+                name     => 'mailer',
+                option   => '=s',
+                allow    => [qw/MIME::lite sendmail/],
+                helptext => "Mailsystem to use for sendig reports.",
+            ),
+        ],
+        genral_options => [
+            Test::Smoke::AppOption->new(
+                name    => 'ddir',
+                option  => '=s',
+                helptxt => "Smoke Destination Directory.",
+            ),
+
+        ],
+        special_options => {
+            'MIME::Lite' => [
+                mserver(),
+                msport(),
+                msuser(),
+                mspass(),
+            ],
+            'sendmail' => [],
+        },
+    );
   
   $mailer->run();
 
@@ -55,9 +60,7 @@ Named:
 
 =over
 
-=item allow => $arrayref_with_allowed_values_or_undef
-
-=item default => $default (optional)
+=item main_options => $list_of_test_smoke_appoptions
 
 =item general_options => $list_of_test_smoke_appoptions
 
@@ -543,3 +546,30 @@ sub log_debug {
 }
 
 1;
+
+=head1 COPYRIGHT
+
+(c) 2002-2013, Abe Timmerman <abeltje@cpan.org> All rights reserved.
+
+With contributions from Jarkko Hietaniemi, Merijn Brand, Campo
+Weijerman, Alan Burlison, Allen Smith, Alain Barbet, Dominic Dunlop,
+Rich Rauenzahn, David Cantrell.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+See:
+
+=over 4
+
+=item * L<http://www.perl.com/perl/misc/Artistic.html>
+
+=item * L<http://www.gnu.org/copyleft/gpl.html>
+
+=back
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=cut

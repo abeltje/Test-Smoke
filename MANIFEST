@@ -11,7 +11,8 @@ lib/Test/Smoke/App/Base.pm
 lib/Test/Smoke/App/Options.pm
 lib/Test/Smoke/App/RunSmoke.pm
 lib/Test/Smoke/App/SendReport.pm
-lib/Test/Smoke/App/Syncer.pm
+lib/Test/Smoke/App/SmokePerl.pm
+lib/Test/Smoke/App/SyncTree.pm
 lib/Test/Smoke/Archiver.pm
 lib/Test/Smoke/BuildCFG.pm
 lib/Test/Smoke/FAQ
@@ -162,5 +163,6 @@ t/win32/makefile.mk
 tsarchive.pl
 tsrunsmoke.pl
 tssendrpt.pl
+tssmokeperl.pl
 tssynctree.pl
 W32Configure.pl

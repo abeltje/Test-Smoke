@@ -63,7 +63,7 @@ The generic information is taken from C<< POSIX::uname() >>.
 
 =item $self->_cpu       => (POSIX::uname)[4]
 
-=itum $self->_cpu_count => ''
+=item $self->_cpu_count => ''
 
 =back
 
@@ -175,6 +175,12 @@ sub tsuname {
 
     return join " ", map { my $m = $sw{$_}; $self->$m } @args;
 }
+
+=head2 $si->old_dump()
+
+Just a backward compatible way to dump the object (for test suite).
+
+=cut
 
 sub old_dump {
     my $self = shift;

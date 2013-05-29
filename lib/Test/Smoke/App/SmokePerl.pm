@@ -1,20 +1,23 @@
-package Test::Smoke::App::Archiver;
+package Test::Smoke::App::SmokePerl;
 use warnings;
 use strict;
 
 use base 'Test::Smoke::App::Base';
 
-use Test::Smoke::Archiver;
+use Test::Smoke::App::SyncTree;
+use Test::Smoke::App::RunSmoke;
+use Test::Smoke::App::Archiver;
+use Test::Smoke::App::SendReport;
 
 =head1 NAME
 
-Test::Smoke::App::Archiver - The tsarchive.pl application.
+Test::Smoke::App::SmokePerl - The tssmokeperl.pl application.
 
 =head1 DESCRIPTION
 
-=head2 Test::Smoke::App::Archiver->new()
+=head2 Test::Smoke::App::SmokePerl->new()
 
-Creates a new attribute C<archiver> of class L<Test::Smoke::Archiver>.
+Return an instance.
 
 =cut
 
@@ -22,7 +25,19 @@ sub new {
     my $class = shift;
     my $self = $class->SUPER::new(@_);
 
-    $self->{_archiver} = Test::Smoke::Archiver->new(
+    $self->{_synctree} = Test::Smoke::App::SyncTree->new(
+        $self->options,
+        v => $self->option('verbose'),
+    );
+    $self->{_runsmoke} = Test::Smoke::App::RunSmoke->new(
+        $self->options,
+        v => $self->option('verbose'),
+    );
+    $self->{_sendreport} = Test::Smoke::App::SendReport->new(
+        $self->options,
+        v => $self->option('verbose'),
+    );
+    $self->{_archiver} = Test::Smoke::App::Archiver->new(
         $self->options,
         v => $self->option('verbose'),
     );
@@ -30,16 +45,31 @@ sub new {
     return $self;
 }
 
-=head2 $archiver->run()
+=head2 $app->run();
 
-Calls C<< $self->archiver->archive_files() >>.
+Run all the parts:
+
+=over
+
+=item * synctree
+
+=item * runsmoke
+
+=item * sendrpt
+
+=item * archive
+
+=back
 
 =cut
 
 sub run {
     my $self = shift;
 
-    $self->archiver->archive_files();
+    $self->synctree->run();
+    $self->runsmoke->run();
+    $self->sendreport->run();
+    $self->archiver->run();
 }
 
 1;

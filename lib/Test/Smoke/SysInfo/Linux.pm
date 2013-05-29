@@ -6,11 +6,11 @@ use base 'Test::Smoke::SysInfo::Base';
 
 =head1 NAME
 
-Test::Smoke::SysInfo::Haiku - Object for specific Haiku info.
+Test::Smoke::SysInfo::Linux - Object for specific Linux info.
 
 =head1 DESCRIPTION
 
-=head2 $si->prepare_sysinof()
+=head2 $si->prepare_sysinfo()
 
 Use os-specific tools to find out more about the system.
 

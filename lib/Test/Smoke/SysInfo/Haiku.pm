@@ -10,7 +10,7 @@ Test::Smoke::SysInfo::Haiku - Object for specific Haiku info.
 
 =head1 DESCRIPTION
 
-=head2 $si->prepare_sysinof()
+=head2 $si->prepare_sysinfo()
 
 Use os-specific tools to find out more about the system.
 
