@@ -56,11 +56,12 @@ my $install_dir = dir_prompt(
 );
 }
 my @scripts = qw(
-synctree.pl patchtree.pl mailrpt.pl W32Configure.pl
-configsmoke.pl smokeperl.pl runsmoke.pl sendrpt.pl
-archiverpt.pl smokestatus.pl chkbcfg.pl sysinfo.pl
+    synctree.pl patchtree.pl mailrpt.pl W32Configure.pl
+    configsmoke.pl smokeperl.pl runsmoke.pl sendrpt.pl
+    archiverpt.pl smokestatus.pl chkbcfg.pl sysinfo.pl
+    tssynctree.pl tsrunsmoke.pl tssendrpt.pl tsarchive.pl
+    tssmokeperl.pl
 );
--f catfile( $findbin, '.patch' ) and push @scripts, '.patch';
 
 my %extra_deps;
 for ($^O) {

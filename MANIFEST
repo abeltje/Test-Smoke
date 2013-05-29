@@ -85,6 +85,11 @@ t/app/000-appobjects.t
 t/app/010-appoptions.t
 t/app/020-appoptioncollection.t
 t/app/030-app-base.t
+t/app/100-archiver.t
+t/app/110-runsmoke.t
+t/app/120-sendreport.t
+t/app/130-smokeperl.t
+t/app/140-synctree.t
 t/buildcfg.t
 t/cfgstuff.t
 t/for_dmake.t
