@@ -4,9 +4,16 @@ use strict;
 
 use Test::Smoke::App::AppOption;
 
+=head1 NAME
+
+Test::Smoke::App::Options - A collection of application configs and config
+options.
+
+=cut
+
 my $opt = 'Test::Smoke::App::AppOption';
 
-sub syncer_config { # synctree.pl
+sub synctree_config { # synctree.pl
     return (
         main_options => [
             syncer(),
@@ -191,6 +198,45 @@ sub archiver_config {
             jsnfile(),
             lfile(),
         ],
+    );
+}
+
+sub smokeperl_config {
+    my %stc = synctree_config();
+    my %rsc = runsmoke_config();
+    my %arc = archiver_config();
+    my %src = sendreport_config();
+
+    my %m_o;
+    for my $opt (@{$stc{main_options}}, @{$rsc{main_options}},
+                 @{$arc{main_options}}, @{$src{main_options}})
+    {
+        $m_o{$opt->name} ||= $opt;
+    }
+    my %g_o;
+    for my $opt (@{$stc{general_options}}, @{$rsc{general_options}},
+                 @{$arc{general_options}}, @{$src{general_options}})
+    {
+        $g_o{$opt->name} ||= $opt;
+    }
+    my %s_o;
+    for my $so (keys %{$stc{special_options}}) {
+        $s_o{$so} = $stc{special_options}{$so};
+    }
+    for my $so (keys %{$rsc{special_options}}) {
+        $s_o{$so} = $rsc{special_options}{$so};
+    }
+    for my $so (keys %{$arc{special_options}}) {
+        $s_o{$so} = $arc{special_options}{$so};
+    }
+    for my $so (keys %{$src{special_options}}) {
+        $s_o{$so} = $src{special_options}{$so};
+    }
+
+    return (
+        main_options => [sort { $a->name cmp $b->name } values %m_o],
+        general_options => [sort { $a->name cmp $b->name } values %g_o],
+        special_options => { %s_o },
     );
 }
 
@@ -791,3 +837,30 @@ sub adir {
 }
 
 1;
+
+=head1 COPYRIGHT
+
+(c) 2002-2013, Abe Timmerman <abeltje@cpan.org> All rights reserved.
+
+With contributions from Jarkko Hietaniemi, Merijn Brand, Campo
+Weijerman, Alan Burlison, Allen Smith, Alain Barbet, Dominic Dunlop,
+Rich Rauenzahn, David Cantrell.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+See:
+
+=over 4
+
+=item * L<http://www.perl.com/perl/misc/Artistic.html>
+
+=item * L<http://www.gnu.org/copyleft/gpl.html>
+
+=back
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=cut

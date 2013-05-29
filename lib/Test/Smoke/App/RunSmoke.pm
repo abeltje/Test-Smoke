@@ -20,6 +20,21 @@ use Test::Smoke::Util qw/
 /;
 use Test::Smoke::Util::Execute;
 
+=head1 NAME
+
+Test::Smoke::App::RunSmoke - The tsrunsmoke.pl application.
+
+=head1 DESCRIPTION
+
+This applet takes care of running the "smoke-mantra" for all
+build-configurations.
+
+=head2 $smoker->run();
+
+reimplemention of the old C<Test::Smoke::run_smoke()>.
+
+=cut
+
 sub run {
     my $self = shift;
 
@@ -42,6 +57,10 @@ sub run {
 
    $self->run_smoke(); 
 }
+
+=head2  $smoker->run_smoke();
+
+=cut
 
 sub run_smoke {
     my $self = shift;
@@ -114,6 +133,13 @@ sub run_smoke {
     close $log or $self->log_warn("Error on closing logfile: $!");
 }
 
+=head2 $smoker->check_for_harness3()
+
+Determine the version of L<Test::Harness> shipped with this perl and set
+B<hasharness3> accordingly.
+
+=cut
+
 sub check_for_harness3 {
     my $self = shift;
 
@@ -131,6 +157,12 @@ sub check_for_harness3 {
 
     return $self->{_hasharness3} = $version >= 3;
 }
+
+=head2 $smoker->create_buildcfg()
+
+Returns an appropriate L<Test::Smoke::BuildCFG> instance.
+
+=cut
 
 sub create_buildcfg {
     my $self = shift;
@@ -161,6 +193,12 @@ sub create_buildcfg {
     );
 }
 
+=head2 $smoker->do_manifest_check()
+
+Calls Test::Smoke::SourceTree->check_MANIFEST().
+
+=cut
+
 sub do_manifest_check {
     my $self = shift;
 
@@ -181,6 +219,12 @@ sub do_manifest_check {
     }
 }
 
+=head2 $smoker->add_smoke_patchlevel()
+
+Calls L<Test::Smoke::Util::set_local_patch()> to add a patch-string.
+
+=cut
+
 sub add_smoke_patchlevel {
     my $self = shift;
     my ($patch) = @_;
@@ -195,3 +239,30 @@ sub add_smoke_patchlevel {
 }
 
 1;
+
+=head1 COPYRIGHT
+
+(c) 2002-2013, Abe Timmerman <abeltje@cpan.org> All rights reserved.
+
+With contributions from Jarkko Hietaniemi, Merijn Brand, Campo
+Weijerman, Alan Burlison, Allen Smith, Alain Barbet, Dominic Dunlop,
+Rich Rauenzahn, David Cantrell.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+See:
+
+=over 4
+
+=item * L<http://www.perl.com/perl/misc/Artistic.html>
+
+=item * L<http://www.gnu.org/copyleft/gpl.html>
+
+=back
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=cut

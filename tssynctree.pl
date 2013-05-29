@@ -4,13 +4,13 @@ use strict;
 use lib 'lib';
 
 use Test::Smoke::App::Options;
-use Test::Smoke::App::Syncer;
+use Test::Smoke::App::SyncTree;
 
-my $syncer = Test::Smoke::App::Syncer->new(
-    Test::Smoke::App::Options->syncer_config()
+my $app = Test::Smoke::App::SyncTree->new(
+    Test::Smoke::App::Options->synctree_config()
 );
 
-if (my $error = $syncer->configfile_error) {
+if (my $error = $app->configfile_error) {
     die "$error\n";
 }
-$syncer->run();
+$app->run();

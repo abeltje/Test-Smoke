@@ -1235,7 +1235,7 @@ sub time_in_hhmm {
     return join " ", @parts;
 }
 
-=head2 do_pod2man( %pod2usage_options )
+=head2 do_pod2usage( %pod2usage_options )
 
 If L<Pod::Usage> is there then call its C<pod2usage()>.
 In the other case, print the general message passed with the C<myusage> key.

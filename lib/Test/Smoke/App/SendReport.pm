@@ -9,6 +9,18 @@ use Test::Smoke::Mailer;
 use Test::Smoke::Poster;
 use Test::Smoke::Reporter;
 
+=head1 NAME
+
+Test::Smoke::App::SendReport - Implementation for tssendrpt.pl
+
+=head1 DESCRIPTIN
+
+=head2 Test::Smoke::App::SendReport->new(%optionn);
+
+The config lives in C<< Test::Smoke::App::Options->sendrpt_config() >>.
+
+=cut
+
 sub new {
     my $class = shift;
     my $self = $class->SUPER::new(@_);
@@ -32,6 +44,18 @@ sub new {
     return $self;
 }
 
+=head2 $sendrpt->run()
+
+=over
+
+=item * Send e-mail if C<< $self->option('mail') >>
+
+=item * Post to CoreSmokeDB if C<< $self->option('smokedb_url') >>
+
+=back
+
+=cut
+
 sub run {
     my $self = shift;
 
@@ -45,6 +69,12 @@ sub run {
         $self->poster->post();
     }
 }
+
+=head2 $sendrpt->check_for_report_and_json()
+
+Check for the '.rpt' and the '.jsn' file, return true if both exist.
+
+=cut
 
 sub check_for_report_and_json {
     my $self = shift;
@@ -73,6 +103,12 @@ sub check_for_report_and_json {
     return 1;
 }
 
+=head2 $sendrpt->regen_report_and_json()
+
+Create a reporter object and generate the '.rpt' and '.jsn' files.
+
+=cut
+
 sub regen_report_and_json {
     my $self = shift;
 
@@ -93,3 +129,30 @@ sub regen_report_and_json {
 }
 
 1;
+
+=head1 COPYRIGHT
+
+(c) 2002-2013, Abe Timmerman <abeltje@cpan.org> All rights reserved.
+
+With contributions from Jarkko Hietaniemi, Merijn Brand, Campo
+Weijerman, Alan Burlison, Allen Smith, Alain Barbet, Dominic Dunlop,
+Rich Rauenzahn, David Cantrell.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+See:
+
+=over 4
+
+=item * L<http://www.perl.com/perl/misc/Artistic.html>
+
+=item * L<http://www.gnu.org/copyleft/gpl.html>
+
+=back
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+=cut

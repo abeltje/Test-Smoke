@@ -23,9 +23,9 @@ for argv ; do
             ;;
         -skipalltests)  SKIPALLTESTS=1
             ;;
-        -skipprivate)   SKIPPRIVATE=1
+        -skipxt|-skipprivate) SKIPPRIVATE=1
             ;;
-        -skiptests)     SKIPTESTS=1
+        -skiptests) SKIPTESTS=1
             ;;
         -noautocommit)  NOAUTOCOMMIT=1
             ;;
@@ -87,7 +87,7 @@ fi
 if [ "$SKIPALLTESTS" != "1" ] ; then
     if [ "$SKIPPRIVATE" != "1" ] ; then
         # Run the private testsuite
-        prove -wl private/*.pl private/*.t
+        prove -wl xt/*.t
         if [ $? -gt 0 ] ; then
             echo "Private tests not ok: $?"
             exit 20

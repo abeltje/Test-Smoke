@@ -40,9 +40,15 @@ Test::Smoke::SourceTree - Manipulate the perl source-tree
 
     $tree->clean_from_MANIFEST;
 
-=head1 DESCRIPTION
+=head1 CONSTANTS
 
-=over 4
+=over
+
+=item ST_MISSING
+
+=item ST_UNDECLARED
+
+=back
 
 =cut
 
@@ -50,7 +56,9 @@ Test::Smoke::SourceTree - Manipulate the perl source-tree
 sub ST_MISSING()    { 1 }
 sub ST_UNDECLARED() { 0 }
 
-=item Test::Smoke::SourceTree->new( $tree_dir )
+=head1 DESCRIPTION
+
+=head2 Test::Smoke::SourceTree->new( $tree_dir )
 
 C<new()> creates a new object, this is a simple scalar containing
 C<< File::Spec->rel2abs( $tree_dir) >>.
@@ -72,7 +80,7 @@ sub new {
     return bless \$self, $class;
 }
 
-=item $tree->canonpath( )
+=head2 $tree->canonpath( )
 
 C<canonpath()> returns the canonical name for the path, 
 see L<File::Spec>.
@@ -84,7 +92,7 @@ sub canonpath {
     return File::Spec->canonpath( $$self );
 }
 
-=item $tree->rel2abs( [$base_dir] )
+=head2 $tree->rel2abs( [$base_dir] )
 
 C<rel2abs()> returns the absolute path, see L<File::Spec>.
 
@@ -95,7 +103,7 @@ sub rel2abs {
     return File::Spec->rel2abs( $$self, @_ );
 }
 
-=item $tree->abs2rel( [$base_dir] )
+=head2 $tree->abs2rel( [$base_dir] )
 
 C<abs2rel()> returns  a relative path, 
 see L<File::Spec>.
@@ -107,7 +115,7 @@ sub abs2rel {
     return File::Spec->abs2rel( $$self, @_ );
 }
 
-=item $tree->mani2abs( $file[, $base_path] )
+=head2 $tree->mani2abs( $file[, $base_path] )
 
 C<mani2abs()> returns the absolute filename of C<$file>, which should 
 be in "MANIFEST" format (i.e. using '/' as directory separator).
@@ -132,7 +140,7 @@ sub mani2abs {
     return File::Spec->catfile( $base_path, @split_path );
 }
 
-=item $tree->mani2absdir( $dir[, $base_path] )
+=head2 $tree->mani2absdir( $dir[, $base_path] )
 
 C<mani2abs()> returns the absolute dirname of C<$dir>, which should 
 be in "MANIFEST" format (i.e. using '/' as directory separator).
@@ -147,7 +155,7 @@ sub mani2absdir {
     return File::Spec->catdir( $base_path, @split_path );
 }
 
-=item $tree->abs2mani( $file )
+=head2 $tree->abs2mani( $file )
 
 C<abs2mani()> returns the MANIFEST style filename.
 
@@ -163,7 +171,7 @@ sub abs2mani {
     return join '/', @dirs;
 }
 
-=item $tree->check_MANIFEST( @ignore )
+=head2 $tree->check_MANIFEST( @ignore )
 
 C<check_MANIFEST()> reads the B<MANIFEST> file from C<< $$self >> and
 compares it with the actual contents of C<< $$self >>.
@@ -216,7 +224,7 @@ sub check_MANIFEST {
     return \%manifest;
 } 
 
-=item $self->_read_mani_file( $path[, $no_croak] )
+=head2 $self->_read_mani_file( $path[, $no_croak] )
 
 C<_read_mani_file()> reads the contents of C<$path> like it is a
 MANIFEST typeof file and returns a ref to hash with all values set
@@ -255,7 +263,7 @@ sub _read_mani_file {
     return \%manifest;
 }
 
-=item $tree->clean_from_MANIFEST( )
+=head2 $tree->clean_from_MANIFEST( )
 
 C<clean_from_MANIFEST()> removes all files from the source-tree that are
 not declared in the B<MANIFEST> file.
@@ -276,7 +284,7 @@ sub clean_from_MANIFEST {
     }
 }
 
-=item copy_from_MANIFEST( $dest_dir[, $verbose] )
+=head2 copy_from_MANIFEST( $dest_dir[, $verbose] )
 
 C<_copy_from_MANIFEST()> uses the B<MANIFEST> file from C<$$self>
 to copy a source-tree to C<< $dest_dir >>.
@@ -330,8 +338,6 @@ sub copy_from_MANIFEST {
 }
 
 1;
-
-=back
 
 =head1 COPYRIGHT
 

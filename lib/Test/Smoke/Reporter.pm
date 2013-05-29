@@ -61,11 +61,7 @@ Handle the parsing of the F<mktest.out> file.
 
 =head1 METHODS
 
-=over 4
-
-=cut
-
-=item Test::Smoke::Reporter->new( %args )
+=head2 Test::Smoke::Reporter->new( %args )
 
 [ Constructor | Public ]
 
@@ -94,7 +90,7 @@ sub new {
     $self->read_parse(  );
 }
 
-=item Test::Smoke::Reporter->config( $key[, $value] )
+=head2 Test::Smoke::Reporter->config( $key[, $value] )
 
 [ Accessor | Public ]
 
@@ -126,7 +122,7 @@ sub config {
     return $CONFIG{ "df_$key" };
 }
 
-=item $self->read_parse( [$result_file] )
+=head2 $self->read_parse( [$result_file] )
 
 C<read_parse()> reads the smokeresults file and parses it.
 
@@ -145,7 +141,7 @@ sub read_parse {
     return $self;
 }
 
-=item $self->_read( $nameorref )
+=head2 $self->_read( $nameorref )
 
 C<_read()> is a private method that handles the reading.
 
@@ -200,7 +196,7 @@ sub _read {
     $self->{v} and print "Reading smokeresult $vmsg\n";
 }
 
-=item $self->_parse( )
+=head2 $self->_parse( )
 
 Interpret the contents of the outfile and prepare them for processing,
 so report can be made.
@@ -512,7 +508,7 @@ sub _parse {
     $self->_post_process;
 }
 
-=item $self->_post_process( )
+=head2 $self->_post_process( )
 
 C<_post_process()> sets up the report for easy printing. It needs to
 sort the buildenvironments, statusletters and test failures.
@@ -701,7 +697,7 @@ sub _post_process {
     $self->{_tstenv}    = [reverse sort keys %bldenv2];
 }
 
-=item __posixdate($time)
+=head2 __posixdate($time)
 
 Returns C<strftime("%F %T %z")>.
 
@@ -717,7 +713,7 @@ sub __posixdate {
     return POSIX::strftime("%Y-%m-%d %T %z", localtime $stamp);
 }
 
-=item __rm_common_args( $cfg, \%common )
+=head2 __rm_common_args( $cfg, \%common )
 
 Removes the the arguments stored as keys in C<%common> from C<$cfg>.
 
@@ -732,7 +728,7 @@ sub __rm_common_args {
     return $bcfg->rm_arg( keys %$common );
 }
 
-=item $reporter->write_to_file( [$name] )
+=head2 $reporter->write_to_file( [$name] )
 
 Write the C<< $self->report >> to file. If name is ommitted it will
 use C<< catfile( $self->{ddir}, $self->{rptfile} ) >>.
@@ -761,7 +757,7 @@ sub write_to_file {
     return 1;
 }
 
-=item $reporter->smokedb_data()
+=head2 $reporter->smokedb_data()
 
 Transport the report to the gateway. The transported data will also be stored
 locally in the file mktest.jsn
@@ -855,7 +851,7 @@ sub smokedb_data {
     return $self->{_json} = $json;
 }
 
-=item $reporter->report( )
+=head2 $reporter->report( )
 
 Return a string with the full report
 
@@ -897,7 +893,7 @@ sub report {
     return $report;
 }
 
-=item $reporter->_get_usernote()
+=head2 $reporter->_get_usernote()
 
 Return $self->{user_note} if exists.
 
@@ -920,7 +916,7 @@ sub _get_usernote {
     $self->{user_note} =~ s/(?<=\S)\s*\z/\n/;
 }
 
-=item $reporter->ccinfo( )
+=head2 $reporter->ccinfo( )
 
 Return the string containing the C-compiler info.
 
@@ -941,7 +937,7 @@ sub ccinfo {
     return $cinfo;
 }
 
-=item $reporter->registered_patches()
+=head2 $reporter->registered_patches()
 
 Return a section with the locally applied patches (from patchlevel.h).
 
@@ -960,7 +956,7 @@ sub registered_patches {
     return "\nLocally applied patches:\n$list\n";
 }
 
-=item $reporter->harness3_options
+=head2 $reporter->harness3_options
 
 Show indication of the options used for C<HARNESS_OPTIONS>.
 
@@ -977,7 +973,7 @@ sub harness3_options {
     return  $msg . " and HARNESS_OPTIONS=$self->{harness3opts}\n";
 }
 
-=item $reporter->user_skipped_tests( )
+=head2 $reporter->user_skipped_tests( )
 
 Show indication for the fact that the user requested to skip some tests.
 
@@ -1000,7 +996,7 @@ sub user_skipped_tests {
     return "\nTests skipped on user request:\n$skipped";
 }
 
-=item $reporter->ccmessages( )
+=head2 $reporter->ccmessages( )
 
 Use a port of Jarkko's F<grepccerr> script to report the compiler messages.
 
@@ -1032,7 +1028,7 @@ Compiler messages($cc):
     EOERRORS
 }
 
-=item $reporter->preamble( )
+=head2 $reporter->preamble( )
 
 Returns the header of the report.
 
@@ -1082,7 +1078,7 @@ __EOH__
     return $preamble;
 }
 
-=item $reporter->smoke_matrix( )
+=head2 $reporter->smoke_matrix( )
 
 C<smoke_matrix()> returns a string with the result-letters and their
 configs.
@@ -1115,7 +1111,7 @@ sub smoke_matrix {
     return $report;
 }
 
-=item $reporter->summary( )
+=head2 $reporter->summary( )
 
 Return the B<PASS> or B<FAIL(x)> string.
 
@@ -1136,7 +1132,7 @@ sub summary {
     return $rpt_summary;
 }
 
-=item $repoarter->has_test_failures( )
+=head2 $repoarter->has_test_failures( )
 
 Returns true if C<< @{ $reporter->{_failures} >>.
 
@@ -1144,7 +1140,7 @@ Returns true if C<< @{ $reporter->{_failures} >>.
 
 sub has_test_failures { exists $_[0]->{_failures} && @{ $_[0]->{_failures} } }
 
-=item $reporter->failures( )
+=head2 $reporter->failures( )
 
 report the failures (grouped by configurations).
 
@@ -1158,7 +1154,7 @@ sub failures {
     } @{ $self->{_failures} };
 }
 
-=item $repoarter->has_todo_passed( )
+=head2 $repoarter->has_todo_passed( )
 
 Returns true if C<< @{ $reporter->{_todo_pasesd} >>.
 
@@ -1166,7 +1162,7 @@ Returns true if C<< @{ $reporter->{_todo_pasesd} >>.
 
 sub has_todo_passed { exists $_[0]->{_todo_passed} && @{ $_[0]->{_todo_passed} } }
 
-=item $reporter->todo_passed( )
+=head2 $reporter->todo_passed( )
 
 report the todo that passed (grouped by configurations).
 
@@ -1180,7 +1176,7 @@ sub todo_passed {
     } @{ $self->{_todo_passed} };
 }
 
-=item $repoarter->has_mani_failures( )
+=head2 $repoarter->has_mani_failures( )
 
 Returns true if C<< @{ $reporter->{_mani} >>.
 
@@ -1188,7 +1184,7 @@ Returns true if C<< @{ $reporter->{_mani} >>.
 
 sub has_mani_failures { exists $_[0]->{_mani} && @{ $_[0]->{_mani} } }
 
-=item $reporter->mani_fail( )
+=head2 $reporter->mani_fail( )
 
 report the MANIFEST failures.
 
@@ -1200,7 +1196,7 @@ sub mani_fail {
     return join "\n", @{ $self->{_mani} }, "";
 }
 
-=item $reporter->bldenv_legend( )
+=head2 $reporter->bldenv_legend( )
 
 Returns a string with the legend for build-environments
 
@@ -1261,7 +1257,7 @@ EOS
 EOE
 }
 
-=item $reporter->letter_legend( )
+=head2 $reporter->letter_legend( )
 
 Returns a string with the legend for the letters in the matrix.
 
@@ -1277,6 +1273,13 @@ Build failures during:       - = unknown or N/A
 c = Configure, m = make, M = make (after miniperl), t = make test-prep
 __EOL__
 }
+
+=head2 $reporter->signature()
+
+Returns the signature for the e-mail message (starting with dash dash space
+newline) and some version numbers.
+
+=cut
 
 sub signature {
     my $self = shift;
@@ -1298,8 +1301,6 @@ Report by Test::Smoke v$build_info running on perl $this_pver
 }
 
 1;
-
-=back
 
 =head1 SEE ALSO
 
