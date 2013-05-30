@@ -55,11 +55,13 @@ sub __get_system_profiler {
 
     # convert newer output from Intel core duo
     my %keymap = (
-        'Processor Name'       => 'CPU Type',
-        'Processor Speed'      => 'CPU Speed',
-        'Model Name'           => 'Machine Name',
-        'Model Identifier'     => 'Machine Model',
-        'Number Of Processors' => 'Number Of CPUs',
+        'Processor Name'        => 'CPU Type',
+        'Processor Speed'       => 'CPU Speed',
+        'Model Name'            => 'Machine Name',
+        'Model Identifier'      => 'Machine Model',
+        'Number Of Processors'  => 'Number Of CPUs',
+        'Number of Processors'  => 'Number Of CPUs',
+        'Total Number of Cores' => 'Total Number Of Cores',
     );
     for my $newkey ( keys %keymap ) {
         my $oldkey = $keymap{$newkey};
