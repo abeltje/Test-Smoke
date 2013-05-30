@@ -9,6 +9,9 @@ use Test::Smoke::App::RunSmoke;
 use Test::Smoke::App::Archiver;
 use Test::Smoke::App::SendReport;
 
+use Test::Smoke::App::Options;
+my $opt = 'Test::Smoke::App::Options';
+
 =head1 NAME
 
 Test::Smoke::App::SmokePerl - The tssmokeperl.pl application.
@@ -21,26 +24,38 @@ Return an instance.
 
 =cut
 
-sub new {
+sub new { 
     my $class = shift;
     my $self = $class->SUPER::new(@_);
 
-    $self->{_synctree} = Test::Smoke::App::SyncTree->new(
-        $self->options,
-        v => $self->option('verbose'),
-    );
-    $self->{_runsmoke} = Test::Smoke::App::RunSmoke->new(
-        $self->options,
-        v => $self->option('verbose'),
-    );
-    $self->{_sendreport} = Test::Smoke::App::SendReport->new(
-        $self->options,
-        v => $self->option('verbose'),
-    );
-    $self->{_archiver} = Test::Smoke::App::Archiver->new(
-        $self->options,
-        v => $self->option('verbose'),
-    );
+    my %options = $self->options;
+    my @argv = map +( "--$_" => $self->option($_)), keys %options;
+    push @argv, '-v', $self->option('verbose');
+
+    {
+        local @ARGV = @argv;
+        $self->{_synctree} = Test::Smoke::App::SyncTree->new(
+            $opt->smokeperl_config()
+        );
+    }
+    {
+        local @ARGV = @argv;
+        $self->{_runsmoke} = Test::Smoke::App::RunSmoke->new(
+            $opt->smokeperl_config()
+        );
+    }
+    {
+        local @ARGV = @argv;
+        $self->{_sendreport} = Test::Smoke::App::SendReport->new(
+            $opt->smokeperl_config()
+        );
+    }
+    {
+        local @ARGV = @argv;
+        $self->{_archiver} = Test::Smoke::App::Archiver->new(
+            $opt->smokeperl_config()
+        );
+    }
 
     return $self;
 }

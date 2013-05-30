@@ -37,6 +37,9 @@ sub synctree_config { # synctree.pl
             copy  => [
                 cdir()
             ],
+            fsync => [
+                fdir(),
+            ],
         },
     );
 }
@@ -247,6 +250,7 @@ sub smokeperl_config {
 sub syncer {
     return $opt->new(
         name     => 'syncer',
+        option   => '=s',
         allow    => [qw/git rsync copy/],
         default  => 'git',
         helptext => 'The source tree sync method.',

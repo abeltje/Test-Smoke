@@ -137,7 +137,7 @@ sub allowed {
             return scalar grep $self->allowed($value, $_), @$allow;
         };
         /^Regexp$/ && do {
-            return $value =~ $allow;
+            return ($value || '') =~ $allow;
         };
         /^CODE$/ && do {
             return $allow->($value);
