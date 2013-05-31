@@ -2,7 +2,7 @@
 use strict;
 
 use Test::More;
-use Test::NoWarnings;
+use Test::NoWarnings ();
 
 use CGI::Util qw/unescape/;
 use Config;
@@ -14,50 +14,28 @@ use Test::Smoke::Util qw/whereis/;
 my $debug = $ENV{TSDEBUG};
 
 my ($pid, $port, $socket);
+my $timeout = 60;
+my $jsnfile = 'testsuite.jsn';
 {
-    my $timeout = 30;
     use IO::Socket::INET;
     $socket = IO::Socket::INET->new(
         Listen => 1024,
         Proto => 'tcp',
-        Blocking => 1,
     );
     $port = $socket->sockport;
     $pid = fork();
     if ($pid) { # Continue
-        note("http://localhost:$port started");
-        if ( $Config{d_alarm} ) { # set timeout
-            $SIG{ALRM} = sub {
-                print STDERR "# Timeout passed\n";
-                exit(42);
-            };
-            alarm $timeout;
-            plan(tests => 9);
-        }
-        else {
-            kill 9, $pid;
-            plan(skip_all => "Could not find 'd_alarm', daren't run tests!");
-        }
+        plan(tests => 9);
+        note("http://localhost:$port started (killed in $timeout s)");
     }
-    else { # Server
+    else { # HTTP-Server for dummies
         my $CRLF = "\015\012";
         while (1) {
             my $httpd = $socket->accept();
             vec(my $fdset = "", $httpd->fileno, 1) = 1;
-            my ($cnt, $buffer, $blck, $to) = (0, "", 1024);
-            my ($start, $pending) = (time(), $timeout);
+            my ($cnt, $buffer, $blck, $to) = (0, "", 1024, 0);
+            $to = select($fdset, undef, undef, $timeout);
             do {
-                while () {
-                    $to = select( $fdset, undef, undef, $pending );
-                    ::diag("[canread] $to/$pending/$timeout") if $debug;
-                    if ( $to == -1 ) {
-                        $! == EINTR or die(qq/select(2): '$!'\n/);
-                        redo if !$timeout
-                              || ($pending = $timeout - (time - $start)) > 0;
-                        $to = 0;
-                    }
-                    last;
-                }
                 $cnt = sysread( $httpd, $buffer, $blck, length($buffer) );
                 ::diag("[Read buffer] ($cnt/$blck): $buffer") if $debug;
             } until $cnt < $blck;
@@ -85,6 +63,7 @@ my ($pid, $port, $socket);
     }
 }
 END {
+    unlink "t/$jsnfile";
     if ($pid) {
         note("tear down: $pid");
         $socket->close;
@@ -131,7 +110,7 @@ SKIP: {
 }
 
 SKIP: {
-    eval { local $^W; require HTTP::Tiny };
+    eval { local $^W; require HTTP::Tiny; die "skip test\n" };
     skip("Could not load HTTP::Tiny", 2) if $@;
 
     my $poster = Test::Smoke::Poster->new(
@@ -150,7 +129,7 @@ SKIP: {
 }
 
 SKIP: {
-    eval { local $^W; require HTTP::Lite };
+    eval { local $^W; require HTTP::Lite; die "skip test\n" };
     skip("Could not load HTTP::Lite", 2) if $@;
 
     my $poster = Test::Smoke::Poster->new(
@@ -168,6 +147,7 @@ SKIP: {
     unlink $poster->json_filename;
 }
 
+Test::NoWarnings::had_no_warnings();
 # done_testing();
 
 sub write_json {
