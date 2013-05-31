@@ -135,6 +135,7 @@ if [ "$NOAUTOCOMMIT" != "1" ]; then
     git commit -m "Autocommit for distribution Test::Smoke $mynewversion" lib/Test/Smoke.pm Changes
     git tag "Test-Smoke-$mynewversion"
     git push --all
+    git push --tags
 fi
 
 PERL_MM_USE_DEFAULT=y perl Makefile.PL
