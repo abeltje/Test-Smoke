@@ -3,7 +3,7 @@ use warnings;
 use strict;
 use Carp;
 
-use Cwd 'abs_path';
+use Cwd qw/cwd abs_path/;
 
 =head1 NAME
 

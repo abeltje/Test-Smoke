@@ -278,7 +278,7 @@ sub poster {
         name     => 'poster',
         option   => '=s',
         allow    => [qw/LWP::UserAgent HTTP::Lite HTTP::Tiny curl/],
-        default  => 'HTTP::Tiny',
+        default  => 'LWP::UserAgent',
         helptext => "The type of HTTP post system to use.",
     );
 }

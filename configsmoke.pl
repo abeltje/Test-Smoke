@@ -2590,8 +2590,9 @@ sub get_avail_vms_make {
 }
 
 sub get_Win_version {
-    require Test::Smoke::SysInfo;
-    ( my $win_version = Test::Smoke::SysInfo::__get_os() ) =~ s/^[^-]*- //;
+    require Test::Smoke::SysInfo::Windows;
+    my $si = Test::Smoke::SysInfo::Windows->new();
+    (my $win_version = $si->os) =~ s/^[^-]*- //;
     return $win_version;
 }
 
