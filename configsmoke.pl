@@ -98,7 +98,7 @@ unless ( $options{oldcfg} ) {
 
 =head1 NAME
 
-configsmoke.pl - Create a configuration for B<smokeperl.pl>
+configsmoke.pl - Create a configuration for B<tssmokeperl.pl>
 
 =head1 SYNOPSIS
 
@@ -853,7 +853,7 @@ B<Test::Smoke> is the symbolic name for a set of scripts and modules
 that try to run the perl core tests on as many configurations as possible
 and combine the results into an easy to read report.
 
-The main script is F<smokeperl.pl>, and this uses a configuration file
+The main script is F<tssmokeperl.pl>, and this uses a configuration file
 that is created by this program (F<configsmoke.pl>).  There is no default
 configuration as some actions can be rather destructive, so you will need
 to create your own configuration by running this program!
@@ -871,7 +871,7 @@ For MSWin32 this is called F<smokecurrent.cmd> otherwise this is called
 F<smokecurrent.sh>. Again the default prefix can be overridden by specifying
 the C<< -j <prefix> >> or C<< -p <prefix> >> switch.
 
-All output (stdout, stderr) from F<smokeperl.pl> and its sub-processes
+All output (stdout, stderr) from F<tssmokeperl.pl> and its sub-processes
 is redirected to a logfile called F<smokecurrent.log> by the small jcl.
 (Use C<< -l <prefix> >> or C<< -p <prefix> >> to override).
 
@@ -1488,7 +1488,7 @@ SMOKEDB: {
 
 =item mail
 
-C<{mail}> will set the new default for L<smokeperl.pl>
+C<{mail}> will set the new default for L<tssmokeperl.pl>
 
 =item mail_type
 
@@ -1741,8 +1741,8 @@ $config{ $arg } = prompt_yn( $arg );
 When C<< $Config{d_alarm} >> is found we can use C<alarm()> to abort 
 long running smokes. Leave this value empty to keep the old behaviour.
 
-    07:30 => F<smokeperl.pl> is aborted on 7:30 localtime
-   +23:45 => F<smokeperl.pl> is aborted after 23 hours and 45 minutes
+    07:30 => F<tssmokeperl.pl> is aborted on 7:30 localtime
+   +23:45 => F<tssmokeperl.pl> is aborted after 23 hours and 45 minutes
 
 Thank you Jarkko for donating this suggestion.
 
@@ -1775,7 +1775,7 @@ $config{lfile} = File::Spec->rel2abs( $options{log}, cwd );
 Some filesystems do not support opening an already opened file. This
 makes it hard to scan the logfile for compiler messages. We can delay
 the creation of the report and call F<mailrpt.pl> after
-F<smokeperl.pl>. VMS might benefit.
+F<tssmokeperl.pl>. VMS might benefit.
 
 =cut
 
@@ -2034,7 +2034,7 @@ C<write_sh()> creates the shell-script.
 sub write_sh {
     my $cwd = cwd();
     my $jcl = "$options{jcl}.sh";
-    my $smokeperl = File::Spec->catfile( $findbin, 'smokeperl.pl' );
+    my $smokeperl = File::Spec->catfile( $findbin, 'tssmokeperl.pl' );
     my $cronline = schedule_entry( File::Spec->catfile( $cwd, $jcl ), 
                                    $cron, $crontime );
 
@@ -2049,7 +2049,7 @@ EO_P5OPT
 
     my $handle_lock = $config{killtime} ? <<EO_CONT : <<EO_DIE;
     # Not sure about this, so I will keep the old behaviour 
-    # smokeperl.pl will exit(42) on timeout
+    # tssmokeperl.pl will exit(42) on timeout
     # continue='--continue'
     echo "We seem to be running (or remove \$LOCKFILE)" >& 2
     exit 200
@@ -2107,9 +2107,9 @@ sub write_bat {
     my $cwd = File::Spec->canonpath( cwd() );
     my $findbin_bin = File::Spec->canonpath( $findbin );
 
-    my $smokeperl  = File::Spec->catfile( $findbin_bin, 'smokeperl.pl' );
-    my $archiverpt = File::Spec->catfile( $findbin_bin, 'archiverpt.pl' );
-    my $mailrpt    = File::Spec->catfile( $findbin_bin, 'mailrpt.pl' );
+    my $smokeperl  = File::Spec->catfile( $findbin_bin, 'tssmokeperl.pl' );
+    my $archiverpt = File::Spec->catfile( $findbin_bin, 'tsarchive.pl' );
+    my $mailrpt    = File::Spec->catfile( $findbin_bin, 'tssendrpt.pl' );
     my $copycmd = <<'EOCOPYCMD';
 
 REM I found hanging XCOPY while smoking; uncommenting the next line might help
@@ -2168,8 +2168,8 @@ if NOT EXIST \%LOCKFILE\% goto START_SMOKE
     set OLD_PATH=\%PATH\%
     set PATH=$findbin_bin;\%PATH\%
     $^X $smokeperl -c "\%CFGNAME\%" \%* > "\%WD\%\\$options{log}" 2>&1
-    $archive
-    $report
+    REM $report
+    REM $archive
     set PATH=\%OLD_PATH\%
 
 del \%LOCKFILE\%
@@ -2212,7 +2212,7 @@ sub write_com {
 \$$p5opt
 \$! DEFINE/USER sys\$output $options{log}
 \$! DEFINE/USER sys\$error $options{log}
-\$  MCR $^X ${findbin}smokeperl.pl "-c=$options{config}"
+\$  MCR $^X ${findbin}tssmokeperl.pl "-c=$options{config}"
 EO_COM
     close MYSMOKECOM or warn "Error writing '$jcl': $!";
 
