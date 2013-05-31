@@ -1,6 +1,8 @@
 #! /usr/bin/perl -w
 use strict;
 
+use FindBin;
+use lib $FindBin::Bin;
 use lib 'lib';
 
 use Test::Smoke::App::Options;

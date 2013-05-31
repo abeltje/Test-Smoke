@@ -1,9 +1,812 @@
-Changes on 2013-05-06 for github repository at:
+Changes on 2013-05-30 for github repository at:
   Fetch URL: ssh://git@github.com/abeltje/Test-Smoke
   Push  URL: ssh://git@github.com/abeltje/Test-Smoke
 
 Enjoy!
 
+________________________________________________________________________________
+[a744615] by abeltje on Thu, 30 May 2013 23:41:35 +0200
+
+     Fix MANIFEST...
+
+
+M	MANIFEST
+________________________________________________________________________________
+[a17ce7d] by abeltje on Thu, 30 May 2013 23:24:35 +0200
+
+     Lets try 1.61-RC1
+
+
+M	lib/Test/Smoke.pm
+M	release.sh
+________________________________________________________________________________
+[031bc48] by abeltje on Thu, 30 May 2013 17:54:29 +0200
+
+     Add instantiate tests for the Test::Smoke::App::* applets.
+
+
+M	lib/Test/Smoke/App/AppOption.pm
+M	lib/Test/Smoke/App/Options.pm
+M	lib/Test/Smoke/App/SmokePerl.pm
+M	t/app/120-sendreport.t
+M	t/app/130-smokeperl.t
+M	t/app/140-synctree.t
+________________________________________________________________________________
+[f88d53f] by abeltje on Wed, 29 May 2013 22:07:27 +0200
+
+     Merge branch 'ts-apps' of ssh://github.com/abeltje/Test-Smoke into
+        ts-apps
+
+________________________________________________________________________________
+[4721e67] by abeltje on Wed, 29 May 2013 21:46:20 +0200
+
+     Add some more tests.
+
+
+M	MANIFEST
+M	Makefile.PL
+A	t/app/100-archiver.t
+A	t/app/110-runsmoke.t
+A	t/app/120-sendreport.t
+A	t/app/130-smokeperl.t
+A	t/app/140-synctree.t
+________________________________________________________________________________
+[30fc512] by abeltje on Wed, 29 May 2013 18:38:16 +0200
+
+     fix manifest
+
+
+M	MANIFEST
+________________________________________________________________________________
+[8ccebb8] by abeltje on Wed, 29 May 2013 18:35:26 +0200
+
+     Final walk through of the code, fix pod, move the private testsuite
+        around some more...
+
+
+M	MANIFEST
+M	MANIFEST.SKIP
+M	lib/Test/Smoke/App/AppOption.pm
+M	lib/Test/Smoke/App/AppOptionCollection.pm
+M	lib/Test/Smoke/App/Archiver.pm
+M	lib/Test/Smoke/App/Base.pm
+M	lib/Test/Smoke/App/Options.pm
+M	lib/Test/Smoke/App/RunSmoke.pm
+M	lib/Test/Smoke/App/SendReport.pm
+A	lib/Test/Smoke/App/SmokePerl.pm
+A	lib/Test/Smoke/App/SyncTree.pm
+D	lib/Test/Smoke/App/Syncer.pm
+M	lib/Test/Smoke/Archiver.pm
+M	lib/Test/Smoke/Patcher.pm
+M	lib/Test/Smoke/Poster.pm
+M	lib/Test/Smoke/Poster/Base.pm
+M	lib/Test/Smoke/Poster/Curl.pm
+M	lib/Test/Smoke/Poster/HTTP_Lite.pm
+M	lib/Test/Smoke/Poster/HTTP_Tiny.pm
+M	lib/Test/Smoke/Poster/LWP_UserAgent.pm
+M	lib/Test/Smoke/Reporter.pm
+M	lib/Test/Smoke/Smoker.pm
+M	lib/Test/Smoke/SourceTree.pm
+M	lib/Test/Smoke/SysInfo/AIX.pm
+M	lib/Test/Smoke/SysInfo/BSD.pm
+M	lib/Test/Smoke/SysInfo/Base.pm
+M	lib/Test/Smoke/SysInfo/Cygwin.pm
+M	lib/Test/Smoke/SysInfo/Darwin.pm
+M	lib/Test/Smoke/SysInfo/HPUX.pm
+M	lib/Test/Smoke/SysInfo/Haiku.pm
+M	lib/Test/Smoke/SysInfo/Irix.pm
+M	lib/Test/Smoke/SysInfo/Linux.pm
+M	lib/Test/Smoke/SysInfo/Solaris.pm
+M	lib/Test/Smoke/SysInfo/VMS.pm
+M	lib/Test/Smoke/SysInfo/Windows.pm
+M	lib/Test/Smoke/Util.pm
+D	private/00-manifest.t
+D	private/10-smoker_basic.t
+D	private/20-smoker_fail.t
+D	private/30-smoker_mini.t
+D	private/40-smoker_ok.t
+D	private/50-smoker_smoke.t
+D	private/SmokertestLib.pm
+D	private/perl/.patch
+D	private/perl/01test.c
+D	private/perl/Configure
+D	private/perl/MANIFEST
+D	private/perl/Makefile.PL
+D	private/perl/patchlevel.h
+D	private/perl/t/TEST
+D	private/perl/t/TestInit.pm
+D	private/perl/t/harness
+D	private/perl/t/smoke/die.t
+D	private/perl/t/smoke/many.t
+D	private/perl/t/smoke/minitest.t
+D	private/perl/t/smoke/test.t
+D	private/perl/win32/Makefile
+D	private/perl/win32/makefile.mk
+D	private/sysinfo/macos.t
+D	private/test_compile.pl
+D	private/test_pod.pl
+M	release.sh
+D	t/app/00-appobjects.t
+A	t/app/000-appobjects.t
+A	t/app/010-appoptions.t
+A	t/app/020-appoptioncollection.t
+A	t/app/030-app-base.t
+D	t/app/10-appoptions.t
+D	t/app/20-appoptioncollection.t
+D	t/app/30-app-base.t
+M	tsrunsmoke.pl
+M	tssendrpt.pl
+A	tssmokeperl.pl
+M	tssynctree.pl
+A	xt/00-manifest.t
+A	xt/01-compile.t
+A	xt/02-pod_syntax.t
+A	xt/03-pod-coverage.t
+A	xt/10-smoker_basic.t
+A	xt/20-smoker_fail.t
+A	xt/30-smoker_mini.t
+A	xt/40-smoker_ok.t
+A	xt/50-smoker_smoke.t
+A	xt/SmokertestLib.pm
+A	xt/perl/.patch
+A	xt/perl/01test.c
+A	xt/perl/Configure
+A	xt/perl/MANIFEST
+A	xt/perl/Makefile.PL
+A	xt/perl/patchlevel.h
+A	xt/perl/t/TEST
+A	xt/perl/t/TestInit.pm
+A	xt/perl/t/harness
+A	xt/perl/t/smoke/die.t
+A	xt/perl/t/smoke/many.t
+A	xt/perl/t/smoke/minitest.t
+A	xt/perl/t/smoke/test.t
+A	xt/perl/win32/Makefile
+A	xt/perl/win32/makefile.mk
+A	xt/sysinfo/macos.t
+________________________________________________________________________________
+[57abd56] by abeltje on Mon, 27 May 2013 23:14:46 +0200
+
+     Various changes to prepare for 1.61-RC1
+           * Fix MANIFEST
+           * AppOption->show_helptext() must only show alts, if there are
+        any.
+           * Add some MSWin32 config variables (5.14)
+
+
+M	MANIFEST
+M	lib/Test/Smoke.pm
+M	lib/Test/Smoke/App/AppOption.pm
+M	lib/Test/Smoke/Smoker.pm
+M	lib/Test/Smoke/Util.pm
+M	t/app/10-appoptions.t
+________________________________________________________________________________
+[6523c63] by abeltje on Mon, 27 May 2013 22:34:22 +0200
+
+     Add more http-posters to CoreSmokeDB and introduce a seperate Archiver.
+           * TS::Archiver && TS::App::Archiver && tsarchive.pl
+           * more posters: HTTP::Tiny && curl
+           * add log_warn() to TS::App::Base and TS::LogMixin
+           * add TS::App::RunSmoke && tsrunsmoke.pl
+
+
+M	configsmoke.pl
+M	lib/Test/Smoke/App/AppOption.pm
+A	lib/Test/Smoke/App/Archiver.pm
+M	lib/Test/Smoke/App/Base.pm
+M	lib/Test/Smoke/App/Options.pm
+A	lib/Test/Smoke/App/RunSmoke.pm
+M	lib/Test/Smoke/App/Syncer.pm
+A	lib/Test/Smoke/Archiver.pm
+M	lib/Test/Smoke/LogMixin.pm
+M	lib/Test/Smoke/Poster.pm
+M	lib/Test/Smoke/Poster/Base.pm
+A	lib/Test/Smoke/Poster/Curl.pm
+A	lib/Test/Smoke/Poster/HTTP_Tiny.pm
+M	lib/Test/Smoke/Poster/LWP_UserAgent.pm
+M	lib/Test/Smoke/Smoker.pm
+A	t/poster-post.t
+A	tsarchive.pl
+A	tsrunsmoke.pl
+M	tssendrpt.pl
+M	tssynctree.pl
+________________________________________________________________________________
+[43aed32] by abeltje on Thu, 23 May 2013 01:02:06 +0200
+
+     Fix Test::Smoke::App::*; we can now have multiple attributes with
+        special_options
+
+
+M	MANIFEST
+M	MANIFEST.SKIP
+M	Makefile.PL
+M	lib/Test/Smoke/App/Base.pm
+M	lib/Test/Smoke/App/Options.pm
+M	lib/Test/Smoke/App/SendReport.pm
+A	lib/Test/Smoke/LogMixin.pm
+M	lib/Test/Smoke/Poster.pm
+M	lib/Test/Smoke/Poster/Base.pm
+M	lib/Test/Smoke/Poster/HTTP_Lite.pm
+M	release.sh
+M	t/app/30-app-base.t
+A	tssendrpt.pl
+A	tssynctree.pl
+________________________________________________________________________________
+[663813d] by abeltje on Tue, 21 May 2013 01:24:25 +0200
+
+     Add mailserver port for MIME::Lite and SendEmail
+
+
+M	lib/Test/Smoke/Mailer/MIME_Lite.pm
+M	lib/Test/Smoke/Mailer/SendEmail.pm
+M	mailrpt.pl
+________________________________________________________________________________
+[45bfaa4] by abeltje on Tue, 21 May 2013 01:22:58 +0200
+
+     Add framework to create applications for Test::Smoke.
+
+
+M	MANIFEST
+A	lib/Test/Smoke/App/AppOption.pm
+A	lib/Test/Smoke/App/AppOptionCollection.pm
+A	lib/Test/Smoke/App/Base.pm
+A	lib/Test/Smoke/App/Options.pm
+A	lib/Test/Smoke/App/SendReport.pm
+A	lib/Test/Smoke/App/Syncer.pm
+A	lib/Test/Smoke/ObjectBase.pm
+A	lib/Test/Smoke/Poster.pm
+A	lib/Test/Smoke/Poster/Base.pm
+A	lib/Test/Smoke/Poster/HTTP_Lite.pm
+A	lib/Test/Smoke/Poster/LWP_UserAgent.pm
+A	t/app/00-appobjects.t
+A	t/app/10-appoptions.t
+A	t/app/20-appoptioncollection.t
+A	t/app/30-app-base.t
+________________________________________________________________________________
+[aff8b2d] by abeltje on Fri, 17 May 2013 07:09:32 +0200
+
+     RT#52022: capture warnings and errors from Intel C/C++ (TONYC)
+
+          - apply this patch from 2009 already
+
+
+M	lib/Test/Smoke/Util.pm
+M	t/grepccmsg.t
+A	t/logs/icc102.log
+________________________________________________________________________________
+[d24a582] by abeltje on Fri, 17 May 2013 07:08:14 +0200
+
+     Move developer test files around a bit.
+
+
+M	MANIFEST
+A	private/00-manifest.t
+D	private/00basic.t
+A	private/10-smoker_basic.t
+A	private/20-smoker_fail.t
+A	private/30-smoker_mini.t
+A	private/40-smoker_ok.t
+A	private/50-smoker_smoke.t
+D	private/smoker_fail.t
+D	private/smoker_mini.t
+D	private/smoker_ok.t
+D	private/smoker_smoke.t
+D	t/00-manifest.t
+________________________________________________________________________________
+[eaf0941] by abeltje on Wed, 29 May 2013 21:46:20 +0200
+
+     Add some more tests.
+
+
+M	MANIFEST
+M	Makefile.PL
+A	t/app/100-archiver.t
+A	t/app/110-runsmoke.t
+A	t/app/120-sendreport.t
+A	t/app/130-smokeperl.t
+A	t/app/140-synctree.t
+________________________________________________________________________________
+[13a22aa] by abeltje on Wed, 29 May 2013 18:38:16 +0200
+
+     fix manifest
+
+
+M	MANIFEST
+________________________________________________________________________________
+[e99c5a6] by abeltje on Wed, 29 May 2013 18:35:26 +0200
+
+     Final walk through of the code, fix pod, move the private testsuite
+        around some more...
+
+
+M	MANIFEST
+M	MANIFEST.SKIP
+M	lib/Test/Smoke/App/AppOption.pm
+M	lib/Test/Smoke/App/AppOptionCollection.pm
+M	lib/Test/Smoke/App/Archiver.pm
+M	lib/Test/Smoke/App/Base.pm
+M	lib/Test/Smoke/App/Options.pm
+M	lib/Test/Smoke/App/RunSmoke.pm
+M	lib/Test/Smoke/App/SendReport.pm
+A	lib/Test/Smoke/App/SmokePerl.pm
+A	lib/Test/Smoke/App/SyncTree.pm
+D	lib/Test/Smoke/App/Syncer.pm
+M	lib/Test/Smoke/Archiver.pm
+M	lib/Test/Smoke/Patcher.pm
+M	lib/Test/Smoke/Poster.pm
+M	lib/Test/Smoke/Poster/Base.pm
+M	lib/Test/Smoke/Poster/Curl.pm
+M	lib/Test/Smoke/Poster/HTTP_Lite.pm
+M	lib/Test/Smoke/Poster/HTTP_Tiny.pm
+M	lib/Test/Smoke/Poster/LWP_UserAgent.pm
+M	lib/Test/Smoke/Reporter.pm
+M	lib/Test/Smoke/Smoker.pm
+M	lib/Test/Smoke/SourceTree.pm
+M	lib/Test/Smoke/SysInfo/AIX.pm
+M	lib/Test/Smoke/SysInfo/BSD.pm
+M	lib/Test/Smoke/SysInfo/Base.pm
+M	lib/Test/Smoke/SysInfo/Cygwin.pm
+M	lib/Test/Smoke/SysInfo/Darwin.pm
+M	lib/Test/Smoke/SysInfo/HPUX.pm
+M	lib/Test/Smoke/SysInfo/Haiku.pm
+M	lib/Test/Smoke/SysInfo/Irix.pm
+M	lib/Test/Smoke/SysInfo/Linux.pm
+M	lib/Test/Smoke/SysInfo/Solaris.pm
+M	lib/Test/Smoke/SysInfo/VMS.pm
+M	lib/Test/Smoke/SysInfo/Windows.pm
+M	lib/Test/Smoke/Util.pm
+D	private/00-manifest.t
+D	private/10-smoker_basic.t
+D	private/20-smoker_fail.t
+D	private/30-smoker_mini.t
+D	private/40-smoker_ok.t
+D	private/50-smoker_smoke.t
+D	private/SmokertestLib.pm
+D	private/perl/.patch
+D	private/perl/01test.c
+D	private/perl/Configure
+D	private/perl/MANIFEST
+D	private/perl/Makefile.PL
+D	private/perl/patchlevel.h
+D	private/perl/t/TEST
+D	private/perl/t/TestInit.pm
+D	private/perl/t/harness
+D	private/perl/t/smoke/die.t
+D	private/perl/t/smoke/many.t
+D	private/perl/t/smoke/minitest.t
+D	private/perl/t/smoke/test.t
+D	private/perl/win32/Makefile
+D	private/perl/win32/makefile.mk
+D	private/sysinfo/macos.t
+D	private/test_compile.pl
+D	private/test_pod.pl
+M	release.sh
+D	t/app/00-appobjects.t
+A	t/app/000-appobjects.t
+A	t/app/010-appoptions.t
+A	t/app/020-appoptioncollection.t
+A	t/app/030-app-base.t
+D	t/app/10-appoptions.t
+D	t/app/20-appoptioncollection.t
+D	t/app/30-app-base.t
+M	tsrunsmoke.pl
+M	tssendrpt.pl
+A	tssmokeperl.pl
+M	tssynctree.pl
+A	xt/00-manifest.t
+A	xt/01-compile.t
+A	xt/02-pod_syntax.t
+A	xt/03-pod-coverage.t
+A	xt/10-smoker_basic.t
+A	xt/20-smoker_fail.t
+A	xt/30-smoker_mini.t
+A	xt/40-smoker_ok.t
+A	xt/50-smoker_smoke.t
+A	xt/SmokertestLib.pm
+A	xt/perl/.patch
+A	xt/perl/01test.c
+A	xt/perl/Configure
+A	xt/perl/MANIFEST
+A	xt/perl/Makefile.PL
+A	xt/perl/patchlevel.h
+A	xt/perl/t/TEST
+A	xt/perl/t/TestInit.pm
+A	xt/perl/t/harness
+A	xt/perl/t/smoke/die.t
+A	xt/perl/t/smoke/many.t
+A	xt/perl/t/smoke/minitest.t
+A	xt/perl/t/smoke/test.t
+A	xt/perl/win32/Makefile
+A	xt/perl/win32/makefile.mk
+A	xt/sysinfo/macos.t
+________________________________________________________________________________
+[8cfbb5a] by abeltje on Mon, 27 May 2013 23:14:46 +0200
+
+     Various changes to prepare for 1.61-RC1
+           * Fix MANIFEST
+           * AppOption->show_helptext() must only show alts, if there are
+        any.
+           * Add some MSWin32 config variables (5.14)
+
+
+M	MANIFEST
+M	lib/Test/Smoke.pm
+M	lib/Test/Smoke/App/AppOption.pm
+M	lib/Test/Smoke/Smoker.pm
+M	lib/Test/Smoke/Util.pm
+M	t/app/10-appoptions.t
+________________________________________________________________________________
+[30cbc8a] by abeltje on Mon, 27 May 2013 22:34:22 +0200
+
+     Add more http-posters to CoreSmokeDB and introduce a seperate Archiver.
+           * TS::Archiver && TS::App::Archiver && tsarchive.pl
+           * more posters: HTTP::Tiny && curl
+           * add log_warn() to TS::App::Base and TS::LogMixin
+           * add TS::App::RunSmoke && tsrunsmoke.pl
+
+
+M	configsmoke.pl
+M	lib/Test/Smoke/App/AppOption.pm
+A	lib/Test/Smoke/App/Archiver.pm
+M	lib/Test/Smoke/App/Base.pm
+M	lib/Test/Smoke/App/Options.pm
+A	lib/Test/Smoke/App/RunSmoke.pm
+M	lib/Test/Smoke/App/Syncer.pm
+A	lib/Test/Smoke/Archiver.pm
+M	lib/Test/Smoke/LogMixin.pm
+M	lib/Test/Smoke/Poster.pm
+M	lib/Test/Smoke/Poster/Base.pm
+A	lib/Test/Smoke/Poster/Curl.pm
+A	lib/Test/Smoke/Poster/HTTP_Tiny.pm
+M	lib/Test/Smoke/Poster/LWP_UserAgent.pm
+M	lib/Test/Smoke/Smoker.pm
+A	t/poster-post.t
+A	tsarchive.pl
+A	tsrunsmoke.pl
+M	tssendrpt.pl
+M	tssynctree.pl
+________________________________________________________________________________
+[ea9b762] by abeltje on Sun, 26 May 2013 19:12:18 +0200
+
+     Fix Test::Smoke::Util::skip_filter() for new test output.
+
+
+M	lib/Test/Smoke/Util.pm
+A	t/logs/5.19.0-make._test.stdout
+M	t/skip_filter.t
+________________________________________________________________________________
+[a65ce46] by abeltje on Sun, 26 May 2013 19:12:18 +0200
+
+     Fix Test::Smoke::Util::skip_filter() for new test output.
+
+
+M	lib/Test/Smoke/Util.pm
+A	t/logs/5.19.0-make._test.stdout
+M	t/skip_filter.t
+________________________________________________________________________________
+[08ece41] by abeltje on Sun, 26 May 2013 18:04:25 +0200
+
+     Apple changed the output of systemprofiler (again), adjust.
+
+
+M	lib/Test/Smoke/SysInfo/Darwin.pm
+________________________________________________________________________________
+[ef816ec] by abeltje on Sun, 26 May 2013 18:04:25 +0200
+
+     Apple changed the output of systemprofiler (again), adjust.
+
+
+M	lib/Test/Smoke/SysInfo/Darwin.pm
+________________________________________________________________________________
+[dca107d] by abeltje on Thu, 23 May 2013 01:02:06 +0200
+
+     Fix Test::Smoke::App::*; we can now have multiple attributes with
+        special_options
+
+
+M	MANIFEST
+M	MANIFEST.SKIP
+M	Makefile.PL
+M	lib/Test/Smoke/App/Base.pm
+M	lib/Test/Smoke/App/Options.pm
+M	lib/Test/Smoke/App/SendReport.pm
+A	lib/Test/Smoke/LogMixin.pm
+M	lib/Test/Smoke/Poster.pm
+M	lib/Test/Smoke/Poster/Base.pm
+M	lib/Test/Smoke/Poster/HTTP_Lite.pm
+M	release.sh
+M	t/app/30-app-base.t
+A	tssendrpt.pl
+A	tssynctree.pl
+________________________________________________________________________________
+[d24c6f4] by abeltje on Tue, 21 May 2013 01:24:25 +0200
+
+     Add mailserver port for MIME::Lite and SendEmail
+
+
+M	lib/Test/Smoke/Mailer/MIME_Lite.pm
+M	lib/Test/Smoke/Mailer/SendEmail.pm
+M	mailrpt.pl
+________________________________________________________________________________
+[b9f4992] by abeltje on Tue, 21 May 2013 01:22:58 +0200
+
+     Add framework to create applications for Test::Smoke.
+
+
+M	MANIFEST
+A	lib/Test/Smoke/App/AppOption.pm
+A	lib/Test/Smoke/App/AppOptionCollection.pm
+A	lib/Test/Smoke/App/Base.pm
+A	lib/Test/Smoke/App/Options.pm
+A	lib/Test/Smoke/App/SendReport.pm
+A	lib/Test/Smoke/App/Syncer.pm
+A	lib/Test/Smoke/ObjectBase.pm
+A	lib/Test/Smoke/Poster.pm
+A	lib/Test/Smoke/Poster/Base.pm
+A	lib/Test/Smoke/Poster/HTTP_Lite.pm
+A	lib/Test/Smoke/Poster/LWP_UserAgent.pm
+A	t/app/00-appobjects.t
+A	t/app/10-appoptions.t
+A	t/app/20-appoptioncollection.t
+A	t/app/30-app-base.t
+________________________________________________________________________________
+[156c63e] by abeltje on Fri, 17 May 2013 07:09:32 +0200
+
+     RT#52022: capture warnings and errors from Intel C/C++ (TONYC)
+
+          - apply this patch from 2009 already
+
+
+M	lib/Test/Smoke/Util.pm
+M	t/grepccmsg.t
+A	t/logs/icc102.log
+________________________________________________________________________________
+[2eeeaf0] by abeltje on Fri, 17 May 2013 07:08:14 +0200
+
+     Move developer test files around a bit.
+
+
+M	MANIFEST
+A	private/00-manifest.t
+D	private/00basic.t
+A	private/10-smoker_basic.t
+A	private/20-smoker_fail.t
+A	private/30-smoker_mini.t
+A	private/40-smoker_ok.t
+A	private/50-smoker_smoke.t
+D	private/smoker_fail.t
+D	private/smoker_mini.t
+D	private/smoker_ok.t
+D	private/smoker_smoke.t
+D	t/00-manifest.t
+________________________________________________________________________________
+[0910ae3] by abeltje on Thu, 16 May 2013 18:45:05 +0200
+
+     Add -help option with information.
+
+
+M	release.sh
+________________________________________________________________________________
+[305ab65] by abeltje on Sun, 12 May 2013 15:42:17 +0200
+
+     Start fixing MSWin32 stuff, add option -DWIN64=undef, dmake/nmake
+        tests..
+
+
+M	lib/Test/Smoke/Util.pm
+M	t/for_dmake.t
+M	t/for_nmake.t
+________________________________________________________________________________
+[b3a4874] by abeltje on Sun, 12 May 2013 15:27:45 +0200
+
+     Fix more dependencies.
+
+
+M	Makefile.PL
+________________________________________________________________________________
+[963702f] by abeltje on Sun, 12 May 2013 15:27:22 +0200
+
+     Add the new SysInfo::Cygwin to the manifest.
+
+
+M	MANIFEST
+________________________________________________________________________________
+[c9ca2cb] by abeltje on Sun, 12 May 2013 15:09:10 +0200
+
+     Treat Cygwin as its own os, resolve rt#35613.
+
+
+M	lib/Test/Smoke/SysInfo.pm
+A	lib/Test/Smoke/SysInfo/Cygwin.pm
+________________________________________________________________________________
+[717b17d] by abeltje on Sat, 11 May 2013 19:41:12 +0200
+
+     Make the diagnostics for smoking from git-repo better:
+           - verbose 1: show command that is run
+           - verbose 2: show current path and command output
+
+
+M	lib/Test/Smoke/Syncer/Git.pm
+M	lib/Test/Smoke/Util/Execute.pm
+________________________________________________________________________________
+[0226364] by abeltje on Sat, 11 May 2013 19:39:06 +0200
+
+     Add '.git' to the default MANIFEST.SKIP files.
+
+
+M	lib/Test/Smoke/SourceTree.pm
+________________________________________________________________________________
+[a9767da] by abeltje on Sat, 11 May 2013 15:24:04 +0200
+
+     Fix the get info from /proc/cpuinfo testcode
+         - it will now handle open my $fh, '< /proc/cpuinfo'
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+M	t/sysinfo_proc.t
+________________________________________________________________________________
+[29dcc92] by abeltje on Fri, 10 May 2013 22:54:03 +0200
+
+     Fix the SysInfo/Solaris code
+
+
+M	lib/Test/Smoke/SysInfo/Solaris.pm
+________________________________________________________________________________
+[53b8792] by abeltje on Fri, 10 May 2013 13:40:09 +0200
+
+     Fix typo, remove '-i' from make args for Haiku
+
+
+M	Makefile.PL
+________________________________________________________________________________
+[3f19b32] by abeltje on Fri, 10 May 2013 13:34:57 +0200
+
+     Merge branch 'master' of ssh://github.com/abeltje/Test-Smoke
+
+        Conflicts:
+        Makefile.PL
+
+________________________________________________________________________________
+[77378ba] by abeltje on Fri, 10 May 2013 13:32:24 +0200
+
+     Update the Makefile.PL, add dependencies for MSWin32 and Haiku.
+
+
+M	Makefile.PL
+________________________________________________________________________________
+[e949a65] by abeltje on Fri, 10 May 2013 13:30:41 +0200
+
+     Update the Makefile.PL, add dependencies for MSWin32 and Haiku.
+
+
+M	Makefile.PL
+________________________________________________________________________________
+[dcc62fc] by abeltje on Fri, 10 May 2013 13:29:40 +0200
+
+     Add ua_timeout option (LWP::UserAgent timeout), so I can set it to 0
+        for my haiku box.
+
+
+M	configsmoke.pl
+M	sendrpt.pl
+M	smokeperl.pl
+________________________________________________________________________________
+[aa98d11] by abeltje on Fri, 10 May 2013 11:39:34 +0200
+
+     Fix long standing bug in the manifest_check code, where MANIFEST.SKIP
+        entries were not treated as regexen.
+
+
+M	lib/Test/Smoke/SourceTree.pm
+A	t/ftppub/perl-current/lib/.gitignore
+M	t/tree.t
+________________________________________________________________________________
+[9cbdf12] by abeltje on Fri, 10 May 2013 11:11:01 +0200
+
+     Add -test|-t switch for running all the tests only.
+
+
+M	release.sh
+________________________________________________________________________________
+[d427ca9] by abeltje on Fri, 10 May 2013 11:10:31 +0200
+
+     Add documentation for the new SysInfo modules.
+
+
+M	lib/Test/Smoke/SysInfo.pm
+M	lib/Test/Smoke/SysInfo/AIX.pm
+M	lib/Test/Smoke/SysInfo/BSD.pm
+M	lib/Test/Smoke/SysInfo/Base.pm
+M	lib/Test/Smoke/SysInfo/Darwin.pm
+M	lib/Test/Smoke/SysInfo/Generic.pm
+M	lib/Test/Smoke/SysInfo/HPUX.pm
+M	lib/Test/Smoke/SysInfo/Haiku.pm
+M	lib/Test/Smoke/SysInfo/Irix.pm
+M	lib/Test/Smoke/SysInfo/Linux.pm
+M	lib/Test/Smoke/SysInfo/Solaris.pm
+M	lib/Test/Smoke/SysInfo/VMS.pm
+M	lib/Test/Smoke/SysInfo/Windows.pm
+________________________________________________________________________________
+[321f1ba] by abeltje on Fri, 10 May 2013 04:18:36 +0000
+
+    
+        * Rest of the changes for Haiku branch.
+
+
+M	MANIFEST
+M	lib/Test/Smoke/SysInfo.pm
+M	lib/Test/Smoke/Util.pm
+M	t/sysinfo.t
+M	t/sysinfo_macos.t
+M	t/sysinfo_proc.t
+________________________________________________________________________________
+[dcfcf3e] by abeltje on Fri, 10 May 2013 04:14:26 +0000
+
+    
+        * Refactor the SysInfo code, add support for Haiku OS.
+
+
+A	lib/Test/Smoke/SysInfo/AIX.pm
+A	lib/Test/Smoke/SysInfo/BSD.pm
+A	lib/Test/Smoke/SysInfo/Base.pm
+A	lib/Test/Smoke/SysInfo/Darwin.pm
+A	lib/Test/Smoke/SysInfo/Generic.pm
+A	lib/Test/Smoke/SysInfo/HPUX.pm
+A	lib/Test/Smoke/SysInfo/Haiku.pm
+A	lib/Test/Smoke/SysInfo/Irix.pm
+A	lib/Test/Smoke/SysInfo/Linux.pm
+A	lib/Test/Smoke/SysInfo/Solaris.pm
+A	lib/Test/Smoke/SysInfo/VMS.pm
+A	lib/Test/Smoke/SysInfo/Windows.pm
+________________________________________________________________________________
+[f474bbd] by abeltje on Wed, 8 May 2013 07:50:20 +0200
+
+     Refactor the Syncer code.
+
+
+M	MANIFEST
+M	lib/Test/Smoke/Syncer.pm
+A	lib/Test/Smoke/Syncer/Base.pm
+A	lib/Test/Smoke/Syncer/Copy.pm
+A	lib/Test/Smoke/Syncer/FTP.pm
+A	lib/Test/Smoke/Syncer/Forest.pm
+A	lib/Test/Smoke/Syncer/Git.pm
+A	lib/Test/Smoke/Syncer/Hardlink.pm
+A	lib/Test/Smoke/Syncer/Rsync.pm
+A	lib/Test/Smoke/Syncer/Snapshot.pm
+M	t/syncer_copy.t
+M	t/syncer_ftpclient.t
+M	t/syncer_link.t
+________________________________________________________________________________
+[b8b2491] by abeltje on Tue, 7 May 2013 18:15:12 +0200
+
+     Refactor the mail modules.
+
+
+M	MANIFEST
+M	lib/Test/Smoke/Mailer.pm
+A	lib/Test/Smoke/Mailer/Base.pm
+A	lib/Test/Smoke/Mailer/MIME_Lite.pm
+A	lib/Test/Smoke/Mailer/Mail_Sendmail.pm
+A	lib/Test/Smoke/Mailer/Mail_X.pm
+A	lib/Test/Smoke/Mailer/SendEmail.pm
+A	lib/Test/Smoke/Mailer/Sendmail.pm
+M	t/mailer.t
+________________________________________________________________________________
+[f4c3d3c] by abeltje on Mon, 6 May 2013 22:38:38 +0200
+
+     Make sure we have 2 digits after the decimal point (aesthetic).
+
+
+M	release.sh
+________________________________________________________________________________
+[0f0e72f] by abeltje on Mon, 6 May 2013 17:15:26 +0200
+
+     Autocommit for distribution Test::Smoke 1.6
+
+
+M	Changes
+M	lib/Test/Smoke.pm
 ________________________________________________________________________________
 [90ec5b5] by Abe Timmerman on Mon, 6 May 2013 17:06:21 +0200
 
