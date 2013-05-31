@@ -1,9 +1,73 @@
-Changes on 2013-05-30 for github repository at:
+Changes on 2013-05-31 for github repository at:
   Fetch URL: ssh://git@github.com/abeltje/Test-Smoke
   Push  URL: ssh://git@github.com/abeltje/Test-Smoke
 
 Enjoy!
 
+________________________________________________________________________________
+[39e47ac] by abeltje on Fri, 31 May 2013 21:30:50 +0200
+
+     Merge branch 'master' of ssh://github.com/abeltje/Test-Smoke
+
+________________________________________________________________________________
+[f5224fa] by abeltje on Fri, 31 May 2013 20:39:17 +0200
+
+     Use the new tssmokeperl.pl
+
+
+M	configsmoke.pl
+________________________________________________________________________________
+[e6b5903] by abeltje on Fri, 31 May 2013 18:10:40 +0200
+
+     Fix some more errors.
+         * use Test::Smoke::SysInfo::Windows->new->os for Windows version
+         * import of cwd() from Cwd.
+         * Make LWP::UserAgent the default poster() again.
+
+
+M	configsmoke.pl
+M	lib/Test/Smoke/App/Options.pm
+M	lib/Test/Smoke/Syncer/Base.pm
+________________________________________________________________________________
+[8ea102c] by abeltje on Fri, 31 May 2013 12:47:03 +0200
+
+     Make this test a bit saver to run...
+
+
+M	t/poster-post.t
+________________________________________________________________________________
+[969b6cb] by abeltje on Fri, 31 May 2013 12:42:34 +0200
+
+     Fix Test::Smoke::App::SmokePerl
+
+
+M	lib/Test/Smoke/App/Base.pm
+M	lib/Test/Smoke/App/SmokePerl.pm
+________________________________________________________________________________
+[34cc763] by abeltje on Fri, 31 May 2013 09:53:40 +0200
+
+     Fix all the Test::Smoke::Poster::* code that use Modules.
+
+
+M	lib/Test/Smoke/Poster/HTTP_Lite.pm
+M	lib/Test/Smoke/Poster/HTTP_Tiny.pm
+M	lib/Test/Smoke/Poster/LWP_UserAgent.pm
+M	t/poster-post.t
+________________________________________________________________________________
+[cca672f] by abeltje on Fri, 31 May 2013 08:26:46 +0200
+
+     Fallout of the first testround with 1.61-RC1
+
+
+M	Changes
+M	MANIFEST
+M	MANIFEST.SKIP
+M	lib/Test/Smoke.pm
+M	tsarchive.pl
+M	tsrunsmoke.pl
+M	tssendrpt.pl
+M	tssmokeperl.pl
+M	tssynctree.pl
 ________________________________________________________________________________
 [a744615] by abeltje on Thu, 30 May 2013 23:41:35 +0200
 
@@ -19,6 +83,11 @@ ________________________________________________________________________________
 
 M	lib/Test/Smoke.pm
 M	release.sh
+________________________________________________________________________________
+[1b84359] by abeltje on Thu, 30 May 2013 17:58:39 +0200
+
+     Merge branch 'master' of ssh://github.com/abeltje/Test-Smoke
+
 ________________________________________________________________________________
 [031bc48] by abeltje on Thu, 30 May 2013 17:54:29 +0200
 
