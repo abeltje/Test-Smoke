@@ -5,7 +5,7 @@ use Carp;
 
 use base 'Test::Smoke::Poster::Base';
 
-use HTTP::Tiny;
+use CGI::Util 'escape';
 use JSON;
 
 =head1 NAME
@@ -28,6 +28,7 @@ sub new {
     my $class = shift;
     my $self = $class->SUPER::new(@_);
 
+    require HTTP::Tiny;
     $self->{_ua} = HTTP::Tiny->new(
         agent => $self->agent_string()
     );
@@ -44,9 +45,16 @@ Post the json to CoreSmokeDB.
 sub post {
     my $self = shift;
 
-    my $response = $self->ua->post_form(
-        $self->smokedb_url,
-        { json => $self->get_json() },
+    my $form_data = "json=" . escape($self->get_json);
+    my $response = $self->ua->request(
+        POST => $self->smokedb_url,
+        { 
+            headers => {
+                'Content-Type'   => 'application/x-www-form-urlencoded',
+                'Content-Length' => length($form_data),
+            },
+            content => $form_data,
+        },
     );
 
     if (!$response->{success}) {

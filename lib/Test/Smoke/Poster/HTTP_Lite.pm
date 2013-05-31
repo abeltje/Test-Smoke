@@ -5,7 +5,6 @@ use Carp;
 
 use base 'Test::Smoke::Poster::Base';
 
-use HTTP::Lite;
 use JSON;
 
 =head1 NAME
@@ -28,6 +27,7 @@ sub new {
     my $class = shift;
     my $self = $class->SUPER::new(@_);
 
+    require HTTP::Lite;
     $self->{_ua} = HTTP::Lite->new();
 
     return $self;

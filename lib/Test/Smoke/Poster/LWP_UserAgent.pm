@@ -5,7 +5,6 @@ use strict;
 use base 'Test::Smoke::Poster::Base';
 
 use JSON;
-use LWP::UserAgent;
 
 =head1 NAME
 
@@ -31,6 +30,7 @@ sub new {
     my $class = shift;
     my $self = $class->SUPER::new(@_);
 
+    require LWP::UserAgent;
     my %extra_args;
     if (defined $self->ua_timeout) {
         $extra_args{timeout} = $self->ua_timeout;

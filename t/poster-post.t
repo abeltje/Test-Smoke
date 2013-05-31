@@ -1,10 +1,12 @@
 #! perl -w
 use strict;
 
-use Test::More tests => 9;
+use Test::More;
 use Test::NoWarnings;
 
 use CGI::Util qw/unescape/;
+use Config;
+use Errno qw/EINTR/;
 use JSON;
 use Test::Smoke::Poster;
 use Test::Smoke::Util qw/whereis/;
@@ -13,6 +15,7 @@ my $debug = $ENV{TSDEBUG};
 
 my ($pid, $port, $socket);
 {
+    my $timeout = 30;
     use IO::Socket::INET;
     $socket = IO::Socket::INET->new(
         Listen => 1024,
@@ -23,16 +26,40 @@ my ($pid, $port, $socket);
     $pid = fork();
     if ($pid) { # Continue
         note("http://localhost:$port started");
+        if ( $Config{d_alarm} ) { # set timeout
+            $SIG{ALRM} = sub {
+                print STDERR "# Timeout passed\n";
+                exit(42);
+            };
+            alarm $timeout;
+            plan(tests => 9);
+        }
+        else {
+            kill 9, $pid;
+            plan(skip_all => "Could not find 'd_alarm', daren't run tests!");
+        }
     }
     else { # Server
         my $CRLF = "\015\012";
         while (1) {
             my $httpd = $socket->accept();
             vec(my $fdset = "", $httpd->fileno, 1) = 1;
-            my ($cnt, $buffer, $blck, $to) = (0, "", 16);
-            $to = select($fdset, undef, undef, 30);
+            my ($cnt, $buffer, $blck, $to) = (0, "", 1024);
+            my ($start, $pending) = (time(), $timeout);
             do {
-                $cnt = sysread($httpd, $buffer, $blck, length($buffer));
+                while () {
+                    $to = select( $fdset, undef, undef, $pending );
+                    ::diag("[canread] $to/$pending/$timeout") if $debug;
+                    if ( $to == -1 ) {
+                        $! == EINTR or die(qq/select(2): '$!'\n/);
+                        redo if !$timeout
+                              || ($pending = $timeout - (time - $start)) > 0;
+                        $to = 0;
+                    }
+                    last;
+                }
+                $cnt = sysread( $httpd, $buffer, $blck, length($buffer) );
+                ::diag("[Read buffer] ($cnt/$blck): $buffer") if $debug;
             } until $cnt < $blck;
             my @message = split(/\015?\012/, $buffer);
             $cnt = length($buffer);
