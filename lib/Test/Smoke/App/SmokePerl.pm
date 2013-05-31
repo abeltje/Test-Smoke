@@ -28,32 +28,28 @@ sub new {
     my $class = shift;
     my $self = $class->SUPER::new(@_);
 
-    my %options = $self->options;
-    my @argv = map +( "--$_" => $self->option($_)), keys %options;
-    push @argv, '-v', $self->option('verbose');
-
     {
-        local @ARGV = @argv;
+        local @ARGV = @{$self->ARGV};
         $self->{_synctree} = Test::Smoke::App::SyncTree->new(
-            $opt->smokeperl_config()
+            $opt->synctree_config()
         );
     }
     {
-        local @ARGV = @argv;
+        local @ARGV = @{$self->ARGV};
         $self->{_runsmoke} = Test::Smoke::App::RunSmoke->new(
-            $opt->smokeperl_config()
+            $opt->runsmoke_config()
         );
     }
     {
-        local @ARGV = @argv;
+        local @ARGV = @{$self->ARGV};
         $self->{_sendreport} = Test::Smoke::App::SendReport->new(
-            $opt->smokeperl_config()
+            $opt->sendreport_config()
         );
     }
     {
-        local @ARGV = @argv;
+        local @ARGV = @{$self->ARGV};
         $self->{_archiver} = Test::Smoke::App::Archiver->new(
-            $opt->smokeperl_config()
+            $opt->archiver_config()
         );
     }
 

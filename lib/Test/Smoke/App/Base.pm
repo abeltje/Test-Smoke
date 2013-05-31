@@ -347,7 +347,7 @@ sub _get_options {
     my $self = shift;
 
     %{$self->{_cli_options}} = %{$self->opt_collection->options_for_cli};
-
+    @{$self->{_ARGV}} = @ARGV;
     GetOptions(
         $self->cli_options,
         @{ $self->opt_collection->options_list },
