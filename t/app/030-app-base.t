@@ -212,7 +212,7 @@ use Test::Smoke::App::AppOption;
     isa_ok($app, 'Test::Smoke::App::Test1');
     like(
         $app->configfile_error,
-        qr/syntax error/,
+        qr/syntax error|Unknown regexp modifier/,
         "configfile error"
     );
     unlink 'smokeme.config';
