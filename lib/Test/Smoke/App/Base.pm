@@ -5,7 +5,7 @@ use Carp;
 
 use base 'Test::Smoke::ObjectBase';
 
-use Getopt::Long;
+use Getopt::Long qw/:config pass_through/;
 use Test::Smoke::App::AppOption;
 use Test::Smoke::App::AppOptionCollection;
 

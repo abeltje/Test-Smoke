@@ -8,7 +8,7 @@ use Test::Smoke::App::Options;
 my $opt = 'Test::Smoke::App::Options';
 
 {
-    local @ARGV = ('--ddir', 't/perl');
+    local @ARGV = ('--ddir', 't/perl', '--poster', 'curl', '--curlbin', 'curl');
     my $app = Test::Smoke::App::SmokePerl->new(
         main_options    => [$opt->syncer(), $opt->poster()],
         general_options => [$opt->ddir()],
@@ -17,6 +17,7 @@ my $opt = 'Test::Smoke::App::Options';
                 $opt->gitbin(),
                 $opt->gitdir(),
             ],
+            'curl' => [ $opt->curlbin() ],
         },
     );
     isa_ok($app, 'Test::Smoke::App::SmokePerl');

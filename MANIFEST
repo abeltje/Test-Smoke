@@ -3,7 +3,9 @@ archiverpt.pl
 Changes
 chkbcfg.pl
 configsmoke.pl
+inc/JSON.pm
 inc/Mail/Sendmail.pm
+lib/fallback.pm
 lib/Test/Smoke.pm
 lib/Test/Smoke/App/AppOption.pm
 lib/Test/Smoke/App/AppOptionCollection.pm
@@ -82,6 +84,8 @@ smokeperl.pl
 smokestatus.pl
 synctree.pl
 sysinfo.pl
+t/10-fallback.t
+t/11-no_fallback.t
 t/app/000-appobjects.t
 t/app/010-appoptions.t
 t/app/020-appoptioncollection.t

@@ -1,21 +1,25 @@
 package Test::Smoke::Reporter;
+use warnings;
 use strict;
 
 use vars qw( $VERSION );
-$VERSION = '0.052';
+$VERSION = '0.053';
+
+use fallback 'inc';
 
 require File::Path;
 require Test::Smoke;
 use Cwd;
+use Encode qw( decode encode );
 use File::Spec::Functions;
 use JSON;
-use LWP::UserAgent;
 use POSIX qw( strftime );
-use Encode qw( decode encode );
 use Test::Smoke::SysInfo;
+use Test::Smoke::Util qw(
+    grepccmsg get_smoked_Config read_logfile
+    time_in_hhmm get_local_patches
+);
 use Text::ParseWords;
-use Test::Smoke::Util qw( grepccmsg get_smoked_Config read_logfile
-                          time_in_hhmm get_local_patches );
 
 use constant USERNOTE_ON_TOP => 'top';
 

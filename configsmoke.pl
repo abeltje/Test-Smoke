@@ -1,22 +1,21 @@
 #!/usr/bin/perl -w
 use strict;
 use 5.006001;
+use Carp;
 
 use Config;
-use Carp;
 use Cwd;
-use File::Spec;
-use File::Path;
-use File::Copy;
 use Data::Dumper;
 use File::Basename;
+use File::Copy;
+use File::Path;
+use File::Spec;
+use File::Spec::Functions;
 my $findbin;
 BEGIN { $findbin = dirname $0 }
 
-use lib File::Spec->catdir($findbin, 'lib');
-use lib File::Spec->catdir($findbin, 'lib', 'inc');
-use lib $findbin;
-use lib File::Spec->catdir($findbin, 'inc');
+use fallback 'inc', 'lib', $findbin, catdir($findbin, 'inc');
+
 use Test::Smoke::SysInfo;
 use Test::Smoke::Util qw(do_pod2usage whereis);
 

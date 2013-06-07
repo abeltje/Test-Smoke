@@ -5,6 +5,8 @@ use Carp;
 
 use base 'Test::Smoke::Poster::Base';
 
+use fallback 'inc';
+
 use CGI::Util 'escape';
 use JSON;
 

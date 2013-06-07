@@ -4,6 +4,8 @@ use strict;
 
 use base 'Test::Smoke::Poster::Base';
 
+use fallback 'inc';
+
 use JSON;
 
 =head1 NAME

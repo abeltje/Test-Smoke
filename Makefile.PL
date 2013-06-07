@@ -82,6 +82,28 @@ for ($^O) {
 if ($] < 5.008) { # Encode is core from 5.8.0
     $extra_deps{'Encode'} = 0;
 }
+eval { require JSON };
+if ( $@ ) {
+    eval { require JSON::PP };
+    $extra_deps{'JSON::PP'} = 0 if $@;
+}
+my %posters;
+for my $poster (qw/LWP::UserAgent HTTP::Lite HTTP::Tiny/) {
+    eval "require $poster;";
+    if ($@) { $posters{$poster} = 0 }
+}
+if (keys %posters == 3) {
+    # Check for the curlbin
+    local @INC = (@INC, 'lib');
+    require Test::Smoke::Util;
+    my $curlbin = Test::Smoke::Util::whereis('curl');
+    if (!$curlbin) {
+        $extra_deps{'LWP::UserAgent'} = 0;
+    }
+    else {
+        print "Found $curlbin\n";
+    }
+}
 
 WriteMakefile(
     NAME          => "Test-Smoke",
@@ -99,8 +121,6 @@ WriteMakefile(
     PREREQ_PM     => {
         'File::Spec'       => 0.82,
         'Test::More'       => 0,
-        'JSON'             => 0,
-        'LWP::UserAgent'   => 0,
         'Test::NoWarnings' => 0,
         %extra_deps,
     },

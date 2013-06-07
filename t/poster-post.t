@@ -1,6 +1,8 @@
 #! perl -w
 use strict;
 
+use fallback 'inc';
+
 use Test::More;
 use Test::NoWarnings ();
 
@@ -19,8 +21,9 @@ my $jsnfile = 'testsuite.jsn';
 {
     use IO::Socket::INET;
     $socket = IO::Socket::INET->new(
-        Listen => 1024,
-        Proto => 'tcp',
+        Listen   => 1024,
+        Proto    => 'tcp',
+        Blocking => 1,
     );
     $port = $socket->sockport;
     $pid = fork();
@@ -30,11 +33,10 @@ my $jsnfile = 'testsuite.jsn';
     }
     else { # HTTP-Server for dummies
         my $CRLF = "\015\012";
-        while (1) {
-            my $httpd = $socket->accept();
+        while (my $httpd = $socket->accept()) {
             vec(my $fdset = "", $httpd->fileno, 1) = 1;
             my ($cnt, $buffer, $blck, $to) = (0, "", 1024, 0);
-            $to = select($fdset, undef, undef, $timeout);
+            #$to = select($fdset, undef, undef, $timeout);
             do {
                 $cnt = sysread( $httpd, $buffer, $blck, length($buffer) );
                 ::diag("[Read buffer] ($cnt/$blck): $buffer") if $debug;
@@ -110,7 +112,7 @@ SKIP: {
 }
 
 SKIP: {
-    eval { local $^W; require HTTP::Tiny; die "skip test\n" };
+    eval { local $^W; require HTTP::Tiny; };
     skip("Could not load HTTP::Tiny", 2) if $@;
 
     my $poster = Test::Smoke::Poster->new(
@@ -129,7 +131,7 @@ SKIP: {
 }
 
 SKIP: {
-    eval { local $^W; require HTTP::Lite; die "skip test\n" };
+    eval { local $^W; require HTTP::Lite; };
     skip("Could not load HTTP::Lite", 2) if $@;
 
     my $poster = Test::Smoke::Poster->new(
