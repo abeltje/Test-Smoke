@@ -14,7 +14,8 @@ use File::Spec::Functions;
 my $findbin;
 BEGIN { $findbin = dirname $0 }
 
-use fallback 'inc', 'lib', $findbin, catdir($findbin, 'inc');
+use lib $findbin;
+use fallback 'inc', 'lib', catdir($findbin, 'inc');
 
 use Test::Smoke::SysInfo;
 use Test::Smoke::Util qw(do_pod2usage whereis);
