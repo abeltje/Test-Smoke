@@ -112,7 +112,7 @@ SKIP: {
 }
 
 SKIP: {
-    eval { local $^W; require HTTP::Tiny; };
+    eval { local $^W; require HTTP::Tiny; die "Not available atm.\n" };
     skip("Could not load HTTP::Tiny", 2) if $@;
 
     my $poster = Test::Smoke::Poster->new(
@@ -131,7 +131,7 @@ SKIP: {
 }
 
 SKIP: {
-    eval { local $^W; require HTTP::Lite; };
+    eval { local $^W; require HTTP::Lite; die "Not available atm.\n" };
     skip("Could not load HTTP::Lite", 2) if $@;
 
     my $poster = Test::Smoke::Poster->new(
