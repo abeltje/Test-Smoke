@@ -3,36 +3,22 @@ use strict;
 
 use Test::More 'no_plan';
 
-use File::Path;
 use File::Spec::Functions;
-use Test::Smoke::App::SmokePerl;
 use Test::Smoke::App::Options;
-my $opt = 'Test::Smoke::App::Options';
+use Test::Smoke::App::Reporter;
 
-my $ddir = catdir('t', 'perl');
-mkpath($ddir);
+my $ddir = 't';
 {
     fake_out($ddir);
-    local @ARGV = ('--ddir', $ddir, '--poster', 'curl', '--curlbin', 'curl');
-    my $app = Test::Smoke::App::SmokePerl->new(
-        main_options    => [$opt->syncer(), $opt->poster()],
-        general_options => [$opt->ddir()],
-        special_options => {
-            'git' => [
-                $opt->gitbin(),
-                $opt->gitdir(),
-            ],
-            'curl' => [ $opt->curlbin() ],
-        },
+    local @ARGV = ('-d', $ddir);
+    my $app = Test::Smoke::App::Reporter->new(
+        Test::Smoke::App::Options->reporter_config()
     );
-    isa_ok($app, 'Test::Smoke::App::SmokePerl');
+    isa_ok($app, 'Test::Smoke::App::Reporter');
 }
 
 # done_testing();
-END {
-    unlink catfile($ddir, Test::Smoke::App::Options->outfile->default);
-    rmtree($ddir);
-}
+END { unlink catfile($ddir, Test::Smoke::App::Options->outfile->default) }
 
 sub fake_out {
     my $outfile = catfile(shift, Test::Smoke::App::Options->outfile->default);

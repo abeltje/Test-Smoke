@@ -12,6 +12,7 @@ lib/Test/Smoke/App/AppOptionCollection.pm
 lib/Test/Smoke/App/Archiver.pm
 lib/Test/Smoke/App/Base.pm
 lib/Test/Smoke/App/Options.pm
+lib/Test/Smoke/App/Reporter.pm
 lib/Test/Smoke/App/RunSmoke.pm
 lib/Test/Smoke/App/SendReport.pm
 lib/Test/Smoke/App/SmokePerl.pm
@@ -95,6 +96,7 @@ t/app/110-runsmoke.t
 t/app/120-sendreport.t
 t/app/130-smokeperl.t
 t/app/140-synctree.t
+t/app/150-reporter.t
 t/buildcfg.t
 t/cfgstuff.t
 t/for_dmake.t
@@ -173,6 +175,7 @@ t/vms_rl.t
 t/win32/Makefile
 t/win32/makefile.mk
 tsarchive.pl
+tsreport.pl
 tsrunsmoke.pl
 tssendrpt.pl
 tssmokeperl.pl

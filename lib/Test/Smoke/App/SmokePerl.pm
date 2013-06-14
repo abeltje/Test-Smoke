@@ -4,10 +4,11 @@ use strict;
 
 use base 'Test::Smoke::App::Base';
 
-use Test::Smoke::App::SyncTree;
-use Test::Smoke::App::RunSmoke;
 use Test::Smoke::App::Archiver;
+use Test::Smoke::App::Reporter;
+use Test::Smoke::App::RunSmoke;
 use Test::Smoke::App::SendReport;
+use Test::Smoke::App::SyncTree;
 
 use Test::Smoke::App::Options;
 my $opt = 'Test::Smoke::App::Options';
@@ -42,6 +43,12 @@ sub new {
     }
     {
         local @ARGV = @{$self->ARGV};
+        $self->{_reporter} = Test::Smoke::App::Reporter->new(
+            $opt->reporter_config()
+        );
+    }
+    {
+        local @ARGV = @{$self->ARGV};
         $self->{_sendreport} = Test::Smoke::App::SendReport->new(
             $opt->sendreport_config()
         );
@@ -66,6 +73,8 @@ Run all the parts:
 
 =item * runsmoke
 
+=item * report
+
 =item * sendrpt
 
 =item * archive
@@ -79,6 +88,7 @@ sub run {
 
     $self->synctree->run();
     $self->runsmoke->run();
+    $self->reporter->run();
     $self->sendreport->run();
     $self->archiver->run();
 }
