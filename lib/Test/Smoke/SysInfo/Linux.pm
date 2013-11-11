@@ -43,16 +43,17 @@ sub prepare_os {
 
     my ($dist_file) = grep {
         -s $_ && !/\blsb-/
-    } glob("/etc/*[-_][rRvV][eE][lLrR]*"), "/etc/issue";
+    } glob("/etc/*[-_][rRvV][eE][lLrR]*"), "/etc/issue",
+	"/etc.defaults/VERSION", "/etc/VERSION";
     return if !$dist_file;
 
     my $os = $self->_os();
-    (my $distro = $dist_file) =~ s{^/etc/}{};
-    $distro =~ s{[-_](?:release|version)\b}{}i;
+    (my $distro = $dist_file) =~ s{^/etc(?:\.defaults)?/}{}i;
+    $distro =~ s{[-_]?(?:release|version)\b}{}i;
     if (open(my $fh, "< $dist_file")) {
-        my @osi = <$fh>;
+        my @osi = grep m/\S/ => <$fh>;
         close $fh;
-        my %os = map { m/^\s*\U(\S+)\E\s*=\s*(.*)\s*$/ } @osi;
+        my %os = map { m/^\s*(\S+)\s*=\s*(.*)\s*$/; ( uc $1 => $2 ) } @osi;
         s/^"\s*(.*?)\s*"$/$1/ for values %os;
 
         if ( $os{PRETTY_NAME} ) {
@@ -65,26 +66,38 @@ sub prepare_os {
         elsif ( $os{VERSION} && $os{CODENAME} ) {
             $distro .= qq{ $os{VERSION} "$os{CODENAME}"};
         }
+        elsif ( $os{MAJORVERSION} && $os{MINORVERSION} ) {
+            -d "/usr/syno" and $distro .= "DSM";
+            $distro .= qq{ $os{MAJORVERSION}.$os{MINORVERSION}};
+            $os{BUILDNUMBER}    and $distro .= qq{-$os{BUILDNUMBER}};
+            $os{SMALLFIXNUMBER} and $distro .= qq{-$os{SMALLFIXNUMBER}};
+        }
         elsif ( @osi && $osi[0] =~ m{^\s*([-A-Za-z0-9. ""/]+)} ) {
 
-            # /etc/issue:
-            # Welcome to openSUSE 11.2 "Emerald" - Kernel \r (\l).
-            # Welcome to openSUSE 11.3 "Teal" - Kernel \r (\l).
-            # Welcome to openSUSE 11.4 "Celadon" - Kernel \r (\l).
-            # Welcome to openSUSE 12.1 "Asparagus" - Kernel \r (\l).
-            # Welcome to openSUSE 12.2 "Mantis" - Kernel \r (\l).
-            # Welcome to openSUSE 12.3 "Dartmouth" - Kernel \r (\l).
-            # Ubuntu 10.04.4 LTS \n \l
-            # Debian GNU/Linux wheezy/sid \n \l
-            # Debian GNU/Linux 6.0 \n \l
-            # /etc/redhat-release:
-            # CentOS release 5.7 (Final)
-            # Red Hat Enterprise Linux ES release 4 (Nahant Update 2)
-            # /etc/debian_version:
-            # 6.0.4
-            # wheezy/sid
+	    # /etc/issue:
+	    #  Welcome to openSUSE 11.1 - Kernel \r (\l).
+	    #  Welcome to openSUSE 11.2 "Emerald" - Kernel \r (\l).
+	    #  Welcome to openSUSE 11.3 "Teal" - Kernel \r (\l).
+	    #  Welcome to openSUSE 11.4 "Celadon" - Kernel \r (\l).
+	    #  Welcome to openSUSE 12.1 "Asparagus" - Kernel \r (\l).
+	    #  Welcome to openSUSE 12.2 "Mantis" - Kernel \r (\l).
+	    #  Welcome to openSUSE 12.3 "Dartmouth" - Kernel \r (\l).
+	    #  Welcome to SUSE Linux Enterprise Server 11 SP1 for VMware  (x86_64) - Kernel \r (\l).
+	    #  Ubuntu 10.04.4 LTS \n \l
+	    #  Debian GNU/Linux wheezy/sid \n \l
+	    #  Debian GNU/Linux 6.0 \n \l
+	    #  CentOS release 6.4 (Final)
+	    # /etc/redhat-release:
+	    #  CentOS release 5.7 (Final)
+	    #  CentOS release 6.4 (Final)
+	    #  Red Hat Enterprise Linux ES release 4 (Nahant Update 2)
+	    # /etc/debian_version:
+	    #  6.0.4
+	    #  wheezy/sid
+	    #  squeeze/sid
             ( $distro = $1 ) =~ s/^Welcome\s+to\s+//i;
             $distro =~ s/\s+-\s+Kernel.*//i;
+            $distro =~ s/\s*\\[rln].*//;
         }
     }
     if ($distro =~ s/^\s*(.*\S)\s*$/$1/) {
