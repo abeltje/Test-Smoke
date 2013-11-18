@@ -75,6 +75,11 @@ sub prepare_os {
         elsif ( @osi && $osi[0] =~ m{^\s*([-A-Za-z0-9. ""/]+)} ) {
 
 	    # /etc/issue:
+	    #  Welcome to SUSE LINUX 10.0 (i586) - Kernel \r (\l).
+	    #  Welcome to openSUSE 10.2 (i586) - Kernel \r (\l).
+	    #  Welcome to openSUSE 10.2 (X86-64) - Kernel \r (\l).
+	    #  Welcome to openSUSE 10.3 (i586) - Kernel \r (\l).
+	    #  Welcome to openSUSE 10.3 (X86-64) - Kernel \r (\l).
 	    #  Welcome to openSUSE 11.1 - Kernel \r (\l).
 	    #  Welcome to openSUSE 11.2 "Emerald" - Kernel \r (\l).
 	    #  Welcome to openSUSE 11.3 "Teal" - Kernel \r (\l).
@@ -82,6 +87,7 @@ sub prepare_os {
 	    #  Welcome to openSUSE 12.1 "Asparagus" - Kernel \r (\l).
 	    #  Welcome to openSUSE 12.2 "Mantis" - Kernel \r (\l).
 	    #  Welcome to openSUSE 12.3 "Dartmouth" - Kernel \r (\l).
+	    #  Welcome to openSUSE 13.1 "Bottle" - Kernel \r (\l).
 	    #  Welcome to SUSE Linux Enterprise Server 11 SP1 for VMware  (x86_64) - Kernel \r (\l).
 	    #  Ubuntu 10.04.4 LTS \n \l
 	    #  Debian GNU/Linux wheezy/sid \n \l
