@@ -49,6 +49,8 @@ sub post {
     $self->ua->request($self->smokedb_url) or croak("CoreSmokeDB: $!");
 
     my $body = decode_json($self->ua->body);
+    $self->log_debug("[CoreSmokeDB] %s", $self->ua->body);
+
     if (exists $body->{error}) {
         $self->log_info("CoreSmokeDB: %s", $body->{error});
         return;

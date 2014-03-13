@@ -61,7 +61,14 @@ sub post {
         { json => $json }
     );
 
-    return decode_json($response->content)->{id};
+    my $body = decode_json($response);
+    $self->log_debug("[CoreSmokeDB] %s", $response);
+
+    if (exists $body->{error}) {
+        $self->log_info("CoreSmokeDB: %s", $body->{error});
+        return;
+    }
+    return $body->{id};
 }
 
 1;

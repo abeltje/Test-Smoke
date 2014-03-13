@@ -59,8 +59,9 @@ sub post {
         $self->smokedb_url,
     );
 
-    $self->log_info("curl-response: %s", $response);
     my $body = decode_json($response);
+    $self->log_debug("[CoreSmokeDB] %s", $response);
+
     if (exists $body->{error}) {
         $self->log_info("CoreSmokeDB: %s", $body->{error});
         return;
