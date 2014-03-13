@@ -16,7 +16,7 @@ use JSON;
 use POSIX qw( strftime );
 use Test::Smoke::SysInfo;
 use Test::Smoke::Util qw(
-    grepccmsg get_smoked_Config read_logfile
+    grepccmsg grepnonfatal get_smoked_Config read_logfile
     time_in_hhmm get_local_patches
 );
 use Text::ParseWords;
@@ -809,6 +809,7 @@ sub smokedb_data {
         };
     };
     $rpt{compiler_msgs} = [$self->ccmessages];
+    $rpt{nonfatal_msgs} = [$self->nonfatalmessages];
     $rpt{skipped_tests} = [$self->user_skipped_tests];
     $rpt{harness_only}  = delete $rpt{harnessonly};
     $rpt{summary}       = $self->summary;
@@ -886,6 +887,8 @@ sub report {
             .  $self->todo_passed if $self->has_todo_passed;
 
     $report .= $self->ccmessages;
+
+    $report .= $self->nonfatalmessages;
 
     if ( $self->{showcfg} && $self->{cfg} && $self->has_test_failures ) {
         require Test::Smoke::BuildCFG;
@@ -1032,6 +1035,38 @@ sub ccmessages {
 
 Compiler messages($cc):
 @{$self->{_ccmessages_}}
+    EOERRORS
+}
+
+=head2 $reporter->nonfatalmessages( )
+
+Find failures worth reporting that won't cause tests to fail
+
+=cut
+
+sub nonfatalmessages {
+    my $self = shift;
+
+    my $ccinfo = $self->{_rpt}{cinfo} || $self->{_ccinfo} || "cc";
+    $ccinfo =~ s/^(.+)\s+version\s+.+/$1/;
+
+    $^O =~ /^(?:linux|.*bsd.*|darwin)/ and $ccinfo = 'gcc';
+    my $cc = $ccinfo =~ /(gcc|bcc32)/ ? $1 : $^O;
+
+    if (!$self->{_nonfatal_}) {
+
+        $self->{v} and print "Looking for non-fatal messages: '$cc'\n";
+        $self->{_ccmessages_} = grepnonfatal($cc, $self->{lfile}, $self->{v}) || [];
+    }
+
+    return @{$self->{_nonfatal_}} if wantarray;
+    return "" if !$self->{_nonfatal_};
+
+    local $" = "\n";
+    return <<"    EOERRORS";
+
+Non-Fatal messages($cc):
+@{$self->{_nonfatal_}}
     EOERRORS
 }
 

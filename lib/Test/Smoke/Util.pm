@@ -14,7 +14,7 @@ use base 'Exporter';
 );
 
 @EXPORT_OK = qw(
-    &grepccmsg &get_local_patches &set_local_patch
+    &grepccmsg &grepnonfatal &get_local_patches &set_local_patch
     &get_ncpu &get_smoked_Config &parse_report_Config 
     &get_regen_headers &run_regen_headers
     &whereis &clean_filename &read_logfile
@@ -544,6 +544,44 @@ sub grepccmsg {
         #     $msg =~ m/cc-(?:1009|1110|1047) / and next;
 
         $error{ $msg } ||= $indx++;
+    }
+
+    my @errors = sort { $error{ $a } <=> $error{ $b } } keys %error;
+
+    return wantarray ? @errors : \@errors;
+}
+
+=head2 grepnonfatal( $cc, $logfile, $verbose )
+
+This is a way to find known failures that do not cause the tests to
+fail but are important enough to report, like being unable to install
+manual pages.
+
+=cut
+
+sub grepnonfatal {
+    my( $cc, $logfile, $verbose ) = @_;
+    defined $logfile or return;
+
+    my( $indx, %error ) = ( 1 );
+    my $smokelog = "";
+    my $log = read_logfile(undef,$logfile);
+    if ($log) {
+	$smokelog = $log;
+        $verbose and print "Read logfile '$logfile'\n";
+    } else {
+        $verbose and print "Skipping '$logfile' '$!'\n";
+    }
+
+    my $kf = qr{
+	# Pod::Man is not available: Can't load module Encode, dynamic loading not available in this perl.
+	(\b (\S+) (?-x: is not available: Can't load module )
+	    (\S+?) , (?-x: dynamic loading not available) )
+	}xi;
+    while ($smokelog =~ m{$kf}g) {
+        my $fail = $1; # $2 = "Pod::Man", $3 = "Encode"
+
+        $error{ $fail } ||= $indx++;
     }
 
     my @errors = sort { $error{ $a } <=> $error{ $b } } keys %error;
@@ -1369,7 +1407,7 @@ sub skip_filter {
 
 =head1 COPYRIGHT
 
-(c) 2001-2003, All rights reserved.
+(c) 2001-2014, All rights reserved.
 
   * H. Merijn Brand <h.m.brand@hccnet.nl>
   * Nicholas Clark <nick@unfortu.net>

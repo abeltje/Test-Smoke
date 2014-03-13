@@ -132,11 +132,13 @@ t/gccmsg.out
 t/get_cpus.t
 t/get_patch.t
 t/grepccmsg.t
+t/grepnonfatal.t
 t/logs/5.19.0-make._test.stdout
 t/logs/gcc2722.log
 t/logs/hpux1020.log
 t/logs/hpux1111.log
 t/logs/icc102.log
+t/logs/linux3710g.log
 t/logs/mingw.log
 t/logs/solaris.log
 t/logs/w32bcc32.log
