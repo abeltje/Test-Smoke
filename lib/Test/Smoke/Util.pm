@@ -174,6 +174,7 @@ sub Configure_win32 {
         "-Dusemymalloc"         => "PERL_MALLOC",
         "-Duselargefiles"       => "USE_LARGE_FILES",
         "-Uuseshrplib"          => "BUILD_STATIC",
+        "-UWIN64"               => "WIN64",
         "-DDEBUGGING"           => "USE_DEBUGGING",
         "-DINST_DRV"            => "INST_DRV",
         "-DINST_TOP"            => "INST_TOP",
@@ -181,7 +182,6 @@ sub Configure_win32 {
         "-DINST_ARCH"           => "INST_ARCH",
         "-Dcf_email"            => "EMAIL",
         "-DCCTYPE"              => "CCTYPE",
-        "-DWIN64"               => "WIN64",
         "-Dgcc_v3_2"            => "USE_GCC_V3_2",
         "-DGCC_4XX"             => "GCC_4XX",
         "-DGCCHELPERDLL"        => "GCCHELPERDLL",
@@ -217,15 +217,21 @@ sub Configure_win32 {
         GCCHELPERDLL    => undef,
         BCCOLD          => 0,
         CCHOME          => undef,
-        WIN64           => undef,
+        WIN64           => 1,
         IS_WIN95        => 0,
         CRYPT_SRC       => undef,
         CRYPT_LIB       => undef,
         EXTRALIBDIRS    => undef,
     );
+
+    # $undef_re: regex for options that should be UNcommented for -Uxxx
+    my $undef_re  = qr/WIN64/;
+
+    # $def_re: regex for options that should be UNcommented for -Dxxx
     my $def_re = qr/((?:(?:PERL|USE|IS|GCC)_\w+)|BCCOLD)/;
+
     my @w32_opts = grep ! /^$def_re/, keys %opts;
-    my $config_args = join " ", 
+    my $config_args = join " ",
         grep /^-[DU][a-z_]+/, quotewords( '\s+', 1, $command );
     push @args, "config_args=$config_args";
 
@@ -247,7 +253,7 @@ sub Configure_win32 {
 
     # If you set one, we do all, so you can have fork()
     # unless you set -Uuseimpsys
-    unless ( $cmdln =~ /-Uuseimpsys\b/ ) {
+    if ( $cmdln !~ /-Uuseimpsys\b/ ) {
         if ( $opts{USE_MULTI} || $opts{USE_ITHREADS} || $opts{USE_IMP_SYS} ) {
             $opts{USE_MULTI} = $opts{USE_ITHREADS} = $opts{USE_IMP_SYS} = 1;
         }
@@ -280,7 +286,7 @@ sub Configure_win32 {
             if (m/^\s*CFG_VARS\s*=/) {
                 my( $extra_char, $quote ) = $is_nmake
                     ? ( "\t", '"' ) : ("~", "" );
-                $_ .= join "", map "\t\t$quote$_$quote\t${extra_char}\t\\\n", 
+                $_ .= join "", map "\t\t$quote$_$quote\t${extra_char}\t\\\n",
                                    grep /\w+=/, @args;
             }
             print NEW $_;
@@ -290,7 +296,7 @@ sub Configure_win32 {
                 # We will now insert the BULDOPT lines
                 my $bo_tmpl = $win32_maker eq 'nmake'
                     ? "BUILDOPT\t= \$(BUILDOPT) %s" : "BUILDOPT\t+= %s";
-                my $buildopt = join "\n", 
+                my $buildopt = join "\n",
                                     map sprintf( $bo_tmpl, $_ ) => @buildopt;
                 $buildopt and $_ = "$buildopt\n$_\n"
             };
@@ -299,14 +305,20 @@ sub Configure_win32 {
         # Only change config stuff _above_ that line!
         if ( m/^\s*#?\s*$def_re(\s*\*?=\s*define)$/ ) {
             $_ = ($opts{$1} ? "" : "#") . $1 . $2 . "\n";
-        } elsif (m/^\s*#?\s*(CFG\s*\*?=\s*Debug)$/) {
+        }
+        elsif (m/\s*#?\s*($undef_re)(\s*\*?=\s*undef)$/) {
+            $_ = ($opts{$1} ? "#" : "") . "$1$2\n";
+        }
+        elsif (m/^\s*#?\s*(CFG\s*\*?=\s*Debug)$/) {
             $_ = ($opts{USE_DEBUGGING} ? "" : "#") . $1 . "\n";
-        } elsif (m/^\s*#?\s*(BUILD_STATIC)\s*=\s*(.*)$/) {
+        }
+        elsif (m/^\s*#?\s*(BUILD_STATIC)\s*=\s*(.*)$/) {
             my( $macro, $mval ) = ( $1, $2 );
             if ( $config_args =~ /-([UD])useshrplib\b/ ) {
                 $_ = ( $1 eq 'D' ? "#" : "" ) . "$macro = $mval\n";
             }
-        } else {
+        }
+        else {
             foreach my $cfg_var ( grep defined $opts{ $_ }, @w32_opts ) {
                 if (  m/^\s*#?\s*($cfg_var\s*\*?=)\s*(.*)$/ ) {
                     $_ =  $opts{ $cfg_var } ?
@@ -403,12 +415,13 @@ sub read_logfile
 
     local $/;
     my $log = <$fh>;
-    my $es; eval { $es = decode( "utf-8",  $log, Encode::FB_CROAK ); };
+    my $es;
+    eval { $es = decode( "utf-8",  $log, Encode::FB_CROAK ); };
     $@ and  eval { $es = decode( "cp1252", $log, Encode::FB_CROAK ); };
     $@ and  eval { $es = decode( "iso-8859-1", $log, Encode::FB_CROAK ); };
     close $fh;
-    warn("Couldn't decode logfile($logfile): $@");
-    return($@ ? $log : $es);
+    warn("Couldn't decode logfile($logfile): $@") if $@;
+    return $self->{log_file} = $@ ? $log : $es;
 }
 
 =head2 grepccmsg( $cc, $logfile, $verbose )

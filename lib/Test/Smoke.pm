@@ -33,6 +33,8 @@ Test::Smoke - The Perl core test smoke suite
 
 =head1 DESCRIPTION
 
+If you are looking to get started, start at the B<README>!
+
 C<Test::Smoke> exports C<$conf> and C<read_config()> by default.
 
 =head2 Test::Smoke::read_config( $config_name )

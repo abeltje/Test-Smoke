@@ -44,10 +44,15 @@ my $dft_install = exists $ENV{SMOKE_INSTDIR} && $ENV{SMOKE_INSTDIR} ne ""
     : catdir( updir(), 'smoke' );
 $dft_install = rel2abs( $dft_install );
 
-my $install_dir = dir_prompt( 
-    "Where would you like to install Test::Smoke?\n",
-    $dft_install
-);
+my $install_dir = $dft_install;
+if (!$ENV{AUTOMATED_TESTING}) {
+    # So CPAN.pm will ask for install-directory!
+    local $ENV{PERL_MM_USE_DEFAULT};
+    $install_dir = dir_prompt( 
+        "Where would you like to install Test::Smoke?\n",
+        $dft_install
+    );
+}
 
 %install = (
     PREFIX   => $install_dir,
