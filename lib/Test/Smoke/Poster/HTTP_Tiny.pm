@@ -1,7 +1,6 @@
 package Test::Smoke::Poster::HTTP_Tiny;
 use warnings;
 use strict;
-use Carp;
 
 use base 'Test::Smoke::Poster::Base';
 
@@ -68,6 +67,8 @@ sub post {
         return;
     }
     my $body = decode_json($response->{content});
+    $self->log_debug("[CoreSmokeDB] %s", $response->{content});
+
     if (exists $body->{error}) {
         $self->log_info("CoreSmokeDB: %s", $body->{error});
         return;
