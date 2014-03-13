@@ -22,12 +22,12 @@ use Test::Smoke::Util qw(do_pod2usage whereis);
 
 # $Id$
 use vars qw($VERSION $conf);
-$VERSION = '0.081';
+$VERSION = '0.082';
 
 use Getopt::Long;
-my %options = ( 
-        config  => undef, 
-        jcl     => undef, 
+my %options = (
+        config  => undef,
+        jcl     => undef,
         log     => undef,
         default => undef,
         prefix  => undef,
@@ -35,16 +35,16 @@ my %options = (
         usedft  => undef,
         );
 my $myusage = "Usage: $0 -p <prefix>[ -d <defaultsprefix>]";
-GetOptions( \%options, 
-        'config|c=s', 'jcl|j=s', 'log|l=s', 
+GetOptions( \%options,
+        'config|c=s', 'jcl|j=s', 'log|l=s',
         'prefix|p=s', 'default|d:s', 'usedft|des',
 
         'help|h', 'man',
         ) or do_pod2usage( verbose => 1, myusage => $myusage );
 
-$options{ man} and 
+$options{ man} and
 do_pod2usage( verbose => 2, exitval => 0, myusage => $myusage );
-$options{help} and 
+$options{help} and
 do_pod2usage( verbose => 1, exitval => 0, myusage => $myusage );
 
 $options{prefix} = 'smokecurrent' unless defined $options{prefix};
@@ -58,7 +58,7 @@ foreach my $opt (qw( config jcl log )) {
 {
     local $@;
     eval { require $options{config} };
-    my $load_error = $@; 
+    my $load_error = $@;
     unless ( $load_error ) {
         $options{oldcfg} = 1;
         print "Using '$options{config}' for defaults.\n";
@@ -106,7 +106,7 @@ configsmoke.pl - Create a configuration for B<tssmokeperl.pl>
 
 or regenerate from previous _config:
 
-    $ perl configsmoke.pl -p <prefix> -des 
+    $ perl configsmoke.pl -p <prefix> -des
 
 =head1 OPTIONS
 
@@ -130,9 +130,9 @@ my %config = ( perl_version => $conf->{perl_version} || 'blead' );
 my %mailers = get_avail_mailers();
 my @mailers = sort keys %mailers;
 my @syncers = get_avail_sync();
-my $syncmsg = join "\n", @{ { 
-    git      => "\tgit - Use a git-repository.",
-    rsync    => "\trsync - Use the rsync(1) program [preferred]",
+my $syncmsg = join "\n", @{ {
+    git      => "\tgit - Use a git-repository [preferred]",
+    rsync    => "\trsync - Use the rsync(1) program",
     ftp      => "\tftp - Use Net::FTP to sync from APC [!slow!]",
     copy     => "\tcopy - Use File::Copy to copy from a local directory",
     hardlink => "\thardlink - Copy from a local directory using link()",
@@ -394,14 +394,14 @@ my %opt = (
                                    'perl-inter' ),
         chk => '.+',
     },
-    fsync => { 
+    fsync => {
         msg => "How would you like to sync your master source-tree?\n$syncmsg",
-        alt => [ @syncers ], 
+        alt => [ @syncers ],
         dft => $syncers[0],
     },
-    sync_type => { 
+    sync_type => {
         msg => "How would you like to sync your source-tree?\n$syncmsg",
-        alt => [ @syncers ], 
+        alt => [ @syncers ],
         dft => $syncers[0],
     },
     source => {
@@ -931,7 +931,7 @@ provide a nice way to set the prefix and set the perl_version.
 
 $arg = 'perl_version';
 my $pversion = prompt( $arg );
-$config{ $arg } = $pversion; 
+$config{ $arg } = $pversion;
 
 foreach my $var ( keys %{ $versions{ $pversion } } ) {
     $var eq 'text' and next;
@@ -984,7 +984,7 @@ you will need to confirm your choice.
         my $manifest  = File::Spec->catfile( $config{ $arg }, 'MANIFEST' );
         my $dot_patch = File::Spec->catfile( $config{ $arg }, '.patch' );
         if ( -e $manifest && -e $dot_patch ) {
-            $opt{use_old}->{dft} = $options{oldcfg} && 
+            $opt{use_old}->{dft} = $options{oldcfg} &&
                                    ($conf->{ddir}||"") eq $config{ddir}
                 ? 'y' : $opt{use_old}->{dft};
             my $use_old = prompt_yn( 'use_old' );
@@ -1044,7 +1044,7 @@ My plan is to use a few more directories, and avoid make distclean:
 
 =item 1
 
-rsync as before, but to a master directory. this directory is only used 
+rsync as before, but to a master directory. this directory is only used
 for rsyncing from the server
 
 =item 2
@@ -1111,21 +1111,21 @@ The default switches passed to B<rsync> are: S<< B<-az --delete> >>
 =item snapshot
 
 This will use B<Net::FTP> to try to find the latest snapshot on
-<ftp://ftp.funet.fi/languages/perl/snap/>. 
+<ftp://ftp.funet.fi/languages/perl/snap/>.
 
 You can also get the perl-5.8.x snapshots (and others) via HTTP
 if you have B<LWP> installed. There are two things you should remember:
 
 =over 8
 
-=item 1. start the server-name B<http://> 
+=item 1. start the server-name B<http://>
 
 =item 2. the snapshot-file must be specified.
 
 =back
 
 Snapshots are not in sync with the repository, so if you have a working
-B<patch> program, you can choose to "upgrade" your snapshot by fetching 
+B<patch> program, you can choose to "upgrade" your snapshot by fetching
 all the seperate patches from the repository and applying them.
 
 =item copy
@@ -1135,7 +1135,7 @@ local source directory.
 
 =item hardlink
 
-This will use B<File::Find> and the B<link> function to copy from a 
+This will use B<File::Find> and the B<link> function to copy from a
 local source directory. (This is also used if you choose "forest".)
 
 =back
@@ -1405,7 +1405,7 @@ if ( $config{is56x} ) {
 =item locale
 
 C<locale> and its value are passed to F<mktest.pl> and its value is passed
-to F<mkovz.pl>. F<mktest.pl> will do an extra pass of B<make test> with 
+to F<mkovz.pl>. F<mktest.pl> will do an extra pass of B<make test> with
 C<< $ENV{LC_ALL} >> set to that locale (and C<< $ENV{PERL_UNICODE} = ""; >>,
 C<< $ENV{PERLIO} = "perlio"; >>). This feature should only be used with
 UTF8 locales, that is why this is checked (by regex only).
@@ -1557,7 +1557,7 @@ MAIL: {
     $arg = 'bcc';
     $config{ $arg } = prompt( $arg );
 
-    if ( $config{mail_type} eq 'mailx' && 
+    if ( $config{mail_type} eq 'mailx' &&
          ( $config{cc} || $config{ccp5p_onfail} ) ) {
         $arg = 'swcc';
         $config{ $arg } = prompt( $arg );
@@ -1600,16 +1600,16 @@ EO_MSG
         alt => $compilers{ $config{w32cc} }->{maker},
         dft => ( sort @{ $compilers{ $config{w32cc} }->{maker} } )[-1],
     };
-    $opt{w32make}->{msg} = @{ $compilers{ $config{w32cc} }->{maker} } > 1 
+    $opt{w32make}->{msg} = @{ $compilers{ $config{w32cc} }->{maker} } > 1
         ? "Which make should be used" : undef;
 
     $config{w32make} = prompt( 'w32make' );
     $config{testmake} = $config{testmake};
 
-    $config{w32args} = [ 
+    $config{w32args} = [
         "--win32-cctype" => $config{w32cc},
         "--win32-maker"  => $config{w32make},
-        "osvers=$osvers", 
+        "osvers=$osvers",
         $compilers{ $config{w32cc} }->{ccversarg},
     ];
 }
@@ -1638,7 +1638,7 @@ VMSMAKE: {
 
 =item make finetuning
 
-Two different config options to accomodate the same thing: 
+Two different config options to accomodate the same thing:
 I<parallel build> and I<serial testing>
 
   * makeopt  => used by Test::Smoke::Smoker::_make()
@@ -1706,7 +1706,7 @@ unless ( is_win32 || is_vms ) {
 
 =item v
 
-The verbosity level: 
+The verbosity level:
 
 =over 8
 
@@ -1738,7 +1738,7 @@ $config{ $arg } = prompt_yn( $arg );
 
 =item killtime
 
-When C<< $Config{d_alarm} >> is found we can use C<alarm()> to abort 
+When C<< $Config{d_alarm} >> is found we can use C<alarm()> to abort
 long running smokes. Leave this value empty to keep the old behaviour.
 
     07:30 => F<tssmokeperl.pl> is aborted on 7:30 localtime
@@ -1824,7 +1824,7 @@ P5OPT: {
 
 =item cron/crontab
 
-We try to detect 'crontab' or 'cron', read the contents of 
+We try to detect 'crontab' or 'cron', read the contents of
 B<crontab -l>, detect ourself and comment us out.
 Then we add an new entry.
 
@@ -1955,7 +1955,7 @@ If C<< Data::Dumper->can('Sortkeys') >> it will order the keys.
 
 sub save_config {
     my $dumper = Data::Dumper->new([ \%config ], [ 'conf' ]);
-    Data::Dumper->can( 'Sortkeys' ) and 
+    Data::Dumper->can( 'Sortkeys' ) and
         $dumper->Sortkeys( \&sort_configkeys );
     local *CONFIG;
     open CONFIG, "> $options{config}" or
@@ -1975,7 +1975,7 @@ Order and grouping by Merijn, thanks!
 =cut
 
 sub sort_configkeys {
-    my @order = ( 
+    my @order = (
         # Test::Smoke (startup) related
         qw( cfg v smartsmoke renice killtime umask ),
 
@@ -2017,11 +2017,11 @@ sub sort_configkeys {
     my $i = 0;
     my %keyorder = map { $_ => $i++ } @order;
 
-    my @keyord = sort { 
-        $a <=> $b 
+    my @keyord = sort {
+        $a <=> $b
     } @keyorder{ grep exists $keyorder{ $_}, keys %{ $_[0] } };
 
-    return [ @order[ @keyord ], 
+    return [ @order[ @keyord ],
              sort grep !exists $keyorder{ $_ }, keys %{ $_[0] } ];
 }
 
@@ -2035,7 +2035,7 @@ sub write_sh {
     my $cwd = cwd();
     my $jcl = "$options{jcl}.sh";
     my $smokeperl = File::Spec->catfile( $findbin, 'tssmokeperl.pl' );
-    my $cronline = schedule_entry( File::Spec->catfile( $cwd, $jcl ), 
+    my $cronline = schedule_entry( File::Spec->catfile( $cwd, $jcl ),
                                    $cron, $crontime );
 
     my $p5lib = $config{perl5lib} ? <<EO_P5LIB : '';
@@ -2048,7 +2048,7 @@ export PERL5OPT
 EO_P5OPT
 
     my $handle_lock = $config{killtime} ? <<EO_CONT : <<EO_DIE;
-    # Not sure about this, so I will keep the old behaviour 
+    # Not sure about this, so I will keep the old behaviour
     # tssmokeperl.pl will exit(42) on timeout
     # continue='--continue'
     echo "We seem to be running (or remove \$LOCKFILE)" >& 2
@@ -2127,7 +2127,7 @@ EO_P5OPT
 
 
     my $jcl = "$options{jcl}.cmd";
-    my $atline = schedule_entry( File::Spec->catfile( $cwd, $jcl ), 
+    my $atline = schedule_entry( File::Spec->catfile( $cwd, $jcl ),
                                  $cron, $crontime );
 
     my $archive = qq/$^X $archiverpt -c "\%CFGNAME\%"/;
@@ -2222,7 +2222,7 @@ EO_COM
 }
 
 sub prompt {
-    my( $message, $alt, $df_val, $chk, $nck ) = 
+    my( $message, $alt, $df_val, $chk, $nck ) =
         @{ $opt{ $_[0] } }{qw( msg alt dft chk nck )};
 
     $df_val = $conf->{ $_[0] } if exists $conf->{ $_[0] };
@@ -2234,7 +2234,7 @@ sub prompt {
     }
 
     $message =~ s/\s+$//;
-        
+
     my %ok_val;
     %ok_val = map { (lc $_ => 1) } @$alt if @$alt;
     $chk ||= '.*';
@@ -2260,7 +2260,7 @@ sub prompt {
         } elsif ( $input eq '&-d' ) {
             $options{usedft} = 1;
             print "(OK, We'll run with --des from now on.)\n";
-            redo INPUT; 
+            redo INPUT;
         } else {
             $input =~ s/^\s+//;
             $input =~ s/\s+$//;
@@ -2269,7 +2269,7 @@ sub prompt {
 
         print "Input should not match: '/$nck/i'\n" and redo INPUT
             if $nck && $input =~ m/$nck/i;
-        
+
         print "Input does not match: 'm/$chk/'\n" and redo INPUT
             unless $input =~ m/$chk/i;
 
@@ -2289,7 +2289,7 @@ sub chk_dir {
     defined $dir or return;
     my $cwd = cwd();
     File::Path::mkpath( $dir, 1, 0755 ) unless -d $dir;
- 
+
     if ( ! chdir $dir  ) {
         warn "Cannot chdir($dir): $!\n";
         $dir = undef;
@@ -2309,10 +2309,10 @@ sub prompt_dir {
     }
 
     GETDIR: {
-    
+
 
         my $dir = prompt( @_ );
-        if ( $dir eq "" && ! @{ $opt{ $_[0] }->{alt} } && 
+        if ( $dir eq "" && ! @{ $opt{ $_[0] }->{alt} } &&
              ! $opt{ $_[0] }->{chk} ) {
             print "Got []\n";
             return "";
@@ -2320,8 +2320,8 @@ sub prompt_dir {
 
         # thanks to perlfaq5
         $dir =~ s{^ ~ ([^/]*)}
-                 {$1 ? ( getpwnam $1 )[7] : 
-                       ( $ENV{HOME} || $ENV{LOGDIR} || 
+                 {$1 ? ( getpwnam $1 )[7] :
+                       ( $ENV{HOME} || $ENV{LOGDIR} ||
                          "$ENV{HOMEDRIVE}$ENV{HOMEPATH}" )}ex;
 
         defined( $dir = chk_dir( $dir ) ) or redo GETDIR;
@@ -2340,7 +2340,7 @@ sub prompt_file {
 
         # thaks to perlfaq5
         $file =~ s{^ ~ ([^/]*)}
-                  {$1 ? ( getpwnam $1 )[7] : 
+                  {$1 ? ( getpwnam $1 )[7] :
                    ( $ENV{HOME} || $ENV{LOGDIR} ||
                    "$ENV{HOMEDRIVE}$ENV{HOMEPATH}" )}ex;
         $file = File::Spec->rel2abs( $file ) unless !$file && $no_valid;
@@ -2421,7 +2421,7 @@ sub get_avail_sync {
     my $pversion = $config{perl_version} || 'blead';
 
     # (has_ftp && 5.9.x) || has_lwp
-    unshift @synctype, 'snapshot' 
+    unshift @synctype, 'snapshot'
         if ( $has_ftp && $pversion eq 'blead' ) || $has_lwp;
 
     unshift @synctype, 'ftp' if $has_ftp;
@@ -2448,17 +2448,17 @@ sub get_avail_tar {
 
     my $fmt = tar_fmt();
 
-    return $fmt && $use_modules 
+    return $fmt && $use_modules
         ? ( $fmt, 'Archive::Tar' )
         : $fmt ? ( $fmt ) : $use_modules ? ( 'Archive::Tar' ) : ();
-    
+
 }
 
 sub tar_fmt {
     my $tar  = whereis( 'tar' );
     my $gzip = whereis( 'gzip' );
 
-    return $tar && $gzip 
+    return $tar && $gzip
         ? "$gzip -cd %s | $tar -xf -"
         : $tar ? "tar -xzf %s" : "";
 }
@@ -2471,7 +2471,7 @@ sub check_locale {
         my @list = grep /utf-?8$/i => readdir USL;
         closedir USL;
         return @list;
-    } 
+    }
     my $locale = whereis( 'locale' );
     return unless $locale;
     return grep /utf-?8$/i => split /\n/, `$locale -a`;
@@ -2526,7 +2526,7 @@ sub get_avail_mailers {
 
     return map { ( $_ => $map{ $_ }) } grep length $map{ $_ } => keys %map;
 }
-        
+
 sub get_avail_w32compilers {
 
     my %map = (
@@ -2573,9 +2573,9 @@ sub get_avail_w32compilers {
 
 sub get_avail_vms_make {
 
-    return map +( $_ => undef ) => grep defined $_ && length( $_ ) 
+    return map +( $_ => undef ) => grep defined $_ && length( $_ )
         => map whereis( $_ ) => qw( MMK MMS );
- 
+
     local *QXERR; open *QXERR, ">&STDERR"; close STDERR;
 
     my %makers = map {
@@ -2621,7 +2621,7 @@ sub default_buildcfg {
         -f $dftbcfg and last;
     }
     -f $dftbcfg
-        or die "You seem to have an incomplete Test::Smoke installation" . 
+        or die "You seem to have an incomplete Test::Smoke installation" .
                "($basename is missing)!\n";
     copy $dftbcfg, $file_name
         and print "\nCreated buildconfig '$file_name'";
@@ -2655,7 +2655,7 @@ sub check_buildcfg {
     my( $os, $osver ) = split /\s+-\s+/, $uname_s;
     # May assume much too much about OS version number formats.
     my( $osvermaj, $osvermin ) = ($osver =~ /^\D*(\d+)\D+(\d+)/);
-    $osver = sprintf "%s", $osvermaj || '?'; 
+    $osver = sprintf "%s", $osvermaj || '?';
     defined $osvermin and $osver .= sprintf ".%03d", $osvermin;
 
 
@@ -2670,7 +2670,7 @@ sub check_buildcfg {
             last OSCHECK;
         };
 
-        $os =~ /darwin|bsd/i && do { 
+        $os =~ /darwin|bsd/i && do {
             push @no_option, qw( -Duselongdouble -Dusemorebits -Duse64bitall );
         };
 
@@ -2698,7 +2698,7 @@ sub check_buildcfg {
         length( $b||"" ) <=> length( $a||"" )
     } @no_option;
 
-    my $display = join "", map "\t$_" 
+    my $display = join "", map "\t$_"
         => grep !/^#/ || ( /^#/ && /$options/ ) => @bcfg;
     $opt{change_cfg}->{msg} = <<EOMSG;
 Some options that do not apply to your platform were found.
@@ -2725,7 +2725,7 @@ sub finish_cfgcheck {
     if ( $overwrite ) {
         my $backup = "$fname.bak";
         -f $backup and chmod( 0775, $backup ) and 1 while unlink $backup;
-        rename $fname, $backup or 
+        rename $fname, $backup or
             warn "Cannot rename '$fname' to '$backup': $!";
     } else {
         $fname = "$options{prefix}.cfg.save";

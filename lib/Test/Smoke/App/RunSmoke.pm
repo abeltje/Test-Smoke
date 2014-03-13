@@ -55,7 +55,7 @@ sub run {
     };
     $Config{d_alarm} and alarm $timeout;
 
-   $self->run_smoke(); 
+   $self->run_smoke();
 }
 
 =head2  $smoker->run_smoke();
@@ -109,7 +109,7 @@ sub run_smoke {
     my $patch = get_patch($self->option('ddir'));
     if (!$self->option('continue')) {
         $smoker->make_distclean();
-        $smoker->ttylog("Smoking patch $patch->[0] $patch->[1]\n"); 
+        $smoker->ttylog("Smoking patch $patch->[0] $patch->[1]\n");
         $smoker->ttylog("Smoking branch $patch->[2]\n") if $patch->[2];
         $self->do_manifest_check();
         $self->add_smoke_patchlevel($patch->[0]);
@@ -122,7 +122,7 @@ sub run_smoke {
             next;
         }
 
-        $smoker->ttylog( join "\n", 
+        $smoker->ttylog( join "\n",
                               "", "Configuration: $this_cfg", "-" x 78, "" );
         $smoker->smoke( $this_cfg, $Policy );
     }
@@ -169,7 +169,7 @@ sub create_buildcfg {
 
     my @df_buildopts = @_ ? grep /^-[DUA]/ => @_ : ();
     # We *always* want -Dusedevel!
-    push @df_buildopts, '-Dusedevel' 
+    push @df_buildopts, '-Dusedevel'
         unless grep /^-Dusedevel$/ => @df_buildopts;
 
     Test::Smoke::BuildCFG->config(dfopts => join(" ", @df_buildopts));
@@ -180,7 +180,7 @@ sub create_buildcfg {
 
     my $logfile = catfile($self->option('ddir'), $self->option('outfile'));
 
-    if ($self->option('continue')) { 
+    if ($self->option('continue')) {
         return Test::Smoke::BuildCFG->continue(
             $logfile,
             $self->option('cfg'),
