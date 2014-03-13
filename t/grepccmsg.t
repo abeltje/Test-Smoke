@@ -28,6 +28,8 @@ BEGIN {
           wcnt =>  5, ecnt => 2, lcnt => 7 },
         { file => 'icc102.log',   type => 'icpc',
           wcnt =>  5, ecnt => 2, lcnt => 7 },
+        { file => 'linux3710g.log', type => 'gcc',
+          wcnt =>  1, ecnt => 1, lcnt => 1 },
     );
 
     plan tests => 1 + 5 * @logs + 1;
