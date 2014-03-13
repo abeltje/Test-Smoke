@@ -917,6 +917,9 @@ sub _get_usernote {
             print "Cannot read '$self->{un_file}': $!\n" if $self->{v};
         }
     }
+    elsif (!defined $self->{user_note}) {
+        $self->{user_note} = '';
+    }
     $self->{user_note} =~ s/(?<=\S)\s*\z/\n/;
 }
 
