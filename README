@@ -4,7 +4,7 @@ README - Perl Core Test Smoke Suite (1.30)
 
 =head1 SYNOPSIS
 
-  $ perl configsmoke.pl
+  $ perl configsmoke.pl      # will generate smokecurrent.sh
   $ sh smokecurrent.sh
 
 =head1 DESCRIPTION

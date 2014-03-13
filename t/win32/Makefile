@@ -43,6 +43,9 @@ USE_LARGE_FILES	= define
 #CCHOME		= f:\msvc20
 CCHOME		= $(MSVCDIR)
 
+# A new thing to build a 32bit perl on 64bit windows
+#WIN64		*= undef
+
 # EMAIL is used to set -Dcf_email=xxx
 #EMAIL		= 
 

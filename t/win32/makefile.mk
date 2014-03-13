@@ -53,6 +53,9 @@ CCHOME		*= C:\MingW
 CCHOME		*= $(MSVCDIR)
 .ENDIF
 
+# A new thing to build a 32bit perl on 64bit windows
+#WIN64		*= undef
+
 # IS_WIN95 is self explanatory (not found in Makefile)
 #IS_WIN95	*= define
 

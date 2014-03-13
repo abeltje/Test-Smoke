@@ -19,7 +19,7 @@ use File::Spec::Functions;
         push @tree, catdir($base, $Config{version}, $Config{archname});
         mkpath($_) for @tree;
     }
-    use fallback 't/fallback';
+    use fallback catdir('t', 'fallback');
 
     is_deeply(\@INC, [@inc, reverse @tree], "Complete stack added to \@INC");
 
