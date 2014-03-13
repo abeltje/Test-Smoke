@@ -405,7 +405,9 @@ sub read_logfile
     my $log = <$fh>;
     my $es; eval { $es = decode( "utf-8",  $log, Encode::FB_CROAK ); };
     $@ and  eval { $es = decode( "cp1252", $log, Encode::FB_CROAK ); };
+    $@ and  eval { $es = decode( "iso-8859-1", $log, Encode::FB_CROAK ); };
     close $fh;
+    warn("Couldn't decode logfile($logfile): $@");
     return($@ ? $log : $es);
 }
 
