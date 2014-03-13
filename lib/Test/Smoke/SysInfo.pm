@@ -61,19 +61,18 @@ Factory method, with fallback to the information in C<< POSIX::uname() >>.
 sub new {
     my $factory = shift;
 
-    for ( $^O ) {
-        /aix/i               && return Test::Smoke::SysInfo::AIX->new();
-        /bsd/i               && return Test::Smoke::SysInfo::BSD->new();
-        /cygwin/i            && return Test::Smoke::SysInfo::Cygwin->new();
-        /darwin/i            && return Test::Smoke::SysInfo::Darwin->new();
-        /haiku/              && return Test::Smoke::SysInfo::Haiku->new();
-        /hp-?ux/i            && return Test::Smoke::SysInfo::HPUX->new();
-        /irix/i              && return Test::Smoke::SysInfo::Irix->new();
-        /linux/i             && return Test::Smoke::SysInfo::Linux->new();
-        /solaris|sunos|osf/i && return Test::Smoke::SysInfo::Solaris->new();
-        /VMS/                && return Test::Smoke::SysInfo::VMS->new();
-        /mswin32|windows/i   && return Test::Smoke::SysInfo::Windows->new();
-    }
+    $^O =~ /aix/i               and return Test::Smoke::SysInfo::AIX->new();
+    $^O =~ /bsd/i               and return Test::Smoke::SysInfo::BSD->new();
+    $^O =~ /cygwin/i            and return Test::Smoke::SysInfo::Cygwin->new();
+    $^O =~ /darwin/i            and return Test::Smoke::SysInfo::Darwin->new();
+    $^O =~ /haiku/              and return Test::Smoke::SysInfo::Haiku->new();
+    $^O =~ /hp-?ux/i            and return Test::Smoke::SysInfo::HPUX->new();
+    $^O =~ /irix/i              and return Test::Smoke::SysInfo::Irix->new();
+    $^O =~ /linux/i             and return Test::Smoke::SysInfo::Linux->new();
+    $^O =~ /solaris|sunos|osf/i and return Test::Smoke::SysInfo::Solaris->new();
+    $^O =~ /VMS/                and return Test::Smoke::SysInfo::VMS->new();
+    $^O =~ /mswin32|windows/i   and return Test::Smoke::SysInfo::Windows->new();
+
     return Test::Smoke::SysInfo::Generic->new();;
 }
 
