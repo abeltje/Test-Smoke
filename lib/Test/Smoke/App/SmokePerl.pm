@@ -25,7 +25,7 @@ Return an instance.
 
 =cut
 
-sub new { 
+sub new {
     my $class = shift;
     my $self = $class->SUPER::new(@_);
 
