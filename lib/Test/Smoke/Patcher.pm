@@ -3,7 +3,7 @@ use strict;
 
 # $Id$
 use vars qw( $VERSION @EXPORT );
-$VERSION = '0.011';
+$VERSION = '0.012';
 
 use base 'Exporter';
 use File::Spec;
@@ -13,7 +13,9 @@ use Test::Smoke::Util qw( get_regen_headers );
 
 @EXPORT = qw( &TRY_REGEN_HEADERS );
 
-sub TRY_REGEN_HEADERS() { 1 }
+sub MAX_FLAG_COUNT    () { 16 }
+sub ALL_FLAGS         () { (2**MAX_FLAG_COUNT) - 1 }
+sub TRY_REGEN_HEADERS () { 1 }
 
 my %CONFIG = (
     df_ddir     => File::Spec->rel2abs( cwd ),
@@ -21,13 +23,14 @@ my %CONFIG = (
     df_pfile    => undef,
     df_patchbin => 'patch',
     df_popts    => '',       # '-p1' is added in call_patch()
-    df_flags    => 1,
+    df_flags    => 0,
+    df_regen    => 1,        # regen => set/unset TRY_REGEN_HEADERS in flags
     df_oldpatch => 0,
     df_v        => 0,
 
     valid_type => { single => 1, multi => 1 },
-    single     => [qw( pfile patchbin popts flags oldpatch )],
-    multi      => [qw( pfile patchbin popts flags oldpatch )],
+    single     => [qw( pfile patchbin popts flags regen oldpatch )],
+    multi      => [qw( pfile patchbin popts flags regen oldpatch )],
 );
 
 =head1 NAME
@@ -134,6 +137,7 @@ Valid keys for C<%args>:
     * pfile:    path to either the patch (single) or a textfile (multi)
     * popts:    options to pass to 'patch' (-p1)
     * patchbin: full path to the patch binary (patch)
+    * regen:    flag to set/unset the TRY_REGEN_HEADERS flag
     * v:        verbosity 0..2
 
 =cut
@@ -160,10 +164,16 @@ sub new {
         my $value = exists $args{$_} ? $args{ $_ } : $CONFIG{ "df_$_" };
         ( $_ => $value )
     } ( v => ddir => fdir => @{ $CONFIG{ $type } } );
-    $fields{pdir} = File::Spec->rel2abs( 
+    $fields{pdir} = File::Spec->rel2abs(
         defined $fields{fdir} ? $fields{fdir} : $fields{ddir}
     );
     $fields{ptype} = $type;
+    if ($fields{regen}) {
+        $fields{flags} = ($fields{flags} | TRY_REGEN_HEADERS) & ALL_FLAGS;
+    }
+    else {
+        $fields{flags} = ($fields{flags} & ~TRY_REGEN_HEADERS) & ALL_FLAGS;
+    }
 
     bless { %fields }, $class;
 }
