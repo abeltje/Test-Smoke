@@ -20,8 +20,11 @@ foreach my $dnf (@etc) {
     $ENV{SMOKE_USE_ETC} = $etc;
 
     my $si = Test::Smoke::SysInfo->new();
-    is( $si->_distro, $dn, "Distname for $etc" );
+    is( $si->_distro, $dn, "Disttribution\t$dn" );
 
     # Helper line :)
-    $si->{__distro} eq $dn or print "echo '$si->{__distro}' >$etc/DISTNAME\n";
+    $si->{__distro} eq $dn and next;
+
+    #use DP;diag (DDumper($si->{__X__}));
+    #print "echo '$si->{__distro}' >$etc/DISTNAME\n";
 }
