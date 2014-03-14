@@ -110,6 +110,16 @@ t/etc/debian-jessie-sid/debian_version
 t/etc/debian-jessie-sid/DISTNAME
 t/etc/debian-jessie-sid/issue
 t/etc/debian-jessie-sid/os-release
+t/etc/debian-lenny/debian_version
+t/etc/debian-lenny/DISTNAME
+t/etc/debian-lenny/issue
+t/etc/debian-squeeze/debian_version
+t/etc/debian-squeeze/DISTNAME
+t/etc/debian-squeeze/issue
+t/etc/debian-wheezy/debian_version
+t/etc/debian-wheezy/DISTNAME
+t/etc/debian-wheezy/issue
+t/etc/debian-wheezy/os-release
 t/etc/get-lsb.pl
 t/etc/suse-11.2/DISTNAME
 t/etc/suse-11.2/issue
