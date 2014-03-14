@@ -74,7 +74,7 @@ sub prepare_os {
     foreach my $df (@dist_file) {
         # use "debian" out of /etc/debian-release
         unless (defined $distro or $df =~ m/\blsb-/) {
-            ($distro = $df) =~ s{^/etc(?:\.defaults)?/}{}i;
+            ($distro = $df) =~ s{^$etc(?:\.defaults)?/}{}i;
             $distro =~ s{[-_]?(?:release|version)\b}{}i;
         }
         _file_info ($df, \%os);
@@ -127,17 +127,29 @@ sub prepare_os {
         #  6.0.4
         #  wheezy/sid
         #  squeeze/sid
-        #use DP;::diag(DDumper(\%os));
-        my @key = sort keys %os;
 
-        if ( my @welcome = grep s{^\s*Welcome\s+to\s+}{} => @key ) {
-	    $distro = $welcome[0];
+        my @key = sort keys %os;
+        s/\s*\\[rln].*// for @key;
+
+        my @vsn = grep m/^[0-9.]+$/ => @key;
+        #$self->{__X__} = { os => \%os, key => \@key, vsn => \@vsn };
+
+        if ( my @welcome = grep s{^\s*Welcome\s+to\s+}{}i => @key ) {
+            $distro = $welcome[0];
+        }
+        elsif ( my @rel  = grep m{\brelease\b}i => @key ) {
+            $distro = $rel[0];
+        }
+        elsif ( my @lnx  = grep m{\bLinux\b}i => @key ) {
+            $distro = $lnx[0];
+        }
+        elsif ( $distro && @vsn ) {
+            $distro .= "-$vsn[0]";
         }
         else {
-	    $distro = $key[0];
-	}
+            $distro = $key[0];
+        }
         $distro =~ s/\s+-\s+Kernel.*//i;
-        $distro =~ s/\s*\\[rln].*//;
     }
     if ($distro =~ s/^\s*(.*\S)\s*$/$1/) {
         $self->{__distro} = $distro;
