@@ -6,7 +6,10 @@ use Test::Smoke::SysInfo;
 
 my @etc = glob "t/etc/*/DISTNAME";
 
-plan tests => scalar @etc;
+#plan $^O eq 'linux'
+#    ? (tests => scalar @etc)
+#    : (skip_all => "$^O is not Linux");
+plan 'no_plan'; local $^O = 'linux';
 
 foreach my $dnf (@etc) {
     open my $dnh, "<", $dnf or die "$dnf: $!\n";
