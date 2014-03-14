@@ -62,9 +62,10 @@ sub _file_info {
 sub prepare_os {
     my $self = shift;
 
+    my $etc = $ENV{SMOKE_USE_ETC} || "/etc";
     my @dist_file = grep { -s $_ }
-        glob("/etc/*[-_][rRvV][eE][lLrR]*"), "/etc/issue",
-             "/etc.defaults/VERSION", "/etc/VERSION";
+        glob("$etc/*[-_][rRvV][eE][lLrR]*"), "$etc/issue",
+             "$etc.defaults/VERSION", "$etc/VERSION";
     return unless @dist_file;
 
     my $os = $self->_os();
@@ -83,6 +84,9 @@ sub prepare_os {
         $distro = $os{PRETTY_NAME};          # "openSUSE 12.1 (Asparagus) (x86_64)"
         $distro =~ s/\)\s+\(\w+\)\s*$/)/;    # remove architectural part
     }
+    elsif ( $os{DISTRIB_DESCRIPTION} ) {
+	$distro = $os{DISTRIB_DESCRIPTION};
+    }
     elsif ( $os{VERSION} && $os{NAME} ) {
         $distro = qq{$os{NAME} $os{VERSION}};
     }
@@ -96,8 +100,6 @@ sub prepare_os {
         $os{SMALLFIXNUMBER} and $distro .= qq{-$os{SMALLFIXNUMBER}};
     }
     else {
-        my @osi = sort keys %os;
-
         # /etc/issue:
         #  Welcome to SUSE LINUX 10.0 (i586) - Kernel \r (\l).
         #  Welcome to openSUSE 10.2 (i586) - Kernel \r (\l).
@@ -125,11 +127,20 @@ sub prepare_os {
         #  6.0.4
         #  wheezy/sid
         #  squeeze/sid
-        ( $distro = $osi[0] ) =~ s/^Welcome\s+to\s+//i;
+        #use DP;::diag(DDumper(\%os));
+        my @key = sort keys %os;
+
+        if ( my @welcome = grep s{^\s*Welcome\s+to\s+}{} => @key ) {
+	    $distro = $welcome[0];
+        }
+        else {
+	    $distro = $key[0];
+	}
         $distro =~ s/\s+-\s+Kernel.*//i;
         $distro =~ s/\s*\\[rln].*//;
     }
     if ($distro =~ s/^\s*(.*\S)\s*$/$1/) {
+        $self->{__distro} = $distro;
         $os .= " [$distro]";
     }
     $self->{__os} = $os;
