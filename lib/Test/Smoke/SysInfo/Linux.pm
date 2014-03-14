@@ -80,12 +80,14 @@ sub prepare_os {
         _file_info ($df, \%os);
     }
 
-    if ( $os{PRETTY_NAME} ) {
+    if ( $os{DISTRIB_DESCRIPTION} ) {
+	$distro = $os{DISTRIB_DESCRIPTION};
+	$os{DISTRIB_CODENAME} and
+	    $distro .= " ($os{DISTRIB_CODENAME})";
+    }
+    elsif ( $os{PRETTY_NAME} ) {
         $distro = $os{PRETTY_NAME};          # "openSUSE 12.1 (Asparagus) (x86_64)"
         $distro =~ s/\)\s+\(\w+\)\s*$/)/;    # remove architectural part
-    }
-    elsif ( $os{DISTRIB_DESCRIPTION} ) {
-	$distro = $os{DISTRIB_DESCRIPTION};
     }
     elsif ( $os{VERSION} && $os{NAME} ) {
         $distro = qq{$os{NAME} $os{VERSION}};
