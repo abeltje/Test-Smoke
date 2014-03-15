@@ -136,8 +136,8 @@ my %wm = (
     }
 );
 
-$ExtUtils::MakeMaker::VERSION > 6.30 and $wm{LICENSE}  = "perl";
-$ExtUtils::MakeMaker::VERSION > 6.67 and $wm{META_ADD} = {
+eval "$mmver" > 6.30 and $wm{LICENSE}  = "perl";
+eval "$mmver" > 6.67 and $wm{META_ADD} = {
     "meta-spec" => {
         version    => 2,
     },
