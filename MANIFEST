@@ -194,6 +194,11 @@ t/etc/ubuntu-12.04/DISTNAME
 t/etc/ubuntu-12.04/issue
 t/etc/ubuntu-12.04/lsb-release
 t/etc/ubuntu-12.04/os-release
+t/etc/ubuntu-13.04/issue
+t/etc/ubuntu-13.04/DISTNAME
+t/etc/ubuntu-13.04/os-release
+t/etc/ubuntu-13.04/lsb-release
+t/etc/ubuntu-13.04/debian_version
 t/etc/ubuntu-13.10/debian_version
 t/etc/ubuntu-13.10/DISTNAME
 t/etc/ubuntu-13.10/issue
