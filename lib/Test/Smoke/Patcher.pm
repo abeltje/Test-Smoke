@@ -119,7 +119,15 @@ The patch-resource can also be specified in four (4) ways.
 
 =head2 TRY_REGEN_HEADERS
 
-Constant 1.
+Constant: 1
+
+=head2 MAX_FLAG_COUNT 
+
+Constant: 16
+
+=head2 ALL_FLAGS
+
+Constant: 2**MAX_FLAG_COUNT) - 1
 
 =head1 METHODS
 

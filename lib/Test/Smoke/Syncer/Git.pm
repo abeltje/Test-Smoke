@@ -57,7 +57,8 @@ sub sync {
     if ( ! -d $self->{gitdir} || ! -d catdir($self->{gitdir}, '.git') ) {
         my $cloneout = $gitbin->run(
             clone => $self->{gitorigin},
-            $self->{gitdir}
+            $self->{gitdir},
+            '2>&1'
         );
         if ( my $gitexit = $gitbin->exitcode ) {
             croak("Cannot make inital clone: $self->{gitbin} exit $gitexit");
@@ -85,7 +86,8 @@ sub sync {
         my $cloneout = $gitbin->run(
             clone         => $self->{gitdir},
             '--reference' => $self->{gitdir},
-            $self->{ddir}
+            $self->{ddir},
+            '2>&1'
         );
         if ( my $gitexit = $gitbin->exitcode ) {
             croak("Cannot make smoke clone: $self->{gitbin} exit $gitexit");
