@@ -15,6 +15,7 @@ my $git = Test::Smoke::Util::Execute->new(command => $gitbin);
 (my $gitversion = $git->run('--version')) =~ s/\s*\z//;
 pass("Git version $gitversion");
 
+# Set up a basic git repository
 my $repopath = 't/tsgit';
 $git->run(init => $repopath);
 is($git->exitcode, 0, "git init $repopath");
