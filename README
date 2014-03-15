@@ -1,11 +1,18 @@
 =head1 NAME
 
-README - Perl Core Test Smoke Suite (1.30)
+README - Perl Core Test Smoke Suite (1.62)
 
 =head1 SYNOPSIS
 
   $ perl configsmoke.pl      # will generate smokecurrent.sh
   $ sh smokecurrent.sh
+
+or on windows:
+
+    C:\smoke>configsmoke     # will generate smokecurrent.bat
+    C:\smoke>smokecurrent
+
+For the impatient: see the section L</"GETTING STARTED">
 
 =head1 DESCRIPTION
 
@@ -46,7 +53,9 @@ I<INSTALLSCRIPT> and I<LIB> all to that directory).
 
 I<If you want to automate the Makefile.PL step you need to set two
 environment variables: $ENV{SMOKE_INSTDIR}='../p5smoke' and
-$ENV{PERL_MM_USE_DEFAULT}='y'>
+$ENV{AUTOMATED_TESTING}=1>
+
+=head1 GETTING STARTED
 
 You are now ready to run the F<configsmoke.pl> configuration program:
 
@@ -55,8 +64,9 @@ You are now ready to run the F<configsmoke.pl> configuration program:
 You will have to answer some questions that help create a
 configuration file for the Test::Smoke suite.
 
-You should check the F<perlcurrent.cfg> build-configurations file and
-remove options that are not supported for your platform.
+You should check the F<perlcurrent.cfg> (or F<w32current.cfg> on MSWin32)
+build-configurations file and remove options that are not supported for your
+platform.
 
 Now you are set to go:
 
@@ -91,29 +101,29 @@ stable and as thoroughly tested as possible.
 To make it clear, the perl core test smoke suite treats B<cygwin> and
 B<DJGPP> as unixy platforms and not as true MSWin32.
 
-To keep in sync with the source-tree, it is recommended you use the
-B<rsync> program. This currently seems only available with Cygwin
-<http://www.cygwin.com>. (All the cygwin tools run perfectly well
-under CMD.EXE, so don't let that stop you.)
+To keep in sync with the source-tree, it is recommended you use L<git>. As long
+as you use a version that also comes with a command-line tool.
 
 Some problems have been reported with older versions of cygwin and the
 patch program during the C<< S<[nd]make test> >> stage of
 Test::Smoke. Don't worry about it if you do not intend to use patch.
 
-Windows 95/98/ME do not seem to be ideal platforms to run Test::Smoke
-on. F<COMMAND.COM> gives some problems while building perl. (See
-F<README.win32>.)
+During smoke testing stuff might crash and give a popup. You'll want to disable Windows error reporting:
 
-We have found some problems with the default windows debugger
-B<Dr.Watson>. By default Dr.Watson will pop-up when the moral equivalent
-of a segmentation fault happens, this will make the smoke wait for
-user input. You can disable this by starting F<drwtsn32.exe> and
-un-check the B<Visual Notification> and B<Sound Notification>
-check-boxes and press B<OK>.
+    Action Center (from Control Panel)
+      -> Maintenance
+          -> Settings
+              -> Never check for solutions
 
-There seems to be a problem with B<Microsoft .NET/Windows XP> and
-segmentation faults, even if B<drwtsn32 -i> is run to set it as the
-default debugger.
+For more information see:
+    http://serverfault.com/questions/29678/disabling-myapp-has-stopped-working-dialog
+
+In "older" Windows versions (before 7) we have found some problems with the default
+windows debugger B<Dr.Watson>. By default Dr.Watson will pop-up when the moral
+equivalent of a segmentation fault happens, this will make the smoke wait for
+user input. You can disable this by starting F<drwtsn32.exe> and un-check the
+B<Visual Notification> and B<Sound Notification> check-boxes and press B<OK>.
+
 
 =head1 Slow Systems
 
@@ -134,6 +144,8 @@ run time of Test::Smoke.
 =item B<Distribution>
 
     http://search.cpan.org/dist/Test-Smoke/
+
+    https://github.com/abeltje/Test-Smoke
 
 =item B<Archives>
 
@@ -158,31 +170,20 @@ run time of Test::Smoke.
   Perl general QA: perl-qa@perl.org
   Development:     perl5-porters@perl.org
 
-=item B<The new smoke_db> (by Alain Barbet)
+=item B<CoreSmokeDB>
 
-Alain Barbet has put a lot of effort in storing the smoke test
-reports in a database and build a nice WEB-front-end:
+We also keep a database of smokereports that are created by Test::Smoke
+1.58 or higher.
 
-    http://www.alianwebserver.com/cgi-bin/smoke_db
-
-=item B<TinySmoke db>
-
-I also keep a database of smokereports that are created by Test::Smoke
-1.17 or higher.
-
-    http://www.test-smoke.org/cgi/tsdb
+    http://perl5.test-smoke.org/
 
 =back
 
 =back
-
-=head1 REVISION
-
-$Id$
 
 =head1 COPYRIGHT and LICENSE
 
-Copyright (C) 2001-2004
+Copyright (C) 2001-2014
 
   * H.Merijn Brand
   * Abe Timmerman
@@ -219,18 +220,19 @@ Michael Schwern <schwern@pobox.com>, the Perl QA pumpkin.
 Contributors and/or co-authors:
 
     Configurations and
-      nuts and bolts	Nicholas Clark <nick@plum.flirble.org>
-    smoke.sh            Jarkko Hietaniemi <jhi@cc.hut.fi>
-    Portability issues	Will Coleda - IMG <wjc@infomg.com>
-    Safety		Richard Soderberg <rs@oregonnet.com>
-    Win32/MSC5/dmake	Mattia Barbon <mbarbon@dsi.unive.it>,
-			Abe Timmerman <abeltje@cpan.org>
-    Cygwin		John Peacock <jpeacock@rowman.com>
-    Sharing issues	Blair Zajac <blair@orcaware.com>
+      nuts and bolts    Nicholas Clark <nick@plum.flirble.org>
+    smoke.sh            Jarkko Hietaniemi
+    Portability issues  Will Coleda - IMG <wjc@infomg.com>
+    Safety              Richard Soderberg
+    Win32/MSC5/dmake    Mattia Barbon
+                        Abe Timmerman <abeltje@cpan.org>
+                        Christian Walde <mithaldu@cpan.org> *
+    Cygwin              John Peacock <jpeacock@rowman.com>
+    Sharing issues      Blair Zajac
     Good ideas          Jos Boumans <kane@dwim.org>
-    VMS                 Craig Berry
+    VMS                 Craig Berry *
     SysInfo             Alain Barbet
-                        Merijn Brand
+                        Merijn Brand *
                         Alan Burlison
                         Allen Smith
                         David Woolger

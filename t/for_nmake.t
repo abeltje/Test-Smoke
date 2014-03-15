@@ -1,11 +1,9 @@
 #! perl -w
 use strict;
 
-# $Id$
-
 use File::Spec;
 
-use Test::More tests => 78;
+use Test::More tests => 77;
 BEGIN { use_ok( 'Test::Smoke::Util' ); }
 END { 
     1 while unlink 'win32/smoke.mk';
@@ -25,12 +23,6 @@ my $config   = $dft_args .
 Configure_win32( './Configure ' . $config, 'nmake' );
 
 ok( -f $smoke_mk, "New makefile ($config)" );
-my $extra_len = length( "\t\tconfig_args=$dft_args\t~\t\\\n" );
-$^O eq 'MSWin32' and $extra_len++;
-is( -s 'win32/Makefile', (-s $smoke_mk ) - $extra_len,
-    "Sizes are equal for standard options (-Duseithreads)" );
-
-# Now we can start testing this stuff
 ok( my_unlink( $smoke_mk ), "Remove makefile" );
 
 $config =  '-DINST_DRV=F:';
