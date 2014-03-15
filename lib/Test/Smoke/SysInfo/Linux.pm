@@ -79,6 +79,11 @@ sub prepare_os {
         }
         _file_info ($df, \%os);
     }
+    foreach my $key (keys %os) {
+        my $KEY = uc $key;
+        defined $os{$key} or next;
+        exists $os{$KEY} or $os{$KEY} = $os{$key};
+    }
 
     if ( $os{DISTRIB_DESCRIPTION} ) {
 	$distro = $os{DISTRIB_DESCRIPTION};
@@ -96,7 +101,7 @@ sub prepare_os {
         $distro .= qq{ $os{VERSION} "$os{CODENAME}"};
     }
     elsif ( $os{MAJORVERSION} && $os{MINORVERSION} ) {
-        -d "/usr/syno" and $distro .= "DSM";
+        -d "/usr/syno" || "@dist_file" =~ m{^\S*/VERSION$} and $distro .= "DSM";
         $distro .= qq{ $os{MAJORVERSION}.$os{MINORVERSION}};
         $os{BUILDNUMBER}    and $distro .= qq{-$os{BUILDNUMBER}};
         $os{SMALLFIXNUMBER} and $distro .= qq{-$os{SMALLFIXNUMBER}};
