@@ -110,11 +110,11 @@ if (keys %posters == 3) {
     }
 }
 
-WriteMakefile(
+my %wm = (
     NAME          => "Test-Smoke",
     DISTNAME      => "Test-Smoke",
     VERSION_FROM  => "lib/Test/Smoke.pm",
-    AUTHOR        => 'H.Merijn Brand <h.m.brand@hccnet.nl>, '.
+    AUTHOR        => 'H.Merijn Brand <h.m.brand@xs4all.nl>, '.
                      'Nicholas Clark <nick@plum.flirble.org> and ' .
                      'Abe Timmerman <abeltje@cpan.org>',
     ABSTRACT_FROM => 'lib/Test/Smoke.pm',
@@ -122,7 +122,7 @@ WriteMakefile(
     dist => {
         COMPRESS => "gzip -9f",
         SUFFIX   => ".gz",
-        },
+    },
     PREREQ_PM     => {
         'File::Spec'       => 0.82,
         'Test::More'       => 0,
@@ -133,7 +133,27 @@ WriteMakefile(
     EXE_FILES     => \@scripts,
     test          => {
         TESTS => 't/*.t t/app/*.t',
+    }
+);
+
+$ExtUtils::MakeMaker::VERSION > 6.30 and $wm{LICENSE}  = "perl";
+$ExtUtils::MakeMaker::VERSION > 6.67 and $wm{META_ADD} = {
+    "meta-spec" => {
+        version    => 2,
     },
+    "resources" => {
+        homepage   => "http://perl5.test-smoke.org/",
+        repository => {
+            type   => "git",
+            url    => "git://github.com/abeltje/Test-Smoke.git",
+            web    => "https://github.com/abeltje/Test-Smoke",
+        },
+        x_IRC      => "irc://irc.perl.org/#smoke",
+    },
+};
+
+WriteMakefile(
+    %wm,
     %install
 );
 
