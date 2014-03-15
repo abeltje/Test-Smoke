@@ -48,7 +48,7 @@ my $install_dir = $dft_install;
 if (!$ENV{AUTOMATED_TESTING}) {
     # So CPAN.pm will ask for install-directory!
     local $ENV{PERL_MM_USE_DEFAULT};
-    $install_dir = dir_prompt( 
+    $install_dir = dir_prompt(
         "Where would you like to install Test::Smoke?\n",
         $dft_install
     );
@@ -87,7 +87,7 @@ for ($^O) {
 if ($] < 5.008) { # Encode is core from 5.8.0
     $extra_deps{'Encode'} = 0;
 }
-eval { require JSON };
+eval { require JSON::XS };
 if ( $@ ) {
     eval { require JSON::PP };
     $extra_deps{'JSON::PP'} = 0 if $@;
@@ -177,8 +177,9 @@ sub dir_prompt {
         # thanks to perlfaq5
         $dir =~ s{^ ~ ([^/]*)}
                  {$1 ? ( getpwnam $1 )[7] : 
-                       ( $ENV{HOME} || $ENV{LOGDIR} || 
-                         "$ENV{HOMEDRIVE}$ENV{HOMEPATH}" )}ex;
+                       ( $ENV{HOME} || $ENV{LOGDIR} ||
+                         "$ENV{HOMEDRIVE}$ENV{HOMEPATH}" )
+                 }ex;
 
         my $cwd = cwd();
         my $dir_existed = -d $dir;
