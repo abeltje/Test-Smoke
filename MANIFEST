@@ -87,6 +87,7 @@ synctree.pl
 sysinfo.pl
 t/10-fallback.t
 t/11-no_fallback.t
+t/15-factory-json.t
 t/app/000-appobjects.t
 t/app/010-appoptions.t
 t/app/020-appoptioncollection.t
