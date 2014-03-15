@@ -44,6 +44,7 @@ sub decode_json { return __PACKAGE__ . "\::decode_json()"; }
     print $pkg $code{General};
     close $pkg;
 
+    local @INC = ('inc', $lib);
     my $obj = JSON->new;
     isa_ok($obj, 'JSON::PP');
 
@@ -60,6 +61,7 @@ sub decode_json { return __PACKAGE__ . "\::decode_json()"; }
     print $pkg $code{General};
     close $pkg;
 
+    local @INC = ('inc', $lib);
     my $obj = JSON->new;
     isa_ok($obj, 'JSON::XS');
 
