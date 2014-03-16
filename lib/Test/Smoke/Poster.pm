@@ -67,7 +67,7 @@ my %CONFIG = (
         'HTTP::Tiny'     => 1,
     },
 
-    general_options => [qw/ddir jsnfile v smokedb_url/],
+    general_options => [qw/ddir jsnfile v smokedb_url poster/],
 );
 
 =head2 Test::Smoke::Poster->new($poster_type, %arguments)

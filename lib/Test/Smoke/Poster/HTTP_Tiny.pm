@@ -4,10 +4,7 @@ use strict;
 
 use base 'Test::Smoke::Poster::Base';
 
-use fallback 'inc';
-
-use CGI::Util 'escape';
-use JSON;
+use CGI::Util;                   # escape() for HTML
 
 =head1 NAME
 
@@ -37,19 +34,23 @@ sub new {
     return $self;
 }
 
-=head2 $poster->post()
+=head2 $poster->_post_data()
 
-Post the json to CoreSmokeDB.
+Post the json to CoreSmokeDB using HTTP::Tiny.
 
 =cut
 
-sub post {
+sub _post_data {
     my $self = shift;
 
-    my $form_data = "json=" . escape($self->get_json);
+    $self->log_info("Posting to %s via %s.", $self->smokedb_url, $self->poster);
+    my $json = CGI::Util::escape($self->get_json);
+    $self->log_debug("Report data: %s", $json);
+
+    my $form_data = "json=$json";
     my $response = $self->ua->request(
         POST => $self->smokedb_url,
-        { 
+        {
             headers => {
                 'Content-Type'   => 'application/x-www-form-urlencoded',
                 'Content-Length' => length($form_data),
@@ -66,14 +67,8 @@ sub post {
         );
         return;
     }
-    my $body = decode_json($response->{content});
-    $self->log_debug("[CoreSmokeDB] %s", $response->{content});
 
-    if (exists $body->{error}) {
-        $self->log_info("CoreSmokeDB: %s", $body->{error});
-        return;
-    }
-    return $body->{id};
+    return $response->{content};
 }
 
 1;
