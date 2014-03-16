@@ -1,0 +1,16 @@
+Started smoke at 1394917388
+Smoking patch e9251c1a8f4944e6dceff5240d9e109ba075ff29 v5.19.9-147-ge9251c1
+Smoking branch blead
+Stopped smoke at 1394917393
+Started smoke at 1394917393
+
+Configuration: -Dusedevel
+------------------------------------------------------------------------------
+
+Compiler info: cc version 4.6.3
+TSTENV = stdio	u=191.12  s=27.87  cu=12209.07  cs=326.01  scripts=2247  tests=697693
+All tests successful.
+TSTENV = perlio	u=185.31  s=27.07  cu=11673.65  cs=297.23  scripts=2249  tests=697687
+All tests successful.
+Finished smoking e9251c1a8f4944e6dceff5240d9e109ba075ff29 v5.19.9-147-ge9251c1 blead
+Stopped smoke at 1394950828

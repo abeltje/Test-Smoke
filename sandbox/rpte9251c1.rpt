@@ -1,0 +1,41 @@
+Automated smoke report for branch blead 5.19.10 patch e9251c1a8f4944e6dceff5240d9e109ba075ff29 v5.19.9-147-ge9251c1
+pismoke.squirrel.nl: ARMv6-compatible processor rev 7 (v6l) (700 MHz) (armv6l/1 cpu)
+    on        linux - 3.2.27+ [wheezy/sid]
+    using     cc version 4.6.3
+    smoketime 9 hours 17 minutes (average 9 hours 17 minutes)
+
+Summary: PASS
+
+O = OK  F = Failure(s), extended report at the bottom
+X = Failure(s) under TEST but not under harness
+? = still running or test results not (yet) available
+Build failures during:       - = unknown or N/A
+c = Configure, m = make, M = make (after miniperl), t = make test-prep
+
+v5.19.9-147-ge9251c1  Configuration (common) none
+----------- ---------------------------------------------------------
+O O - -     
+| | | +----- PERLIO = perlio -DDEBUGGING
+| | +------- PERLIO = stdio  -DDEBUGGING
+| +--------- PERLIO = perlio
++----------- PERLIO = stdio
+
+
+Locally applied patches:
+    SMOKEe9251c1a8f4944e6dceff5240d9e109ba075ff29
+
+Compiler messages(gcc):
+make ...regcomp.c: In function ‘Perl_re_op_compile’:
+regcomp.c:7018:5: warning: format ‘%ld’ expects argument of type ‘long int’, but argument 5 has type ‘ssize_t’ [-Wformat]
+regexec.c: In function ‘S_regcppush’:
+regexec.c:295:20: warning: format ‘%i’ expects argument of type ‘int’, but argument 3 has type ‘U32’ [-Wformat]
+regexec.c:295:20: warning: format ‘%i’ expects argument of type ‘int’, but argument 4 has type ‘I32’ [-Wformat]
+taint.c: In function ‘Perl_taint_proper’:
+taint.c:38:2: warning: format ‘%lu’ expects argument of type ‘long unsigned int’, but argument 5 has type ‘uid_t’ [-Wformat]
+taint.c:38:2: warning: format ‘%lu’ expects argument of type ‘long unsigned int’, but argument 6 has type ‘uid_t’ [-Wformat]
+
+Raspberry PI 512MB with Raspbian (Debian Wheezy/Sid).
+
+-- 
+Report by Test::Smoke v1.6 running on perl 5.14.2
+(Reporter v0.052 / Smoker v0.045)
