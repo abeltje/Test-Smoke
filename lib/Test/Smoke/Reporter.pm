@@ -732,6 +732,20 @@ sub __rm_common_args {
     return $bcfg->rm_arg( keys %$common );
 }
 
+=head2 $reporter->get_logfile()
+
+Return the contents of C<< $self->{lfile} >> either by reading the file or
+returning the cached version.
+
+=cut
+
+sub get_logfile {
+    my $self = shift;
+    return $self->{log_file} if $self->{log_file};
+
+    return $self->{log_file} = read_logfile($self->{lfile}, $self->{v});
+}
+
 =head2 $reporter->write_to_file( [$name] )
 
 Write the C<< $self->report >> to file. If name is ommitted it will
@@ -820,6 +834,7 @@ sub smokedb_data {
         if (   ($send_log eq "always")
             or ($send_log eq "on_fail" && $rpt_fail))
         {
+            $self->get_logfile();
             my $log = read_logfile($self, $rpt{lfile});
             $log and $rpt{log_file} = $log;
         }
@@ -1056,7 +1071,7 @@ sub nonfatalmessages {
     if (!$self->{_nonfatal_}) {
 
         $self->{v} and print "Looking for non-fatal messages: '$cc'\n";
-        $self->{_ccmessages_} = grepnonfatal($cc, $self->{lfile}, $self->{v}) || [];
+        $self->{_nonfatal_} = grepnonfatal($cc, $self->{lfile}, $self->{v}) || [];
     }
 
     return @{$self->{_nonfatal_}} if wantarray;
@@ -1084,7 +1099,7 @@ sub preamble {
     ));
     my $si = Test::Smoke::SysInfo->new;
     my $archname  = $si->cpu_type;
- 
+
     (my $ncpu = $si->ncpu || "") =~ s/^(\d+)\s*/$1 cpu/;
     $archname .= "/$ncpu";
 

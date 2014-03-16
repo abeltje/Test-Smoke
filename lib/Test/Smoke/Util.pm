@@ -404,24 +404,19 @@ read the logfile
 
 =cut
 
-sub read_logfile
-{
-    my ($self, $logfile) = @_;
+sub read_logfile {
+    my ($logfile, $verbose) = @_;
 
-    !$logfile && $self && $self->{log_file} and return $self->{log_file};
-
-    $logfile ||= $self->{lfile} or return undef;
     open my $fh, "<", $logfile  or return undef;
-
-    local $/;
-    my $log = <$fh>;
-    my $es;
-    eval { $es = decode( "utf-8",  $log, Encode::FB_CROAK ); };
-    $@ and  eval { $es = decode( "cp1252", $log, Encode::FB_CROAK ); };
-    $@ and  eval { $es = decode( "iso-8859-1", $log, Encode::FB_CROAK ); };
+    my $log = do { local $/; <$fh> };
     close $fh;
+
+    my $es = eval { decode("utf-8",  $log, Encode::FB_CROAK ) };
+    $@   and eval { $es = decode("cp1252",     $log, Encode::FB_CROAK ) };
+    $@   and eval { $es = decode("iso-8859-1", $log, Encode::FB_CROAK ) };
+
     warn("Couldn't decode logfile($logfile): $@") if $@;
-    return $self->{log_file} = $@ ? $log : $es;
+    return $@ ? $log : $es;
 }
 
 =head2 grepccmsg( $cc, $logfile, $verbose )
@@ -522,7 +517,7 @@ sub grepccmsg {
 
     my( $indx, %error ) = ( 1 );
     my $smokelog = '';
-    my $log = read_logfile(undef,$logfile);
+    my $log = read_logfile($logfile);
     if ($log) {
 	$smokelog = $log;
         $verbose and print "Read logfile '$logfile'\n";
@@ -565,19 +560,19 @@ sub grepnonfatal {
 
     my( $indx, %error ) = ( 1 );
     my $smokelog = "";
-    my $log = read_logfile(undef,$logfile);
+    my $log = read_logfile($logfile);
     if ($log) {
-	$smokelog = $log;
+        $smokelog = $log;
         $verbose and print "Read logfile '$logfile'\n";
     } else {
         $verbose and print "Skipping '$logfile' '$!'\n";
     }
 
     my $kf = qr{
-	# Pod::Man is not available: Can't load module Encode, dynamic loading not available in this perl.
-	(\b (\S+) (?-x: is not available: Can't load module )
-	    (\S+?) , (?-x: dynamic loading not available) )
-	}xi;
+        # Pod::Man is not available: Can't load module Encode, dynamic loading not available in this perl.
+        (\b (\S+) (?-x: is not available: Can't load module )
+            (\S+?) , (?-x: dynamic loading not available) )
+        }xi;
     while ($smokelog =~ m{$kf}g) {
         my $fail = $1; # $2 = "Pod::Man", $3 = "Encode"
 
