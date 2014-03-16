@@ -12,6 +12,7 @@ use lib $lib;
 
 use JSON; # Should be our factory type module.
 
+require Scalar::Util;	# Now needed for Test::More (isa_ok)
 use Test::More 'no_plan';
 
 my %code = (
