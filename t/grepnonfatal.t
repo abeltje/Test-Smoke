@@ -43,7 +43,15 @@ for my $log ( @logs ) {
     my $file = catfile "t", "logs", $log->{file};
     ok -f $file, "logfile($file) exists";
 
-    my @errors = grepnonfatal( $log->{type}, $file, $verbose );
+    my $logs;
+    if (open my $fh, '<', $file) {
+        $logs = do { local $/; <$fh> };
+        close $fh;
+    }
+    else {
+        diag("Problem reading '$file': $!");
+    }
+    my @errors = grepnonfatal( $log->{type}, $logs, $verbose );
 
     is scalar @errors, $log->{lcnt},
        "Lines extracted from $log->{file}: $log->{lcnt}"

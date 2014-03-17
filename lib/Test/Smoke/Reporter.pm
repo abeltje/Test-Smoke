@@ -1073,7 +1073,11 @@ sub nonfatalmessages {
     if (!$self->{_nonfatal_}) {
 
         $self->{v} and print "Looking for non-fatal messages: '$cc'\n";
-        $self->{_nonfatal_} = grepnonfatal($cc, $self->{lfile}, $self->{v}) || [];
+        $self->{_nonfatal_} = grepnonfatal(
+            $cc,
+            $self->get_logfile(),
+            $self->{v}
+        ) || [];
     }
 
     return @{$self->{_nonfatal_}} if wantarray;

@@ -406,6 +406,7 @@ read the logfile
 
 sub read_logfile {
     my ($logfile, $verbose) = @_;
+    return if ! defined $logfile;
 
     open my $fh, "<", $logfile  or return undef;
     my $log = do { local $/; <$fh> };
@@ -550,24 +551,17 @@ manual pages.
 =cut
 
 sub grepnonfatal {
-    my( $cc, $logfile, $verbose ) = @_;
-    defined $logfile or return;
+    my( $cc, $smokelog, $verbose ) = @_;
+    $smokelog or return;
 
     my( $indx, %error ) = ( 1 );
-    my $smokelog = "";
-    my $log = read_logfile($logfile);
-    if ($log) {
-        $smokelog = $log;
-        $verbose and print "Read logfile '$logfile'\n";
-    } else {
-        $verbose and print "Skipping '$logfile' '$!'\n";
-    }
 
     my $kf = qr{
         # Pod::Man is not available: Can't load module Encode, dynamic loading not available in this perl.
         (\b (\S+) (?-x: is not available: Can't load module )
             (\S+?) , (?-x: dynamic loading not available) )
-        }xi;
+    }xi;
+
     while ($smokelog =~ m{$kf}g) {
         my $fail = $1; # $2 = "Pod::Man", $3 = "Encode"
 
@@ -832,11 +826,11 @@ sub version_from_patchlevel_h {
             return "$revision.$version$subversion";
         }
 
-        $revision   = $patchlevel =~ /^#define PERL_REVISION\s+(\d+)/m 
+        $revision   = $patchlevel =~ /^#define PERL_REVISION\s+(\d+)/m
                     ? $1 : '?';
         $version    = $patchlevel =~ /^#define PERL_VERSION\s+(\d+)/m
                     ? $1 : '?';
-        $subversion = $patchlevel =~ /^#define PERL_SUBVERSION\s+(\d+)/m 
+        $subversion = $patchlevel =~ /^#define PERL_SUBVERSION\s+(\d+)/m
                     ? $1 : '?';
     }
     return "$revision.$version.$subversion";
