@@ -834,9 +834,7 @@ sub smokedb_data {
         if (   ($send_log eq "always")
             or ($send_log eq "on_fail" && $rpt_fail))
         {
-            $self->get_logfile();
-            my $log = read_logfile($self, $rpt{lfile});
-            $log and $rpt{log_file} = $log;
+            $rpt{log_file} = $self->get_logfile();
         }
     }
     $rpt{out_file} = undef;
@@ -1039,7 +1037,11 @@ sub ccmessages {
     if (!$self->{_ccmessages_}) {
 
         $self->{v} and print "Looking for cc messages: '$cc'\n";
-        $self->{_ccmessages_} = grepccmsg($cc, $self->{lfile}, $self->{v}) || [];
+        $self->{_ccmessages_} = grepccmsg(
+            $cc,
+            $self->get_logfile(),
+            $self->{v}
+        ) || [];
     }
 
     return @{$self->{_ccmessages_}} if wantarray;

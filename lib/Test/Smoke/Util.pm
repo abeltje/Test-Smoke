@@ -426,11 +426,11 @@ This is a port of Jarkko Hietaniemi's grepccerr script.
 =cut
 
 sub grepccmsg {
-    my( $cc, $logfile, $verbose ) = @_;
-    defined $logfile or return;
+    my( $cc, $smokelog, $verbose ) = @_;
+    defined $smokelog or return;
     $cc ||= 'gcc';
     my %OS2PAT = (
-        'aix' => 
+        'aix' =>
             # "foo.c", line n.c: pppp-qqq (W) ...error description...
             # "foo.c", line n.c: pppp-qqq (S) ...error description...
             '(^".+?", line \d+\.\d+: \d+-\d+ \([WS]\) .+?$)',
@@ -516,15 +516,10 @@ sub grepccmsg {
     my $pat = $OS2PAT{ lc $cc };
 
     my( $indx, %error ) = ( 1 );
-    my $smokelog = '';
-    my $log = read_logfile($logfile);
-    if ($log) {
-	$smokelog = $log;
-        $verbose and print "Read logfile '$logfile'\n";
+    if ($smokelog) {
         $verbose and print "Pattern($cc): /$pat/\n";
     } else {
-        $verbose and print "Skipping '$logfile' '$!'\n";
-        $error{ "Couldn't examine '$logfile' for compiler warnings." } = 1;
+        $error{ "Couldn't examine logfile for compiler warnings." } = 1;
     }
 
     while ($smokelog =~ m/$pat/mg) {
