@@ -146,6 +146,7 @@ sub prepare_os {
         }
         elsif ( my @rel  = grep m{\brelease\b}i => @key ) {
             $distro = $rel[0];
+            $distro =~ s/ *release//;
         }
         elsif ( my @lnx  = grep m{\bLinux\b}i => @key ) {
             $distro = $lnx[0];
