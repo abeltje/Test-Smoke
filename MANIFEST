@@ -160,6 +160,11 @@ t/etc/rhel-6.2/issue
 t/etc/rhel-6.2/redhat-release
 t/etc/rhel-6.2/system-release
 t/etc/rhel-6.2/system-release-cpe
+t/etc/rhel-6.4/DISTNAME
+t/etc/rhel-6.4/issue
+t/etc/rhel-6.4/redhat-release
+t/etc/rhel-6.4/system-release
+t/etc/rhel-6.4/system-release-cpe
 t/etc/scient-6.4/DISTNAME
 t/etc/scient-6.4/lsb-release
 t/etc/scient-6.4/lsb-release.d
