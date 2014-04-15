@@ -145,6 +145,8 @@ sub prepare_os {
             $distro = $welcome[0];
         }
         elsif ( my @rel  = grep m{\brelease\b}i => @key ) {
+            @rel > 1 && $rel[0] =~ m/^Enterprise Linux Enterprise/
+                     && $rel[1] =~ m/^Oracle Linux/ and shift @rel;
             $distro = $rel[0];
             $distro =~ s/ *release//;
             $distro =~ s/Red Hat Enterprise Linux/RHEL/; # Too long for subject
