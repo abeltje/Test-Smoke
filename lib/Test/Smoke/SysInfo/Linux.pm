@@ -100,7 +100,7 @@ sub prepare_os {
     elsif ( $os{VERSION} && $os{CODENAME} ) {
         $distro .= qq{ $os{VERSION} "$os{CODENAME}"};
     }
-    elsif ( $os{MAJORVERSION} && $os{MINORVERSION} ) {
+    elsif ( $os{MAJORVERSION} && defined $os{MINORVERSION} ) {
         -d "/usr/syno" || "@dist_file" =~ m{^\S*/VERSION$} and $distro .= "DSM";
         $distro .= qq{ $os{MAJORVERSION}.$os{MINORVERSION}};
         $os{BUILDNUMBER}    and $distro .= qq{-$os{BUILDNUMBER}};
