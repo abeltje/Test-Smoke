@@ -65,7 +65,7 @@ sub prepare_os {
     my $etc = $ENV{SMOKE_USE_ETC} || "/etc";
     my @dist_file = grep { -s $_ }
         glob("$etc/*[-_][rRvV][eE][lLrR]*"), "$etc/issue",
-             "$etc.defaults/VERSION", "$etc/VERSION";
+             "$etc.defaults/VERSION", "$etc/VERSION", "$etc/release";
     return unless @dist_file;
 
     my $os = $self->_os();
@@ -105,6 +105,10 @@ sub prepare_os {
         $distro .= qq{ $os{MAJORVERSION}.$os{MINORVERSION}};
         $os{BUILDNUMBER}    and $distro .= qq{-$os{BUILDNUMBER}};
         $os{SMALLFIXNUMBER} and $distro .= qq{-$os{SMALLFIXNUMBER}};
+    }
+    elsif ( $os{DISTRIBVER} && exists $os{NETBSDSRCDIR} ) {
+	(my $dv = $os{DISTRIBVER}) =~ tr{ ''"";}{}d;
+	$distro .= qq{ NetBSD $dv};
     }
     else {
         # /etc/issue:
