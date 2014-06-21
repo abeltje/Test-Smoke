@@ -125,8 +125,12 @@ t/etc/debian-wheezy/debian_version
 t/etc/debian-wheezy/DISTNAME
 t/etc/debian-wheezy/issue
 t/etc/debian-wheezy/os-release
-t/etc/ds213-4.3/DISTNAME
-t/etc/ds213-4.3/VERSION
+t/etc/dsm-4.2/VERSION
+t/etc/dsm-4.2/DISTNAME
+t/etc/dsm-4.3/VERSION
+t/etc/dsm-4.3/DISTNAME
+t/etc/dsm-5.0/VERSION
+t/etc/dsm-5.0/DISTNAME
 t/etc/fedora-19/DISTNAME
 t/etc/fedora-19/fedora-release
 t/etc/fedora-19/issue
