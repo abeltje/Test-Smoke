@@ -429,7 +429,7 @@ This is a port of Jarkko Hietaniemi's grepccerr script.
 sub grepccmsg {
     my( $cc, $smokelog, $verbose ) = @_;
     defined $smokelog or return;
-    $cc ||= 'gcc';
+    $cc = 'gcc' if !$cc || $cc eq 'g++';
     my %OS2PAT = (
         'aix' =>
             # "foo.c", line n.c: pppp-qqq (W) ...error description...
