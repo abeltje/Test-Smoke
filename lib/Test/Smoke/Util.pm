@@ -492,7 +492,7 @@ sub grepccmsg {
             # foo.c(:nn)?: undefined reference to ...
             '(^(?-s:.+?):(?: In function .+?:$|' .
                '(?: undefined reference to .+?$)|' .
-               '\d+(?:\:\d+)?: ' . '(?:warning:|error:|invalid) .+?$))',
+               '\d+(?:\:\d+)?: ' . '(?:warning:|error:|note:|invalid) .+?$))',
 
         'mswin32' => # MSVC(?:60)*
             # foo.c : error LNKnnn: error description
