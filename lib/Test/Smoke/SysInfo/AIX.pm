@@ -52,6 +52,18 @@ sub prepare_sysinfo {
 
 Use os-specific tools to find out more about the operating system.
 
+Abbreviations used in AIX OS version include
+
+ ML   Maintenance Level
+ TL   Technology Level
+ SP   Service Pack
+ CSP  Conclusive/Last SP
+ RD   Release Date (YYWW)
+
+When the OS version reports as C<AIX 5.3.0.0/TL12-05>, the C<05> is
+the C<SP> number. Newer versions of AIX report using C<TL>, where older
+AIX releases report using C<ML>. See C<oslevel -?>.
+
 =cut
 
 sub prepare_os {
@@ -64,8 +76,6 @@ sub prepare_os {
 	# 6100-09-03-1415 = AIX 6.1.0.0 TL09 SP03 (release 2014, week 15)
         # Which will show as AIX 6.1.0.0/TL09-03
         $os = join(".", split //, $1) . "/TL$2-$3";
-        # The RD seems to be important for finding filesets:
-        # bos:bos.rte.install:6.1.9.16: : :C:F:LPP Install Commands: : : : : : :0:0:/:1415
     }
     else {
 	chomp( $os = `oslevel -r` );
@@ -98,9 +108,9 @@ sub prepare_os {
 
 =head1 COPYRIGHT
 
-(c) 2002-2013, Abe Timmerman <abeltje@cpan.org> All rights reserved.
+(c) 2002-2014, Abe Timmerman <abeltje@cpan.org> All rights reserved.
 
-With contributions from Jarkko Hietaniemi, Merijn Brand, Campo
+With contributions from Jarkko Hietaniemi, H.Merijn Brand, Campo
 Weijerman, Alan Burlison, Allen Smith, Alain Barbet, Dominic Dunlop,
 Rich Rauenzahn, David Cantrell.
 
