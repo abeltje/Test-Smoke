@@ -52,30 +52,53 @@ sub prepare_sysinfo {
 
 Use os-specific tools to find out more about the operating system.
 
+Abbreviations used in AIX OS version include
+
+ ML   Maintenance Level
+ TL   Technology Level
+ SP   Service Pack
+ CSP  Conclusive/Last SP
+ RD   Release Date (YYWW)
+
+When the OS version reports as C<AIX 5.3.0.0/TL12-05>, the C<05> is
+the C<SP> number. Newer versions of AIX report using C<TL>, where older
+AIX releases report using C<ML>. See C<oslevel -?>.
+
 =cut
 
 sub prepare_os {
     my $self = shift;
 
     my $os = $self->_os;
-    chomp( $os = `oslevel -r` );
-    if ( $os =~ m/^(\d+)-(\d+)$/ ) {
-        $os = join(".", split //, $1) . "/ML$2";
+    # First try the format used since 5.3ML05
+    chomp( $os = `oslevel -s` );
+    if ( $os =~ m/^(\d+)-(\d+)-(\d+)-(\d+)$/ && $1 >= 5300 ) {
+	# 6100-09-03-1415 = AIX 6.1.0.0 TL09 SP03 (release 2014, week 15)
+        # Which will show as AIX 6.1.0.0/TL09-03
+        $os = join(".", split //, $1) . "/TL$2-$3";
     }
     else {
-        chomp( $os = `oslevel` );
+	chomp( $os = `oslevel -r` );
+	# 5300-12 = AIX 5.3.0.0/ML12
+	if ( $os =~ m/^(\d+)-(\d+)$/ ) {
+	    $os = join(".", split //, $1) . "/ML$2";
+	}
+	else {
+	    chomp( $os = `oslevel` );
+	    # 5.3.0.0 = AIX 5.3.0.0
 
-        # And try figuring out at what maintainance level we are
-        my $ml = "00";
-        for ( grep m/ML\b/ => `instfix -i` ) {
-            if (m/All filesets for (\S+) were found/) {
-                $ml = $1;
-                $ml =~ m/^\d+-(\d+)_AIX_ML/ and $ml = "ML$1";
-                next;
-            }
-            $ml =~ s/\+*$/+/;
-        }
-        $os .= "/$ml";
+	    # And try figuring out at what maintainance level we are
+	    my $ml = "00";
+	    for ( grep m/ML\b/ => `instfix -i` ) {
+		if (m/All filesets for (\S+) were found/) {
+		    $ml = $1;
+		    $ml =~ m/^\d+-(\d+)_AIX_ML/ and $ml = "ML$1";
+		    next;
+		}
+		$ml =~ s/\+*$/+/;
+	    }
+	    $os .= "/$ml";
+	}
     }
     $os =~ s/^/AIX - /;
     $self->{__os} = $os;
@@ -85,9 +108,9 @@ sub prepare_os {
 
 =head1 COPYRIGHT
 
-(c) 2002-2013, Abe Timmerman <abeltje@cpan.org> All rights reserved.
+(c) 2002-2014, Abe Timmerman <abeltje@cpan.org> All rights reserved.
 
-With contributions from Jarkko Hietaniemi, Merijn Brand, Campo
+With contributions from Jarkko Hietaniemi, H.Merijn Brand, Campo
 Weijerman, Alan Burlison, Allen Smith, Alain Barbet, Dominic Dunlop,
 Rich Rauenzahn, David Cantrell.
 

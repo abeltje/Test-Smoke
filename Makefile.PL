@@ -48,7 +48,7 @@ my $install_dir = $dft_install;
 if (!$ENV{AUTOMATED_TESTING}) {
     # So CPAN.pm will ask for install-directory!
     local $ENV{PERL_MM_USE_DEFAULT};
-    $install_dir = dir_prompt( 
+    $install_dir = dir_prompt(
         "Where would you like to install Test::Smoke?\n",
         $dft_install
     );
@@ -87,7 +87,7 @@ for ($^O) {
 if ($] < 5.008) { # Encode is core from 5.8.0
     $extra_deps{'Encode'} = 0;
 }
-eval { require JSON };
+eval { require JSON::XS };
 if ( $@ ) {
     eval { require JSON::PP };
     $extra_deps{'JSON::PP'} = 0 if $@;
@@ -110,11 +110,11 @@ if (keys %posters == 3) {
     }
 }
 
-WriteMakefile(
+my %wm = (
     NAME          => "Test-Smoke",
     DISTNAME      => "Test-Smoke",
     VERSION_FROM  => "lib/Test/Smoke.pm",
-    AUTHOR        => 'H.Merijn Brand <h.m.brand@hccnet.nl>, '.
+    AUTHOR        => 'H.Merijn Brand <h.m.brand@xs4all.nl>, '.
                      'Nicholas Clark <nick@plum.flirble.org> and ' .
                      'Abe Timmerman <abeltje@cpan.org>',
     ABSTRACT_FROM => 'lib/Test/Smoke.pm',
@@ -122,7 +122,7 @@ WriteMakefile(
     dist => {
         COMPRESS => "gzip -9f",
         SUFFIX   => ".gz",
-        },
+    },
     PREREQ_PM     => {
         'File::Spec'       => 0.82,
         'Test::More'       => 0,
@@ -133,7 +133,27 @@ WriteMakefile(
     EXE_FILES     => \@scripts,
     test          => {
         TESTS => 't/*.t t/app/*.t',
+    }
+);
+
+eval "$mmver" > 6.30 and $wm{LICENSE}  = "perl";
+eval "$mmver" > 6.67 and $wm{META_ADD} = {
+    "meta-spec" => {
+        version    => 2,
     },
+    "resources" => {
+        homepage   => "http://perl5.test-smoke.org/",
+        repository => {
+            type   => "git",
+            url    => "git://github.com/abeltje/Test-Smoke.git",
+            web    => "https://github.com/abeltje/Test-Smoke",
+        },
+        x_IRC      => "irc://irc.perl.org/#smoke",
+    },
+};
+
+WriteMakefile(
+    %wm,
     %install
 );
 
@@ -157,8 +177,9 @@ sub dir_prompt {
         # thanks to perlfaq5
         $dir =~ s{^ ~ ([^/]*)}
                  {$1 ? ( getpwnam $1 )[7] : 
-                       ( $ENV{HOME} || $ENV{LOGDIR} || 
-                         "$ENV{HOMEDRIVE}$ENV{HOMEPATH}" )}ex;
+                       ( $ENV{HOME} || $ENV{LOGDIR} ||
+                         "$ENV{HOMEDRIVE}$ENV{HOMEPATH}" )
+                 }ex;
 
         my $cwd = cwd();
         my $dir_existed = -d $dir;

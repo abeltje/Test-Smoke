@@ -716,9 +716,9 @@ sub READLINE {
         my @list = map "$_\n" => split m/\n/, $$buffer;
         $$buffer = "";
         return @list;
-    } else {
-        $$buffer =~ s/^(.*\n?)// and return $1;
     }
+
+    $$buffer =~ s/^(.*\n?)// and return $1;
 }
 
 1;

@@ -38,75 +38,136 @@ Use os-specific tools to find out more about the operating system.
 
 =cut
 
+sub _file_info {
+    my ($file, $os) = @_;
+    open(my $fh, "< $file") or return;
+    while (<$fh>) {
+	m/^\s*[;#]/ and next;
+	chomp;
+	m/\S/ or next;
+	s/^\s+//;
+	s/\s+$//;
+	if (my ($k, $v) = (m/^(.*\S)\s*=\s*(\S.*)$/)) {
+	    # Having a value prevails over being defined
+	    defined $os->{$k} and next;
+	    $v =~ s/^"\s*(.*?)\s*"$/$1/;
+	    $os->{$k} = $v;
+	    next;
+	}
+	exists $os->{$_} or $os->{$_} = undef;
+    }
+    close $fh;
+}
+
 sub prepare_os {
     my $self = shift;
 
-    my ($dist_file) = grep {
-        -s $_ && !/\blsb-/
-    } glob("/etc/*[-_][rRvV][eE][lLrR]*"), "/etc/issue",
-	"/etc.defaults/VERSION", "/etc/VERSION";
-    return if !$dist_file;
+    my $etc = $ENV{SMOKE_USE_ETC} || "/etc";
+    my @dist_file = grep { -s $_ }
+        glob("$etc/*[-_][rRvV][eE][lLrR]*"), "$etc/issue",
+             "$etc.defaults/VERSION", "$etc/VERSION", "$etc/release";
+    return unless @dist_file;
 
     my $os = $self->_os();
-    (my $distro = $dist_file) =~ s{^/etc(?:\.defaults)?/}{}i;
-    $distro =~ s{[-_]?(?:release|version)\b}{}i;
-    if (open(my $fh, "< $dist_file")) {
-        my @osi = grep m/\S/ => <$fh>;
-        close $fh;
-        my %os = map { m/^\s*(\S+)\s*=\s*(.*)\s*$/; ( uc $1 => $2 ) } @osi;
-        s/^"\s*(.*?)\s*"$/$1/ for values %os;
+    my %os;
+    my $distro;
+    foreach my $df (@dist_file) {
+        # use "debian" out of /etc/debian-release
+        unless (defined $distro or $df =~ m/\blsb-/) {
+            ($distro = $df) =~ s{^$etc(?:\.defaults)?/}{}i;
+            $distro =~ s{[-_]?(?:release|version)\b}{}i;
+        }
+        _file_info ($df, \%os);
+    }
+    foreach my $key (keys %os) {
+        my $KEY = uc $key;
+        defined $os{$key} or next;
+        exists $os{$KEY} or $os{$KEY} = $os{$key};
+    }
 
-        if ( $os{PRETTY_NAME} ) {
-            $distro = $os{PRETTY_NAME};          # "openSUSE 12.1 (Asparagus) (x86_64)"
-            $distro =~ s/\)\s+\(\w+\)\s*$/)/;    # remove architectural part
-        }
-        elsif ( $os{VERSION} && $os{NAME} ) {
-            $distro = qq{$os{NAME} $os{VERSION}};
-        }
-        elsif ( $os{VERSION} && $os{CODENAME} ) {
-            $distro .= qq{ $os{VERSION} "$os{CODENAME}"};
-        }
-        elsif ( $os{MAJORVERSION} && $os{MINORVERSION} ) {
-            -d "/usr/syno" and $distro .= "DSM";
-            $distro .= qq{ $os{MAJORVERSION}.$os{MINORVERSION}};
-            $os{BUILDNUMBER}    and $distro .= qq{-$os{BUILDNUMBER}};
-            $os{SMALLFIXNUMBER} and $distro .= qq{-$os{SMALLFIXNUMBER}};
-        }
-        elsif ( @osi && $osi[0] =~ m{^\s*([-A-Za-z0-9. ""/]+)} ) {
+    if ( $os{DISTRIB_DESCRIPTION} ) {
+	$distro = $os{DISTRIB_DESCRIPTION};
+	$os{DISTRIB_CODENAME} and
+	    $distro .= " ($os{DISTRIB_CODENAME})";
+    }
+    elsif ( $os{PRETTY_NAME} ) {
+        $distro = $os{PRETTY_NAME};          # "openSUSE 12.1 (Asparagus) (x86_64)"
+        $distro =~ s/\)\s+\(\w+\)\s*$/)/;    # remove architectural part
+    }
+    elsif ( $os{VERSION} && $os{NAME} ) {
+        $distro = qq{$os{NAME} $os{VERSION}};
+    }
+    elsif ( $os{VERSION} && $os{CODENAME} ) {
+        $distro .= qq{ $os{VERSION} "$os{CODENAME}"};
+    }
+    elsif ( $os{MAJORVERSION} && defined $os{MINORVERSION} ) {
+        -d "/usr/syno" || "@dist_file" =~ m{^\S*/VERSION$} and $distro .= "DSM";
+        $distro .= qq{ $os{MAJORVERSION}.$os{MINORVERSION}};
+        $os{BUILDNUMBER}    and $distro .= qq{-$os{BUILDNUMBER}};
+        $os{SMALLFIXNUMBER} and $distro .= qq{-$os{SMALLFIXNUMBER}};
+    }
+    elsif ( $os{DISTRIBVER} && exists $os{NETBSDSRCDIR} ) {
+	(my $dv = $os{DISTRIBVER}) =~ tr{ ''"";}{}d;
+	$distro .= qq{ NetBSD $dv};
+    }
+    else {
+        # /etc/issue:
+        #  Welcome to SUSE LINUX 10.0 (i586) - Kernel \r (\l).
+        #  Welcome to openSUSE 10.2 (i586) - Kernel \r (\l).
+        #  Welcome to openSUSE 10.2 (X86-64) - Kernel \r (\l).
+        #  Welcome to openSUSE 10.3 (i586) - Kernel \r (\l).
+        #  Welcome to openSUSE 10.3 (X86-64) - Kernel \r (\l).
+        #  Welcome to openSUSE 11.1 - Kernel \r (\l).
+        #  Welcome to openSUSE 11.2 "Emerald" - Kernel \r (\l).
+        #  Welcome to openSUSE 11.3 "Teal" - Kernel \r (\l).
+        #  Welcome to openSUSE 11.4 "Celadon" - Kernel \r (\l).
+        #  Welcome to openSUSE 12.1 "Asparagus" - Kernel \r (\l).
+        #  Welcome to openSUSE 12.2 "Mantis" - Kernel \r (\l).
+        #  Welcome to openSUSE 12.3 "Dartmouth" - Kernel \r (\l).
+        #  Welcome to openSUSE 13.1 "Bottle" - Kernel \r (\l).
+        #  Welcome to SUSE Linux Enterprise Server 11 SP1 for VMware  (x86_64) - Kernel \r (\l).
+        #  Ubuntu 10.04.4 LTS \n \l
+        #  Debian GNU/Linux wheezy/sid \n \l
+        #  Debian GNU/Linux 6.0 \n \l
+        #  CentOS release 6.4 (Final)
+        # /etc/redhat-release:
+        #  CentOS release 5.7 (Final)
+        #  CentOS release 6.4 (Final)
+        #  Red Hat Enterprise Linux ES release 4 (Nahant Update 2)
+        # /etc/debian_version:
+        #  6.0.4
+        #  wheezy/sid
+        #  squeeze/sid
 
-	    # /etc/issue:
-	    #  Welcome to SUSE LINUX 10.0 (i586) - Kernel \r (\l).
-	    #  Welcome to openSUSE 10.2 (i586) - Kernel \r (\l).
-	    #  Welcome to openSUSE 10.2 (X86-64) - Kernel \r (\l).
-	    #  Welcome to openSUSE 10.3 (i586) - Kernel \r (\l).
-	    #  Welcome to openSUSE 10.3 (X86-64) - Kernel \r (\l).
-	    #  Welcome to openSUSE 11.1 - Kernel \r (\l).
-	    #  Welcome to openSUSE 11.2 "Emerald" - Kernel \r (\l).
-	    #  Welcome to openSUSE 11.3 "Teal" - Kernel \r (\l).
-	    #  Welcome to openSUSE 11.4 "Celadon" - Kernel \r (\l).
-	    #  Welcome to openSUSE 12.1 "Asparagus" - Kernel \r (\l).
-	    #  Welcome to openSUSE 12.2 "Mantis" - Kernel \r (\l).
-	    #  Welcome to openSUSE 12.3 "Dartmouth" - Kernel \r (\l).
-	    #  Welcome to openSUSE 13.1 "Bottle" - Kernel \r (\l).
-	    #  Welcome to SUSE Linux Enterprise Server 11 SP1 for VMware  (x86_64) - Kernel \r (\l).
-	    #  Ubuntu 10.04.4 LTS \n \l
-	    #  Debian GNU/Linux wheezy/sid \n \l
-	    #  Debian GNU/Linux 6.0 \n \l
-	    #  CentOS release 6.4 (Final)
-	    # /etc/redhat-release:
-	    #  CentOS release 5.7 (Final)
-	    #  CentOS release 6.4 (Final)
-	    #  Red Hat Enterprise Linux ES release 4 (Nahant Update 2)
-	    # /etc/debian_version:
-	    #  6.0.4
-	    #  wheezy/sid
-	    #  squeeze/sid
-            ( $distro = $1 ) =~ s/^Welcome\s+to\s+//i;
-            $distro =~ s/\s+-\s+Kernel.*//i;
-            $distro =~ s/\s*\\[rln].*//;
+        my @key = sort keys %os;
+        s/\s*\\[rln].*// for @key;
+
+        my @vsn = grep m/^[0-9.]+$/ => @key;
+        #$self->{__X__} = { os => \%os, key => \@key, vsn => \@vsn };
+
+        if ( my @welcome = grep s{^\s*Welcome\s+to\s+}{}i => @key ) {
+            $distro = $welcome[0];
         }
+        elsif ( my @rel  = grep m{\brelease\b}i => @key ) {
+            @rel > 1 && $rel[0] =~ m/^Enterprise Linux Enterprise/
+                     && $rel[1] =~ m/^Oracle Linux/ and shift @rel;
+            $distro = $rel[0];
+            $distro =~ s/ *release//;
+            $distro =~ s/Red Hat Enterprise Linux/RHEL/; # Too long for subject
+        }
+        elsif ( my @lnx  = grep m{\bLinux\b}i => @key ) {
+            $distro = $lnx[0];
+        }
+        elsif ( $distro && @vsn ) {
+            $distro .= "-$vsn[0]";
+        }
+        else {
+            $distro = $key[0];
+        }
+        $distro =~ s/\s+-\s+Kernel.*//i;
     }
     if ($distro =~ s/^\s*(.*\S)\s*$/$1/) {
+        $self->{__distro} = $distro;
         $os .= " [$distro]";
     }
     $self->{__os} = $os;

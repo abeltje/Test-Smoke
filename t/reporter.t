@@ -2114,6 +2114,12 @@ EORESULTS
         while (<$in>) {
             $in_string .= $_;
         }
+        # Prevent false negatives:
+        # < tux: Intel(R) Xeon(R) CPU E3-1245 V2 @ 3.40GHz (GenuineIntel 3740MHz) (x86_64/8 cpu[32 cores])
+        # > tux: Intel(R) Xeon(R) CPU E3-1245 V2 @ 3.40GHz (GenuineIntel 3774MHz) (x86_64/8 cpu[32 cores])
+        unless ($in_string eq $report_string) {
+            s{GenuineIntel [0-9]+[MG]Hz}{GenuineIntel 9999MHz} for $in_string, $report_string;
+        }
         is($in_string, $report_string, "file is the same as the report");
         close $in;
         unlink $file or die "Can't unlink file: $!";

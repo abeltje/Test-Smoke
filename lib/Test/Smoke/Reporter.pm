@@ -732,6 +732,20 @@ sub __rm_common_args {
     return $bcfg->rm_arg( keys %$common );
 }
 
+=head2 $reporter->get_logfile()
+
+Return the contents of C<< $self->{lfile} >> either by reading the file or
+returning the cached version.
+
+=cut
+
+sub get_logfile {
+    my $self = shift;
+    return $self->{log_file} if $self->{log_file};
+
+    return $self->{log_file} = read_logfile($self->{lfile}, $self->{v});
+}
+
 =head2 $reporter->write_to_file( [$name] )
 
 Write the C<< $self->report >> to file. If name is ommitted it will
@@ -820,8 +834,7 @@ sub smokedb_data {
         if (   ($send_log eq "always")
             or ($send_log eq "on_fail" && $rpt_fail))
         {
-            my $log = read_logfile($self, $rpt{lfile});
-            $log and $rpt{log_file} = $log;
+            $rpt{log_file} = $self->get_logfile();
         }
     }
     $rpt{out_file} = undef;
@@ -1024,7 +1037,11 @@ sub ccmessages {
     if (!$self->{_ccmessages_}) {
 
         $self->{v} and print "Looking for cc messages: '$cc'\n";
-        $self->{_ccmessages_} = grepccmsg($cc, $self->{lfile}, $self->{v}) || [];
+        $self->{_ccmessages_} = grepccmsg(
+            $cc,
+            $self->get_logfile(),
+            $self->{v}
+        ) || [];
     }
 
     return @{$self->{_ccmessages_}} if wantarray;
@@ -1056,7 +1073,11 @@ sub nonfatalmessages {
     if (!$self->{_nonfatal_}) {
 
         $self->{v} and print "Looking for non-fatal messages: '$cc'\n";
-        $self->{_nonfatal_} = grepnonfatal($cc, $self->{lfile}, $self->{v}) || [];
+        $self->{_nonfatal_} = grepnonfatal(
+            $cc,
+            $self->get_logfile(),
+            $self->{v}
+        ) || [];
     }
 
     return @{$self->{_nonfatal_}} if wantarray;
@@ -1084,7 +1105,7 @@ sub preamble {
     ));
     my $si = Test::Smoke::SysInfo->new;
     my $archname  = $si->cpu_type;
- 
+
     (my $ncpu = $si->ncpu || "") =~ s/^(\d+)\s*/$1 cpu/;
     $archname .= "/$ncpu";
 
@@ -1132,7 +1153,8 @@ sub smoke_matrix {
     my $rpt  = $self->{_rpt};
 
     # Maximum of 6 letters => 11 positions
-    my $pad = " " x int( (11 - length( $rpt->{patchdescr} ))/2 );
+    my $rptl = length $rpt->{patchdescr};
+    my $pad = $rptl >= 11 ? "" : " " x int( (11 - $rptl)/2 );
     my $patch = $pad . $rpt->{patchdescr};
     my $report = sprintf "%-11s  Configuration (common) %s\n", 
                          $patch, $rpt->{common_args};

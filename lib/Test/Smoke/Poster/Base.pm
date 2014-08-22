@@ -6,9 +6,12 @@ use Carp;
 use base 'Test::Smoke::ObjectBase';
 use Test::Smoke::LogMixin;
 
+use fallback 'inc';
+
 require Test::Smoke;
 
 use File::Spec::Functions;
+use JSON;
 
 =head1 NAME
 
@@ -122,7 +125,7 @@ sub json_filename {
 
 =head2 $poster->post()
 
-Abstract method.
+Post the JSON report to CoreSmokeDB.
 
 =head3 Arguments
 
@@ -139,8 +142,59 @@ HTTP or Test::Smoke::Gateway-application errors.
 =cut
 
 sub post {
+    my $self = shift;
+    my $response_body = decode_json($self->_post_data());
+    $self->_process_post_result($response_body);
+}
+
+=head2 $poster->_post_data()
+
+Abstract method that should be implemented by the subclass.
+
+=head3 Arguments
+
+None.
+
+=head3 Returns
+
+The body of the response.
+
+=cut
+
+sub _post_data {
     my $class = ref($_[0]) || $_[0];
     croak("Must be implemented by '$class'");
+}
+
+=head2 $poster->_process_post_result($response_body)
+
+Process the result of the POST action to CoreSmokeDB.
+
+=head3 Arguments
+
+Positional.
+
+=over
+
+=item $response_body (the raw JSON string send by CoreSmokeDB)
+
+=back
+
+=head3 Returns
+
+The id of the report on success, I<undef> on failure.
+
+=cut
+
+sub _process_post_result {
+    my $self = shift;
+    my ($body) = @_;
+
+    if (exists $body->{error}) {
+        $self->log_info("CoreSmokeDB: %s", $body->{error});
+        return;
+    }
+    return $body->{id};
 }
 
 1;

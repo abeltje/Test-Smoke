@@ -160,7 +160,7 @@ sub find_a_patch {
     my $patch_bin;
     foreach my $patch (qw( gpatch npatch patch )) {
         $patch_bin = whereis( $patch ) or next;
-        my $version = `$patch_bin --version`;
+        my $version = `$patch_bin --version 2>&1`;
         $? or return $patch_bin;
     }
 }

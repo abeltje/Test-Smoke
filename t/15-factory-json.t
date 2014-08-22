@@ -12,6 +12,7 @@ use lib $lib;
 
 use JSON; # Should be our factory type module.
 
+require Scalar::Util;	# Now needed for Test::More (isa_ok)
 use Test::More 'no_plan';
 
 my %code = (
@@ -44,6 +45,7 @@ sub decode_json { return __PACKAGE__ . "\::decode_json()"; }
     print $pkg $code{General};
     close $pkg;
 
+    local @INC = ('inc', $lib);
     my $obj = JSON->new;
     isa_ok($obj, 'JSON::PP');
 
@@ -60,6 +62,7 @@ sub decode_json { return __PACKAGE__ . "\::decode_json()"; }
     print $pkg $code{General};
     close $pkg;
 
+    local @INC = ('inc', $lib);
     my $obj = JSON->new;
     isa_ok($obj, 'JSON::XS');
 

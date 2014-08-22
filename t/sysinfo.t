@@ -42,9 +42,9 @@ ok defined &tsuname, "tsuname() imported";
     ok $si->os, $si->os;
     ok $si->host, $si->host;
 
+    my $sysinfo = sysinfo();
     is join( " ", @{ $si }{map "_$_" => qw( host os cpu_type )} ),
-       sysinfo(),
-       "test sysinfo() " . sysinfo();
+       $sysinfo, "test sysinfo() $sysinfo";
 }
 
 {

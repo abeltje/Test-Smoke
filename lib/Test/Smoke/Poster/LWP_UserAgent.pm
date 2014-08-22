@@ -45,30 +45,25 @@ sub new {
     return $self;
 }
 
-=head2 $poster->post()
+=head2 $poster->_post_data()
 
-Post the json to CoreSmokeDB.
+Post the json to CoreSmokeDB using LWP::UserAgent.
 
 =cut
 
-sub post {
+sub _post_data {
     my $self = shift;
 
-    my $json = $self->get_json();
+    $self->log_info("Posting to %s via %s.", $self->smokedb_url, $self->poster);
+    my $json = $self->get_json;
+    $self->log_debug("Report data: %s", $json);
 
     my $response = $self->ua->post(
         $self->smokedb_url,
         { json => $json }
     );
 
-    my $body = decode_json($response->content);
-    $self->log_debug("[CoreSmokeDB] %s", $response);
-
-    if (exists $body->{error}) {
-        $self->log_info("CoreSmokeDB: %s", $body->{error});
-        return;
-    }
-    return $body->{id};
+    return $response->content;
 }
 
 1;

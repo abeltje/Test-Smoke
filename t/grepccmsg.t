@@ -43,7 +43,15 @@ for my $log ( @logs ) {
     my $file = catfile "t", "logs", $log->{file};
     ok -f $file, "logfile($file) exists";
 
-    my @errors = grepccmsg( $log->{type}, $file, $verbose );
+    my $logs;
+    if (open my $fh, '<', $file) {
+        $logs = do { local $/; <$fh> };
+        close $fh;
+    }
+    else {
+        diag("Problem reading '$file': $!");
+    }
+    my @errors = grepccmsg( $log->{type}, $logs, $verbose );
 
     ok @errors, "Found messages in '$log->{file}'";
     is scalar @errors, $log->{lcnt},
@@ -60,10 +68,18 @@ for my $log ( @logs ) {
 }
 
 {
-    my $log = catfile 't', 'logs', 'gcc2722.log';
-    my @errors = grepccmsg( 'gcc', $log, $verbose );
+    my $file = catfile 't', 'logs', 'gcc2722.log';
+    my $logs;
+    if (open my $fh, '<', $file) {
+        $logs = do { local $/; <$fh> };
+        close $fh;
+    }
+    else {
+        diag("Problem reading '$file': $!");
+    }
+    my @errors = grepccmsg( 'gcc', $logs, $verbose );
     my $report = join "\n", @errors;
 
-    ( my $orig = get_file( $log ) ) =~ s/\n$//;
+    ( my $orig = get_file( $file ) ) =~ s/\n$//;
     is $report, $orig, "Got all the gcc-2.7.2.2 messages";
 }

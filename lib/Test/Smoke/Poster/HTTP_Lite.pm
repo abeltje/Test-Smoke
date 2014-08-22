@@ -5,10 +5,6 @@ use Carp;
 
 use base 'Test::Smoke::Poster::Base';
 
-use fallback 'inc';
-
-use JSON;
-
 =head1 NAME
 
 Test::Smoke::Poster::HTTP_Lite - Poster subclass using HTTP::Lite.
@@ -35,27 +31,22 @@ sub new {
     return $self;
 }
 
-=head2 $poster->post()
+=head2 $poster->_post_data()
 
-Post the json to CoreSmokeDB.
+Post the json to CoreSmokeDB using L<HTTP::Lite>.
 
 =cut
 
-sub post {
+sub _post_data {
     my $self = shift;
 
-    $self->ua->prepare_post({ json => $self->get_json });
+    $self->log_info("Posting to %s via %s.", $self->smokedb_url, $self->poster);
+    $self->log_debug("Report data: %s", my $json = $self->get_json);
+    $self->ua->prepare_post({ json => $json });
     $self->ua->add_req_header('User-Agent', $self->agent_string);
     $self->ua->request($self->smokedb_url) or croak("CoreSmokeDB: $!");
 
-    my $body = decode_json($self->ua->body);
-    $self->log_debug("[CoreSmokeDB] %s", $self->ua->body);
-
-    if (exists $body->{error}) {
-        $self->log_info("CoreSmokeDB: %s", $body->{error});
-        return;
-    }
-    return $body->{id};
+    return $self->ua->body;
 }
 
 1;

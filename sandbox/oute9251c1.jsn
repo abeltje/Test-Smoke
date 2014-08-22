@@ -1,0 +1,92 @@
+{
+   "locale" : "",
+   "un_file" : "/home/pi/wrk/Test-Smoke/smoke/smokecurrent.usernote",
+   "rptfile" : "mktest.rpt",
+   "outfile" : "mktest.out",
+   "harness_only" : "0",
+   "applied_patches" : [
+      "SMOKEe9251c1a8f4944e6dceff5240d9e109ba075ff29"
+   ],
+   "v" : 1,
+   "cfg" : "/home/pi/wrk/Test-Smoke/smoke/perlcurrent.cfg",
+   "lfile" : "/home/pi/wrk/Test-Smoke/smoke/smokecurrent.log",
+   "showcfg" : 0,
+   "sysinfo" : {
+      "smoker_version" : "0.045",
+      "git_describe" : "v5.19.9-147-ge9251c1",
+      "hostname" : "pismoke.squirrel.nl",
+      "reporter_version" : "0.052",
+      "reporter" : "Johan Vromans <jvromans@squirrel.nl>",
+      "architecture" : "armv6l",
+      "test_jobs" : null,
+      "osversion" : "3.2.27+ [wheezy/sid]",
+      "cpu_count" : "1",
+      "osname" : "linux",
+      "lc_all" : null,
+      "config_count" : 1,
+      "git_id" : "e9251c1a8f4944e6dceff5240d9e109ba075ff29",
+      "smoke_perl" : "5.14.2",
+      "smoke_date" : "2014-03-15 22:03:08 +0100",
+      "user_note" : "Raspberry PI 512MB with Raspbian (Debian Wheezy/Sid).\n",
+      "lang" : "en_US.UTF-8",
+      "cpu_description" : "ARMv6-compatible processor rev 7 (v6l) (700 MHz)",
+      "smoke_branch" : "blead",
+      "duration" : 33440,
+      "username" : "pi",
+      "smoke_revision" : "1.6",
+      "smoke_version" : "1.6",
+      "perl_id" : "5.19.10"
+   },
+   "summary" : "PASS",
+   "defaultenv" : 0,
+   "manifest_msgs" : [],
+   "compiler_msgs" : [
+      "make ...regcomp.c: In function ‘Perl_re_op_compile’:",
+      "regcomp.c:7018:5: warning: format ‘%ld’ expects argument of type ‘long int’, but argument 5 has type ‘ssize_t’ [-Wformat]",
+      "regexec.c: In function ‘S_regcppush’:",
+      "regexec.c:295:20: warning: format ‘%i’ expects argument of type ‘int’, but argument 3 has type ‘U32’ [-Wformat]",
+      "regexec.c:295:20: warning: format ‘%i’ expects argument of type ‘int’, but argument 4 has type ‘I32’ [-Wformat]",
+      "taint.c: In function ‘Perl_taint_proper’:",
+      "taint.c:38:2: warning: format ‘%lu’ expects argument of type ‘long unsigned int’, but argument 5 has type ‘uid_t’ [-Wformat]",
+      "taint.c:38:2: warning: format ‘%lu’ expects argument of type ‘long unsigned int’, but argument 6 has type ‘uid_t’ [-Wformat]"
+   ],
+   "un_position" : "bottom",
+   "out_file" : null,
+   "harness3opts" : null,
+   "log_file" : null,
+   "jsnfile" : "mktest.jsn",
+   "is56x" : 0,
+   "ddir" : "/home/pi/wrk/Test-Smoke/perl-current",
+   "skip_tests" : "",
+   "skipped_tests" : [],
+   "configs" : [
+      {
+         "ccversion" : "4.6.3",
+         "cc" : "cc",
+         "duration" : 33435,
+         "started" : "2014-03-15 22:03:13 +0100",
+         "debugging" : "N",
+         "arguments" : "",
+         "results" : [
+            {
+               "failures" : [],
+               "stat_cpu_time" : 12754.07,
+               "summary" : "O",
+               "stat_tests" : "697693",
+               "statistics" : "u=191.12  s=27.87  cu=12209.07  cs=326.01  scripts=2247  tests=697693",
+               "locale" : null,
+               "io_env" : "stdio"
+            },
+            {
+               "failures" : [],
+               "stat_cpu_time" : 12183.26,
+               "summary" : "O",
+               "stat_tests" : "697687",
+               "statistics" : "u=185.31  s=27.07  cu=11673.65  cs=297.23  scripts=2249  tests=697687",
+               "locale" : null,
+               "io_env" : "perlio"
+            }
+         ]
+      }
+   ]
+}

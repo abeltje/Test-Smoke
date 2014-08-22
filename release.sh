@@ -7,29 +7,40 @@ SKIPTESTS=0
 SKIPALLTESTS=0
 NOAUTOCOMMIT=0
 TESTMODEONLY=0
+VTYPE='keep'   # keep, minor, test
 distdir=./
 UNAME=`uname -n | perl -ne '/^([^.]+)/ and print $1'`
 if [ $UNAME == "diefenbaker" ] ; then
     distdir=~/distro
+elif [ $UNAME == "ati6" ] ; then
+    distdir=~/ztreet/distro
 fi
 
 for argv ; do
     case $argv in
-        -b=*)           GITBRANCH=`echo $argv | perl -pe 's/^-b=//;'`
+        -b=*)                 GITBRANCH=`echo $argv | perl -pe 's/^-b=//;'`
             ;;
-        -d=*)           DIST_DIR=`echo $argv | perl -pe 's/^-d=//'`
+        -d=*)                 DIST_DIR=`echo $argv | perl -pe 's/^-d=//'`
             ;;
-        -skipstatus)    SKIPSTATUS=1
+        -vtype=*)             VTYPE=`echo $argv | perl -pe 's/^-vtype=//'`
             ;;
-        -skipalltests)  SKIPALLTESTS=1
+        -skipstatus)          SKIPSTATUS=1
+            ;;
+        -skipalltests)        SKIPALLTESTS=1
             ;;
         -skipxt|-skipprivate) SKIPPRIVATE=1
             ;;
-        -skiptests) SKIPTESTS=1
+        -skiptests)           SKIPTESTS=1
             ;;
-        -noautocommit)  NOAUTOCOMMIT=1
+        -noautocommit)        NOAUTOCOMMIT=1
             ;;
-        -test|-t)       TESTMODEONLY=1
+        -test|-t)             TESTMODEONLY=1
+            ;;
+        -clean|-c)
+            if [ ! -z `find . -name "Test-Smoke*.gz"` ] ; then rm -v Test-Smoke*.gz ; fi
+            echo "Restoring changed files..."
+            git checkout lib/Test/Smoke.pm Changes
+            exit
             ;;
         -*)   if test "$argv" == "-help" || test "$argv" == "-h" ; then
                   echo ""
@@ -41,10 +52,11 @@ Usage: $0 [-t] [-d=<directory]
 
     -t              Run tests only, do not make a tarball
     -d=<directory>  Taret directory for the tarball ($distdir)
-    -b=<gitbranch>  Check the current branch against <gitbranch> (master)
+    -b=<gitbranch>  Check the current branch against <gitbranch> ($GITBRANCH)
+    -vtype=<vtype>  <keep|minor|test> ($VTYPE)
     -skipstatus     Skip 'git status' (everything must be checked in)
     -skippalltests  Do not run any test
-    -skipprivate    Do not run the tests in private/
+    -skipxt         Do not run the tests in xt/
     -skiptests      Do not run the tests in t/
     -noautocommit   Do not commit version-bump and Changelog (with tag)
     -help           This message
@@ -116,7 +128,15 @@ fi
 
 # Update the version in lib/Test/Smoke.pm
 myoldversion=`perl -Ilib -MTest::Smoke -e 'print Test::Smoke->VERSION'`
-perl -i -pe '/^(?:our\s*)?\$VERSION\s*=\s*/ && s/(\d+\.\d+)(?:_(\d+))?/$2 ? sprintf("%.2f_%02d", $1, $2+1) : sprintf("%.2f", $1+0.01)/e' lib/Test/Smoke.pm
+
+if [ "$VTYPE" == "minor" ] ; then # Always make a minor and bump.
+    perl -i -pe '/^(?:our\s*)?\$VERSION\s*=\s*/ && s/(\d+\.\d+)(?:_(\d+))?/sprintf("%.2f", $1+0.01)/e' lib/Test/Smoke.pm
+elif [ "$VTYPE" == "test" ] ; then
+    perl -i -pe '/^(?:our\s*)?\$VERSION\s*=\s*/ && s/(\d+\.\d+)(?:_(\d+))?/$2 ? sprintf("%.2f_%02d", $1, $2+1) : sprintf("%.2f_01", $1)/e' lib/Test/Smoke.pm
+else # "keep"
+    perl -i -pe '/^(?:our\s*)?\$VERSION\s*=\s*/ && s/(\d+\.\d+)(?:_(\d+))?/$2 ? sprintf("%.2f_%02d", $1, $2+1) : sprintf("%.2f", $1+0.01)/e' lib/Test/Smoke.pm
+fi
+
 mynewversion=`perl -Ilib -MTest::Smoke -e 'print Test::Smoke->VERSION'`
 
 # Update the Changes file
@@ -138,7 +158,7 @@ if [ "$NOAUTOCOMMIT" != "1" ]; then
     git push --tags
 fi
 
-PERL_MM_USE_DEFAULT=y perl Makefile.PL
+AUTOMATED_TESTING=y perl Makefile.PL
 make all test
 if [ $? -gt 0 ] ; then
     echo "make test failed: $?"

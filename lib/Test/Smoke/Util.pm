@@ -404,24 +404,20 @@ read the logfile
 
 =cut
 
-sub read_logfile
-{
-    my ($self, $logfile) = @_;
+sub read_logfile {
+    my ($logfile, $verbose) = @_;
+    return if ! defined $logfile;
 
-    !$logfile && $self && $self->{log_file} and return $self->{log_file};
-
-    $logfile ||= $self->{lfile} or return undef;
     open my $fh, "<", $logfile  or return undef;
-
-    local $/;
-    my $log = <$fh>;
-    my $es;
-    eval { $es = decode( "utf-8",  $log, Encode::FB_CROAK ); };
-    $@ and  eval { $es = decode( "cp1252", $log, Encode::FB_CROAK ); };
-    $@ and  eval { $es = decode( "iso-8859-1", $log, Encode::FB_CROAK ); };
+    my $log = do { local $/; <$fh> };
     close $fh;
+
+    my $es = eval { decode("utf-8",  $log, Encode::FB_CROAK ) };
+    $@   and eval { $es = decode("cp1252",     $log, Encode::FB_CROAK ) };
+    $@   and eval { $es = decode("iso-8859-1", $log, Encode::FB_CROAK ) };
+
     warn("Couldn't decode logfile($logfile): $@") if $@;
-    return $self->{log_file} = $@ ? $log : $es;
+    return $@ ? $log : $es;
 }
 
 =head2 grepccmsg( $cc, $logfile, $verbose )
@@ -431,11 +427,11 @@ This is a port of Jarkko Hietaniemi's grepccerr script.
 =cut
 
 sub grepccmsg {
-    my( $cc, $logfile, $verbose ) = @_;
-    defined $logfile or return;
-    $cc ||= 'gcc';
+    my( $cc, $smokelog, $verbose ) = @_;
+    defined $smokelog or return;
+    $cc = 'gcc' if !$cc || $cc eq 'g++';
     my %OS2PAT = (
-        'aix' => 
+        'aix' =>
             # "foo.c", line n.c: pppp-qqq (W) ...error description...
             # "foo.c", line n.c: pppp-qqq (S) ...error description...
             '(^".+?", line \d+\.\d+: \d+-\d+ \([WS]\) .+?$)',
@@ -496,7 +492,7 @@ sub grepccmsg {
             # foo.c(:nn)?: undefined reference to ...
             '(^(?-s:.+?):(?: In function .+?:$|' .
                '(?: undefined reference to .+?$)|' .
-               '\d+(?:\:\d+)?: ' . '(?:warning:|error:|invalid) .+?$))',
+               '\d+(?:\:\d+)?: ' . '(?:warning:|error:|note:|invalid) .+?$))',
 
         'mswin32' => # MSVC(?:60)*
             # foo.c : error LNKnnn: error description
@@ -521,15 +517,10 @@ sub grepccmsg {
     my $pat = $OS2PAT{ lc $cc };
 
     my( $indx, %error ) = ( 1 );
-    my $smokelog = '';
-    my $log = read_logfile(undef,$logfile);
-    if ($log) {
-	$smokelog = $log;
-        $verbose and print "Read logfile '$logfile'\n";
+    if ($smokelog) {
         $verbose and print "Pattern($cc): /$pat/\n";
     } else {
-        $verbose and print "Skipping '$logfile' '$!'\n";
-        $error{ "Couldn't examine '$logfile' for compiler warnings." } = 1;
+        $error{ "Couldn't examine logfile for compiler warnings." } = 1;
     }
 
     while ($smokelog =~ m/$pat/mg) {
@@ -560,24 +551,17 @@ manual pages.
 =cut
 
 sub grepnonfatal {
-    my( $cc, $logfile, $verbose ) = @_;
-    defined $logfile or return;
+    my( $cc, $smokelog, $verbose ) = @_;
+    $smokelog or return;
 
     my( $indx, %error ) = ( 1 );
-    my $smokelog = "";
-    my $log = read_logfile(undef,$logfile);
-    if ($log) {
-	$smokelog = $log;
-        $verbose and print "Read logfile '$logfile'\n";
-    } else {
-        $verbose and print "Skipping '$logfile' '$!'\n";
-    }
 
     my $kf = qr{
-	# Pod::Man is not available: Can't load module Encode, dynamic loading not available in this perl.
-	(\b (\S+) (?-x: is not available: Can't load module )
-	    (\S+?) , (?-x: dynamic loading not available) )
-	}xi;
+        # Pod::Man is not available: Can't load module Encode, dynamic loading not available in this perl.
+        (\b (\S+) (?-x: is not available: Can't load module )
+            (\S+?) , (?-x: dynamic loading not available) )
+    }xi;
+
     while ($smokelog =~ m{$kf}g) {
         my $fail = $1; # $2 = "Pod::Man", $3 = "Encode"
 
@@ -842,11 +826,11 @@ sub version_from_patchlevel_h {
             return "$revision.$version$subversion";
         }
 
-        $revision   = $patchlevel =~ /^#define PERL_REVISION\s+(\d+)/m 
+        $revision   = $patchlevel =~ /^#define PERL_REVISION\s+(\d+)/m
                     ? $1 : '?';
         $version    = $patchlevel =~ /^#define PERL_VERSION\s+(\d+)/m
                     ? $1 : '?';
-        $subversion = $patchlevel =~ /^#define PERL_SUBVERSION\s+(\d+)/m 
+        $subversion = $patchlevel =~ /^#define PERL_SUBVERSION\s+(\d+)/m
                     ? $1 : '?';
     }
     return "$revision.$version.$subversion";
