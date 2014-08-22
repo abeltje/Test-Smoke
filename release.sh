@@ -12,7 +12,7 @@ distdir=./
 UNAME=`uname -n | perl -ne '/^([^.]+)/ and print $1'`
 if [ $UNAME == "diefenbaker" ] ; then
     distdir=~/distro
-elif [ $UNAME == "ati6" ] ; then
+elif [ $UNAME == "ati7" ] ; then
     distdir=~/ztreet/distro
 fi
 
