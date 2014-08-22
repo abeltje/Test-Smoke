@@ -156,6 +156,14 @@ t/etc/mageia-4/mandrake-release
 t/etc/mageia-4/mandriva-release
 t/etc/mageia-4/os-release
 t/etc/mageia-4/redhat-release
+t/etc/netbsd-6.99.24/DISTNAME
+t/etc/netbsd-6.99.24/release
+t/etc/oracle-5.9/DISTNAME
+t/etc/oracle-5.9/enterprise-release
+t/etc/oracle-5.9/issue
+t/etc/oracle-5.9/lsb-release.d
+t/etc/oracle-5.9/oracle-release
+t/etc/oracle-5.9/redhat-release
 t/etc/rhel-5.7/DISTNAME
 t/etc/rhel-5.7/issue
 t/etc/rhel-5.7/redhat-release
