@@ -1,9 +1,904 @@
-Changes on 2013-05-31 for github repository at:
+Changes on 2014-08-22 for github repository at:
   Fetch URL: ssh://git@github.com/abeltje/Test-Smoke
   Push  URL: ssh://git@github.com/abeltje/Test-Smoke
 
 Enjoy!
 
+________________________________________________________________________________
+[89d1c23] by Abe Timmerman on Fri, 22 Aug 2014 14:33:51 +0300
+
+     New machine
+
+
+M	release.sh
+________________________________________________________________________________
+[cd8f898] by abetim on Fri, 22 Aug 2014 12:20:56 +0200
+
+     Add files to the MANIFEST
+
+
+M	MANIFEST
+________________________________________________________________________________
+[e46b042] by abetim on Fri, 22 Aug 2014 12:12:03 +0200
+
+     Merge remote-tracking branch 'origin/master' into Lyon2014
+
+        Conflicts:
+        lib/Test/Smoke/Reporter.pm
+
+________________________________________________________________________________
+[bdbfb70] by abetim on Fri, 22 Aug 2014 12:06:59 +0200
+
+     Pull SysInfo.pm from master.
+
+
+M	lib/Test/Smoke/SysInfo.pm
+________________________________________________________________________________
+[a23bef7] by Abe Timmerman on Fri, 22 Aug 2014 10:32:41 +0200
+
+     Fix nonfatalmessage()
+
+
+M	lib/Test/Smoke/Reporter.pm
+________________________________________________________________________________
+[2a11896] by H.Merijn Brand - Tux on Tue, 19 Aug 2014 12:13:32 +0200
+
+     Documentation for AIX OS version
+
+        "oslevel -s" output may say the system is older than it actually is. 
+        It by default reports the most recent consistent level. If a single 
+        fileset is missing  (for example /usr/include files)  at the latest 
+        level, the old level is reported rather than the level of "most" of 
+        the system.
+
+        $ oslevel -s 6100-09-03-1415
+        $ oslevel -q -s | head -3 Known Service Packs
+        ------------------- 6100-09-03-1415 6100-09-02-1412 6100-09-01-1341
+
+        The RD seems to be important for finding filesets: 
+        bos:bos.rte.install:6.1.9.16: : :C:F:LPP Install Commands: : : : : :
+        :0:0:/:1415
+
+
+M	lib/Test/Smoke/SysInfo/AIX.pm
+________________________________________________________________________________
+[4cb77ac] by H.Merijn Brand - Tux on Tue, 19 Aug 2014 11:47:38 +0200
+
+     AIX OS version analysis updated
+
+        As of AIX 5.3/ML05, the new "oslevel -s" will output the OS version
+        in 4 parts: OS version, TL (previous ML), SP and release date
+
+
+M	lib/Test/Smoke/SysInfo/AIX.pm
+________________________________________________________________________________
+[69cdd35] by H.Merijn Brand - Tux on Mon, 28 Jul 2014 10:00:48 +0200
+
+     Typo in instruction
+
+
+M	configsmoke.pl
+________________________________________________________________________________
+[458fb63] by H.Merijn Brand on Sun, 29 Jun 2014 20:05:22 +0200
+
+     We do not want to see failing patch --version output
+
+        This is exactly why we do the test
+
+        t/patcher.t ...................... 1/41
+        /data/data/com.pdaxrom.cctools/root/cctools/bin/patch: unrecognized
+        option '--version' BusyBox v1.21.1 (2013-12-08 10:51:29 EET)
+        multi-call binary.
+
+        Usage: patch [OPTIONS] [ORIGFILE [PATCHFILE]]
+
+        	-p N	Strip N leading components from file names
+        -i DIFF	Read DIFF instead of stdin
+        -R	Reverse patch
+        -N	Ignore already applied patches
+        -E	Remove output files if they become empty
+
+
+M	t/TestLib.pm
+________________________________________________________________________________
+[b14fb0a] by H.Merijn Brand on Sun, 29 Jun 2014 19:51:42 +0200
+
+     Guard against warnings for negative repeat in pad-length
+
+        RT#96821 - "Negative repeat count does nothing" warnings 
+        https://rt.cpan.org/Ticket/Display.html?id=96821 Negative repeat
+        count does nothing at
+        /data/data/home/.cpan/build/Test-Smoke-1.6-sou720/blib/lib/Test/Smoke/Reporter.pm
+        line 1097.
+
+
+M	lib/Test/Smoke/Reporter.pm
+________________________________________________________________________________
+[8c3ec5e] by H.Merijn Brand on Sun, 29 Jun 2014 18:14:25 +0200
+
+     no else after return
+
+
+M	t/sysinfo_proc.t
+________________________________________________________________________________
+[f7eb3e8] by H.Merijn Brand on Sun, 29 Jun 2014 18:02:34 +0200
+
+     Prevent false negatives in CPU speed report
+
+
+M	t/reporter.t
+________________________________________________________________________________
+[70a02b0] by H.Merijn Brand - Tux on Wed, 25 Jun 2014 08:22:41 +0200
+
+     The newer gcc:s seem to have also "note: ..." (jhi)
+
+
+M	lib/Test/Smoke/Util.pm
+________________________________________________________________________________
+[b2b8502] by H.Merijn Brand - Tux on Tue, 24 Jun 2014 17:01:12 +0200
+
+     map g++ warnings to gcc (jhi)
+
+
+M	lib/Test/Smoke/Util.pm
+________________________________________________________________________________
+[7df761f] by H.Merijn Brand on Sat, 21 Jun 2014 11:32:23 +0200
+
+     Forgot to rename DSM dist files in MANIFEST
+
+
+M	MANIFEST
+________________________________________________________________________________
+[27d88d4] by H.Merijn Brand - Tux on Thu, 1 May 2014 13:32:59 +0200
+
+     NetBSD release info
+
+        they *only* have /etc/release I don't know if that is valid for all
+        NetBSD releases
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+M	t/etc/get-lsb.pl
+A	t/etc/netbsd-6.99.24/DISTNAME
+A	t/etc/netbsd-6.99.24/release
+________________________________________________________________________________
+[d5d1907] by H.Merijn Brand - Tux on Tue, 15 Apr 2014 11:43:11 +0200
+
+     tests for DSM called dsm, not ds213
+
+
+D	t/etc/ds213-4.2/DISTNAME
+D	t/etc/ds213-4.2/VERSION
+D	t/etc/ds213-4.3/DISTNAME
+D	t/etc/ds213-4.3/VERSION
+D	t/etc/ds213-5.0/DISTNAME
+D	t/etc/ds213-5.0/VERSION
+A	t/etc/dsm-4.2/DISTNAME
+A	t/etc/dsm-4.2/VERSION
+A	t/etc/dsm-4.3/DISTNAME
+A	t/etc/dsm-4.3/VERSION
+A	t/etc/dsm-5.0/DISTNAME
+A	t/etc/dsm-5.0/VERSION
+________________________________________________________________________________
+[0f4ce22] by H.Merijn Brand - Tux on Tue, 15 Apr 2014 11:42:04 +0200
+
+     DSM-5.0 & DSM-4.3
+
+        With DSM, dist-detection will find two files named VERSION The first
+        it finds is the newest. Previous test had the wrong stored in
+        t/etc/ds213-4.3
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+A	t/etc/ds213-4.2/DISTNAME
+A	t/etc/ds213-4.2/VERSION
+M	t/etc/ds213-4.3/DISTNAME
+M	t/etc/ds213-4.3/VERSION
+A	t/etc/ds213-5.0/DISTNAME
+A	t/etc/ds213-5.0/VERSION
+________________________________________________________________________________
+[c28ac38] by H.Merijn Brand - Tux on Tue, 15 Apr 2014 10:54:44 +0200
+
+     Oracle Linux Server
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+A	t/etc/oracle-5.9/DISTNAME
+A	t/etc/oracle-5.9/enterprise-release
+A	t/etc/oracle-5.9/issue
+A	t/etc/oracle-5.9/lsb-release.d
+A	t/etc/oracle-5.9/oracle-release
+A	t/etc/oracle-5.9/redhat-release
+________________________________________________________________________________
+[7a0b968] by H.Merijn Brand - Tux on Wed, 26 Mar 2014 22:51:08 +0100
+
+     Add sysinfo for RHEL-6.4
+
+
+M	MANIFEST
+A	t/etc/rhel-6.4/DISTNAME
+A	t/etc/rhel-6.4/issue
+A	t/etc/rhel-6.4/redhat-release
+A	t/etc/rhel-6.4/system-release
+A	t/etc/rhel-6.4/system-release-cpe
+________________________________________________________________________________
+[6a3edb0] by Abe Timmerman on Tue, 18 Mar 2014 10:07:16 +0100
+
+     Merge branch 'master' of ssh://github.com/abeltje/Test-Smoke
+
+________________________________________________________________________________
+[cca699f] by H.Merijn Brand - Tux on Tue, 18 Mar 2014 08:00:03 +0100
+
+     add RHEL server distro names
+
+
+M	MANIFEST
+M	lib/Test/Smoke/SysInfo/Linux.pm
+A	t/etc/rhel-5.7/DISTNAME
+A	t/etc/rhel-5.7/issue
+A	t/etc/rhel-5.7/redhat-release
+A	t/etc/rhel-6.2/DISTNAME
+A	t/etc/rhel-6.2/issue
+A	t/etc/rhel-6.2/redhat-release
+A	t/etc/rhel-6.2/system-release
+A	t/etc/rhel-6.2/system-release-cpe
+________________________________________________________________________________
+[6ee08e3] by H.Merijn Brand - Tux on Tue, 18 Mar 2014 07:58:35 +0100
+
+     typo in verbose tests
+
+
+M	t/distname.t
+________________________________________________________________________________
+[a83deec] by H.Merijn Brand - Tux on Tue, 18 Mar 2014 07:58:11 +0100
+
+     shorten long name
+
+        Do not use the word "release" in destro name
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+M	t/etc/centos-5.10/DISTNAME
+M	t/etc/centos-6.4/DISTNAME
+M	t/etc/scient-6.4/DISTNAME
+________________________________________________________________________________
+[1ce26c2] by Abe Timmerman on Mon, 17 Mar 2014 12:06:16 +0100
+
+     Rewrite grepnonfatal() to use the file-contents rather than the
+        file-name.
+
+
+M	lib/Test/Smoke/Reporter.pm
+M	lib/Test/Smoke/Util.pm
+M	t/grepnonfatal.t
+________________________________________________________________________________
+[797e313] by Abe Timmerman on Mon, 17 Mar 2014 11:48:05 +0100
+
+     Rewrite grepccmsg() so it takes the file-contents rather than the
+        file-name.
+
+
+M	lib/Test/Smoke/Reporter.pm
+M	lib/Test/Smoke/Util.pm
+M	t/grepccmsg.t
+________________________________________________________________________________
+[098c1e7] by Abe Timmerman on Sun, 16 Mar 2014 17:05:24 +0100
+
+     Small refectornig, read_logfile() is a utility function,
+        Test::Smoke::Reporter->get_log() is the method.
+
+
+M	lib/Test/Smoke/Reporter.pm
+M	lib/Test/Smoke/Util.pm
+________________________________________________________________________________
+[14ee9cd] by Abe Timmerman on Sun, 16 Mar 2014 17:01:26 +0100
+
+     Add -vtype switch to influence the type of version-bump you want.
+
+
+M	release.sh
+________________________________________________________________________________
+[e314372] by H.Merijn Brand - Tux on Sun, 16 Mar 2014 13:34:59 +0100
+
+     Newer Test::More requires (not use's) Scalar::Util
+
+
+M	t/15-factory-json.t
+________________________________________________________________________________
+[7bbfea4] by H.Merijn Brand - Tux on Sun, 16 Mar 2014 13:15:48 +0100
+
+     Keep the "wide character" logs
+
+        {"db_error":"Wide character in subroutine entry at
+        ../perl5/lib/perl5//JSON.pm line 171.\n","error":"Unexpected
+        error."}
+
+        => Dancer problem
+
+
+A	sandbox/loge9251c1.log
+A	sandbox/oute9251c1.jsn
+A	sandbox/oute9251c1.out
+A	sandbox/rpte9251c1.rpt
+________________________________________________________________________________
+[7809161] by Abe Timmerman on Sun, 16 Mar 2014 10:43:57 +0100
+
+     Refactor Test::Smoke::Poster->post() for easier logging.
+
+
+M	lib/Test/Smoke/Poster.pm
+M	lib/Test/Smoke/Poster/Base.pm
+M	lib/Test/Smoke/Poster/Curl.pm
+M	lib/Test/Smoke/Poster/HTTP_Lite.pm
+M	lib/Test/Smoke/Poster/HTTP_Tiny.pm
+M	lib/Test/Smoke/Poster/LWP_UserAgent.pm
+________________________________________________________________________________
+[4908743] by abeltje on Sat, 15 Mar 2014 18:02:19 +0100
+
+     Fix test for systems that have either JSON::XS or JSON::PP installed.
+
+
+M	t/15-factory-json.t
+________________________________________________________________________________
+[cc0e253] by abeltje on Sat, 15 Mar 2014 18:01:10 +0100
+
+     Fix checking of ExtUtils::MakeMaker->VERSION (some people have
+        "_-versions" installed.
+
+
+M	Makefile.PL
+________________________________________________________________________________
+[c56c2ce] by Abe Timmerman on Sat, 15 Mar 2014 17:27:07 +0100
+
+     Merge branch 'master' of ssh://github.com/abeltje/Test-Smoke
+
+________________________________________________________________________________
+[f2f9a1a] by Abe Timmerman on Sat, 15 Mar 2014 17:26:50 +0100
+
+     Fix check for usable JSON module.
+
+
+M	Makefile.PL
+________________________________________________________________________________
+[809e03b] by Abe Timmerman on Sat, 15 Mar 2014 17:25:42 +0100
+
+     Provide more (up to date) information for Windows, fix tests.
+
+
+M	README
+M	t/for_dmake.t
+M	t/for_nmake.t
+________________________________________________________________________________
+[ca0e9c9] by H.Merijn Brand - Tux on Sat, 15 Mar 2014 15:41:29 +0100
+
+     Fix synology distname detection
+
+
+M	MANIFEST
+M	lib/Test/Smoke/SysInfo/Linux.pm
+A	t/etc/ds213-4.3/DISTNAME
+A	t/etc/ds213-4.3/VERSION
+________________________________________________________________________________
+[0371d1f] by Abe Timmerman on Sat, 15 Mar 2014 13:45:16 +0100
+
+     Merge branch 'master' of ssh://github.com/abeltje/Test-Smoke
+
+________________________________________________________________________________
+[dbaa35b] by H.Merijn Brand - Tux on Sat, 15 Mar 2014 12:25:42 +0100
+
+     Add meta-info for repository
+
+        BTW hccnet.nl is long dead and gone
+
+
+M	Makefile.PL
+________________________________________________________________________________
+[a162cec] by Abe Timmerman on Sat, 15 Mar 2014 11:54:00 +0100
+
+     Merge branch 'Lyon2014'
+
+________________________________________________________________________________
+[e41ece6] by Abe Timmerman on Sat, 15 Mar 2014 11:52:57 +0100
+
+     Fix some test issues:
+         - Document constants
+         - Suppress output from git clone
+         - Add comment to a test
+
+
+M	lib/Test/Smoke/Patcher.pm
+M	lib/Test/Smoke/Syncer/Git.pm
+M	t/syncer_git.t
+________________________________________________________________________________
+[9035c73] by Abe Timmerman on Sat, 15 Mar 2014 11:50:37 +0100
+
+     Fix the JSON fallback/factory class and tests for it.
+
+
+M	MANIFEST
+M	inc/JSON.pm
+A	t/15-factory-json.t
+________________________________________________________________________________
+[6784de9] by H.Merijn Brand - Tux on Sat, 15 Mar 2014 10:18:33 +0100
+
+     disttest ubuntu 13.04
+
+
+M	MANIFEST
+A	t/etc/ubuntu-13.04/DISTNAME
+A	t/etc/ubuntu-13.04/debian_version
+A	t/etc/ubuntu-13.04/issue
+A	t/etc/ubuntu-13.04/lsb-release
+A	t/etc/ubuntu-13.04/os-release
+________________________________________________________________________________
+[4943bfd] by H.Merijn Brand - Tux on Sat, 15 Mar 2014 10:09:45 +0100
+
+     Move Johan's logs to the sandox
+
+        They currently do not add any testing value
+
+
+M	.gitignore
+M	MANIFEST.SKIP
+A	sandbox/logaf25b78.log
+A	sandbox/outaf25b78.jsn
+A	sandbox/outaf25b78.out
+A	sandbox/rptaf25b78.rpt
+D	t/logs/logaf25b78.log
+D	t/logs/outaf25b78.jsn
+D	t/logs/outaf25b78.out
+D	t/logs/rptaf25b78.rpt
+________________________________________________________________________________
+[97d133f] by H.Merijn Brand - Tux on Sat, 15 Mar 2014 10:00:25 +0100
+
+     More dist info
+
+
+M	MANIFEST
+A	t/etc/centos-5.10/DISTNAME
+A	t/etc/centos-5.10/issue
+A	t/etc/centos-5.10/lsb-release.d
+A	t/etc/centos-5.10/redhat-release
+A	t/etc/fedora-19/DISTNAME
+A	t/etc/fedora-19/fedora-release
+A	t/etc/fedora-19/issue
+A	t/etc/fedora-19/os-release
+A	t/etc/fedora-19/redhat-release
+A	t/etc/fedora-19/system-release
+A	t/etc/fedora-19/system-release-cpe
+A	t/etc/fedora-20/DISTNAME
+A	t/etc/fedora-20/fedora-release
+A	t/etc/fedora-20/issue
+A	t/etc/fedora-20/os-release
+A	t/etc/fedora-20/redhat-release
+A	t/etc/fedora-20/system-release
+A	t/etc/fedora-20/system-release-cpe
+________________________________________________________________________________
+[bc15108] by H.Merijn Brand - Tux on Fri, 14 Mar 2014 17:38:17 +0100
+
+     More distro's give even more info :)
+
+        Prefer DISTRIB_DESCRIPTION (+ DISTRIB_CODENAME) over PRETTY_NAME
+
+
+M	MANIFEST
+M	lib/Test/Smoke/SysInfo/Linux.pm
+A	t/etc/mageia-4/DISTNAME
+A	t/etc/mageia-4/issue
+A	t/etc/mageia-4/lsb-release
+A	t/etc/mageia-4/lsb-release.d
+A	t/etc/mageia-4/mageia-release
+A	t/etc/mageia-4/mandrake-release
+A	t/etc/mageia-4/mandrakelinux-release
+A	t/etc/mageia-4/mandriva-release
+A	t/etc/mageia-4/os-release
+A	t/etc/mageia-4/redhat-release
+M	t/etc/ubuntu-10.04/DISTNAME
+A	t/etc/ubuntu-11.04/DISTNAME
+A	t/etc/ubuntu-11.04/debian_version
+A	t/etc/ubuntu-11.04/issue
+A	t/etc/ubuntu-11.04/lsb-release
+M	t/etc/ubuntu-12.04/DISTNAME
+A	t/etc/ubuntu-13.10/DISTNAME
+A	t/etc/ubuntu-13.10/debian_version
+A	t/etc/ubuntu-13.10/issue
+A	t/etc/ubuntu-13.10/lsb-release
+A	t/etc/ubuntu-13.10/os-release
+________________________________________________________________________________
+[8329aba] by H.Merijn Brand - Tux on Fri, 14 Mar 2014 16:51:02 +0100
+
+     add Johan's smoke logs
+
+
+A	t/logs/logaf25b78.log
+A	t/logs/outaf25b78.jsn
+A	t/logs/outaf25b78.out
+A	t/logs/rptaf25b78.rpt
+________________________________________________________________________________
+[5415c14] by H.Merijn Brand - Tux on Fri, 14 Mar 2014 16:38:18 +0100
+
+     ease debugging (for new distros)
+
+
+M	t/distname.t
+________________________________________________________________________________
+[69ab921] by H.Merijn Brand - Tux on Fri, 14 Mar 2014 16:31:29 +0100
+
+     More distname
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+A	t/etc/scient-6.4/DISTNAME
+A	t/etc/scient-6.4/lsb-release
+A	t/etc/scient-6.4/lsb-release.d
+A	t/etc/scient-6.4/redhat-release
+A	t/etc/scient-6.4/system-release
+A	t/etc/scient-6.4/system-release-cpe
+________________________________________________________________________________
+[000e33b] by Abe Timmerman on Fri, 14 Mar 2014 16:19:31 +0100
+
+     Set the expected distnames for debian-stables.
+
+
+M	t/distname.t
+M	t/etc/debian-lenny/DISTNAME
+M	t/etc/debian-squeeze/DISTNAME
+M	t/etc/debian-wheezy/DISTNAME
+________________________________________________________________________________
+[676bfc6] by Abe Timmerman on Fri, 14 Mar 2014 15:59:55 +0100
+
+     Add distribution files for debian (for testing SysInfo::Linux)
+
+
+M	MANIFEST
+A	t/etc/debian-lenny/DISTNAME
+A	t/etc/debian-lenny/debian_version
+A	t/etc/debian-lenny/issue
+A	t/etc/debian-squeeze/DISTNAME
+A	t/etc/debian-squeeze/debian_version
+A	t/etc/debian-squeeze/issue
+A	t/etc/debian-wheezy/DISTNAME
+A	t/etc/debian-wheezy/debian_version
+A	t/etc/debian-wheezy/issue
+A	t/etc/debian-wheezy/os-release
+________________________________________________________________________________
+[a9243a5] by H.Merijn Brand - Tux on Fri, 14 Mar 2014 15:37:27 +0100
+
+     Test distribution names
+
+
+M	MANIFEST
+M	lib/Test/Smoke/SysInfo/Linux.pm
+A	t/distname.t
+A	t/etc/centos-6.4/DISTNAME
+A	t/etc/debian-jessie-sid/DISTNAME
+A	t/etc/suse-11.2/DISTNAME
+A	t/etc/suse-11.3/DISTNAME
+A	t/etc/suse-12.1/DISTNAME
+A	t/etc/suse-12.2/DISTNAME
+A	t/etc/suse-12.3/DISTNAME
+A	t/etc/suse-13.1/DISTNAME
+A	t/etc/ubuntu-10.04/DISTNAME
+A	t/etc/ubuntu-12.04/DISTNAME
+________________________________________________________________________________
+[01d1fdd] by H.Merijn Brand - Tux on Fri, 14 Mar 2014 14:27:11 +0100
+
+     etc files + collector
+
+
+A	t/etc/centos-6.4/centos-release
+A	t/etc/centos-6.4/issue
+A	t/etc/centos-6.4/redhat-release
+A	t/etc/centos-6.4/system-release
+A	t/etc/centos-6.4/system-release-cpe
+A	t/etc/debian-jessie-sid/debian_version
+A	t/etc/debian-jessie-sid/issue
+A	t/etc/debian-jessie-sid/os-release
+A	t/etc/get-lsb.pl
+A	t/etc/suse-11.2/SuSE-release
+A	t/etc/suse-11.2/issue
+A	t/etc/suse-11.3/SuSE-release
+A	t/etc/suse-11.3/issue
+A	t/etc/suse-12.1/SuSE-release
+A	t/etc/suse-12.1/issue
+A	t/etc/suse-12.1/os-release
+A	t/etc/suse-12.2/SuSE-release
+A	t/etc/suse-12.2/issue
+A	t/etc/suse-12.2/os-release
+A	t/etc/suse-12.3/SuSE-release
+A	t/etc/suse-12.3/issue
+A	t/etc/suse-12.3/lsb-release
+A	t/etc/suse-12.3/lsb-release.d
+A	t/etc/suse-12.3/os-release
+A	t/etc/suse-13.1/SuSE-release
+A	t/etc/suse-13.1/issue
+A	t/etc/suse-13.1/lsb-release
+A	t/etc/suse-13.1/lsb-release.d
+A	t/etc/suse-13.1/os-release
+A	t/etc/ubuntu-10.04/debian_version
+A	t/etc/ubuntu-10.04/issue
+A	t/etc/ubuntu-10.04/lsb-release
+A	t/etc/ubuntu-12.04/debian_version
+A	t/etc/ubuntu-12.04/issue
+A	t/etc/ubuntu-12.04/lsb-release
+A	t/etc/ubuntu-12.04/os-release
+________________________________________________________________________________
+[8af4d4a] by H.Merijn Brand - Tux on Thu, 13 Mar 2014 23:59:28 +0100
+
+     Inspect *all* release/version files on /etc
+
+        Do not skip lsb-release, but just read all known files that we know
+        to ddefine info about the OS/release. Prefer XXX=blah over XXX.
+        First come will be used.
+
+        Next step is to collect /etc folders with the files we use for this
+        on a per-release occurence
+
+
+M	lib/Test/Smoke/SysInfo.pm
+M	lib/Test/Smoke/SysInfo/Linux.pm
+M	t/sysinfo.t
+________________________________________________________________________________
+[7e72dfb] by Abe Timmerman on Thu, 13 Mar 2014 17:56:14 +0100
+
+     Merge branch 'master' into Lyon2014
+
+________________________________________________________________________________
+[668b38f] by Abe Timmerman on Thu, 13 Mar 2014 16:41:57 +0100
+
+     First day of fixes:
+           - Have Makefile.PL prompt for installation-directory
+           - Tiny hint about configsmoke
+           - Tiny hint about where to start reading
+           - only try to decode_json the content of the response
+        (Poster::LWP_UserAgent)
+           - implement and test -UWIN64 for Configure_win32()
+           - handle slashes stuff on windows for fallback.pm test
+           -
+
+
+M	Makefile.PL
+M	README
+M	lib/Test/Smoke.pm
+M	lib/Test/Smoke/Poster/LWP_UserAgent.pm
+M	lib/Test/Smoke/Util.pm
+M	t/10-fallback.t
+M	t/for_dmake.t
+M	t/for_nmake.t
+M	t/win32/Makefile
+M	t/win32/makefile.mk
+________________________________________________________________________________
+[a6ec443] by Abe Timmerman on Thu, 13 Mar 2014 10:35:11 +0100
+
+     Empty the user_note attribute if none could be found.
+
+
+M	lib/Test/Smoke/Reporter.pm
+________________________________________________________________________________
+[8bf8cc3] by Abe Timmerman on Thu, 13 Mar 2014 10:33:51 +0100
+
+     Add extra decoding layer for 'iso-8859-1' and a warning for when the
+        file could not be decoded.
+
+
+M	lib/Test/Smoke/Util.pm
+________________________________________________________________________________
+[039b182] by Abe Timmerman on Thu, 13 Mar 2014 10:30:23 +0100
+
+     Make all the http-poster modules roughly do the same thing.
+
+
+M	lib/Test/Smoke/Poster/Curl.pm
+M	lib/Test/Smoke/Poster/HTTP_Lite.pm
+M	lib/Test/Smoke/Poster/HTTP_Tiny.pm
+M	lib/Test/Smoke/Poster/LWP_UserAgent.pm
+________________________________________________________________________________
+[9278cbf] by Abe Timmerman on Thu, 13 Mar 2014 10:26:18 +0100
+
+     Create a separate flag 'regen' to (un)set RegenHeaders after patching.
+
+
+M	lib/Test/Smoke/Patcher.pm
+________________________________________________________________________________
+[c15ccf0] by Abe Timmerman on Thu, 13 Mar 2014 10:22:33 +0100
+
+     White space fixes.
+
+
+M	configsmoke.pl
+M	lib/Test/Smoke/App/RunSmoke.pm
+M	lib/Test/Smoke/App/SmokePerl.pm
+________________________________________________________________________________
+[ba42547] by Abe Timmerman on Thu, 13 Mar 2014 16:41:57 +0100
+
+     First day of fixes:
+           - Have Makefile.PL prompt for installation-directory
+           - Tiny hint about configsmoke
+           - Tiny hint about where to start reading
+           - only try to decode_json the content of the response
+        (Poster::LWP_UserAgent)
+           - implement and test -UWIN64 for Configure_win32()
+           - handle slashes stuff on windows for fallback.pm test
+           -
+
+
+M	Makefile.PL
+M	README
+M	lib/Test/Smoke.pm
+M	lib/Test/Smoke/Poster/LWP_UserAgent.pm
+M	lib/Test/Smoke/Util.pm
+M	t/10-fallback.t
+M	t/for_dmake.t
+M	t/for_nmake.t
+M	t/win32/Makefile
+M	t/win32/makefile.mk
+________________________________________________________________________________
+[f51dd4d] by H.Merijn Brand - Tux on Thu, 13 Mar 2014 16:31:12 +0100
+
+     Deal with non-fatal important messages
+
+
+M	MANIFEST
+M	lib/Test/Smoke/Reporter.pm
+M	lib/Test/Smoke/Util.pm
+M	t/grepccmsg.t
+A	t/grepnonfatal.t
+A	t/logs/linux3710g.log
+________________________________________________________________________________
+[169ef0c] by Abe Timmerman on Thu, 13 Mar 2014 10:35:11 +0100
+
+     Empty the user_note attribute if none could be found.
+
+
+M	lib/Test/Smoke/Reporter.pm
+________________________________________________________________________________
+[b0ab00d] by Abe Timmerman on Thu, 13 Mar 2014 10:33:51 +0100
+
+     Add extra decoding layer for 'iso-8859-1' and a warning for when the
+        file could not be decoded.
+
+
+M	lib/Test/Smoke/Util.pm
+________________________________________________________________________________
+[99b30b4] by Abe Timmerman on Thu, 13 Mar 2014 10:30:23 +0100
+
+     Make all the http-poster modules roughly do the same thing.
+
+
+M	lib/Test/Smoke/Poster/Curl.pm
+M	lib/Test/Smoke/Poster/HTTP_Lite.pm
+M	lib/Test/Smoke/Poster/HTTP_Tiny.pm
+M	lib/Test/Smoke/Poster/LWP_UserAgent.pm
+________________________________________________________________________________
+[8def21c] by Abe Timmerman on Thu, 13 Mar 2014 10:26:18 +0100
+
+     Create a separate flag 'regen' to (un)set RegenHeaders after patching.
+
+
+M	lib/Test/Smoke/Patcher.pm
+________________________________________________________________________________
+[065f139] by Abe Timmerman on Thu, 13 Mar 2014 10:22:33 +0100
+
+     White space fixes.
+
+
+M	configsmoke.pl
+M	lib/Test/Smoke/App/RunSmoke.pm
+M	lib/Test/Smoke/App/SmokePerl.pm
+________________________________________________________________________________
+[ffd2c30] by H.Merijn Brand - Tux on Mon, 18 Nov 2013 18:00:05 +0100
+
+     OpenSUSE 13.1 released
+
+        I dug up some old /etc/issue strings from the backup. I like lists
+        like this to be complete :)
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+________________________________________________________________________________
+[4ff1db1] by H.Merijn Brand - Tux on Mon, 11 Nov 2013 10:15:59 +0100
+
+     Sync forgotten sysinfo branch with master and added Synology
+
+        NASynology:perl/Test-Smoke-git 509 > perl -Ilib sysinfo.pl Hostname 
+                   : NASynology Number of CPU's      : 1 Processor type     
+         : armv5tel Processor description: Feroceon 88FR131 rev 1 (v5l)
+        (2000 MHz) OS and version       : linux - 2.6.32.12 [DSM 4.3-3810]
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+________________________________________________________________________________
+[66de7ab] by abeltje on Mon, 12 Aug 2013 12:17:31 +0300
+
+     Fix the autocommit.
+
+
+M	release.sh
+________________________________________________________________________________
+[2867968] by abeltje on Fri, 14 Jun 2013 23:41:13 +0200
+
+     Add the reporter applet.
+
+
+M	MANIFEST
+A	lib/Test/Smoke/App/Reporter.pm
+M	lib/Test/Smoke/App/SmokePerl.pm
+M	t/app/130-smokeperl.t
+A	t/app/150-reporter.t
+A	tsreport.pl
+________________________________________________________________________________
+[0c63435] by abeltje on Sun, 9 Jun 2013 10:45:45 +0200
+
+     make the test "pass" again.
+
+
+M	t/poster-post.t
+________________________________________________________________________________
+[a1112f2] by abeltje on Sun, 9 Jun 2013 10:34:48 +0200
+
+     Add version.
+
+
+M	inc/JSON.pm
+________________________________________________________________________________
+[24bc710] by abeltje on Sat, 8 Jun 2013 23:22:21 +0200
+
+     Make sure configsmoke.pl can find itself (and fallback.pm)
+
+
+M	configsmoke.pl
+________________________________________________________________________________
+[67b0822] by abeltje on Fri, 7 Jun 2013 17:25:27 +0200
+
+     Introduce fallback.pm (like lib.pm, but do push() not unshift()) and a
+        JSON.pm fallback wrapper for JSON::PP.
+
+
+M	MANIFEST
+M	Makefile.PL
+M	configsmoke.pl
+A	inc/JSON.pm
+M	lib/Test/Smoke/App/Base.pm
+M	lib/Test/Smoke/Mailer/Mail_Sendmail.pm
+M	lib/Test/Smoke/Poster/Curl.pm
+M	lib/Test/Smoke/Poster/HTTP_Lite.pm
+M	lib/Test/Smoke/Poster/HTTP_Tiny.pm
+M	lib/Test/Smoke/Poster/LWP_UserAgent.pm
+M	lib/Test/Smoke/Reporter.pm
+A	lib/fallback.pm
+A	t/10-fallback.t
+A	t/11-no_fallback.t
+M	t/app/120-sendreport.t
+M	t/app/130-smokeperl.t
+M	t/poster-post.t
+________________________________________________________________________________
+[f2b87f1] by Tony Cook on Sat, 1 Jun 2013 19:55:43 +1000
+
+     perl 5.18 doesn't produce "syntax error", allow for that
+
+        It instead produces:
+
+        Unknown regexp modifier "/b" at smokeme.config line 1, at end of
+        line Unknown regexp modifier "/n" at smokeme.config line 1, at end
+        of line
+
+
+M	t/app/030-app-base.t
+________________________________________________________________________________
+[24d8726] by abeltje on Fri, 31 May 2013 21:38:13 +0200
+
+     Push the tags to github.
+
+
+M	release.sh
+________________________________________________________________________________
+[4766d1a] by abeltje on Fri, 31 May 2013 21:33:39 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_02
+
+
+M	Changes
+M	lib/Test/Smoke.pm
 ________________________________________________________________________________
 [39e47ac] by abeltje on Fri, 31 May 2013 21:30:50 +0200
 
