@@ -83,7 +83,7 @@ sub _prepare_cpu_type {
         if (@cpu and $cpu[0] =~ m/^\S+\s+(\d+\.\d+[a-z]?)\s+(\S+)/) {
              my( $arch, $cpu ) = ( "PA-RISC$1", $2 );
              $self->{__cpu} = $cpu;
-             chomp( my $hw3264 = 
+             chomp( my $hw3264 =
                     `/usr/bin/getconf HW_32_64_CAPABLE 2>/dev/null` );
             (my $osvers = $self->{__os}) =~ s/.*[AB]\.//;
             $osvers =~ s{/.*}{};

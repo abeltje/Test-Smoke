@@ -792,7 +792,7 @@ sub _run_harness3_target {
             push @failed, "    $extra\n";
             next;
         }
-    
+
         my( $parse_error ) = $line =~ /^  Parse errors: (.+)/;
         if ( $parse_error ) {
             push @failed, "${file}FAILED\n";

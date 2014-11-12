@@ -49,7 +49,7 @@ Test::Smoke::App::Base - Baseclass for Test::Smoke::App::* applications.
             'sendmail' => [],
         },
     );
-  
+
   $mailer->run();
 
 =head2 Test::Smoke::App->new(%arguments)

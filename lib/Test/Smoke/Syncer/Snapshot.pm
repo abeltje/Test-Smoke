@@ -6,8 +6,8 @@ use base 'Test::Smoke::Syncer::Base';
 
 =head1 Test::Smoke::Syncer::Snapshot
 
-This handles syncing from a snapshot with the B<Net::FTP> module. 
-It should only be visible from the "parent-package" so no direct 
+This handles syncing from a snapshot with the B<Net::FTP> module.
+It should only be visible from the "parent-package" so no direct
 user-calls on this.
 
 =cut
@@ -32,7 +32,7 @@ This crates the new object. Keys for C<%args>:
 =head2 $syncer->sync( )
 
 Make a connection to the ftp server, change to the {sdir} directory.
-Get the list of snapshots (C<< /^perl@\d+\.tgz$/ >>) and determin the 
+Get the list of snapshots (C<< /^perl@\d+\.tgz$/ >>) and determin the
 highest patchlevel. Fetch this file.  Remove the current source-tree
 and extract the snapshot.
 
@@ -60,7 +60,7 @@ sub sync {
 
 =head2 $syncer->_fetch_snapshot( )
 
-C<_fetch_snapshot()> checks to see if 
+C<_fetch_snapshot()> checks to see if
 C<< S<< $self->{server} =~ m|^https?://| >> && $self->{sfile} >>.
 If so let B<LWP::Simple> do the fetching else do the FTP thing.
 
@@ -116,7 +116,7 @@ sub _fetch_snapshot {
                              "$snap_name\n as $local_snap ";
         my $l_file = $ftp->get( $snap_name, $local_snap );
         my $ok = $l_file eq $local_snap && $snap_size == -s $local_snap;
-        $ok or printf "Error in get(%s) [%d]\n", $l_file || "", 
+        $ok or printf "Error in get(%s) [%d]\n", $l_file || "",
                                                  (-s $local_snap);
         $ok && $self->{v} and print "[$snap_size] OK\n";
     }
@@ -189,7 +189,7 @@ sub __find_snap_name {
         [ $_, $p_level ]
     } grep {
     	/^perl[@#_]\d+/ &&
-    	/$snapext$/ 
+    	/$snapext$/
     } map { $verbose > 1 and print "Found snapname: $_\n"; $_ } @list )[-1];
 
     return $snap_name;
@@ -197,8 +197,8 @@ sub __find_snap_name {
 
 =head2 $syncer->_extract_snapshot( )
 
-C<_extract_snapshot()> checks the B<tar> attribute to find out how to 
-extract the snapshot. This could be an external command or the 
+C<_extract_snapshot()> checks the B<tar> attribute to find out how to
+extract the snapshot. This could be an external command or the
 B<Archive::Tar>/B<Comperss::Zlib> modules.
 
 =cut
@@ -252,7 +252,7 @@ sub _extract_snapshot {
 =head2 $syncer->_extract_with_Archive_Tar( )
 
 C<_extract_with_Archive_Tar()> uses the B<Archive::Tar> and
-B<Compress::Zlib> modules to extract the snapshot. 
+B<Compress::Zlib> modules to extract the snapshot.
 (This tested verry slow on my Linux box!)
 
 =cut
@@ -287,7 +287,7 @@ sub _extract_with_Archive_Tar {
 
 =head2 $syncer->_extract_with_external( )
 
-C<_extract_with_external()> uses C<< $self->{tar} >> as a sprintf() 
+C<_extract_with_external()> uses C<< $self->{tar} >> as a sprintf()
 template to build a command. Yes that might be dangerous!
 
 =cut
@@ -363,7 +363,7 @@ EO_UNTGZ
 =head2 $syncer->patch_a_snapshot( $patch_number )
 
 C<patch_a_snapshot()> tries to fetch all the patches between
-C<$patch_number> and C<perl-current> and apply them. 
+C<$patch_number> and C<perl-current> and apply them.
 This requires a working B<patch> program.
 
 You should pass this extra information to
@@ -392,8 +392,8 @@ sub patch_a_snapshot {
 
 =head2 $syncer->_get_patches( [$patch_number] )
 
-C<_get_patches()> sets up the FTP connection and gets all patches 
-beyond C<$patch_number>. Remember that patch numbers  do not have to be 
+C<_get_patches()> sets up the FTP connection and gets all patches
+beyond C<$patch_number>. Remember that patch numbers  do not have to be
 consecutive.
 
 =cut
@@ -460,7 +460,7 @@ and updates B<.patch> accordingly.
 
 C<@patch_list> is a list of filenames of these patches.
 
-Checks the B<unzip> attribute to find out how to unzip the patch and 
+Checks the B<unzip> attribute to find out how to unzip the patch and
 uses the B<Test::Smoke::Patcher> module to apply the patch.
 
 =cut
@@ -526,7 +526,7 @@ sub _read_patch {
 
         my $buffer;
         $content .= $buffer while $unzip->gzread( $buffer ) > 0;
- 
+
         unless ( $Compress::Zlib::gzerrno == Compress::Zlib::Z_STREAM_END() ) {
             require Carp;
             Carp::carp( "Error reading '$file': $Compress::Zlib::gzerrno" );
@@ -553,7 +553,7 @@ C<_fix_dot_patch()> updates the B<.patch> file with the new patch level.
 sub _fix_dot_patch {
     my( $self, $new_level ) = @_;
 
-    return $self->check_dot_patch 
+    return $self->check_dot_patch
         unless defined $new_level && $new_level =~ /^\d+$/;
 
     my $dot_patch = File::Spec->catfile( $self->{ddir}, '.patch' );
@@ -571,8 +571,8 @@ sub _fix_dot_patch {
 
 [This is B<not> a method]
 
-C<__get_directory_names()> retruns all directory names from 
-C<< $dir || cwd() >>. It does not look at symlinks (there should 
+C<__get_directory_names()> retruns all directory names from
+C<< $dir || cwd() >>. It does not look at symlinks (there should
 not be any in the perl source-tree).
 
 =cut

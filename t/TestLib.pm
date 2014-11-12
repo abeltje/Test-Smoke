@@ -8,7 +8,7 @@ $VERSION = '0.06';
 use Test::Smoke::Util qw( whereis );
 
 use base 'Exporter';
-@EXPORT = qw( 
+@EXPORT = qw(
     &whereis
     &find_a_patch
     &find_unzip &do_unzip
@@ -189,7 +189,7 @@ sub find_unzip {
 Returns the gunzipped contents of C<$uzfile>.
 
 =cut
-        
+
 sub do_unzip {
     my( $unzip, $uzfile ) = @_;
     return undef unless -f $uzfile;

@@ -39,7 +39,7 @@ sub sync {
 
 [ Method | private-ish ]
 
-C<_clear_source_tree()> removes B<all> files in the source-tree 
+C<_clear_source_tree()> removes B<all> files in the source-tree
 using B<File::Path::rmtree()>. (See L<File::Path> for caveats.)
 
 If C<$tree_dir> is not specified, C<< $self->{ddir} >> is used.
@@ -63,7 +63,7 @@ sub _clear_source_tree {
 
 [ Method | Private-ish ]
 
-C<_relocate_tree()> uses B<File::Copy::move()> to move the source-tree 
+C<_relocate_tree()> uses B<File::Copy::move()> to move the source-tree
 from C<< $source_dir >> to its destination (C<< $self->{ddir} >>).
 
 =cut
@@ -173,7 +173,7 @@ sub check_dot_patch {
 
 =head2 version_from_patchlevel_h( $ddir )
 
-C<version_from_patchlevel_h()> returns a "dotted" version as derived 
+C<version_from_patchlevel_h()> returns a "dotted" version as derived
 from the F<patchlevel.h> file in the distribution.
 
 =cut

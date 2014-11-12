@@ -105,7 +105,7 @@ sub continue {
 
 [ Accessor | Public ]
 
-C<config()> is an interface to the package lexical C<%CONFIG>, 
+C<config()> is an interface to the package lexical C<%CONFIG>,
 which holds all the default values for the C<new()> arguments.
 
 With the special key B<all_defaults> this returns a reference
@@ -202,7 +202,7 @@ sub _read {
         } else { # Allow intentional default_buildcfg()
             $self->{_buildcfg} = $self->default_buildcfg();
             $vmsg = "internal content";
-        } 
+        }
     }
     $vmsg .= "[continue]" if $self->{_continue};
     $self->{v} and print "Reading build configurations from $vmsg\n";
@@ -221,8 +221,8 @@ There are two types of section
 
 =item B<policy-section>
 
-A B<policy-section> contains a "target-option". This is a build option 
-that should be in the ccflags variable in the F<Policy.sh> file 
+A B<policy-section> contains a "target-option". This is a build option
+that should be in the ccflags variable in the F<Policy.sh> file
 (see also L<Test::Smoke::Policy>) and starts with a (forward) slash ('/').
 
 A B<policy-section> can have only one (1) target-option.
@@ -263,28 +263,28 @@ sub _parse {
                             join( "\n\t", @targets ),
                             "\nWill use /$targets[0]/\n" );
             }
-            push @{ $self->{_sections} }, 
-                 { policy_target => $targets[0], 
+            push @{ $self->{_sections} },
+                 { policy_target => $targets[0],
                    args => [ sort {$opts{ $a } <=> $opts{ $b }} keys %opts ] };
 
         } else { # Buildopt section
-            push @{ $self->{_sections} }, 
+            push @{ $self->{_sections} },
                  [ sort {$opts{ $a } <=> $opts{ $b }} keys %opts ];
         }
     }
     # Make sure we have at least *one* section
     push @{ $self->{_sections} }, [ "" ] unless @{ $self->{_sections} };
 
-    $self->{v} > 1 and printf "Left with %d parsed sections\n", 
+    $self->{v} > 1 and printf "Left with %d parsed sections\n",
                               scalar @{ $self->{_sections} };
     $self->_serialize;
-    $self->{v} > 1 and printf "Found %d (unfiltered) configurations\n", 
+    $self->{v} > 1 and printf "Found %d (unfiltered) configurations\n",
                               scalar @{ $self->{_list} };
 }
 
 =item $self->_serialize( )
 
-C<_serialize()> creates a list of B<Test::Smoke::BuildCFG::Config> 
+C<_serialize()> creates a list of B<Test::Smoke::BuildCFG::Config>
 objects from the parsed sections.
 
 =cut
@@ -318,7 +318,7 @@ sub __build_list {
         $config_args .= " $conf" if length $conf;
 
         my @substitutions = @$policy_subst;
-        push @substitutions, [ $policy_target, $conf ] 
+        push @substitutions, [ $policy_target, $conf ]
             if defined $policy_target;
 
         if ( @cfgs ) {
@@ -356,8 +356,8 @@ sub policy_targets {
     return unless UNIVERSAL::isa( $self->{_sections}, "ARRAY" );
 
     my @targets;
-    for my $section ( @{ $self->{_sections} } ) { 
-        next unless UNIVERSAL::isa( $section, "HASH" ) && 
+    for my $section ( @{ $self->{_sections} } ) {
+        next unless UNIVERSAL::isa( $section, "HASH" ) &&
                     $section->{policy_target};
         push @targets, $section->{policy_target};
     }
@@ -415,7 +415,7 @@ sub __get_smoked_configs {
 
 =item Test::Smoke::BuildCFG->default_buildcfg()
 
-This is a constant that returns a textversion of the default 
+This is a constant that returns a textversion of the default
 configuration.
 
 =cut
@@ -477,7 +477,7 @@ or
 
     my $bcfg = Test::Smoke::BuildCFG::Config->new;
     $bcfg->args( $args );
-    $bcfg->policy( [ -DDEBUGGING => '-DDEBUGGING' ], 
+    $bcfg->policy( [ -DDEBUGGING => '-DDEBUGGING' ],
                    [ -DPERL_COPY_ON_WRITE => '' ] );
 
     if ( $bcfg->has_arg( '-Duseithreads' ) ) {
@@ -486,7 +486,7 @@ or
 
 =head1 DESCRIPTION
 
-This is a simple object that holds both the build arguments and the 
+This is a simple object that holds both the build arguments and the
 policy substitutions. The build arguments are stored as a string and
 the policy subtitutions are stored as a list of lists. Each substitution is
 represented as a list with the two elements: the target and its substitute.
@@ -540,7 +540,7 @@ sub policy {
     my $self = shift;
 
     if ( @_ ) {
-        my @substitutions = @_ == 1 &&  ref $_[0][0] eq 'ARRAY' 
+        my @substitutions = @_ == 1 &&  ref $_[0][0] eq 'ARRAY'
             ? @{ $_[0] } : @_;
         $self->[1] = \@substitutions;
     }
@@ -568,7 +568,7 @@ sub _split_args {
 
 =item $buildcfg->has_arg( $arg[,...] )
 
-Check the build arguments hash for C<$arg>. If you specify more then one 
+Check the build arguments hash for C<$arg>. If you specify more then one
 the results will be logically ANDed!
 
 =cut
@@ -583,7 +583,7 @@ sub has_arg {
 
 =item $buildcfg->any_arg( $arg[,...] )
 
-Check the build arguments hash for C<$arg>. If you specify more then one 
+Check the build arguments hash for C<$arg>. If you specify more then one
 the results will be logically ORed!
 
 =cut
@@ -610,8 +610,8 @@ sub args_eq {
     my $self = shift;
     my $args = shift;
 
-    my $default_args = join "|", sort { 
-        length($b) <=> length($a) 
+    my $default_args = join "|", sort {
+        length($b) <=> length($a)
     } quotewords( '\s+', 1, Test::Smoke::BuildCFG->config( 'dfopts' ) );
 
     my %copy = map { ( $_ => undef ) }

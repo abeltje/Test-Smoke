@@ -29,7 +29,7 @@ Keys for C<%args>:
 
 =head2 $mailer->mail( )
 
-C<mail()> sets up the commandline and body and passes it to the 
+C<mail()> sets up the commandline and body and passes it to the
 B<sendemail> program.
 
 =cut

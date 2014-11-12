@@ -133,7 +133,7 @@ sub  new {
 
 =head2 Test::Smoke::Mailer->config( $key[, $value] )
 
-C<config()> is an interface to the package lexical C<%CONFIG>, 
+C<config()> is an interface to the package lexical C<%CONFIG>,
 which holds all the default values for the C<new()> arguments.
 
 With the special key B<all_defaults> this returns a reference
