@@ -55,9 +55,9 @@ my %options = (
 );
 
 my $myusage = "Usage: $0 [-c configname]";
-GetOptions( \%options, 
-    'config|c=s', 
-    'fetch!', 
+GetOptions( \%options,
+    'config|c=s',
+    'fetch!',
     'patch!',
     'ccp5p_onfail!',
     'mail!',
@@ -79,9 +79,9 @@ GetOptions( \%options,
     'help|h', 'man',
 ) or do_pod2usage(  verbose => 1, myusage => $myusage );
 
-$options{ man} 
+$options{ man}
     and do_pod2usage( verbose => 2, exitval => 0, myusage => $myusage );
-$options{help} 
+$options{help}
     and do_pod2usage( verbose => 1, exitval => 0, myusage => $myusage );
 
 =head1 NAME
@@ -134,7 +134,7 @@ unless ( read_config( $config_file ) ) {
     $config_file = catfile( $findbin, $options{config} );
     read_config( $config_file );
 }
-defined Test::Smoke->config_error and 
+defined Test::Smoke->config_error and
     die "!!!Please run 'configsmoke.pl'!!!\nCannot find configuration: $!";
 
 # smartsmoke doesn't make sense with nofetch (unless you say so)
@@ -190,7 +190,7 @@ sub synctree {
         # and make distclean will not see leftovers
         if ( $options{snapshot} ) {
             if ( $conf->{sync_type} eq 'snapshot' ||
-               ( $conf->{sync_type} eq 'forest'   && 
+               ( $conf->{sync_type} eq 'forest'   &&
                  $conf->{fsync} eq 'snapshot' ) ) {
 
                 $conf->{sfile} = snapshot_name();
@@ -201,12 +201,12 @@ sub synctree {
         }
         my $syncer = Test::Smoke::Syncer->new( $conf->{sync_type}, $conf );
         $now_patchlevel = $syncer->sync;
-        $conf->{v} and 
+        $conf->{v} and
             print "$conf->{ddir} now up to patchlevel $now_patchlevel\n";
     }
 
     if ( $conf->{smartsmoke} && ($was_patchlevel eq $now_patchlevel) ) {
-        $conf->{v} and 
+        $conf->{v} and
             print "Skipping this smoke, patchlevel ($was_patchlevel)" .
                   " did not change.\n";
         exit(0);
@@ -221,8 +221,8 @@ sub patchtree {
                 print "Skipping patching ($conf->{pfile})\n";
             last PATCHAPERL;
         }
-        last PATCHAPERL unless exists $conf->{patch_type} && 
-                               $conf->{patch_type} eq 'multi' && 
+        last PATCHAPERL unless exists $conf->{patch_type} &&
+                               $conf->{patch_type} eq 'multi' &&
                                $conf->{pfile};
         my $patcher = Test::Smoke::Patcher->new( $conf->{patch_type}, $conf );
         eval { $patcher->patch };
@@ -298,7 +298,7 @@ sub archiverpt {
     return unless exists $conf->{adir};
     return if $conf->{adir} eq "";
     -d $conf->{adir} or do {
-        mkpath( $conf->{adir}, 0, 0775 ) or 
+        mkpath( $conf->{adir}, 0, 0775 ) or
             die "Cannot create '$conf->{adir}': $!";
     };
 
@@ -330,7 +330,7 @@ sub archiverpt {
     SKIP_LOG: {
         my $archived_log = "log${patch_level}.log";
         last SKIP_LOG unless defined $conf->{lfile};
-        last SKIP_LOG 
+        last SKIP_LOG
             unless -f $conf->{lfile};
         copy( $conf->{lfile},
               catfile( $conf->{adir}, $archived_log ) ) or

@@ -61,7 +61,7 @@ if ( defined $opt{config} ) {
             }
         }
     } else {
-        warn "WARNING: Could not process '$opt{config}': " . 
+        warn "WARNING: Could not process '$opt{config}': " .
              Test::Smoke->config_error . "\n";
     }
 }
@@ -92,7 +92,7 @@ my $cwd = cwd();
     my $smoker   = Test::Smoke::Smoker->new( \*LOG, $conf );
 
     for my $bcfg ( $BuildCFG->configurations ) {
-        $smoker->ttylog( join "\n", 
+        $smoker->ttylog( join "\n",
                               "", "Configuration: $bcfg", "-" x 78, "" );
         $smoker->smoke( $bcfg, $Policy );
     }
