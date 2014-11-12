@@ -46,6 +46,10 @@ sub sync {
     my $redir = $self->{v} ? "" : " >" . File::Spec->devnull;
 
     my $cwd = cwd();
+    if (not -e $self->{ddir}) {
+	use File::Path qw(make_path);
+	make_path($self->{ddir});
+    }
     chdir $self->{ddir} or do {
         require Carp;
         Carp::croak( "[rsync] Cannot chdir($self->{ddir}): $!" );
