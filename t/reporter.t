@@ -50,7 +50,7 @@ for my $p (@patchlevels) {
 
     my $reporter = Test::Smoke::Reporter->new(
         ddir       => $findbin,
-        v          => $verbose, 
+        v          => $verbose,
         outfile    => '',
         showcfg    => $showcfg,
         cfg        => \( my $bcfg = <<__EOCFG__ ),
@@ -87,7 +87,7 @@ Stopped smoke at @{ [$timer += 100] }
 EORESULTS
 
     is( $reporter->{_rpt}{started}, $timer - 300, "Start time" );
-    is( $reporter->{_rpt}{patch}, $p->[0], 
+    is( $reporter->{_rpt}{patch}, $p->[0],
         "Changenumber $reporter->{_rpt}{patch}" );
     is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
         "Changedescr $reporter->{_rpt}{patchdescr}" );
@@ -110,7 +110,7 @@ __EOM__
 
     chomp( my $summary = $reporter->summary );
     is $summary, 'PASS', $summary;
-    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/",
             "hasn't the configurations";
 
 #    diag Dumper $reporter->{_counters};
@@ -121,7 +121,7 @@ for my $p (@patchlevels) {
     create_config_sh( $config_sh, version => '5.8.3' );
     my $reporter = Test::Smoke::Reporter->new(
         ddir    => $findbin,
-        v       => $verbose, 
+        v       => $verbose,
         outfile => '',
         showcfg => $showcfg,
         cfg     => \( my $bcfg = <<__EOCFG__ ),
@@ -214,10 +214,10 @@ __EOM__
     chomp( my $summary = $reporter->summary );
     is $summary, 'FAIL(F)', $summary;
     if ( $showcfg ) {
-         like $reporter->report, "/Build configurations:\n$bcfg=/", 
+         like $reporter->report, "/Build configurations:\n$bcfg=/",
               "has the configurations";
     } else {
-         unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+         unlike $reporter->report, "/Build configurations:\n$bcfg=/",
                 "hasn't the configurations";
     }
 
@@ -229,7 +229,7 @@ for my $p (@patchlevels) {
     create_config_sh( $config_sh, version => '5.9.0' );
     my $reporter = Test::Smoke::Reporter->new(
         ddir    => $findbin,
-        v       => $verbose, 
+        v       => $verbose,
         outfile => '',
     );
     isa_ok( $reporter, 'Test::Smoke::Reporter' );
@@ -320,9 +320,9 @@ unlink $config_sh;
 for my $p (@patchlevels) {
     # This test is just to test 'PASS' (and not PASS-so-far)
     #    create_config_sh( $config_sh, version => '5.00504' );
-    my $reporter = Test::Smoke::Reporter->new( 
+    my $reporter = Test::Smoke::Reporter->new(
         ddir    => $findbin,
-        v       => $verbose, 
+        v       => $verbose,
         outfile => '',
         is56x   => 1,
     );
@@ -417,10 +417,10 @@ __EOM__
     $r or diag $reporter->smoke_matrix, $reporter->bldenv_legend;
 
     if ( $showcfg ) {
-         like $reporter->report, "/Build configurations:\n$bcfg=/", 
+         like $reporter->report, "/Build configurations:\n$bcfg=/",
               "has the configurations";
     } else {
-         unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+         unlike $reporter->report, "/Build configurations:\n$bcfg=/",
                 "hasn't the configurations";
     }
 
@@ -450,7 +450,7 @@ for my $p (@patchlevels) {
 __EOCFG__
     ), "new reporter for bugtst02.out" );
     isa_ok $reporter, 'Test::Smoke::Reporter';
-    is $reporter->ccinfo, "gcc version 3.3.1 (cygming special)", 
+    is $reporter->ccinfo, "gcc version 3.3.1 (cygming special)",
        "ccinfo(bugstst02)";
 
     is( $reporter->{_rpt}{patch}, $p->[0],
@@ -476,10 +476,10 @@ __EOM__
     $r or diag $reporter->smoke_matrix, $reporter->bldenv_legend;
 
     if ( $showcfg ) {
-         like $reporter->report, "/Build configurations:\n$bcfg=/", 
+         like $reporter->report, "/Build configurations:\n$bcfg=/",
               "has the configurations";
     } else {
-         unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+         unlike $reporter->report, "/Build configurations:\n$bcfg=/",
                 "hasn't the configurations";
     }
 
@@ -559,10 +559,10 @@ __EOM__
     $r or diag $reporter->smoke_matrix, $reporter->bldenv_legend;
 
     if ( $showcfg ) {
-         like $reporter->report, "/Build configurations:\n$bcfg=/", 
+         like $reporter->report, "/Build configurations:\n$bcfg=/",
               "has the configurations";
     } else {
-         unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+         unlike $reporter->report, "/Build configurations:\n$bcfg=/",
                 "hasn't the configurations";
     }
     my @f_lines = split /\n/, $reporter->failures;
@@ -623,7 +623,7 @@ for my $p (@patchlevels) {
 
     my $reporter = Test::Smoke::Reporter->new(
         ddir       => $findbin,
-        v          => $verbose, 
+        v          => $verbose,
         outfile    => '',
         showcfg    => $showcfg,
         cfg        => \( my $bcfg = <<__EOCFG__ ),
@@ -667,7 +667,7 @@ Finished smoking $patch
 Stopped smoke at 1258883821
 EORESULTS
 
-    is( $reporter->{_rpt}{patch}, $p->[0], 
+    is( $reporter->{_rpt}{patch}, $p->[0],
         "Changenumber $reporter->{_rpt}{patch}" );
     is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
         "Changedescr $reporter->{_rpt}{patchdescr}" );
@@ -693,7 +693,7 @@ __EOM__
 
     chomp( my $summary = $reporter->summary );
     is $summary, 'FAIL(F)', $summary;
-    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/",
             "hasn't the configurations";
 
 
@@ -726,7 +726,7 @@ for my $p (@patchlevels) {
 
     my $reporter = Test::Smoke::Reporter->new(
         ddir       => $findbin,
-        v          => $verbose, 
+        v          => $verbose,
         outfile    => '',
         showcfg    => $showcfg,
         cfg        => \( my $bcfg = <<__EOCFG__ ),
@@ -764,7 +764,7 @@ Finished smoking $patch
 Stopped smoke at 1258883821
 EORESULTS
 
-    is( $reporter->{_rpt}{patch}, $p->[0], 
+    is( $reporter->{_rpt}{patch}, $p->[0],
         "Changenumber $reporter->{_rpt}{patch}" );
     is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
         "Changedescr $reporter->{_rpt}{patchdescr}" );
@@ -790,7 +790,7 @@ __EOM__
 
     chomp( my $summary = $reporter->summary );
     is $summary, 'PASS', $summary;
-    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/",
             "hasn't the configurations";
 
 
@@ -817,7 +817,7 @@ for my $p (@patchlevels) {
 
     my $reporter = Test::Smoke::Reporter->new(
         ddir       => $findbin,
-        v          => $verbose, 
+        v          => $verbose,
         outfile    => '',
         showcfg    => $showcfg,
         cfg        => \( my $bcfg = <<__EOCFG__ ),
@@ -856,7 +856,7 @@ Finished smoking $patch
 Stopped smoke at 1258883821
 EORESULTS
 
-    is( $reporter->{_rpt}{patch}, $p->[0], 
+    is( $reporter->{_rpt}{patch}, $p->[0],
         "Changenumber $reporter->{_rpt}{patch}" );
     is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
         "Changedescr $reporter->{_rpt}{patchdescr}" );
@@ -882,7 +882,7 @@ __EOM__
 
     chomp( my $summary = $reporter->summary );
     is $summary, 'FAIL(F)', $summary;
-    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/",
             "hasn't the configurations";
 
 
@@ -913,7 +913,7 @@ for my $p (@patchlevels) {
 
     my $reporter = Test::Smoke::Reporter->new(
         ddir       => $findbin,
-        v          => $verbose, 
+        v          => $verbose,
         outfile    => '',
         showcfg    => $showcfg,
         cfg        => \( my $bcfg = <<__EOCFG__ ),
@@ -950,7 +950,7 @@ Finished smoking $patch
 Stopped smoke at 1258883821
 EORESULTS
 
-    is( $reporter->{_rpt}{patch}, $p->[0], 
+    is( $reporter->{_rpt}{patch}, $p->[0],
         "Changenumber $reporter->{_rpt}{patch}" );
     is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
         "Changedescr $reporter->{_rpt}{patchdescr}" );
@@ -976,7 +976,7 @@ __EOM__
 
     chomp( my $summary = $reporter->summary );
     is $summary, 'FAIL(F)', $summary;
-    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/",
             "hasn't the configurations";
 
 
@@ -1005,7 +1005,7 @@ for my $p (@patchlevels) {
 
     my $reporter = Test::Smoke::Reporter->new(
         ddir       => $findbin,
-        v          => $verbose, 
+        v          => $verbose,
         outfile    => '',
         showcfg    => $showcfg,
         cfg        => \( my $bcfg = <<__EOCFG__ ),
@@ -1042,7 +1042,7 @@ Finished smoking $patch
 Stopped smoke at 1258883821
 EORESULTS
 
-    is( $reporter->{_rpt}{patch}, $p->[0], 
+    is( $reporter->{_rpt}{patch}, $p->[0],
         "Changenumber $reporter->{_rpt}{patch}" );
     is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
         "Changedescr $reporter->{_rpt}{patchdescr}" );
@@ -1068,7 +1068,7 @@ __EOM__
 
     chomp( my $summary = $reporter->summary );
     is $summary, 'FAIL(X)', $summary;
-    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/",
             "hasn't the configurations";
 
 
@@ -1097,7 +1097,7 @@ for my $p (@patchlevels) {
 
     my $reporter = Test::Smoke::Reporter->new(
         ddir       => $findbin,
-        v          => $verbose, 
+        v          => $verbose,
         outfile    => '',
         showcfg    => $showcfg,
         cfg        => \( my $bcfg = <<__EOCFG__ ),
@@ -1142,7 +1142,7 @@ Finished smoking $patch
 Stopped smoke at 1258883821
 EORESULTS
 
-    is( $reporter->{_rpt}{patch}, $p->[0], 
+    is( $reporter->{_rpt}{patch}, $p->[0],
         "Changenumber $reporter->{_rpt}{patch}" );
     is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
         "Changedescr $reporter->{_rpt}{patchdescr}" );
@@ -1168,7 +1168,7 @@ __EOM__
 
     chomp( my $summary = $reporter->summary );
     is $summary, 'FAIL(F)', $summary;
-    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/",
             "hasn't the configurations";
 
 
@@ -1201,7 +1201,7 @@ for my $p (@patchlevels) {
 
     my $reporter = Test::Smoke::Reporter->new(
         ddir       => $findbin,
-        v          => $verbose, 
+        v          => $verbose,
         outfile    => '',
         showcfg    => $showcfg,
         cfg        => \( my $bcfg = <<__EOCFG__ ),
@@ -1306,7 +1306,7 @@ Finished smoking $patch
 Stopped smoke at 1258883821
 EORESULTS
 
-    is( $reporter->{_rpt}{patch}, $p->[0], 
+    is( $reporter->{_rpt}{patch}, $p->[0],
         "Changenumber $reporter->{_rpt}{patch}" );
     is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
         "Changedescr $reporter->{_rpt}{patchdescr}" );
@@ -1332,7 +1332,7 @@ __EOM__
 
     chomp( my $summary = $reporter->summary );
     is $summary, 'FAIL(F)', $summary;
-    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/",
             "hasn't the configurations";
 
 
@@ -1395,7 +1395,7 @@ for my $p (@patchlevels) {
 
     my $reporter = Test::Smoke::Reporter->new(
         ddir       => $findbin,
-        v          => $verbose, 
+        v          => $verbose,
         outfile    => '',
         showcfg    => $showcfg,
         cfg        => \( my $bcfg = <<__EOCFG__ ),
@@ -1450,7 +1450,7 @@ Finished smoking $patch
 Stopped smoke at 1258883821
 EORESULTS
 
-    is( $reporter->{_rpt}{patch}, $p->[0], 
+    is( $reporter->{_rpt}{patch}, $p->[0],
         "Changenumber $reporter->{_rpt}{patch}" );
     is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
         "Changedescr $reporter->{_rpt}{patchdescr}" );
@@ -1482,7 +1482,7 @@ __EOM__
 
     chomp( my $summary = $reporter->summary );
     is $summary, 'PASS', $summary;
-    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/",
             "hasn't the configurations";
 
 
@@ -1509,7 +1509,7 @@ for my $p (@patchlevels) {
 
     my $reporter = Test::Smoke::Reporter->new(
         ddir       => $findbin,
-        v          => $verbose, 
+        v          => $verbose,
         outfile    => '',
         showcfg    => $showcfg,
         cfg        => \( my $bcfg = <<__EOCFG__ ),
@@ -1564,7 +1564,7 @@ Finished smoking $patch
 Stopped smoke at 1258883821
 EORESULTS
 
-    is( $reporter->{_rpt}{patch}, $p->[0], 
+    is( $reporter->{_rpt}{patch}, $p->[0],
         "Changenumber $reporter->{_rpt}{patch}" );
     is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
         "Changedescr $reporter->{_rpt}{patchdescr}" );
@@ -1596,7 +1596,7 @@ __EOM__
 
     chomp( my $summary = $reporter->summary );
     is $summary, 'PASS', $summary;
-    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/",
             "hasn't the configurations";
 
 
@@ -1635,7 +1635,7 @@ for my $p (@patchlevels) {
 
     my $reporter = Test::Smoke::Reporter->new(
         ddir       => $findbin,
-        v          => $verbose, 
+        v          => $verbose,
         outfile    => '',
         showcfg    => $showcfg,
         cfg        => \( my $bcfg = <<__EOCFG__ ),
@@ -1668,7 +1668,7 @@ Finished smoking $patch
 Stopped smoke at 1258883821
 EORESULTS
 
-    is( $reporter->{_rpt}{patch}, $p->[0], 
+    is( $reporter->{_rpt}{patch}, $p->[0],
         "Changenumber $reporter->{_rpt}{patch}" );
     is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
         "Changedescr $reporter->{_rpt}{patchdescr}" );
@@ -1692,7 +1692,7 @@ __EOM__
 
     chomp( my $summary = $reporter->summary );
     is $summary, 'FAIL(F)', $summary;
-    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/",
             "hasn't the configurations";
 
 
@@ -1714,7 +1714,7 @@ for my $p (@patchlevels) {
 
     my $reporter = Test::Smoke::Reporter->new(
         ddir       => $findbin,
-        v          => $verbose, 
+        v          => $verbose,
         outfile    => '',
         showcfg    => $showcfg,
         cfg        => \( my $bcfg = <<__EOCFG__ ),
@@ -1751,7 +1751,7 @@ Finished smoking $patch
 Stopped smoke at 1258883821
 EORESULTS
 
-    is( $reporter->{_rpt}{patch}, $p->[0], 
+    is( $reporter->{_rpt}{patch}, $p->[0],
         "Changenumber $reporter->{_rpt}{patch}" );
     is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
         "Changedescr $reporter->{_rpt}{patchdescr}" );
@@ -1775,7 +1775,7 @@ __EOM__
 
     chomp( my $summary = $reporter->summary );
     is $summary, 'FAIL(F)', $summary;
-    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/",
             "hasn't the configurations";
 
 
@@ -1798,7 +1798,7 @@ for my $p (@patchlevels) {
 
     my $reporter = Test::Smoke::Reporter->new(
         ddir       => $findbin,
-        v          => $verbose, 
+        v          => $verbose,
         outfile    => '',
         showcfg    => $showcfg,
         cfg        => \( my $bcfg = <<__EOCFG__ ),
@@ -1829,7 +1829,7 @@ Finished smoking $patch
 Stopped smoke at 1258883821
 EORESULTS
 
-    is( $reporter->{_rpt}{patch}, $p->[0], 
+    is( $reporter->{_rpt}{patch}, $p->[0],
         "Changenumber $reporter->{_rpt}{patch}" );
     is( $reporter->{_rpt}{patchdescr}, $p->[1] || $p->[0],
         "Changedescr $reporter->{_rpt}{patchdescr}" );
@@ -1853,7 +1853,7 @@ __EOM__
 
     chomp( my $summary = $reporter->summary );
     is $summary, 'FAIL(F)', $summary;
-    unlike $reporter->report, "/Build configurations:\n$bcfg=/", 
+    unlike $reporter->report, "/Build configurations:\n$bcfg=/",
             "hasn't the configurations";
 
 

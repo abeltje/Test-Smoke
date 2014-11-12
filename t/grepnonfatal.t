@@ -13,7 +13,7 @@ use Test::More;
 
 my @logs;
 BEGIN {
-    @logs = ( 
+    @logs = (
         { file => 'w32bcc32.log',   type => 'bcc32',
           wcnt =>  0, ecnt => 0, lcnt => 0 },
         { file => 'solaris.log',    type => 'solaris',
@@ -23,7 +23,7 @@ BEGIN {
         { file => 'hpux1111.log',   type => 'hpux',
           wcnt =>  0, ecnt => 0, lcnt => 0 },
         { file => 'mingw.log',      type => 'gcc',
-          wcnt =>  0, ecnt => 0, lcnt => 0 }, 
+          wcnt =>  0, ecnt => 0, lcnt => 0 },
         { file => 'icc102.log',     type => 'icc',
           wcnt =>  0, ecnt => 0, lcnt => 0 },
         { file => 'icc102.log',     type => 'icpc',

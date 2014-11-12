@@ -82,7 +82,7 @@ use_ok( 'Test::Smoke::Smoker' );
         \\d+(?:[,\\s-]+\\d+)*\\s+
         (?:.+\\s)?
     /xm@, "Failures report" );
-          
+
 
     select( $verbose ? \*STDOUT : \*DEVNULL ); $| = 1;
     $smoker->make_distclean;
@@ -158,7 +158,7 @@ use_ok( 'Test::Smoke::Smoker' );
         \\d+(?:[,\\s-]+\\d+)*\\s+
         (?:.+\\s)?
     /xm@, "Failures report" );
-          
+
 
     select( $verbose ? \*STDOUT : \*DEVNULL ); $| = 1;
     $smoker->make_distclean;

@@ -5,7 +5,7 @@ use File::Spec;
 
 use Test::More tests => 77;
 BEGIN { use_ok( 'Test::Smoke::Util' ); }
-END { 
+END {
     1 while unlink 'win32/smoke.mk';
     chdir File::Spec->updir
         if -d File::Spec->catdir( File::Spec->updir, 't' );
@@ -138,9 +138,9 @@ SKIP: {
     like( $makefile, '/^EMAIL\s*= abeltje\@cpan\.org\n/m', '$(EMAIL) set' );
 
     # This should now be set twice
-    like( $makefile, '/^CCTYPE\s*= MSVC60\nCCTYPE\s*= MSVC60\n/m', 
+    like( $makefile, '/^CCTYPE\s*= MSVC60\nCCTYPE\s*= MSVC60\n/m',
           '$(CCTYPE) set twice' );
-    like( $makefile, '/^\s*CCTYPE=\$\(CCTYPE\) > somewhere\n/m', 
+    like( $makefile, '/^\s*CCTYPE=\$\(CCTYPE\) > somewhere\n/m',
           "Untuched CCTYPE" );
 }
 

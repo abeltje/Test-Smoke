@@ -73,7 +73,7 @@ use_ok( 'Test::Smoke::Smoker' );
         -DDEBUGGING.*\s+
         .*smoke\/minitest\.t\.+FAILED
     /xm@, "Failures report" );
-          
+
 
     select( DEVNULL ); $| = 1;
     $smoker->make_distclean;
@@ -143,7 +143,7 @@ use_ok( 'Test::Smoke::Smoker' );
         .*smoke\/minitest\.t\.+FAILED\s+
         \d(?:[, -]\d+)*
     /xm@, "Failures report" );
-          
+
 
     select( DEVNULL ); $| = 1;
     $smoker->make_distclean;

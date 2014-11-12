@@ -158,7 +158,7 @@ use Test::Smoke::App::AppOption;
         };
         local *STDOUT;
         open STDOUT, '>', \$helptxt;
-        
+
         local @ARGV = ('--help', '--test1', 'app');
         $app = Test::Smoke::App::Test1->new(
             main_options => [

@@ -99,7 +99,7 @@ SKIP: {
     is( $dcnt, 0, "No other files have been added" );
 }
 
-END { 
+END {
     unless ( $ENV{SMOKE_DEBUG} ) {
       rmtree( $ddir );
       rmtree( $cdir );

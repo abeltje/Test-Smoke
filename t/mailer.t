@@ -46,16 +46,16 @@ SKIP: {
 
     my @config = parse_report_Config( $mailer->{body} );
     my @conf = @{ $eg_config }{qw(version plevel os osvers arch sum branch)};
-    
+
     is_deeply( \@config, \@conf, "Config..." );
     my $subj = sprintf "Smoke [%s] %s %s %s %s (%s)", @conf[6, 1, 5, 2, 3, 4];
-    
+
     is( $subject, $subj, "Read the report: $subject" );
     is( $mailer->{body}, $report, "Report read back ok" );
 
     # Now we try to test the new ccp5p_onfail stuff
     # and the new cc behaviour: no cc unless fail
-    is( $mailer->_get_cc( $subject ), '', 
+    is( $mailer->_get_cc( $subject ), '',
         "p5p not added to cc-list [--noccp5p_onfail]" );
     $mailer->{ccp5p_onfail} = 1;
     is( $mailer->_get_cc( $subject ), '',
@@ -88,7 +88,7 @@ SKIP: {
 
     my @config = parse_report_Config( $mailer->{body} );
     my @conf = @{ $fail_cfg }{qw(version plevel os osvers arch sum branch)};
-    
+
     is_deeply( \@config, \@conf, "Config..." );
     my $subj = sprintf "Smoke [%s] %s %s %s %s (%s)", @conf[6, 1, 5, 2, 3, 4];
 
@@ -96,19 +96,19 @@ SKIP: {
     is( $mailer->{body}, $report, "Report read back ok" );
 
     # Now we try to test the new ccp5p_onfail stuff
-    is( $mailer->_get_cc( $subject ), 'abeltje@test-smoke.org', 
+    is( $mailer->_get_cc( $subject ), 'abeltje@test-smoke.org',
         "p5p not added to cc-list [--noccp5p_onfail]" );
     $mailer->{ccp5p_onfail} = 1;
-    is( $mailer->_get_cc( $subject ), 
+    is( $mailer->_get_cc( $subject ),
         'abeltje@test-smoke.org, ' . $Test::Smoke::Mailer::P5P,
         "p5p got added to cc-list [--ccp5p_onfail]" );
     my $old_to = $mailer->{to};
     $mailer->{to} .= ", $Test::Smoke::Mailer::P5P";
-    is( $mailer->_get_cc( $subject ), 'abeltje@test-smoke.org', 
+    is( $mailer->_get_cc( $subject ), 'abeltje@test-smoke.org',
         "p5p not added to cc-list [already in To:]" );
     $mailer->{to} = $old_to;
     $mailer->{cc} = $Test::Smoke::Mailer::P5P;
-    is( $mailer->_get_cc( $subject ), $Test::Smoke::Mailer::P5P, 
+    is( $mailer->_get_cc( $subject ), $Test::Smoke::Mailer::P5P,
         "p5p not added to cc-list [already in Cc:]" );
     1 while unlink File::Spec->catfile( 't', 'mktest.rpt' );
 }
@@ -131,7 +131,7 @@ SKIP: {
 
     my @config = parse_report_Config( $mailer->{body} );
     my @conf = @{ $eg_config }{qw(version plevel os osvers arch sum branch)};
-    
+
     is_deeply( \@config, \@conf, "Config..." );
     my $subj = sprintf "Smoke [%s] %s %s %s %s (%s)", @conf[6, 1, 5, 2, 3, 4];
 
@@ -158,7 +158,7 @@ SKIP: {
 
     my @config = parse_report_Config( $mailer->{body} );
     my @conf = @{ $eg_config }{qw(version plevel os osvers arch sum branch)};
-    
+
     is_deeply( \@config, \@conf, "Config..." );
     my $subj = sprintf "Smoke [%s] %s %s %s %s (%s)", @conf[6, 1, 5, 2, 3, 4];
 
@@ -187,7 +187,7 @@ SKIP: {
 
     my @config = parse_report_Config( $mailer->{body} );
     my @conf = @{ $eg_config }{qw(version plevel os osvers arch sum branch)};
-    
+
     is_deeply( \@config, \@conf, "Config..." );
     my $subj = sprintf "Smoke [%s] %s %s %s %s (%s)", @conf[6, 1, 5, 2, 3, 4];
 

@@ -58,7 +58,7 @@ for my $test ( @tests ) {
     while (<$tst>) {
         chomp;
         skip_filter($_) and next;
-        m/^u=.*tests=/ and next;        
+        m/^u=.*tests=/ and next;
         (my $tname = $_) =~ s/\s*\.+.*/.t/;
         push @nok, $tname;
     }

@@ -12,7 +12,7 @@ use TestLib;
 use File::Copy;
 
 use Test::More tests => 15;
-BEGIN { 
+BEGIN {
     use_ok 'Test::Smoke::Util', qw( get_local_patches set_local_patch );
 }
 my $verbose = $ENV{SMOKE_VERBOSE} || 0;

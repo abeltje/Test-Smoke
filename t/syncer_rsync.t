@@ -31,41 +31,41 @@ my %df_rsync = (
 }
 {
     my %rsync = %df_rsync;
-    $rsync{source} = 'ftp.linux.ActiveState.com::perl-current'; 
+    $rsync{source} = 'ftp.linux.ActiveState.com::perl-current';
     $rsync{ddir}   = File::Spec->canonpath(abs_path(cwd()));
-    my $sync = eval { 
-        Test::Smoke::Syncer->new( 'rsync', 
+    my $sync = eval {
+        Test::Smoke::Syncer->new( 'rsync',
             source => $rsync{source},
             -ddir  => $rsync{ddir},
             nonsence => 'who cares',
-        ) 
+        )
     };
     ok( !$@, "No error on type 'rsync'" );
     isa_ok( $sync, 'Test::Smoke::Syncer::Rsync' );
     for my $field (sort keys %rsync ) {
         ok( exists $sync->{ $field }, "{$field} exists" ) or
             skip "expected {$field} but is not there", 1;
-        is( $sync->{ $field }, $rsync{ $field }, 
+        is( $sync->{ $field }, $rsync{ $field },
             "{$field} value $sync->{ $field }" );
     }
 }
 {
     my %rsync = %df_rsync;
-    $rsync{source} = 'ftp.linux.ActiveState.com::perl-current'; 
+    $rsync{source} = 'ftp.linux.ActiveState.com::perl-current';
     $rsync{ddir}   = File::Spec->canonpath(abs_path(cwd()));
-    my $sync = eval { 
+    my $sync = eval {
         Test::Smoke::Syncer->new( rsync => {
             source => $rsync{source},
             -ddir  => $rsync{ddir},
             nonsense => 'who cares',
-        }) 
+        })
     };
     ok( !$@, "No errror when options passed as hashref" );
     isa_ok( $sync, 'Test::Smoke::Syncer::Rsync' );
     for my $field (sort keys %rsync ) {
         ok( exists $sync->{ $field }, "{$field} exists" ) or
             skip "expected {$field} but is not there", 1;
-        is( $sync->{ $field }, $rsync{ $field }, 
+        is( $sync->{ $field }, $rsync{ $field },
             "{$field} value $sync->{ $field }" );
     }
 }

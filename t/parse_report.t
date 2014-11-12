@@ -57,7 +57,7 @@ __EOR__
 
     my %conf;
 
-    @conf{qw( version plevel os osvers arch sum ) } = 
+    @conf{qw( version plevel os osvers arch sum ) } =
         parse_report_Config( $report );
     $conf{ccvers} = $ccvers if $eg->{ccvers};
     $conf{cpu} = $cpu if $eg->{cpu};

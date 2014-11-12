@@ -29,11 +29,11 @@ open LOG, "> " . devnull();
     my $smoker = Test::Smoke::Smoker->new( \*LOG, %config );
     isa_ok( $smoker, 'Test::Smoke::Smoker' );
 
-    my $ref = mkargs( \%config, 
+    my $ref = mkargs( \%config,
                       Test::Smoke::Smoker->config( 'all_defaults' ) );
     $ref->{logfh} = \*LOG;
 
-    is_deeply( $smoker, $ref, "Check arguments" );   
+    is_deeply( $smoker, $ref, "Check arguments" );
 
     close LOG;
 }
@@ -925,7 +925,7 @@ SKIP: {
     $ok &&= grep $files =~ /^\Q$_\E/m => @libext;
     ok $ok, "files back in MANIFEST";
 
-    1 while unlink $skip_tests;    
+    1 while unlink $skip_tests;
 }
     rmtree $dst, $verbose;
 }
@@ -935,7 +935,7 @@ sub mkargs {
 
     my %mkargs = map {
 
-        my $value = exists $set->{ $_ } 
+        my $value = exists $set->{ $_ }
             ? $set->{ $_ } : Test::Smoke::Smoker->config( $_ );
         ( $_ => $value )
     } keys %$default;

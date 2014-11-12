@@ -122,7 +122,7 @@ It currently has two real options:
 
 This option will make sure that C<< S<make miniperl> >> will succeed,
 but C<make> (to create the F<perl> binary) will not succeed. This
-option enables us to test this situation and (later) check that 
+option enables us to test this situation and (later) check that
 C<< S<make minitest> >> is called instead of C<< S<make test> >>.
 
 =item B<--cc [path to cc]>

@@ -11,7 +11,7 @@ use Data::Dumper;
 # For this there is the 't/ftppub' directory with:
 #     't/ftppub/perl-current' contains a source-tree
 #     't/ftppub/perl-current-diffs' contains a few fake diffs
-# Now that we have controlable FTP (if you have Net::FTP), 
+# Now that we have controlable FTP (if you have Net::FTP),
 # we can concentrate on doing the untargz and patch stuff
 #
 #####
@@ -33,7 +33,7 @@ use Test::More;
 
 BEGIN {
     eval { require Net::FTP; };
-    $@ and plan( skip_all => "No 'Net::FTP' found!\n" . 
+    $@ and plan( skip_all => "No 'Net::FTP' found!\n" .
                              "!!!You will not be able to smoke from " .
                              "FTP-archive without it!!!" );
     plan tests => 12;
@@ -51,7 +51,7 @@ sub Net::FTP::new {
 sub Net::FTP::login { return 1 }
 sub Net::FTP::binary { return 1 }
 sub Net::FTP::quit {return 1 }
-sub Net::FTP::cwd { 
+sub Net::FTP::cwd {
     my $self = shift;
     my $dir = shift;
     if ( $dir eq '/' ) {
@@ -67,7 +67,7 @@ sub Net::FTP::pwd {
     my $self = shift;
     File::Spec->abs2rel( $self->{cwd}, $self->{root} );
 }
-sub Net::FTP::ls { 
+sub Net::FTP::ls {
     my $self = shift;
     local *DLDIR;
     opendir DLDIR, $self->{cwd} or return ( );
@@ -107,7 +107,7 @@ sub Net::FTP::dir {
 #                                                 $info[7], $lsldate, $_;
         sprintf "%s  1 %-8s %-8s %10d %12s %s", $lslmode, 'ftp', 'ftp',
                                                  $info[7], $lsldate, $_;
-    } @list; 
+    } @list;
 }
 sub Net::FTP::size {
     my $self = shift;
@@ -166,7 +166,7 @@ require_ok 'Test::Smoke::SourceTree';
     {
         my $tree = Test::Smoke::SourceTree->new( $stree );
         my $mc = $tree->check_MANIFEST;
-    
+
         is scalar keys %$mc, 0, "No files in manicheck" or
             diag Dumper $mc;
     }
@@ -184,7 +184,7 @@ require_ok 'Test::Smoke::SourceTree';
     {
         my $tree = Test::Smoke::SourceTree->new( $stree );
         my $mc = $tree->check_MANIFEST;
-    
+
         is scalar keys %$mc, 0, "No files in manicheck (resync)" or
             diag Dumper $mc;
     }
@@ -194,6 +194,6 @@ require_ok 'Test::Smoke::SourceTree';
     $FTP_FAIL = 1;
     $plevel = $sync->sync;
     is $plevel, undef, "no sync on failing FTP";
-    
+
     ok rmtree( $stree ), "Clean-up";
 }
