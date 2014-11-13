@@ -1,7 +1,6 @@
 package Test::Smoke::Util;
 use strict;
 
-# $Id$
 use vars qw( $VERSION @EXPORT @EXPORT_OK $NOCASE );
 $VERSION = '0.58';
 

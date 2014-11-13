@@ -2,8 +2,6 @@
 use strict;
 use Data::Dumper;
 
-# $Id$
-
 use Test::More;
 my @tests;
 BEGIN {

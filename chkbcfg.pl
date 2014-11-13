@@ -1,7 +1,6 @@
 #! /usr/bin/perl -w
 use strict;
 
-# $Id$
 use vars qw ( $VERSION );
 $VERSION = '0.002';
 

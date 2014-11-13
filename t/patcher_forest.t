@@ -1,8 +1,6 @@
 #! /usr/bin/perl -w
 use strict;
 
-# $Id$
-
 use File::Spec::Functions;
 my $findbin;
 use File::Basename;

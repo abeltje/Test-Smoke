@@ -7,7 +7,6 @@ use File::Path;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
 use Test::Smoke::Util qw( clean_filename time_in_hhmm );
 
-# $Id$
 use vars qw( $VERSION );
 $VERSION = '0.011';
 

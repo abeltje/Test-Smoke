@@ -3,7 +3,6 @@ use strict;
 $| = 1;
 # BEGIN { die "You must be on MSWin32 for this!\n" unless $^O eq 'MSWin32' }
 
-# $Id$
 use vars qw( $VERSION );
 $VERSION = '0.007';
 

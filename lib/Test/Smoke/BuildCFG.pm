@@ -1,7 +1,6 @@
 package Test::Smoke::BuildCFG;
 use strict;
 
-# $Id$
 use vars qw( $VERSION );
 $VERSION = '0.009';
 

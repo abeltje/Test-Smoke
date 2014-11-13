@@ -5,7 +5,6 @@ eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}'
 use strict;
 $|=1;
 
-# $Id$
 use vars qw( $VERSION );
 $VERSION = Test::Smoke->VERSION;
 

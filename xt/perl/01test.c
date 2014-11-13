@@ -1,7 +1,5 @@
 /* ********************************************************************** *
  *                                                                        *
- * $Id$                                                                   *
- *                                                                        *
  * 01test.c is a stupid program that can be compiled in three ways:       *
  *                                                                        *
  *   1) no defines (perl)                                                 *

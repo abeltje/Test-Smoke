@@ -1,8 +1,6 @@
 #! /usr/bin/perl -w
 use strict;
 
-# $Id$
-
 use Test::More tests => 81;
 my $verbose = 0;
 

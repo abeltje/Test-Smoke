@@ -20,7 +20,6 @@ use fallback 'inc', 'lib', catdir($findbin, 'inc');
 use Test::Smoke::SysInfo;
 use Test::Smoke::Util qw(do_pod2usage whereis);
 
-# $Id$
 use vars qw($VERSION $conf);
 $VERSION = '0.082';
 

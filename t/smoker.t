@@ -2,7 +2,6 @@
 use strict;
 use Data::Dumper;
 
-# $Id$
 use File::Spec::Functions qw( :DEFAULT devnull abs2rel rel2abs );
 use Cwd;
 

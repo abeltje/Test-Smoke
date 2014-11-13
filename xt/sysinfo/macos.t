@@ -2,8 +2,6 @@
 use warnings;
 use strict;
 
-# $Id$
-
 # We need at least 5.9.5 for the readpipe() override
 my $not595;
 BEGIN { eval qq/use 5.009005/; $not595 = $@ }

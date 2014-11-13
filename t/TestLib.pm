@@ -1,7 +1,6 @@
 package TestLib;
 use strict;
 
-# $Id$
 use vars qw( $VERSION @EXPORT );
 $VERSION = '0.06';
 

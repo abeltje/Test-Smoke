@@ -2,8 +2,6 @@
 use strict;
 use Data::Dumper;
 
-# $Id$
-
 my $findbin;
 use File::Basename;
 BEGIN { $findbin = dirname $0; }

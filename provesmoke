@@ -2,7 +2,6 @@
 use warnings FATAL => 'all';
 use strict;
 
-# $Id$
 use Test::More;
 
 use Getopt::Long;

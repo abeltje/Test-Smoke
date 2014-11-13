@@ -1,6 +1,5 @@
 # This file is a fixed makefile for dmake
 #      Makefile.PL
-#      $Id$
 #
 OPTIONS   =
 CCTYPE    = GCC

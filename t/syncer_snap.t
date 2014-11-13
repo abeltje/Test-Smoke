@@ -1,8 +1,6 @@
 #! /usr/bin/perl -w
 use strict;
 
-# $Id$
-
 use Data::Dumper;
 use Test::More tests => 3;
 
