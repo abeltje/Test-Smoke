@@ -364,10 +364,6 @@ sub snapshot_name {
 
 L<README>, L<FAQ>, L<configsmoke.pl>, L<mktest.pl>, L<mkovz.pl>
 
-=head1 REVISION
-
-$Id$
-
 =head1 COPYRIGHT
 
 (c) 2002-2003, All rights reserved.

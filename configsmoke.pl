@@ -2762,12 +2762,6 @@ sub _perl_numeric_version {
 
 Schedule, logfile optional
 
-=head1 REVISION
-
-In case I forget to update the C<$VERSION>:
-
-    $Id$
-
 =head1 COPYRIGHT
 
 (c) 2002-2003, All rights reserved.

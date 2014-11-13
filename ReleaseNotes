@@ -39,10 +39,6 @@ I changed my mind about version numbering. I'll just use X.YY from now on.
 
 =back
 
-=head1 REVISION
-
-$Id$
-
 =head1 COPYRIGHT
 
 (c) MMII-MMVIII, Abe Timmerman <abeltje@cpan.org> All rights reserved.
