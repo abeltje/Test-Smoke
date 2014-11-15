@@ -6,9 +6,9 @@ FAQ - Test::Smoke frequently asked questions
 
 =head2 What is Test::Smoke?
 
-B<Test::Smoke> is the symbolic name for set of scripts and modules
-that try to run the perl core tests on as many configurations as
-possible and combine the results into an easy to read report.
+B<Test::Smoke> is the symbolic name for a set of scripts and modules that
+try to run the perl core tests on as many configurations as possible and
+combine the results into an easy to read report.
 
 The basic cycle looks like:
 
