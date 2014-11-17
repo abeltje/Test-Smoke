@@ -210,7 +210,7 @@ sub check_for_json {
             return $json;
         }
         else {
-            $opt{v} and print "Not reuising existing JSON, regenerate\n";
+            $opt{v} and print "Not reusing existing JSON, regenerate\n";
         }
     }
     else {
