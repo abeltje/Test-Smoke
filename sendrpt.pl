@@ -214,7 +214,7 @@ sub check_for_json {
         }
     }
     else {
-        $opt{v} and print "No json found in [$opt{ddir}]\n";
+        $opt{v} and print "No JSON found in [$opt{ddir}]\n";
     }
 
     my $reporter = Test::Smoke::Reporter->new($conf);
