@@ -86,10 +86,19 @@ Run all the parts:
 sub run {
     my $self = shift;
 
+    $self->log_debug("==> Starting synctree");
     $self->synctree->run();
+
+    $self->log_debug("==> Starting runsmoke");
     $self->runsmoke->run();
+
+    $self->log_debug("==> Starting reporter");
     $self->reporter->run();
+
+    $self->log_debug("==> Starting sendreport");
     $self->sendreport->run();
+
+    $self->log_debug("==> Starting archiver");
     $self->archiver->run();
 }
 

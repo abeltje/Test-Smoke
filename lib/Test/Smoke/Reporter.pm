@@ -20,6 +20,7 @@ use Test::Smoke::Util qw(
     time_in_hhmm get_local_patches
 );
 use Text::ParseWords;
+use Test::Smoke::LogMixin;
 
 use constant USERNOTE_ON_TOP => 'top';
 
@@ -92,6 +93,20 @@ sub new {
     $fields{_conf_args} = { %args_raw };
     my $self = bless \%fields, $class;
     $self->read_parse(  );
+}
+
+=head2 $reporter->v()
+
+Accessor to the C<v> attribute.
+
+=cut
+
+sub v {
+    my $self = shift;
+
+    $self->{v} = shift if @_;
+
+    $self->{v};
 }
 
 =head2 Test::Smoke::Reporter->config( $key[, $value] )
@@ -758,7 +773,7 @@ sub write_to_file {
     return unless defined $self->{_outfile};
     my( $name ) = shift || ( catfile $self->{ddir}, $self->{rptfile} );
 
-    $self->{v} and print "Writing report to '$name':";
+    $self->log_info("Writing report to '%s'", $name);
     local *RPT;
     open RPT, "> $name" or do {
         require Carp;
@@ -771,7 +786,7 @@ sub write_to_file {
         Carp::carp( "Error writing to '$name': $!" );
         return;
     };
-    $self->{v} and print " OK\n";
+    $self->log_info("'%s' written OK", $name);
     return 1;
 }
 
@@ -1036,13 +1051,14 @@ sub ccmessages {
 
     if (!$self->{_ccmessages_}) {
 
-        $self->{v} and print "Looking for cc messages: '$cc'\n";
+        $self->log_info("Looking for cc messages: '%s'", $cc);
         $self->{_ccmessages_} = grepccmsg(
             $cc,
             $self->get_logfile(),
             $self->{v}
         ) || [];
     }
+    $self->log_debug("Finished grepping for %s", $cc);
 
     return @{$self->{_ccmessages_}} if wantarray;
     return "" if !$self->{_ccmessages_};

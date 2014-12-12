@@ -41,6 +41,7 @@ sub run {
 
     $self->log_debug("[Reporter] write_to_file()");
     $self->reporter->write_to_file();
+
     $self->log_debug("[Reporter] smokedb_data()");
     $self->reporter->smokedb_data();
 
