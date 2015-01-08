@@ -154,6 +154,8 @@ sub prepare_os {
             $distro = $rel[0];
             $distro =~ s/ *release//;
             $distro =~ s/Red Hat Enterprise Linux/RHEL/; # Too long for subject
+            # RHEL ES 4 (Nahant Update 2) => RHEL Server 4.2 (Nahant)
+            $distro =~ s/^RHEL ES (\d+)\s+(.*)\s+Update\s+(\d+)/RHEL Server $1.$3 $2/;
         }
         elsif ( my @lnx  = grep m{\bLinux\b}i => @key ) {
             $distro = $lnx[0];
