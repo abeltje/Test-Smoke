@@ -42,19 +42,19 @@ sub _file_info {
     my ($file, $os) = @_;
     open(my $fh, "< $file") or return;
     while (<$fh>) {
-	m/^\s*[;#]/ and next;
-	chomp;
-	m/\S/ or next;
-	s/^\s+//;
-	s/\s+$//;
-	if (my ($k, $v) = (m/^(.*\S)\s*=\s*(\S.*)$/)) {
-	    # Having a value prevails over being defined
-	    defined $os->{$k} and next;
-	    $v =~ s/^"\s*(.*?)\s*"$/$1/;
-	    $os->{$k} = $v;
-	    next;
-	}
-	exists $os->{$_} or $os->{$_} = undef;
+        m/^\s*[;#]/ and next;
+        chomp;
+        m/\S/ or next;
+        s/^\s+//;
+        s/\s+$//;
+        if (my ($k, $v) = (m/^(.*\S)\s*=\s*(\S.*)$/)) {
+            # Having a value prevails over being defined
+            defined $os->{$k} and next;
+            $v =~ s/^"\s*(.*?)\s*"$/$1/;
+            $os->{$k} = $v;
+            next;
+        }
+        exists $os->{$_} or $os->{$_} = undef;
     }
     close $fh;
 }
@@ -86,9 +86,9 @@ sub prepare_os {
     }
 
     if ( $os{DISTRIB_DESCRIPTION} ) {
-	$distro = $os{DISTRIB_DESCRIPTION};
-	$os{DISTRIB_CODENAME} and
-	    $distro .= " ($os{DISTRIB_CODENAME})";
+        $distro = $os{DISTRIB_DESCRIPTION};
+        $os{DISTRIB_CODENAME} and
+            $distro .= " ($os{DISTRIB_CODENAME})";
     }
     elsif ( $os{PRETTY_NAME} ) {
         $distro = $os{PRETTY_NAME};          # "openSUSE 12.1 (Asparagus) (x86_64)"
@@ -114,8 +114,8 @@ sub prepare_os {
         $os{SMALLFIXNUMBER} and $distro .= qq{-$os{SMALLFIXNUMBER}};
     }
     elsif ( $os{DISTRIBVER} && exists $os{NETBSDSRCDIR} ) {
-	(my $dv = $os{DISTRIBVER}) =~ tr{ ''"";}{}d;
-	$distro .= qq{ NetBSD $dv};
+        (my $dv = $os{DISTRIBVER}) =~ tr{ ''"";}{}d;
+        $distro .= qq{ NetBSD $dv};
     }
     else {
         # /etc/issue:
