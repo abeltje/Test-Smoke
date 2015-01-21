@@ -92,6 +92,13 @@ sub prepare_os {
     }
     elsif ( $os{PRETTY_NAME} ) {
         $distro = $os{PRETTY_NAME};          # "openSUSE 12.1 (Asparagus) (x86_64)"
+        if (my $vid = $os{VERSION_ID}) {     # wheezy 7 => 7.2
+            if (my @rv = grep m{^$vid\.} => sort keys %os) {
+                # from /etc/debian_version
+                $rv[0] =~ m/^[0-9]+\.\w+$/ and
+                    $distro =~ s/\b$vid\b/$rv[0]/;
+            }
+        }
         $distro =~ s/\)\s+\(\w+\)\s*$/)/;    # remove architectural part
     }
     elsif ( $os{VERSION} && $os{NAME} ) {
