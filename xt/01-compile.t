@@ -7,7 +7,7 @@ use File::Find;
 my @to_compile;
 BEGIN {
     @to_compile = qw( smokeperl.pl runsmoke.pl
-                   synctree.pl patchtree.pl mailrpt.pl 
+                   synctree.pl patchtree.pl mailrpt.pl
                    archiverpt.pl smokestatus.pl W32Configure.pl
                    Makefile.PL configsmoke.pl chkbcfg.pl sysinfo.pl );
 

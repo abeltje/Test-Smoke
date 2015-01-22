@@ -311,7 +311,7 @@ sub sendmail {
     if (/^[45]/ or !$_) {
         return fail("HELO error ($_)")
     }
-    
+
     print S "mail from: <$fromaddr>\015\012";
     chomp($_ = <S>);
     if (/^[45]/ or !$_) {
@@ -423,7 +423,7 @@ Copy Sendmail.pm to Mail/ in your Perl lib directory.
 
 ppm install --location=http://alma.ch/perl/ppm Mail-Sendmail
 
-But this way you don't get a chance to have a look at other files (Changes, 
+But this way you don't get a chance to have a look at other files (Changes,
 Todo, test.pl, ...) and PPM doesn't run the test script (test.pl).
 
 =back
@@ -435,7 +435,7 @@ Install MIME::QuotedPrint. This is not required but strongly recommended.
 
 =head1 FEATURES
 
-Automatic time zone detection, Date: header, MIME quoted-printable encoding 
+Automatic time zone detection, Date: header, MIME quoted-printable encoding
 (if MIME::QuotedPrint installed), all of which can be overridden.
 
 Internal Bcc: and Cc: support (even on broken servers)
@@ -456,7 +456,7 @@ Doesn't work on OpenVMS.
 
 Headers are not encoded, even if they have accented characters.
 
-Since the whole message is in memory (twice!), it's not suitable for 
+Since the whole message is in memory (twice!), it's not suitable for
 sending very big attached files.
 
 The SMTP server has to be set manually in Sendmail.pm or in your script,
@@ -660,9 +660,9 @@ The package version number (you can not import this one)
 
 =head2 Configuration variables from previous versions
 
-The following global variables were used in version 0.74 for configuration. 
-They should still work, but will not in a future version (unless you 
-complain loudly). Please use I<%mailcfg> if you need to access the 
+The following global variables were used in version 0.74 for configuration.
+They should still work, but will not in a future version (unless you
+complain loudly). Please use I<%mailcfg> if you need to access the
 configuration from your scripts.
 
 =over 4
@@ -728,13 +728,13 @@ Milivoj Ivkovic mi@alma.ch or ivkovic@bluewin.ch
 
 =head1 NOTES
 
-MIME::QuotedPrint is used by default on every message if available. It 
-allows reliable sending of accented characters, and also takes care of 
-too long lines (which can happen in HTML mails). It is available in the 
-MIME-Base64 package at http://www.perl.com/CPAN/modules/by-module/MIME/ or 
+MIME::QuotedPrint is used by default on every message if available. It
+allows reliable sending of accented characters, and also takes care of
+too long lines (which can happen in HTML mails). It is available in the
+MIME-Base64 package at http://www.perl.com/CPAN/modules/by-module/MIME/ or
 through PPM.
 
-Look at http://alma.ch/perl/Mail-Sendmail-FAQ.htm for additional info 
+Look at http://alma.ch/perl/Mail-Sendmail-FAQ.htm for additional info
 (CGI, examples of sending attachments, HTML mail etc...)
 
 You can use it freely. (Someone complained this is too vague. So, more

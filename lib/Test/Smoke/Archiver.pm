@@ -88,7 +88,7 @@ sub archive_files {
     if (!$self->adir) {
         return $self->log_info("Skipping archive: No archive directory set.");
     }
-    
+
     if (!-d $self->adir) {
         mkpath($self->adir, ($self->v > 1), 0775)
             or die "Cannot mkpath(@{[$self->adir]}): $!";

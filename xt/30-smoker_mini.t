@@ -60,7 +60,7 @@ use_ok( 'Test::Smoke::Smoker' );
 
         $smoker->log( "\nConfiguration: $bcfg\n", '-' x 78, "\n" );
         my $stat = $smoker->make_;
-        is( $stat, Test::Smoke::Smoker::BUILD_MINIPERL(), 
+        is( $stat, Test::Smoke::Smoker::BUILD_MINIPERL(),
             "Could not build anything but 'miniperl'" );
         $smoker->log( "Unable to make anything but miniperl",
                       " in this configuration\n" );
@@ -84,7 +84,7 @@ use_ok( 'Test::Smoke::Smoker' );
         -DDEBUGGING \\s+
         t[\\\\/]smoke[\\\\/]minitest\\.+FAILED\\ at\\ test\\ 2
     /xm@, "Failures report" );
-          
+
 
     select( DEVNULL ); $| = 1;
     $smoker->make_distclean;

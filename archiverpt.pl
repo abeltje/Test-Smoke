@@ -105,7 +105,7 @@ if ( defined $opt{config} ) {
             }
         }
     } else {
-        warn "WARNING: Could not process '$opt{config}': " . 
+        warn "WARNING: Could not process '$opt{config}': " .
              Test::Smoke->config_error . "\n";
     }
 }

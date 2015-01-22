@@ -26,7 +26,7 @@ my $verbose = exists $ENV{SMOKE_VERBOSE} ? $ENV{SMOKE_VERBOSE} : 0;
 
     # Check that the default values are returned
     for my $attr (qw( pfile patchbin popts v )) {
-        is( $patcher->{ $attr }, $df_vals->{ $attr }, 
+        is( $patcher->{ $attr }, $df_vals->{ $attr },
             "'$attr' attribute" );
     }
 
@@ -73,7 +73,7 @@ SKIP: { # test Test::Smoke::Patcher->patch_single()
 
     my $reverse1 = File::Spec->catfile( File::Spec->updir, 'test.patch' );
     local *MYPATCH;
-    open MYPATCH, "> $testpatch" or 
+    open MYPATCH, "> $testpatch" or
         skip "Cannont create '$testpatch': $!", $to_skip -= 4;
     binmode MYPATCH;
     print MYPATCH $p_content;

@@ -283,7 +283,7 @@ sub linux_ppc {
         $info{detected} =~ s/.*(\b.+Mac G\d).*/$1/;
         $info{machine} = $info{detected};
     }
-        
+
     $self->{__cpu} = sprintf "%s %s (%s)", map $info{ $_ } => @parts;
 }
 

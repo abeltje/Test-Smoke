@@ -30,12 +30,12 @@ SKIP: {
     my $cfg_nm = 'Config_heavy.pl';
     my $to_skip = 5;
     my $libpath = File::Spec->catdir( $findbin, 'lib' );
-    -d $libpath or mkpath( $libpath )  or 
+    -d $libpath or mkpath( $libpath )  or
         skip "Can't create '$libpath': $!", $to_skip;
     $Config_heavy = File::Spec->catfile( $libpath, $cfg_nm );
 
     local *CONFIGPM;
-    open CONFIGPM, "> $Config_heavy" or 
+    open CONFIGPM, "> $Config_heavy" or
         skip "Can't create '$Config_heavy': $!", $to_skip;
 
     print CONFIGPM <<EOCONFIG;
@@ -69,12 +69,12 @@ EOCONFIG
 SKIP: {
     my $to_skip = 5;
     my $libpath = File::Spec->catdir( $findbin, 'lib' );
-    -d $libpath or mkpath( $libpath )  or 
+    -d $libpath or mkpath( $libpath )  or
         skip "Can't create '$libpath': $!", $to_skip;
     $Config_pm = File::Spec->catfile( $libpath, 'Config.pm' );
 
     local *CONFIGPM;
-    open CONFIGPM, "> $Config_pm" or 
+    open CONFIGPM, "> $Config_pm" or
         skip "Can't create '$Config_pm': $!", $to_skip;
 
     print CONFIGPM <<EOCONFIG;
@@ -110,7 +110,7 @@ SKIP: { # get info from config.sh
     $Config_sh = File::Spec->catfile( $libpath, 'config.sh' );
 
     local *CONFIGSH;
-    open CONFIGSH, "> $Config_sh" or 
+    open CONFIGSH, "> $Config_sh" or
         skip "Can't create '$Config_sh': $!", $to_skip;
 
     print CONFIGSH <<EOCONFIG;
@@ -149,7 +149,7 @@ EOCONFIG
     my $no_files = 1;
     $no_files &&= ! -e $_ for grep defined $_
         => ( $Config_heavy, $Config_pm, $Config_sh );
-    ok( $no_files, "Config from: fallback" ); 
+    ok( $no_files, "Config from: fallback" );
     is( $Config{archname}, $arch, "Architecture $arch" );
     is( $Config{osname}, $osname, "OS name: $osname" );
     is( $Config{osvers}, $osvers, "OS version: $osvers" );
@@ -161,7 +161,7 @@ SKIP: {
     my $to_skip = 4;
 
     local *PL_H;
-    open PL_H, "> $patchlevel_h" or 
+    open PL_H, "> $patchlevel_h" or
         skip "Can't create '$Config_pm': $!", $to_skip;
 
     print PL_H <<EOPL;
@@ -188,7 +188,7 @@ SKIP: {
     my $to_skip = 4;
 
     local *PL_H;
-    open PL_H, "> $patchlevel_h" or 
+    open PL_H, "> $patchlevel_h" or
         skip "Can't create '$Config_pm': $!", $to_skip;
 
     print PL_H <<EOPL;
@@ -230,7 +230,7 @@ SKIP: {
     my $to_skip = 5;
 
     local *CONFIGPM;
-    open CONFIGPM, "> $Config_pm" or 
+    open CONFIGPM, "> $Config_pm" or
         skip "Can't create '$Config_pm': $!", $to_skip;
 
     print CONFIGPM <<EOCONFIG;

@@ -46,8 +46,8 @@ runsmoke.pl - Configure, build and test bleading edge perl
 
 =head1 OPTIONS
 
-Most of the F<mktest.pl> switches are implemented for backward 
-compatibility, but some had to go in faviour of the new regime of 
+Most of the F<mktest.pl> switches are implemented for backward
+compatibility, but some had to go in faviour of the new regime of
 front-ends.
 
 =over 4
@@ -57,13 +57,13 @@ front-ends.
     --config|-c <configfile>  Use the settings from the configfile
 
 F<runsmoke.pl> can use the configuration file created by
-F<configsmoke.pl>.  Other options can override the settings 
-from the configuration file. If the config-filename is ommited 
+F<configsmoke.pl>.  Other options can override the settings
+from the configuration file. If the config-filename is ommited
 B<smokecurrent_config> is assumed.
 
 =item Overridable options
 
-These options will also override the values in the configfile 
+These options will also override the values in the configfile
 (if the C<--config> switch is used).
 
     --fdir|--forest|-f <dir>  Set the basedir for forest
@@ -95,7 +95,7 @@ These options will also override the values in the configfile
 
 =head1 DESCRIPTION
 
-F<runsmoke.pl> is the replacement script for F<mktest.pl> (which is now 
+F<runsmoke.pl> is the replacement script for F<mktest.pl> (which is now
 depricated and will not be maintained).
 
 =cut
@@ -140,7 +140,7 @@ if ( defined $opt{config} ) {
             }
         }
     } else {
-        warn "WARNING: Could not process '$opt{config}': " . 
+        warn "WARNING: Could not process '$opt{config}': " .
              Test::Smoke->config_error . "\n";
     }
 }

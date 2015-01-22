@@ -73,7 +73,7 @@ Just pass it options for the F<Makefile> on the command-line.
 See L<Test::Smoke::Util/Configure_win32> for options you can pass!
 
 The result is B<[builddir]\win32\smoke.mk> a makefile that has all
-the configure options you passed worked into it. 
+the configure options you passed worked into it.
 
 This could help debugging.
 
@@ -107,14 +107,14 @@ if ( defined $opt{config} ) {
             }
         }
     } else {
-        warn "WARNING: Could not process '$opt{config}': " . 
+        warn "WARNING: Could not process '$opt{config}': " .
              Test::Smoke->config_error . "\n";
     }
 }
 
 $opt{maker} ||= 'nmake';
 $opt{ddir} && -d $opt{ddir} or
-    do_pod2usage( message => "'$opt{ddir}' does not exist!", 
+    do_pod2usage( message => "'$opt{ddir}' does not exist!",
                   verbose => 0, myusage => $my_usage );
 
 push @ARGV, "-DCCTYPE=$conf->{w32cc}" unless grep /^-DCCTYPE=/ => @ARGV;

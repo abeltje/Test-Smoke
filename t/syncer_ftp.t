@@ -10,7 +10,7 @@ use strict;
 # For this there is the 't/ftppub' directory with:
 #     't/ftppub/snap' contains two fake snapshots (with files)
 #     't/ftppub/perl-current-diffs' contains a few fake diffs
-# Now that we have controlable FTP (if you have Net::FTP), 
+# Now that we have controlable FTP (if you have Net::FTP),
 # we can concentrate on doing the untargz and patch stuff
 #
 #####
@@ -25,7 +25,7 @@ use Test::More;
 
 BEGIN {
     eval { require Net::FTP; };
-    $@ and plan( skip_all => "No 'Net::FTP' found!\n" . 
+    $@ and plan( skip_all => "No 'Net::FTP' found!\n" .
                              "!!!You will not be able to smoke from " .
                              "snapshots without it!!!" );
     plan tests => 7;
@@ -41,12 +41,12 @@ sub Net::FTP::new { bless {}, 'Net::FTP' }
 sub Net::FTP::login { return 1 }
 sub Net::FTP::binary { return 1 }
 sub Net::FTP::quit {return 1 }
-sub Net::FTP::cwd { 
+sub Net::FTP::cwd {
     my $self = shift;
     ( my $dir = shift ) =~ s|^.*/||;
     $self->{cwd} = File::Spec->catdir( 't', 'ftppub', $dir );
 }
-sub Net::FTP::ls { 
+sub Net::FTP::ls {
     my $self = shift;
     local *DLDIR;
     opendir DLDIR, $self->{cwd} or return ( );

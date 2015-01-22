@@ -16,7 +16,7 @@ use lib catdir( $FindBin::Bin, 'lib' );
 use lib $FindBin::Bin;
 use Test::Smoke;
 use Test::Smoke::Reporter;
-use Test::Smoke::Util qw( 
+use Test::Smoke::Util qw(
     do_pod2usage time_in_hhmm calc_timeout
     get_patch parse_report_Config );
 
@@ -94,7 +94,7 @@ $opt{dir} && -d $opt{dir} or $opt{dir} = '';
 $opt{dir} ||= $FindBin::Bin;
 
 my %save_opt = %opt;
-my @configs = $opt{all} 
+my @configs = $opt{all}
     ? get_configs() : $opt{running} ? get_lcks() : $opt{config};
 
 print "$0-$VERSION Test::Smoke-$Test::Smoke::VERSION Test::Smoke::Reporter-$Test::Smoke::Reporter::VERSION\n\n";
@@ -114,7 +114,7 @@ foreach my $config ( @configs ) {
     my $ccnt = 0;
     Test::Smoke::skip_config( $_ ) or $ccnt++ for $bcfg->configurations;
 
-    printf "  Change number $rpt->{patch} started on %s.\n", 
+    printf "  Change number $rpt->{patch} started on %s.\n",
            scalar localtime( $rpt->{started} );
 
     print "    $rpt->{ccount} out of $ccnt configurations finished",
@@ -137,9 +137,9 @@ foreach my $config ( @configs ) {
     my $killtime = calc_timeout( $conf->{killtime}, $rpt->{started} )
         ? timeout_msg( $conf->{killtime}, $rpt->{started } )
         : "";
-    
-    my $todo_time = $rpt->{avg} <= 0  ? '.' : 
-        $est_todo <= 0 
+
+    my $todo_time = $rpt->{avg} <= 0  ? '.' :
+        $est_todo <= 0
             ? has_lck( $config )
                 ? ", smoke looks hanging delay " . time_in_hhmm( -$est_todo )
                 : ", smoke looks terminated${killtime}."
@@ -154,9 +154,9 @@ foreach my $config ( @configs ) {
 
     if ( $rpt->{ccount} > 0 && $opt{matrix} ) {
         printf "  Matrix, using %s:\n", $rpt->{reporter}->ccinfo;
-        print join "", map "  $_\n" 
+        print join "", map "  $_\n"
             => split /\n/, $rpt->{reporter}->smoke_matrix;
-        print join "", map "  $_\n" 
+        print join "", map "  $_\n"
             => split /\n/, $rpt->{reporter}->bldenv_legend;
     }
 }
@@ -176,7 +176,7 @@ sub guess_status {
                 my $summary = ( parse_report_Config( $report ) )[-1];
                 $status = $summary ? " [$summary]" : "";
             }
-            printf "  Change number %s%s finshed on %s\n", 
+            printf "  Change number %s%s finshed on %s\n",
                    $patch, $status, scalar localtime( $mtime );
         } else {
             print "  Change number $patch found, but no (previous) results.\n";
@@ -206,7 +206,7 @@ sub parse_out {
 
         if ( $rpt{statcfg}{ $config } ) {
             $fcnt = $rpt{statcfg}{ $config };
-            $rpt{statcfg}{ $config } = "F" 
+            $rpt{statcfg}{ $config } = "F"
                 if $rpt{statcfg}{ $config } =~ /^\d+$/;
 
             $rpt{fail}++;
@@ -216,7 +216,7 @@ sub parse_out {
     $rpt{stat} = join "", sort keys %{ $rpt{stat} };
 
     $rpt{reporter} = $reporter;
-    return \%rpt    
+    return \%rpt
 }
 
 sub get_configs {
@@ -251,12 +251,12 @@ sub process_args {
 
     unless ( Test::Smoke->config_error ) {
         foreach my $option ( keys %$conf ) {
-            $opt{ $option } = $conf->{ $option }, next 
+            $opt{ $option } = $conf->{ $option }, next
               unless defined $opt{ $option };
             $conf->{ $option } = $opt{ $option }
         }
     } else {
-        warn "WARNING: Could not process '$opt{config}': " . 
+        warn "WARNING: Could not process '$opt{config}': " .
              Test::Smoke->config_error . "\n";
     }
 }

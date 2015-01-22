@@ -154,7 +154,7 @@ if ( defined $opt{config} ) {
             }
         }
     } else {
-        warn "WARNING: Could not process '$opt{config}': " . 
+        warn "WARNING: Could not process '$opt{config}': " .
              Test::Smoke->config_error . "\n";
     }
 }
@@ -192,7 +192,7 @@ sub check_for_report {
     my $reporter = Test::Smoke::Reporter->new( $conf );
     if ( defined $reporter->{_outfile} ) {
         $reporter->write_to_file;
-    
+
         unless ( -f $report ) {
             die "Hmmm... cannot find [$report]";
         }

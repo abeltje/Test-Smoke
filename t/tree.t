@@ -18,7 +18,7 @@ sub mani_file_from_list($;@) {
     print MANIFEST "$_\n" for grep length $_ => @list;
     close MANIFEST;
 }
-    
+
 sub MANIFEST_from_dir($) {
     my( $path ) = @_;
 
@@ -111,14 +111,14 @@ SKIP: { # Check that check_MANIFEST() finds dubious files
     my $undeclared = File::Spec->catfile( 't', 'undeclared' );
     $undeclared = File::Spec->rel2abs( $undeclared );
     {
-        open FH, "> $undeclared" or 
+        open FH, "> $undeclared" or
             skip "Cannot create '$undeclared': $!", 3;
         close FH;
     }
     my $skipit = File::Spec->catfile( 't', 'skip_it' );
     $skipit = File::Spec->rel2abs( $skipit );
     {
-        open FH, "> $skipit" or 
+        open FH, "> $skipit" or
             skip "Cannot create '$skipit': $!", 3;
         close FH;
     }
@@ -166,14 +166,14 @@ SKIP: { # Check that check_MANIFEST() finds dubious files with MANIFEST.SKIP
     my $undeclared = File::Spec->catfile( 't', 'undeclared' );
     $undeclared = File::Spec->rel2abs( $undeclared );
     {
-        open FH, "> $undeclared" or 
+        open FH, "> $undeclared" or
             skip "Cannot create '$undeclared': $!", 3;
         close FH;
     }
     my $skipit = File::Spec->catfile( 't', 'skip_it' );
     $skipit = File::Spec->rel2abs( $skipit );
     {
-        open FH, "> $skipit" or 
+        open FH, "> $skipit" or
             skip "Cannot create '$skipit': $!", 3;
         close FH;
     }

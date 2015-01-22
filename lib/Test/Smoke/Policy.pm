@@ -86,7 +86,7 @@ sub _do_subst {
     my $policy = $self->{_policy};
     while ( my( $target, $values ) = each %substs ) {
         unless ( $policy =~ s{^(\s*ccflags=.*?)$target}
-                             {$1 . join " ", 
+                             {$1 . join " ",
                                    grep $_ && length $_ => @$values}meg ) {
             require Carp;
             Carp::carp( "Policy target '$target' failed to match" );
@@ -163,7 +163,7 @@ sub _read_Policy {
         $vmsg = "anonymous filehandle";
 
     } else {
-        $srcpath = File::Spec->curdir 
+        $srcpath = File::Spec->curdir
             unless defined $srcpath && length $srcpath;
         my $p_name = File::Spec->catfile( $srcpath, 'Policy.sh' );
 

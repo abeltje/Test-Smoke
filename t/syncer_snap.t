@@ -17,6 +17,6 @@ use_ok( 'Test::Smoke::Syncer' );
 
     isa_ok( $syncer, 'Test::Smoke::Syncer::Snapshot' );
 
-    is( $syncer->{server}, Test::Smoke::Syncer->config( 'server' ), 
+    is( $syncer->{server}, Test::Smoke::Syncer->config( 'server' ),
         "ftp server for snapshot" );
 }

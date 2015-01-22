@@ -90,7 +90,7 @@ sub run_tests {
         # If more than 1 value wishes to substitute, join them with spaces
         my $this_policy = $policy;
         while (my ($target, $values) = each %substs) {
-#diag( "TRADITIONAL: '$target'-> '@$values' " , 
+#diag( "TRADITIONAL: '$target'-> '@$values' " ,
 #      ($this_policy=~/^(ccflags.*)/m) );
             unless ($this_policy =~ s/$target/join " ", @$values/seg) {
                 warn "Policy target '$target' failed to match";
@@ -104,7 +104,7 @@ sub run_tests {
         my @new = grep ! /^#/ => split /\n/, $pobj->{_new_policy};
 #diag( Dumper \@old, \@new );
         is_deeply( \@new, \@old, "Policy.sh up-to-date: $config_args" );
-      
+
     }
 }
 

@@ -10,7 +10,7 @@ use lib $findbin;
 use TestLib;
 
 use Test::More tests => 11;
-BEGIN { 
+BEGIN {
     use_ok( 'Test::Smoke::Util', qw( get_regen_headers run_regen_headers ) );
 }
 
@@ -27,7 +27,7 @@ SKIP: { # Find 'regen_headers.pl'
     my $to_skip = 2;
     local *FILE;
     my $regen_headers_pl = File::Spec->catfile( $ddir, 'regen_headers.pl' );
-    open( FILE, "> $regen_headers_pl" ) 
+    open( FILE, "> $regen_headers_pl" )
         or skip "Cannot create '$regen_headers_pl': $!", $to_skip;
     print FILE <<EO_REGEN;
 #! $^X -w
@@ -57,7 +57,7 @@ SKIP: { # Prefer 'regen_headers.pl' over 'regen.pl'
     local *FILE;
     my $regen_headers_pl = File::Spec->catfile( $ddir, 'regen_headers.pl' );
     my $regen_pl = File::Spec->catfile( $ddir, 'regen.pl' );
-    open( FILE, "> $regen_pl" ) 
+    open( FILE, "> $regen_pl" )
         or skip "Cannot create '$regen_pl': $!", $to_skip;
     print FILE <<EO_REGEN;
 #! $^X -w
@@ -87,7 +87,7 @@ SKIP: { # as of 18852: 'regen_headers.pl' is now 'regen.pl'
     my $regen_headers_pl = File::Spec->catfile( $ddir, 'regen_headers.pl' );
     my $regen_pl = File::Spec->catfile( $ddir, 'regen.pl' );
 
-    unlink $regen_headers_pl 
+    unlink $regen_headers_pl
         or skip "Cannot unlink($regen_headers_pl): $!", $to_skip--;
 
     my $regen = get_regen_headers( $ddir );

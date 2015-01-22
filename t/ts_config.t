@@ -10,7 +10,7 @@ use vars qw( $conf );
 use Test::More tests => 9 - 1;
 BEGIN { use_ok( 'Test::Smoke' ) }
 
-#is( Test::Smoke->VERSION, $Test::Smoke::VERSION, 
+#is( Test::Smoke->VERSION, $Test::Smoke::VERSION,
 #    "Check version $Test::Smoke::VERSION" );
 
 ok( defined &read_config, "read_config() is exported" );
@@ -19,7 +19,7 @@ my $test = { ddir => '../' };
 
 SKIP: {
     my $prefix = 'smokecurrent';
-    my $config_name = File::Spec->catfile( $FindBin::Bin, 
+    my $config_name = File::Spec->catfile( $FindBin::Bin,
                                            "${prefix}_config" );
     local *FILE;
     open FILE, "> $config_name" or skip "Cannot write file: $!", 2;
@@ -39,4 +39,4 @@ SKIP: {
     1 while unlink $config_name;
 }
 
-    
+

@@ -71,11 +71,11 @@ __EOCFG__
     foreach my $config ( $bcfg->configurations ) {
         if ( ($config->policy)[0]->[1] ) {
             ok( $config->has_arg( '-DDEBUGGING' ), "has_arg(-DDEBUGGING)" );
-            like( "$config", '/-DDEBUGGING/', 
+            like( "$config", '/-DDEBUGGING/',
                   "'$config' has -DDEBUGGING" );
         } else {
             ok( !$config->has_arg( '-DDEBUGGING' ), "! has_arg(-DDEBUGGING)" );
-            unlike( "$config", '/-DDEBUGGING/', 
+            unlike( "$config", '/-DDEBUGGING/',
                     "'$config' has no -DDEBUGGING" );
         }
         ok( $config->args_eq( "$config" ), "Stringyfied: args_eq($config)" );
@@ -100,7 +100,7 @@ __EOCFG__
 
     my $bcfg = Test::Smoke::BuildCFG->new( \$dft_cfg => { v => $verbose } );
 
-    is_deeply $bcfg->{_sections}, $dft_sect, 
+    is_deeply $bcfg->{_sections}, $dft_sect,
               "Empty lines at end of section kept";
 
     my $first = ( $bcfg->configurations )[0];
@@ -109,11 +109,11 @@ __EOCFG__
     foreach my $config ( $bcfg->configurations ) {
         if ( ($config->policy)[0]->[1] ) {
             ok( $config->has_arg( '-DDEBUGGING' ), "has_arg(-DDEBUGGING)" );
-            like( "$config", '/-DDEBUGGING/', 
+            like( "$config", '/-DDEBUGGING/',
                   "'$config' has -DDEBUGGING" );
         } else {
             ok( !$config->has_arg( '-DDEBUGGING' ), "! has_arg(-DDEBUGGING)" );
-            unlike( "$config", '/-DDEBUGGING/', 
+            unlike( "$config", '/-DDEBUGGING/',
                     "'$config' has no -DDEBUGGING" );
         }
         ok( $config->args_eq( "$config" ), "Stringyfied: args_eq($config)" );
@@ -181,7 +181,7 @@ __EOCFG__
 __EOCFG__
 
     my $dft_sect = [
-        { policy_target => '-DPERL_COPY_ON_WRITE', 
+        { policy_target => '-DPERL_COPY_ON_WRITE',
           args          => [ '', '-DPERL_COPY_ON_WRITE'] },
         [ '', '-Duseithreads' ],
         { policy_target => '-DDEBUGGING', args => [ '', '-DDEBUGGING'] },
@@ -189,7 +189,7 @@ __EOCFG__
 
     my $bcfg = Test::Smoke::BuildCFG->new( \$dft_cfg => { v => $verbose } );
 
-    is_deeply [ $bcfg->policy_targets ], 
+    is_deeply [ $bcfg->policy_targets ],
               [qw( -DPERL_COPY_ON_WRITE -DDEBUGGING )],
               "Policy targets...";
 
@@ -234,7 +234,7 @@ OUT
     my @not_seen;
     push @not_seen, "$_" for $bcfg->configurations;
 
-    is_deeply( \@not_seen, ["-Dusedevel -Dusethreads", 
+    is_deeply( \@not_seen, ["-Dusedevel -Dusethreads",
                             "-Dusedevel -Dusethreads -DDEBUGGING" ],
                "The right configs are left for continue" );
     1 while unlink 'mktest.out';

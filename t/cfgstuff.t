@@ -58,7 +58,7 @@ SKIP: {
                             policy_target => '-DDEBUGGING'} ],
                "Parse test configuration" );
 
-    ok( unlink( $get_cfg ), "Clean-up" ) 
+    ok( unlink( $get_cfg ), "Clean-up" )
         or diag "$get_cfg: $!";
 }
 

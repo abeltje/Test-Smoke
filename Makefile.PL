@@ -176,7 +176,7 @@ sub dir_prompt {
 
         # thanks to perlfaq5
         $dir =~ s{^ ~ ([^/]*)}
-                 {$1 ? ( getpwnam $1 )[7] : 
+                 {$1 ? ( getpwnam $1 )[7] :
                        ( $ENV{HOME} || $ENV{LOGDIR} ||
                          "$ENV{HOMEDRIVE}$ENV{HOMEPATH}" )
                  }ex;

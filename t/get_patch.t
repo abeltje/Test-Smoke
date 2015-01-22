@@ -98,7 +98,7 @@ SKIP: {
     1 while unlink '.patch';
 }
 
-END { 
+END {
     1 while unlink 'patchlevel.h';
     chdir File::Spec->updir
         if -d File::Spec->catdir( File::Spec->updir, 't' );

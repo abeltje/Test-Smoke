@@ -69,7 +69,7 @@ There are two ways to initialise the B<Test::Smoke::Patcher> object.
 
 =item B<single> mode
 
-The B<pfile> attribute is a pointer to a I<single> patch. 
+The B<pfile> attribute is a pointer to a I<single> patch.
 There are four (4) ways to specify that patch.
 
 =over 4
@@ -89,7 +89,7 @@ You passed an opened filehandle to a file containing the patch.
 
 =item I<filename>
 
-If none of the above apply, it is assumed you passed a filename. 
+If none of the above apply, it is assumed you passed a filename.
 Relative paths are rooted at the builddir (B<ddir> attribute).
 
 =back
@@ -97,7 +97,7 @@ Relative paths are rooted at the builddir (B<ddir> attribute).
 =item B<multi> mode
 
 The B<pfile> attribute is a pointer to a recource that contains filenames
-of patches. 
+of patches.
 The format of this recource is one filename per line optionally followed
 by a semi-colon (;) and switches for the patch program.
 
@@ -121,7 +121,7 @@ The patch-resource can also be specified in four (4) ways.
 
 Constant: 1
 
-=head2 MAX_FLAG_COUNT 
+=head2 MAX_FLAG_COUNT
 
 Constant: 16
 
@@ -188,7 +188,7 @@ sub new {
 
 =item Test::Smoke::Patcher->config( $key[, $value] )
 
-C<config()> is an interface to the package lexical C<%CONFIG>, 
+C<config()> is an interface to the package lexical C<%CONFIG>,
 which holds all the default values for the C<new()> arguments.
 
 With the special key B<all_defaults> this returns a reference
@@ -284,9 +284,9 @@ sub perl_regen_headers {
 
 =item $patcher->patch_single( )
 
-C<patch_single()> checks if the B<pfile> attribute is a plain scalar 
+C<patch_single()> checks if the B<pfile> attribute is a plain scalar
 or a ref to a scalar, array, glob. In the first case this is taken to
-be a filename.  A GLOB-ref is a filehandle, the other two are taken to 
+be a filename.  A GLOB-ref is a filehandle, the other two are taken to
 be literal content.
 
 =cut
@@ -309,7 +309,7 @@ sub patch_single {
         $content = do { local $/; <PATCH> };
         $self->{pfinfo} ||= 'file content';
     } else {
-        my $full_name = File::Spec->file_name_is_absolute( $pfile ) 
+        my $full_name = File::Spec->file_name_is_absolute( $pfile )
             ? $pfile : File::Spec->rel2abs( $pfile, $self->{pdir} );
 
         $self->{pfinfo} = $full_name;
@@ -327,9 +327,9 @@ sub patch_single {
 
 =item $patcher->patch_multi( )
 
-C<patch_multi()> checks the B<pfile> attribute is a plain scalar 
+C<patch_multi()> checks the B<pfile> attribute is a plain scalar
 or a ref to a scalar, array, glob. In the first case this is taken to
-be a filename.  A GLOB-ref is a filehandle, the other two are taken to 
+be a filename.  A GLOB-ref is a filehandle, the other two are taken to
 be literal content.
 
 =cut
@@ -352,7 +352,7 @@ sub patch_multi {
         chomp( @patches = <PATCHES> );
         $self->{pfinfo} ||= 'file content';
     } else {
-        my $full_name = File::Spec->file_name_is_absolute( $pfile ) 
+        my $full_name = File::Spec->file_name_is_absolute( $pfile )
             ? $pfile : File::Spec->rel2abs( $pfile, $self->{pdir} );
         $self->{pfinfo} = $full_name;
         open PATCHES, "< $full_name" or do {
@@ -408,7 +408,7 @@ sub _make_opts {
 
 =item $patcher->call_patch( $ref_to_content )
 
-C<call_patch()> opens a pipe to the B<patch> program and prints 
+C<call_patch()> opens a pipe to the B<patch> program and prints
 C<< $$ref_to_content >> to it. It will Carp::croak() on any error!
 
 =cut
@@ -429,7 +429,7 @@ sub call_patch {
     };
 
     # patch is verbose enough if $self->{v} == 1
-    $self->{v} > 1 and 
+    $self->{v} > 1 and
         print "[$self->{pfinfo}] | $self->{patchbin} $opts $redir\n";
 
     if ( open PATCHBIN, "| $self->{patchbin} $opts $redir" ) {

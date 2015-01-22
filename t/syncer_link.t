@@ -89,7 +89,7 @@ SKIP: { # Check that the same works for {haslink} == 0
     my $tar = find_uncompress() or
         skip "Cannot find decompression stuff", $to_skip;
 
-    do_uncompress( $tar, 't', 
+    do_uncompress( $tar, 't',
                    File::Spec->catfile(qw( ftppub snap perl@20000.tgz )) ) or
         skip "Cannot decompress testsnapshot", $to_skip;
 
@@ -143,7 +143,7 @@ sub do_uncompress {
 
     # I cannot use Test::Smoke::Syncer::Snapshot to extract
     # but I need check_dot_patch() for the tests
-    my $syncer = Test::Smoke::Syncer->new( snapshot => { 
+    my $syncer = Test::Smoke::Syncer->new( snapshot => {
         v    => 2,
         ddir => 'perl',
     });

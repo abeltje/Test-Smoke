@@ -6,8 +6,8 @@ use base 'Test::Smoke::Syncer::Base';
 
 =head1 Test::Smoke::Syncer::Rsync
 
-This handles syncing with the B<rsync> program. 
-It should only be visible from the "parent-package" so no direct 
+This handles syncing with the B<rsync> program.
+It should only be visible from the "parent-package" so no direct
 user-calls on this.
 
 =cut
@@ -30,7 +30,7 @@ This crates the new object. Keys for C<%args>:
 
 Do the actual sync using a call to the B<rsync> program.
 
-B<rsync> can also be used as a smart version of copy. If you 
+B<rsync> can also be used as a smart version of copy. If you
 use a local directory to rsync from, make sure the destination path
 ends with a I<path separator>! (This does not seem to work for source
 paths mounted via NFS.)
