@@ -1,8 +1,6 @@
 #! /usr/bin/perl -w
 use strict;
 
-# $Id$
-
 use Data::Dumper;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs splitpath splitdir );
 use File::Find;

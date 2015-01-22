@@ -2,7 +2,6 @@
 use strict;
 $| = 1;
 
-# $Id$
 use vars qw( $VERSION );
 $VERSION = 0.001;
 

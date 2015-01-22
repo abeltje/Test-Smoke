@@ -20,7 +20,6 @@ use fallback 'inc', 'lib', catdir($findbin, 'inc');
 use Test::Smoke::SysInfo;
 use Test::Smoke::Util qw(do_pod2usage whereis);
 
-# $Id$
 use vars qw($VERSION $conf);
 $VERSION = '0.082';
 
@@ -2762,12 +2761,6 @@ sub _perl_numeric_version {
 =head1 TODO
 
 Schedule, logfile optional
-
-=head1 REVISION
-
-In case I forget to update the C<$VERSION>:
-
-    $Id$
 
 =head1 COPYRIGHT
 

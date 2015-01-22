@@ -3,8 +3,6 @@ use strict;
 use Data::Dumper;
 $| = 1;
 
-# $Id$
-
 my $verbose = exists $ENV{SMOKE_VERBOSE} ? $ENV{SMOKE_VERBOSE} : 0;
 
 use Cwd;

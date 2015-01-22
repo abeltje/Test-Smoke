@@ -5,7 +5,6 @@ eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}'
 use strict;
 $|=1;
 
-# $Id$
 use vars qw( $VERSION );
 $VERSION = Test::Smoke->VERSION;
 
@@ -364,10 +363,6 @@ sub snapshot_name {
 =head1 SEE ALSO
 
 L<README>, L<FAQ>, L<configsmoke.pl>, L<mktest.pl>, L<mkovz.pl>
-
-=head1 REVISION
-
-$Id$
 
 =head1 COPYRIGHT
 

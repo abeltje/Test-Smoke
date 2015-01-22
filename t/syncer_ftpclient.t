@@ -2,7 +2,6 @@
 use strict;
 use Data::Dumper;
 
-# $Id$
 ##### syncer_ftpclient.t
 #
 # Here we try to test the actual syncing process from ftp

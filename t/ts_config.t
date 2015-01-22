@@ -1,8 +1,6 @@
 #! /usr/perl/perl -w
 use strict;
 
-# $Id$
-
 use FindBin;
 use Data::Dumper;
 use vars qw( $conf );

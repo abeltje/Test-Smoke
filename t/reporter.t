@@ -2,8 +2,6 @@
 use strict;
 $| = 1;
 
-# $Id$
-
 use File::Spec::Functions;
 my $findbin;
 use File::Basename;

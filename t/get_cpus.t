@@ -1,8 +1,6 @@
 #! perl -w
 use strict;
 
-# $Id$
-
 use Config;
 
 use Test::More tests => 3;

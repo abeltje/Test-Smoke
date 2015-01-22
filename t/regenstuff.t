@@ -1,8 +1,6 @@
 #! perl -w
 use strict;
 
-# $Id$
-
 my $findbin;
 use File::Basename;
 BEGIN { $findbin = dirname $0; }

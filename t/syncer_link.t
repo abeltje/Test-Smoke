@@ -1,8 +1,6 @@
 #! /usr/bin/perl -w
 use strict;
 
-# $Id$
-
 use Config;
 use File::Spec;
 use Cwd 'abs_path';

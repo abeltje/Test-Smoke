@@ -1,8 +1,6 @@
 #! /usr/bin/perl -w
 use strict;
 
-# $Id$
-
 use Data::Dumper;
 use Cwd qw/cwd abs_path/;
 use File::Spec;

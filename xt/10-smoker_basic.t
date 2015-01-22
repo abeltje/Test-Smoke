@@ -2,7 +2,6 @@
 use strict;
 use FindBin;
 
-# $Id$
 use vars qw( @output ); @output = ();
 use Test::More tests => 6;
 

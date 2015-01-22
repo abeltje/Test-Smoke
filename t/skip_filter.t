@@ -1,8 +1,6 @@
 #! perl -w
 use strict;
 
-# $Id$
-
 # Add the test-lines in the '    EOT' here-document
 # First char should be 'P' for PASS (we don't want it)
 # and 'F' for FAIL (we _do_ want it)
