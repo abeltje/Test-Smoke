@@ -105,7 +105,10 @@ sub prepare_os {
         $distro = qq{$os{NAME} $os{VERSION}};
     }
     elsif ( $os{VERSION} && $os{CODENAME} ) {
-        $distro .= qq{ $os{VERSION} "$os{CODENAME}"};
+        if ( my @welcome = grep s{^\s*Welcome\s+to\s+(\S*$distro\S*)\b.*}{$1}i => keys %os ) {
+            $distro = $welcome[0];
+        }
+        $distro .= qq{ $os{VERSION} ($os{CODENAME})};
     }
     elsif ( $os{MAJORVERSION} && defined $os{MINORVERSION} ) {
         -d "/usr/syno" || "@dist_file" =~ m{^\S*/VERSION$} and $distro .= "DSM";
@@ -153,7 +156,7 @@ sub prepare_os {
         #$self->{__X__} = { os => \%os, key => \@key, vsn => \@vsn };
 
         if ( my @welcome = grep s{^\s*Welcome\s+to\s+}{}i => @key ) {
-            $distro = $welcome[0];
+            ($distro = $welcome[0]) =~ s/"([^"]+)"/($1)/;
         }
         elsif ( my @rel  = grep m{\brelease\b}i => @key ) {
             @rel > 1 && $rel[0] =~ m/^Enterprise Linux Enterprise/
