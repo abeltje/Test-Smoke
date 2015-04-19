@@ -1,9 +1,120 @@
-Changes on 2014-08-22 for github repository at:
+Changes on 2015-04-19 for github repository at:
   Fetch URL: ssh://git@github.com/abeltje/Test-Smoke
   Push  URL: ssh://git@github.com/abeltje/Test-Smoke
 
 Enjoy!
 
+________________________________________________________________________________
+[75f0695] by Abe Timmerman on Sun, 19 Apr 2015 12:05:48 +0200
+
+     Berlin2015: Test::Smoke 1.71 to be
+
+        Several bugfixes, whitespace, refactoring, more testing
+
+
+M	MANIFEST
+M	Makefile.PL
+M	configsmoke.pl
+M	inc/JSON.pm
+M	lib/Test/Smoke/App/Base.pm
+M	lib/Test/Smoke/App/Options.pm
+M	lib/Test/Smoke/App/RunSmoke.pm
+M	lib/Test/Smoke/App/SendReport.pm
+M	lib/Test/Smoke/App/SmokePerl.pm
+M	lib/Test/Smoke/App/SyncTree.pm
+M	lib/Test/Smoke/Archiver.pm
+M	lib/Test/Smoke/BuildCFG.pm
+M	lib/Test/Smoke/LogMixin.pm
+M	lib/Test/Smoke/ObjectBase.pm
+M	lib/Test/Smoke/Policy.pm
+M	lib/Test/Smoke/Poster/Curl.pm
+M	lib/Test/Smoke/Poster/HTTP_Lite.pm
+M	lib/Test/Smoke/Poster/HTTP_Tiny.pm
+M	lib/Test/Smoke/Poster/LWP_UserAgent.pm
+M	lib/Test/Smoke/Reporter.pm
+M	lib/Test/Smoke/Smoker.pm
+M	lib/Test/Smoke/SourceTree.pm
+M	lib/Test/Smoke/Syncer/Base.pm
+M	lib/Test/Smoke/Syncer/Copy.pm
+M	lib/Test/Smoke/Syncer/Git.pm
+M	lib/Test/Smoke/Syncer/Rsync.pm
+M	lib/Test/Smoke/Util.pm
+M	lib/Test/Smoke/Util/Execute.pm
+A	lib/Test/Smoke/Util/FindHelpers.pm
+M	t/15-factory-json.t
+A	t/20-logger.t
+M	t/TestLib.pm
+M	t/app/000-appobjects.t
+M	t/app/010-appoptions.t
+M	t/app/020-appoptioncollection.t
+M	t/app/030-app-base.t
+M	t/app/100-archiver.t
+M	t/app/110-runsmoke.t
+M	t/app/120-sendreport.t
+M	t/app/130-smokeperl.t
+M	t/app/140-synctree.t
+M	t/app/150-reporter.t
+M	t/ftppub/perl-current/MANIFEST
+A	t/ftppub/perl-current/cpan/Test-Harness/lib/Test/Harness.pm
+A	t/ftppub/perl-current/git_version.h
+M	t/poster-post.t
+M	t/syncer_rsync.t
+M	t/util-execute.t
+M	xt/03-pod-coverage.t
+________________________________________________________________________________
+[34ac00b] by Abe Timmerman on Fri, 12 Dec 2014 15:02:50 +0100
+
+     Fixes for the new tsapps architecture
+
+
+M	lib/Test/Smoke/App/Reporter.pm
+M	lib/Test/Smoke/App/SmokePerl.pm
+M	lib/Test/Smoke/Reporter.pm
+________________________________________________________________________________
+[2011f71] by Paul Cochrane on Mon, 17 Nov 2014 09:35:48 +0100
+
+     Capitalising JSON in error message for consistency
+
+
+M	sendrpt.pl
+________________________________________________________________________________
+[531fcf7] by Paul Cochrane on Mon, 17 Nov 2014 09:35:09 +0100
+
+     Correcting typo in sendrpt error message
+
+
+M	sendrpt.pl
+________________________________________________________________________________
+[2bcc262] by H.Merijn Brand - Tux on Sun, 26 Oct 2014 21:45:57 +0100
+
+     Add OpenSUSE 13.2 (Harlequin)
+
+
+A	t/etc/suse-13.2/DISTNAME
+A	t/etc/suse-13.2/SuSE-release
+A	t/etc/suse-13.2/issue
+A	t/etc/suse-13.2/lsb-release
+A	t/etc/suse-13.2/os-release
+________________________________________________________________________________
+[103ecce] by H.Merijn Brand - Tux on Tue, 16 Sep 2014 17:48:07 +0200
+
+     Add CentOS-6.5 to distname checks (boring)
+
+
+A	t/etc/centos-6.5/DISTNAME
+A	t/etc/centos-6.5/centos-release
+A	t/etc/centos-6.5/issue
+A	t/etc/centos-6.5/redhat-release
+A	t/etc/centos-6.5/system-release
+A	t/etc/centos-6.5/system-release-cpe
+________________________________________________________________________________
+[9ba91d6] by Abe Timmerman on Fri, 22 Aug 2014 14:39:08 +0300
+
+     Autocommit for distribution Test::Smoke 1.61_03
+
+
+M	Changes
+M	lib/Test/Smoke.pm
 ________________________________________________________________________________
 [89d1c23] by Abe Timmerman on Fri, 22 Aug 2014 14:33:51 +0300
 
