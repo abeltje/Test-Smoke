@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 use strict;
-use 5.006001;
+use 5.008003;
 use Carp;
 
 use Config;
@@ -19,10 +19,11 @@ use fallback 'inc', 'lib', catdir($findbin, 'inc');
 
 use Test::Smoke::SysInfo;
 use Test::Smoke::Util qw(do_pod2usage whereis);
+use Test::Smoke::Util::FindHelpers ':all';
 
 # $Id$
 use vars qw($VERSION $conf);
-$VERSION = '0.082';
+$VERSION = '0.090';
 
 use Getopt::Long;
 my %options = (
@@ -133,7 +134,6 @@ my @syncers = get_avail_sync();
 my $syncmsg = join "\n", @{ {
     git      => "\tgit - Use a git-repository [preferred]",
     rsync    => "\trsync - Use the rsync(1) program",
-    ftp      => "\tftp - Use Net::FTP to sync from APC [!slow!]",
     copy     => "\tcopy - Use File::Copy to copy from a local directory",
     hardlink => "\thardlink - Copy from a local directory using link()",
     snapshot => "\tsnapshot - Get a snapshot using Net::FTP (or LWP::Simple)",
@@ -145,82 +145,23 @@ my %vdirs = map {
     my $vdir = $_;
     is_vms and $vdir =~ tr/.//d;
     ( $_ => $vdir )
-} qw( 5.8.x 5.10.x 5.12.x 5.14.x 5.16.x );
+} qw( 5.18.x 5.20.x 5.22.x );
 
 my %versions = (
-    '5.8.x' => {
-        gbranch => 'maint-5.8',
-        source  => 'perl5.git.perl.org::perl-5.8.x',
+    '5.18.x' => {
+        gbranch => 'maint-5.18',
+        source  => 'perl5.git.perl.org::perl-5.18.x',
         server  => 'http://perl5.git.perl.org',
         sdir    => '/perl.git/snapshot/refs/heads/',
-        sfile   => 'maint-5.8.tar.gz',
-        pdir    => '',
-        ddir    => File::Spec->catdir(
-            cwd(),
-            File::Spec->updir,
-            "perl-$vdirs{'5.8.x'}"
-        ),
-        ftphost => 'public.activestate.com',
-        ftpusr  => 'anonymous',
-        ftppwd  => 'smokers@perl.org',
-        ftpsdir => '/pub/apc/perl-5.8.x',
-        ftpcdir => '/pub/apc/perl-5.8.x-diffs',
-
-        text    => 'Perl 5.8 MAINT',
-        cfg     => (
-            is_win32
-                ? 'w32current.cfg'
-                : is_vms ? 'vmsperl.cfg' : 'perlmaint.cfg'
-        ),
-        is56x   => 0,
-    },
-
-    '5.10.x' => {
-        gbranch => 'maint-5.10',
-        source  => 'perl5.git.perl.org::perl-5.10.x',
-        server  => 'http://perl5.git.perl.org',
-        sdir    => '/perl.git/snapshot/refs/heads/',
-        sfile   => 'maint-5.10.tar.gz',
-        pdir    => '',
-        ddir    => File::Spec->catdir(
-            cwd(),
-            File::Spec->updir,
-            "perl-$vdirs{'5.10.x'}"
-        ),
-        ftphost => 'public.activestate.com',
-        ftpusr  => 'anonymous',
-        ftppwd  => 'smokers@perl.org',
-        ftpsdir => '/pub/apc/perl-5.10.x',
-        ftpcdir => '/pub/apc/perl-5.10.x-diffs',
-
-        text    => 'Perl 5.10 MAINT',
-        cfg     => (
-            is_win32
-                ? 'w32current.cfg'
-                : is_vms ? 'vmsperl.cfg' : 'perlmaint.cfg'
-        ),
-        is56x   => 0,
-    },
-
-    '5.12.x' => {
-        gbranch => 'maint-5.12',
-        source  => 'perl5.git.perl.org::perl-5.12.x',
-        server  => 'http://perl5.git.perl.org',
-        sdir    => '/perl.git/snapshot/refs/heads/',
-        sfile   => 'maint-5.12.tar.gz',
+        sfile   => 'maint-5.18.tar.gz',
         pdir    => '/pub/apc/perl-current-diffs',
         ddir    => File::Spec->catdir(
             cwd(),
             File::Spec->updir,
             'perl-current'
         ),
-        ftphost => 'public.activestate.com',
-        ftpusr  => 'anonymous',
-        ftppwd  => 'smokers@perl.org',
-        ftpsdir => '/pub/apc/perl-current',
-        ftpcdir => '/pub/apc/perl-current-diffs',
 
-        text    => 'Perl 5.12 maint',
+        text    => 'Perl 5.18 maint',
         cfg     => (
             is_win32
                 ? 'w32current.cfg'
@@ -228,25 +169,20 @@ my %versions = (
         ),
         is56x   => 0,
     },
-    '5.14.x' => {
-        gbranch => 'maint-5.14',
-        source  => 'perl5.git.perl.org::perl-5.14.x',
+    '5.20.x' => {
+        gbranch => 'maint-5.20',
+        source  => 'perl5.git.perl.org::perl-5.20.x',
         server  => 'http://perl5.git.perl.org',
         sdir    => '/perl.git/snapshot/refs/heads/',
-        sfile   => 'maint-5.14.tar.gz',
+        sfile   => 'maint-5.20.tar.gz',
         pdir    => '/pub/apc/perl-current-diffs',
         ddir    => File::Spec->catdir(
             cwd(),
             File::Spec->updir,
             'perl-current'
         ),
-        ftphost => 'public.activestate.com',
-        ftpusr  => 'anonymous',
-        ftppwd  => 'smokers@perl.org',
-        ftpsdir => '/pub/apc/perl-current',
-        ftpcdir => '/pub/apc/perl-current-diffs',
 
-        text    => 'Perl 5.14 maint',
+        text    => 'Perl 5.20 maint',
         cfg     => (
             is_win32
                 ? 'w32current.cfg'
@@ -254,25 +190,20 @@ my %versions = (
         ),
         is56x   => 0,
     },
-    '5.16.x' => {
-        gbranch => 'maint-5.16',
-        source  => 'perl5.git.perl.org::perl-5.16.x',
+    '5.22.x' => {
+        gbranch => 'maint-5.22',
+        source  => 'perl5.git.perl.org::perl-5.22.x',
         server  => 'http://perl5.git.perl.org',
         sdir    => '/perl.git/snapshot/refs/heads/',
-        sfile   => 'maint-5.16.tar.gz',
+        sfile   => 'maint-5.22.tar.gz',
         pdir    => '/pub/apc/perl-current-diffs',
         ddir    => File::Spec->catdir(
             cwd(),
             File::Spec->updir,
             'perl-current'
         ),
-        ftphost => 'public.activestate.com',
-        ftpusr  => 'anonymous',
-        ftppwd  => 'smokers@perl.org',
-        ftpsdir => '/pub/apc/perl-current',
-        ftpcdir => '/pub/apc/perl-current-diffs',
 
-        text    => 'Perl 5.16 maint',
+        text    => 'Perl 5.22 maint',
         cfg     => (
             is_win32
                 ? 'w32current.cfg'
@@ -292,13 +223,8 @@ my %versions = (
             File::Spec->updir,
             'perl-current'
         ),
-        ftphost => 'public.activestate.com',
-        ftpusr  => 'anonymous',
-        ftppwd  => 'smokers@perl.org',
-        ftpsdir => '/pub/apc/perl-current',
-        ftpcdir => '/pub/apc/perl-current-diffs',
 
-        text    => 'Perl 5.18 to-be',
+        text    => 'Perl 5.22 to-be',
         cfg     => (
             is_win32
                 ? 'w32current.cfg'
@@ -407,7 +333,7 @@ my %opt = (
     source => {
         msg => 'Where would you like to rsync from?',
         alt => [ ],
-        dft => 'ftp.linux.activestate.com::perl-current',
+        dft => 'perl5.git.perl.org::perl-current',
     },
     rsync => {
         msg => 'Which rsync program should be used?',
@@ -481,24 +407,6 @@ Examples:$untarmsg",
         dft => 'tgz',
     },
 
-    patchup => {
-        msg => 'Would you like to try to patchup your snapshot?',
-        alt => [qw( N y ) ],
-        dft => 'n',
-    },
-
-    pserver => {
-        msg => 'Which server would you like the patches FTPed from?',
-        alt => [ ],
-        dft => 'ftp.linux.activestate.com',
-    },
-
-    pdir => {
-        msg => 'Which directory should the patches FTPed from?',
-        alt => [ ],
-        dft => '/pub/staff/gsar/APC/perl-current-diffs',
-    },
-
     unzip => {
         msg => 'How should the patches be unzipped?',
         alt => [ ],
@@ -523,36 +431,6 @@ Examples:$untarmsg",
         msg => 'From which directory should the source-tree be hardlinked?',
         alt => [ ],
         dft => undef,
-        chk => '.+',
-    },
-
-    ftphost => {
-        msg => 'From which server should the source-tree be FTPed',
-        alt => [ ],
-        dft => 'ftp.linux.activestate.com',
-        chk => '.+',
-    },
-
-    ftpusr  => {
-       msg => undef, #no choise
-       alt => [ ],
-       dft => 'anonymous',
-    },
-    ftppwd  => {
-       msg => '',
-       alt => [ ],
-       dft => 'smokers@perl.org',
-    },
-    ftpsdir => {
-       msg => 'Base directory for mirror on FTP server',
-       alt => [ ],
-       dft => '/pub/staff/gsar/APC/perl-current',
-       chk => '.+',
-    },
-    ftpcdir => {
-        msg => 'Base directory for patches on FTP server',
-        alt => [ ],
-        dft => '/pub/staff/gsar/APC/perl-current-diffs',
         chk => '.+',
     },
 
@@ -1190,14 +1068,6 @@ SYNCER: {
         last SYNCER;
     };
 
-    /^ftp$/  && do {
-        for $arg (qw( ftphost ftpusr ftpsdir ftpcdir )) {
-            $config{ $arg } = prompt( $arg );
-        }
-        $config{ftppwd} = $conf->{ftppwd} || $opt{ftppwd}{dft};
-
-        last SYNCER;
-    };
 
     /^snapshot$/ && do {
         for $arg ( qw( server sdir sfile ) ) {
@@ -1214,21 +1084,6 @@ SYNCER: {
         $arg = 'tar';
         $config{ $arg } = prompt( $arg );
 
-        $arg = 'patchup';
-        $config{patchbin} ||= find_a_patch();
-        if ( $config{patchbin} ) {
-            $config{ $arg } = prompt_yn( $arg );
-
-            if ( $config{ $arg } ) {
-                for $arg (qw( pserver pdir unzip patchbin )) {
-                    $config{ $arg } = prompt( $arg );
-                }
-                $opt{cleanup}->{msg} .= " 2(patches) 3(both)";
-                $opt{cleanup}->{alt}  = [0, 1, 2, 3];
-            }
-        } else {
-            $config{ $arg } = 0;
-        }
         $arg = 'cleanup';
         $config{ $arg } = prompt( $arg );
 
@@ -1984,8 +1839,7 @@ sub sort_configkeys {
 
         # Sync related
         qw( sync_type fsync rsync opts source tar server sdir sfile
-            patchup pserver pdir unzip patchbin cleanup cdir hdir pfile
-            ftphost ftpusr ftppwd ftpsdir ftpcdir
+            unzip patchbin cleanup cdir hdir pfile
             gitbin gitdir gitorigin gitdfbranch gitbranchfile ),
 
         # OS specific make related
@@ -2370,13 +2224,7 @@ sub prompt_yn {
 }
 
 sub find_a_patch {
-
-    my $patch_bin;
-    foreach my $patch (qw( gpatch npatch patch )) {
-        $patch_bin = whereis( $patch ) or next;
-        my $version = `$patch_bin -version`;
-        $? or return $patch_bin;
-    }
+    return (get_avail_patchers())[0];
 }
 
 sub renice {
@@ -2390,77 +2238,6 @@ EORENICE
 # (renice -n 20 \$\$ >/dev/null 2>&1) || (renice 20 \$\$ >/dev/null 2>&1)
 EOCOMMENT
 
-}
-
-sub get_avail_posters {
-    my @posters;
-
-    eval { local $^W; require HTTP::Tiny };
-    push @posters, 'HTTP::Tiny' if !$@;
-
-    eval { local $^W; require LWP::UserAgent };
-    push @posters, 'LWP::UserAgent' if !$@;
-
-    eval { local $^W; require HTTP::Lite };
-    push @posters, 'HTTP::Lite' if !$@;
-
-    push @posters, 'curl', if whereis('curl');
-
-    return @posters;
-}
-
-sub get_avail_sync {
-
-    my @synctype = qw( copy hardlink );
-    eval { local $^W; require Net::FTP };
-    my $has_ftp = !$@;
-
-    eval { local $^W; require LWP::Simple };
-    my $has_lwp = !$@;
-
-    my $pversion = $config{perl_version} || 'blead';
-
-    # (has_ftp && 5.9.x) || has_lwp
-    unshift @synctype, 'snapshot'
-        if ( $has_ftp && $pversion eq 'blead' ) || $has_lwp;
-
-    unshift @synctype, 'ftp' if $has_ftp;
-
-    unshift @synctype, 'rsync' if whereis( 'rsync' );
-
-    unshift @synctype, 'git' if whereis('git');
-
-    return @synctype;
-}
-
-sub get_avail_tar {
-
-    my $use_modules = 0;
-    eval { require Archive::Tar };
-    unless ( $@ ) {
-        if ( eval "$Archive::Tar::VERSION" >= 0.99 ) {
-            eval { require IO::Zlib };
-        } else {
-            eval { require Compress::Zlib };
-        }
-        $use_modules = !$@;
-    }
-
-    my $fmt = tar_fmt();
-
-    return $fmt && $use_modules
-        ? ( $fmt, 'Archive::Tar' )
-        : $fmt ? ( $fmt ) : $use_modules ? ( 'Archive::Tar' ) : ();
-
-}
-
-sub tar_fmt {
-    my $tar  = whereis( 'tar' );
-    my $gzip = whereis( 'gzip' );
-
-    return $tar && $gzip
-        ? "$gzip -cd %s | $tar -xf -"
-        : $tar ? "tar -xzf %s" : "";
 }
 
 sub check_locale {
@@ -2502,91 +2279,6 @@ sub schedule_entry {
         $entry = sprintf qq[%02d %02d * * * '%s'], $min, $hour, $script;
     }
     return $entry;
-}
-
-sub get_avail_mailers {
-    my %map;
-    my $mailer = 'mail';
-    $map{ $mailer } = whereis( $mailer );
-    $mailer = 'mailx';
-    $map{ $mailer } = whereis( $mailer );
-    {
-        $mailer = 'sendmail';
-        local $ENV{PATH} = "$ENV{PATH}$Config{path_sep}/usr/sbin";
-        $map{ $mailer } = whereis( $mailer );
-    }
-    $mailer = 'sendemail';
-    $map{ $mailer } = whereis( $mailer );
-
-    eval { require Mail::Sendmail };
-    $map{ 'Mail::Sendmail' } = $@ ? '' : 'Mail::Sendmail';
-
-    eval { require MIME::Lite };
-    $map{ 'MIME::Lite' } = $@ ? '' : 'MIME::Lite';
-
-    return map { ( $_ => $map{ $_ }) } grep length $map{ $_ } => keys %map;
-}
-
-sub get_avail_w32compilers {
-
-    my %map = (
-        MSVC => { ccname => 'cl',    maker => [ 'nmake' ] },
-        BCC  => { ccname => 'bcc32', maker => [ 'dmake' ] },
-        GCC  => { ccname => 'gcc',   maker => [ 'dmake' ] },
-    );
-
-    my $CC = 'MSVC';
-    if ( $map{ $CC }->{ccbin} = whereis( $map{ $CC }->{ccname} ) ) {
-        # No, cl doesn't support --version (One can but try)
-        my $output =`"$map{ $CC }->{ccbin}" --version 2>&1`;
-        my $ccvers = $output =~ /^.*Version\s+([\d.]+)/ ? $1 : '?';
-        $map{ $CC }->{ccversarg} = "ccversion=$ccvers";
-        my $mainvers = $ccvers =~ /^(\d+)/ ? $1 : 1;
-        $map{ $CC }->{CCTYPE} = $mainvers < 12 ? 'MSVC' : 'MSVC60';
-    }
-
-    $CC = 'BCC';
-    if ( $map{ $CC }->{ccbin} = whereis( $map{ $CC }->{ccname} ) ) {
-        # No, bcc32 doesn't support --version (One can but try)
-        my $output = `"$map{ $CC }->{ccbin}" --version 2>&1`;
-        my $ccvers = $output =~ /([\d.]+)/ ? $1 : '?';
-        $map{ $CC }->{ccversarg} = "ccversion=$ccvers";
-        $map{ $CC }->{CCTYPE} = 'BORLAND';
-    }
-
-    $CC = 'GCC';
-    if ( $map{ $CC }->{ccbin} = whereis( $map{ $CC }->{ccname} ) ) {
-        local *STDERR;
-        open STDERR, ">&STDOUT"; #do we need an error?
-        select( (select( STDERR ), $|++ )[0] );
-        my $output = `"$map{ $CC }->{ccbin}" --version`;
-        my $ccvers = $output =~ /(\d+.*)/ ? $1 : '?';
-        $ccvers =~ s/\s+copyright.*//i;
-        $map{ $CC }->{ccversarg} = "gccversion=$ccvers";
-        $map{ $CC }->{CCTYPE} = $CC
-    }
-
-    return map {
-       ( $map{ $_ }->{CCTYPE} => $map{ $_ } )
-    } grep length $map{ $_ }->{ccbin} => keys %map;
-}
-
-sub get_avail_vms_make {
-
-    return map +( $_ => undef ) => grep defined $_ && length( $_ )
-        => map whereis( $_ ) => qw( MMK MMS );
-
-    local *QXERR; open *QXERR, ">&STDERR"; close STDERR;
-
-    my %makers = map {
-        my $maker = $_;
-        map +( $maker => /V([\d.-]+)/ ? $1 : '' )
-        => grep /\b$maker\b/ && /V[\d.-]+/ => qx($maker/IDENT)
-    } qw( MMK MMS );
-
-    open STDERR, ">&QXERR"; close QXERR;
-
-    return %makers;
 }
 
 sub get_Win_version {

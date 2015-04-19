@@ -4,6 +4,8 @@ use strict;
 
 use Cwd;
 
+use Test::Smoke::LogMixin;
+
 =head1 NAME
 
 Test::Smoke::Util::Execute - Run a command and return its output.
@@ -83,8 +85,8 @@ sub run {
             / / ? qq/"$_"/ : $_
             } $self->arguments(@_)
     );
-    $self->verbose > 1 and printf "In pwd(%s) running:\n", cwd();
-    $self->verbose and printf "qx[%s]\n", $command;
+    $self->log_debug("In pwd(%s) running:", cwd());
+    $self->log_info("qx[%s]\n", $command);
 
     my @output = qx/$command/;
     $self->{exitcode} = $? >> 8;

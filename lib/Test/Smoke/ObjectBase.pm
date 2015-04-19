@@ -35,6 +35,6 @@ sub AUTOLOAD {
     );
 }
 
-sub DESTROY { }
+sub DESTROY { 1 } # the 1 is for coverage
 
 1;

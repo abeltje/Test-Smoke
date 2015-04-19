@@ -74,6 +74,7 @@ sub run {
         $self->option('ddir'),
         $patchlevel
     );
+    return $patchlevel;
 }
 
 1;

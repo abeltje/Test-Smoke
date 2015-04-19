@@ -189,7 +189,7 @@ sub find_unzip {
 Returns the gunzipped contents of C<$uzfile>.
 
 =cut
-        
+
 sub do_unzip {
     my( $unzip, $uzfile ) = @_;
     return undef unless -f $uzfile;

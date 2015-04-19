@@ -12,16 +12,9 @@ all_pod_coverage_ok({trustme => \@options});
 
 
 __DATA__
-archiver_config
-mailer_config
-poster_config
-reporter_config
-runsmoke_config
-sendreport_config
-smokeperl_config
-synctree_config
 adir
 archive
+archiver_config
 bcc
 cc
 ccp5p_onfail
@@ -42,6 +35,7 @@ gitorigin
 harness3opts
 harness_destruct
 harnessonly
+hasharness3
 hdir
 is56x
 is_vms
@@ -53,6 +47,7 @@ locale
 mail
 mail_type
 mailbin
+mailer_config
 mailxbin
 makeopt
 mdir
@@ -62,22 +57,31 @@ msport
 msuser
 opt_continue
 outfile
+patchlevel
 poster
+poster_config
 report
+reporter_config
 rptfile
 rsyncbin
 rsyncopts
 rsyncsource
+runsmoke_config
 send_log
 send_out
 sendemailbin
 sendmailbin
+sendreport_config
 showcfg
 skip_tests
+smartsmoke
 smokedb_url
+smokeperl_config
 swbcc
 swcc
+sync
 syncer
+synctree_config
 testmake
 to
 ua_timeout

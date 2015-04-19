@@ -1,16 +1,18 @@
 #! perl -w
 use strict;
 
-use Test::More 'no_plan';
-use Test::NoWarnings;
+use Test::More;
+use Test::NoWarnings ();
 
 BEGIN {
     no warnings 'redefine';
     *CORE::GLOBAL::exit = sub (;$) {
         die sprintf "exit(%s) called\n", (shift||'');
     };
+    *CORE::GLOBAL::localtime = sub { CORE::localtime(@_) };
 }
 
+use Cwd 'abs_path', 'cwd';
 use Data::Dumper;
 use Test::Smoke::App::AppOption;
 
@@ -67,7 +69,7 @@ use Test::Smoke::App::AppOption;
     is($app->option('verbose'), 2, "verbose level 2");
     is($app->option('test1'), 'app2', "self-type ok");
     is($app->option('2gogo'), 1, "default option for app2");
-    is($app->option('configfile'), 'smokeme_config', "Configuration file");
+    is($app->option('configfile'), abs_path('smokeme_config'), "Configuration file");
     is(
         $app->option('mybin2'),
         '/usr/bin/mybin2',
@@ -90,7 +92,7 @@ use Test::Smoke::App::AppOption;
     is_deeply(
         {$app->options},
         {
-            configfile  => 'smokeme_config',
+            configfile  => abs_path('smokeme_config'),
             verbose     => 2,
             test1       => 'app2',
             mybin2      => '/usr/bin/mybin2',
@@ -101,33 +103,45 @@ use Test::Smoke::App::AppOption;
     );
 
     # Test the logging
+    no warnings 'redefine';
+    local *CORE::GLOBAL::localtime = sub {
+        return (2, 11, 14, 15, 3, 115, 3, 104, 1);
+    };
     {
         open my $log, '>', \my $logfile;
         my $stdout = select $log;
         $app->run1("no newline %s", 'single value');
         select $stdout;
-        is($logfile, "no newline single value\n", "log_info() no newline");
+        is($logfile, <<'        EOL', "log_info() no newline");
+[2015-04-15 14:11:02+0200] no newline single value
+        EOL
     }
     {
         open my $log, '>', \my $logfile;
         my $stdout = select $log;
         $app->run1("With newline %s\n\n", 'single value');
         select $stdout;
-        is($logfile, "With newline single value\n\n", "log_info() 2newline");
+        is($logfile, <<'        EOL', "log_info() 2newline");
+[2015-04-15 14:11:02+0200] With newline single value
+        EOL
     }
     {
         open my $log, '>', \my $logfile;
         my $stdout = select $log;
         $app->run2("no newline %s", 'single value');
         select $stdout;
-        is($logfile, "no newline single value\n", "log_debug() no newline");
+        is($logfile, <<'        EOL', "log_debug() no newline");
+[2015-04-15 14:11:02+0200] no newline single value
+        EOL
     }
     {
         open my $log, '>', \my $logfile;
         my $stdout = select $log;
         $app->run2("With newline %s\n", 'single value');
         select $stdout;
-        is($logfile, "With newline single value\n", "log_debug() newline");
+        is($logfile, <<'        EOL', "log_debug() newline");
+[2015-04-15 14:11:02+0200] With newline single value
+        EOL
     }
     {
         $app->final_options->{verbose} = 0;
@@ -158,7 +172,7 @@ use Test::Smoke::App::AppOption;
         };
         local *STDOUT;
         open STDOUT, '>', \$helptxt;
-        
+
         local @ARGV = ('--help', '--test1', 'app');
         $app = Test::Smoke::App::Test1->new(
             main_options => [
@@ -271,7 +285,9 @@ Show configuration requested:
     is($exitval, 0, "ExitValue 0");
 }
 
-# done_testing();
+Test::NoWarnings::had_no_warnings();
+$Test::NoWarnings::do_end_test = 0;
+done_testing();
 
 sub create_config {
     my ($name, %options) = @_;

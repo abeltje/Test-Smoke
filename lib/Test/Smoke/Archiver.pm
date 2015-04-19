@@ -88,19 +88,26 @@ sub archive_files {
     if (!$self->adir) {
         return $self->log_info("Skipping archive: No archive directory set.");
     }
-    
+
     if (!-d $self->adir) {
-        mkpath($self->adir, ($self->v > 1), 0775)
+        open my $ch, '>', \my $output;
+        my $stdout = select $ch;
+        mkpath($self->adir, 1, 0775)
             or die "Cannot mkpath(@{[$self->adir]}): $!";
+        select $stdout;
+        $self->log_debug($_) for split /\n/, $output;
     }
 
     (my $patch_level = get_patch($self->ddir)->[0]) =~ tr/ //sd;
     $self->{_patchlevel} = $patch_level;
 
+    my @archived;
     for my $filetype (qw/rpt out jsn log/) {
         my $to_archive = "archive_$filetype";
-        $self->$to_archive;
+        my $filename = $filetype eq 'log' ? 'lfile' : "${filetype}file";
+        push @archived, $self->$filename if $self->$to_archive;
     }
+    return \@archived;
 }
 
 =head2 $archiver->archive_rpt

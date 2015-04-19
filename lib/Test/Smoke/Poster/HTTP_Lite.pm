@@ -42,6 +42,7 @@ sub _post_data {
 
     $self->log_info("Posting to %s via %s.", $self->smokedb_url, $self->poster);
     $self->log_debug("Report data: %s", my $json = $self->get_json);
+
     $self->ua->prepare_post({ json => $json });
     $self->ua->add_req_header('User-Agent', $self->agent_string);
     $self->ua->request($self->smokedb_url) or croak("CoreSmokeDB: $!");

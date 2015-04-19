@@ -55,13 +55,15 @@ sub _post_data {
     my $self = shift;
 
     $self->log_info("Posting to %s via %s.", $self->smokedb_url, $self->poster);
-    my $json = $self->get_json;
-    $self->log_debug("Report data: %s", $json);
+    $self->log_debug("Report data: %s", my $json = $self->get_json);
 
-    my $response = $self->ua->post(
-        $self->smokedb_url,
-        { json => $json }
-    );
+    my $response = eval {
+        $self->ua->post(
+            $self->smokedb_url,
+            { json => $json }
+        );
+    };
+    $self->log_warn("Error posting: $@") if $@;
 
     return $response->content;
 }
@@ -70,7 +72,7 @@ sub _post_data {
 
 =head1 COPYRIGHT
 
-(c) 2002-2013, Abe Timmerman <abeltje@cpan.org> All rights reserved.
+(c) 2002-2015, Abe Timmerman <abeltje@cpan.org> All rights reserved.
 
 With contributions from Jarkko Hietaniemi, Merijn Brand, Campo
 Weijerman, Alan Burlison, Allen Smith, Alain Barbet, Dominic Dunlop,

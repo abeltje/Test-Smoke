@@ -2,8 +2,8 @@
 use strict;
 $|++;
 
-use Test::More 'no_plan';
-use Test::NoWarnings;
+use Test::More;
+use Test::NoWarnings ();
 
 use Test::Smoke::App::AppOption;
 
@@ -128,4 +128,6 @@ use Test::Smoke::App::AppOption;
     );
 }
 
-# done_testing();
+Test::NoWarnings::had_no_warnings();
+$Test::NoWarnings::do_end_test = 0;
+done_testing();

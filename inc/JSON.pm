@@ -25,6 +25,23 @@ JSON. Also people that installed L<JSON::XS> on a pre-5.14 system.
 use Exporter 'import';
 our @EXPORT = qw/encode_json decode_json/;
 
+no warnings 'redefine';
+my $json_base_class;
+sub import {
+    my ($class) = @_;
+    $json_base_class = $class->find_base_class;
+
+    die "Could not find a supported JSON implementation.\n"
+        if !$json_base_class;
+
+    {
+        no warnings 'redefine', 'once';
+        *encode_json = \&{$json_base_class."::encode_json"};
+        *decode_json = \&{$json_base_class."::decode_json"};
+    }
+    goto &Exporter::import;
+}
+
 =head2 my $class = JSON->find_base_class()
 
 On success returns one of: B<JSON::XS>, B<JSON::PP>
@@ -53,16 +70,6 @@ This will die() if no base class could be found.
 
 sub new {
     my $class = shift;
-    my $json_base_class = $class->find_base_class;
-
-    die "Could not find a supported JSON implementation.\n"
-        if !$json_base_class;
-
-    {
-        no warnings 'redefine', 'once';
-        *encode_json = \&{$json_base_class."::encode_json"};
-        *decode_json = \&{$json_base_class."::decode_json"};
-    }
     return $json_base_class->new(@_);
 }
 

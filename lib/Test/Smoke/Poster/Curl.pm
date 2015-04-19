@@ -49,13 +49,13 @@ sub _post_data {
     my $self = shift;
 
     $self->log_info("Posting to %s via %s.", $self->smokedb_url, $self->poster);
-    my $json = CGI::Util::escape($self->get_json);
-    $self->log_debug("Report data: %s", $json);
+    $self->log_debug("Report data: %s", my $json = $self->get_json);
 
+    my $form_data = sprintf("json=%s", CGI::Util::escape($json));
     my $response = $self->curl->run(
         ($self->v ? () : '--silent'),
         '-A' => $self->agent_string(),
-        '-d' => "json=$json",
+        '-d' => $form_data,
         $self->smokedb_url,
     );
     $self->log_debug("[CoreSmokeDB] %s", $response);

@@ -1,8 +1,8 @@
 #! perl -w
 use strict;
 
-use Test::More 'no_plan';
-use Test::NoWarnings;
+use Test::More;
+use Test::NoWarnings ();
 
 {
     my $o = MyObj->new();
@@ -23,7 +23,15 @@ use Test::NoWarnings;
         qr/^Invalid attribute 'unknown' for class 'MyObj'/,
         "Cannot address unknown fields"
     );
+
+    # trigger DESTROY()
+    undef $o;
+    is($o, undef, "destroyed");
 }
+
+Test::NoWarnings::had_no_warnings();
+$Test::NoWarnings::do_end_test = 0;
+done_testing();
 
 package MyObj;
 use warnings;

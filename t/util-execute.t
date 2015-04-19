@@ -6,6 +6,7 @@ use Test::More 'no_plan';
 use Cwd;
 use Test::Smoke::Util::Execute;
 
+local $Test::Smoke::LogMixin::USE_TIMESTAMP = 0;
 {
     my @numbers = map "$_\n", 1..3;
     my $lines = join("", @numbers);

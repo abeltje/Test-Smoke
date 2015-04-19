@@ -9,6 +9,7 @@ use File::Spec;
 use File::Find;
 use Cwd;
 use Carp;
+use Test::Smoke::LogMixin;
 
 use base 'Exporter';
 %EXPORT_TAGS = (
@@ -58,7 +59,7 @@ sub ST_UNDECLARED() { 0 }
 
 =head1 DESCRIPTION
 
-=head2 Test::Smoke::SourceTree->new( $tree_dir )
+=head2 Test::Smoke::SourceTree->new( $tree_dir[, $verbose] )
 
 C<new()> creates a new object, this is a simple scalar containing
 C<< File::Spec->rel2abs( $tree_dir) >>.
@@ -75,10 +76,26 @@ sub new {
     my $dir = File::Spec->canonpath( shift );
     my $cwd = cwd();
     chdir $dir or croak "Cannot chdir($dir): $!";
-    my $self = cwd();
+    my $self = {tree_dir => cwd(), verbose => shift || 0};
     chdir $cwd;
-    return bless \$self, $class;
+    return bless $self, $class;
 }
+
+=head2 $tree->tree_dir
+
+Get the directory.
+
+=cut
+
+sub tree_dir { return $_[0]->{tree_dir} }
+
+=head2 $tree->verbose
+
+Get verbosity.
+
+=cut
+
+sub verbose { return $_[0]->{verbose} }
 
 =head2 $tree->canonpath( )
 
@@ -89,7 +106,7 @@ see L<File::Spec>.
 
 sub canonpath {
     my $self = shift;
-    return File::Spec->canonpath( $$self );
+    return File::Spec->canonpath( $self->tree_dir );
 }
 
 =head2 $tree->rel2abs( [$base_dir] )
@@ -100,7 +117,7 @@ C<rel2abs()> returns the absolute path, see L<File::Spec>.
 
 sub rel2abs {
     my $self = shift;
-    return File::Spec->rel2abs( $$self, @_ );
+    return File::Spec->rel2abs( $self->tree_dir, @_ );
 }
 
 =head2 $tree->abs2rel( [$base_dir] )
@@ -112,7 +129,7 @@ see L<File::Spec>.
 
 sub abs2rel {
     my $self = shift;
-    return File::Spec->abs2rel( $$self, @_ );
+    return File::Spec->abs2rel( $self->tree_dir, @_ );
 }
 
 =head2 $tree->mani2abs( $file[, $base_path] )
@@ -127,7 +144,7 @@ sub mani2abs {
 
     my $path = shift;
     my @dirs = split m{/+}, $path;
-    my $file = pop @dirs; 
+    my $file = pop @dirs;
     if ( $^O eq 'VMS' ) {
         my @parts = split m/\./, $file;
         my $last = pop @parts;
@@ -136,7 +153,7 @@ sub mani2abs {
     }
     @dirs and $file = join '/', @dirs, $file;
     my @split_path = split m|/|, $file;
-    my $base_path = File::Spec->rel2abs( $$self, @_ );
+    my $base_path = File::Spec->rel2abs( $self->tree_dir, @_ );
     return File::Spec->catfile( $base_path, @split_path );
 }
 
@@ -151,7 +168,7 @@ sub mani2absdir {
     my $self = shift;
 
     my @split_path = split m|/|, shift;
-    my $base_path = File::Spec->rel2abs( $$self, @_ );
+    my $base_path = File::Spec->rel2abs( $self->tree_dir, @_ );
     return File::Spec->catdir( $base_path, @split_path );
 }
 
@@ -164,7 +181,7 @@ C<abs2mani()> returns the MANIFEST style filename.
 sub abs2mani {
     my $self = shift;
     my $relfile = File::Spec->abs2rel( File::Spec->canonpath( shift ),
-                                       $$self );
+                                       $self->tree_dir );
     my( undef, $directories, $file ) = File::Spec->splitpath( $relfile );
     my @dirs = grep $_ && length $_ => File::Spec->splitdir( $directories );
     push @dirs, $file;
@@ -173,8 +190,8 @@ sub abs2mani {
 
 =head2 $tree->check_MANIFEST( @ignore )
 
-C<check_MANIFEST()> reads the B<MANIFEST> file from C<< $$self >> and
-compares it with the actual contents of C<< $$self >>.
+C<check_MANIFEST()> reads the B<MANIFEST> file from C<< $self->tree_dir >> and
+compares it with the actual contents of C<< $self->tree_dir >>.
 
 Returns a hashref with suspicious entries (if any) as keys that have a 
 value of either B<ST_MISSING> (not in directory) or B<ST_UNDECLARED>
@@ -186,18 +203,20 @@ sub check_MANIFEST {
     my $self = shift;
 
     my %manifest = %{ $self->_read_mani_file( 'MANIFEST' ) };
+    $self->log_debug("Found %d entries in MANIFEST", scalar(keys %manifest));
 
     my %ignore = map {
         my $entry = $NOCASE ? uc $_ : $_;
-        $entry => undef 
-    } ( ".patch", "MANIFEST.SKIP", '.git', '.gitignore', @_ ), 
+        $entry => undef
+    } ( ".patch", "MANIFEST.SKIP", '.git', '.gitignore', @_ ),
       keys %{ $self->_read_mani_file( 'MANIFEST.SKIP', 1 ) };
+    $self->log_debug("Found %d entries in MANIFEST.SKIP", scalar(keys %ignore));
 
     # Walk the tree, remove all found files from %manifest
     # and add other files to %manifest 
     # unless they are in the ignore list
     my $cwd = cwd();
-    chdir $$self or die "Cannot chdir($$self): $!";
+    chdir $self->tree_dir or die "Cannot chdir($self->tree_dir): $!";
     require File::Find;
     File::Find::find(
         sub {
@@ -209,20 +228,26 @@ sub check_MANIFEST {
             my $mani_name = join '/', @dirs, $file;
             $NOCASE and $mani_name = uc $mani_name;
             if (exists $manifest{$mani_name}) {
+                $self->log_debug("[manicheck] Matched $mani_name");
                 delete $manifest{$mani_name};
             }
             else {
                 if (!grep $mani_name =~ /$_/, keys %ignore) {
+                    $self->log_debug("[manicheck] Undeclared $mani_name");
                     $manifest{$mani_name} = ST_UNDECLARED;
+                }
+                else {
+                    $self->log_debug("[manicheck] Skipped $mani_name");
                 }
             }
         },
         '.'
     );
     chdir $cwd;
+    $self->log_debug("[manicheck] %d entries missing", scalar(keys %manifest));
 
     return \%manifest;
-} 
+}
 
 =head2 $self->_read_mani_file( $path[, $no_croak] )
 
@@ -243,7 +268,7 @@ sub _read_mani_file {
         croak( "Can't open '$manifile': $!" );
     };
 
-    my %manifest = map { 
+    my %manifest = map {
         m|(\S+)|;
         my $entry = $NOCASE ? uc $1 : $1;
         if ( $^O eq 'VMS' ) {
@@ -275,7 +300,7 @@ sub clean_from_MANIFEST {
 
     my $mani_check = $self->check_MANIFEST( @_ );
     my @to_remove = grep {
-        $mani_check->{ $_ } == ST_UNDECLARED 
+        $mani_check->{ $_ } == ST_UNDECLARED
     } keys %$mani_check;
 
     foreach my $entry ( @to_remove ) {
@@ -284,16 +309,15 @@ sub clean_from_MANIFEST {
     }
 }
 
-=head2 copy_from_MANIFEST( $dest_dir[, $verbose] )
+=head2 copy_from_MANIFEST( $dest_dir )
 
-C<_copy_from_MANIFEST()> uses the B<MANIFEST> file from C<$$self>
+C<_copy_from_MANIFEST()> uses the B<MANIFEST> file from C<$self->tree_dir>
 to copy a source-tree to C<< $dest_dir >>.
 
 =cut
 
 sub copy_from_MANIFEST {
-    my( $self, $dest_dir, $verbose ) = @_;
-    $verbose ||= 0;
+    my ($self, $dest_dir) = @_;
 
     my $manifest = $self->mani2abs( 'MANIFEST' );
 
@@ -303,7 +327,7 @@ sub copy_from_MANIFEST {
         return undef;
     };
 
-    $verbose and print "Reading from '$manifest'";
+    $self->log_info("Reading from '%s'", $manifest);
     my @manifest_files = map {
         /^([^\s]+)/ ? $1 : $_
     } <MANIFEST>;
@@ -311,9 +335,9 @@ sub copy_from_MANIFEST {
     my $dot_patch = $self->mani2abs( '.patch' );
     -f $dot_patch and push @manifest_files, '.patch';
 
-    $verbose and printf " %d items OK\n", scalar @manifest_files;
+    $self->log_info("%s: %d items OK", $manifest, scalar @manifest_files);
 
-    File::Path::mkpath( $dest_dir, $verbose ) unless -d $dest_dir;
+    File::Path::mkpath( $dest_dir, $self->verbose ) unless -d $dest_dir;
     my $dest = $self->new( $dest_dir );
 
     require File::Basename;
@@ -324,16 +348,19 @@ sub copy_from_MANIFEST {
         my $dest_name = $dest->mani2abs( $file );
         my $dest_path = File::Basename::dirname( $dest_name );
 
-        File::Path::mkpath( $dest_path, $verbose ) unless -d $dest_path;
+        File::Path::mkpath( $dest_path, $self->verbose ) unless -d $dest_path;
 
         my $abs_file = $self->mani2abs( $file );
-        $verbose > 1 and print "$abs_file -> $dest_name ";
         my $mode = ( stat $abs_file )[2] & 07777;
         -f $dest_name and 1 while unlink $dest_name;
         my $ok = File::Copy::syscopy( $abs_file, $dest_name );
         $ok and $ok &&= chmod $mode, $dest_name;
-        $ok or carp "copy '$file' ($dest_path): $!\n";
-        $ok && $verbose > 1 and print "OK\n";
+        if ($ok) {
+            $self->log_debug("%s -> %s: %sOK", $abs_file, $dest_name, ($ok ? "" : "NOT "));
+        }
+        else {
+            $self->log_warn("copy '$file' ($dest_path): $!");
+        }
     }
 }
 
@@ -341,7 +368,7 @@ sub copy_from_MANIFEST {
 
 =head1 COPYRIGHT
 
-(c) 2002-2003, All rights reserved.
+(c) 2002-2015, All rights reserved.
 
   * Abe Timmerman <abeltje@cpan.org>
 

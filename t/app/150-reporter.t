@@ -1,7 +1,11 @@
 #! perl -w
 use strict;
 
-use Test::More 'no_plan';
+BEGIN {
+    *CORE::GLOBAL::localtime = sub { @_ ? CORE::localtime(shift) : CORE::localtime() };
+}
+use Test::More;
+use Test::NoWarnings ();
 
 use File::Spec::Functions;
 use Test::Smoke::App::Options;
@@ -15,9 +19,34 @@ my $ddir = 't';
         Test::Smoke::App::Options->reporter_config()
     );
     isa_ok($app, 'Test::Smoke::App::Reporter');
+
+    no warnings 'redefine';
+    local *CORE::GLOBAL::localtime = sub {
+        return (2, 11, 14, 15, 3, 115, 3, 104, 1);
+    };
+    local *Test::Smoke::Reporter::write_to_file = sub {
+        my $self = shift;
+        $self->log_warn("%s::write_to_file(): '@_'", ref $self);
+    };
+    local *Test::Smoke::Reporter::smokedb_data = sub {
+        my $self = shift;
+        $self->log_warn("%s::smokedb_data(): '@_'", ref $self);
+    };
+    open my $fh, '>', \my $logfile;
+    my $stdout = select $fh;
+    $app->run();
+    select $stdout;
+
+    is($logfile, <<'    EOL', "logfile");
+[2015-04-15 14:11:02+0200] Test::Smoke::Reporter::write_to_file(): ''
+[2015-04-15 14:11:02+0200] Test::Smoke::Reporter::smokedb_data(): ''
+    EOL
 }
 
-# done_testing();
+Test::NoWarnings::had_no_warnings();
+$Test::NoWarnings::do_end_test = 0;
+done_testing();
+
 END { unlink catfile($ddir, Test::Smoke::App::Options->outfile->default) }
 
 sub fake_out {

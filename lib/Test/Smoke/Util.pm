@@ -2,18 +2,17 @@ package Test::Smoke::Util;
 use strict;
 
 # $Id$
-use vars qw( $VERSION @EXPORT @EXPORT_OK $NOCASE );
-$VERSION = '0.58';
+our $VERSION = '0.58';
 
-use base 'Exporter';
-@EXPORT = qw( 
+use Exporter 'import';
+our @EXPORT = qw( 
     &Configure_win32
     &get_cfg_filename &get_config
     &get_patch
     &skip_config &skip_filter
 );
 
-@EXPORT_OK = qw(
+our @EXPORT_OK = qw(
     &grepccmsg &grepnonfatal &get_local_patches &set_local_patch
     &get_ncpu &get_smoked_Config &parse_report_Config 
     &get_regen_headers &run_regen_headers
@@ -28,8 +27,9 @@ use File::Spec::Functions;
 use Encode qw ( decode );
 use File::Find;
 use Cwd;
+use Test::Smoke::LogMixin;
 
-$NOCASE = $^O eq 'VMS';
+our $NOCASE = $^O eq 'VMS';
 
 =head1 NAME
 
@@ -585,14 +585,15 @@ sub get_local_patches {
     $ddir = shift || cwd();
     my $plevel = catfile( $ddir, 'patchlevel.h' );
 
+    my $logger = Test::Smoke::Logger->new(v => $verbose);
+
     my @lpatches = ( );
     local *PLEVEL;
-    $verbose and print "Locally applied patches from '$plevel':";
+    $logger->log_info("Locally applied patches from '%s'", $plevel);
     unless ( open PLEVEL, "< $plevel" ) {
-        $verbose and print " error: $!";
+        $logger->log_warn("open(%s) error: %s", $plevel, $!);
         return @lpatches;
     }
-    $verbose and print " open ok\n";
     my( $seen, $patchnum );
     while ( <PLEVEL> ) {
         $patchnum = $1 if /#define PERL_PATCHNUM\s+(\d+)/;
@@ -606,7 +607,7 @@ sub get_local_patches {
             $_;
         } @lpatches;
     }
-    $verbose and do { local $"=';'; print "Patches: '@lpatches'\n" };
+    $logger->log_info("Patches: '%s'", join(';', @lpatches));
     return @lpatches;
 }
 
@@ -735,7 +736,7 @@ sub get_config {
         }
 
         while (my ($key, $val) = each %conf) {
-            $val > 1 and 
+            $val > 1 and
                 warn "Configuration line '$key' duplicated $val times";
         }
         my $args = [@conf];
@@ -771,14 +772,33 @@ sub get_patch {
         close DOTPATCH;
 
         if ( $patch_level ) {
-            my ($branch, $date, $sha, $describe) = split(' ', $patch_level);
-            ( my $short_describe = $describe ) =~ s/^GitLive-//;
-            return [$sha, $short_describe, $branch]
+            if ($patch_level =~ /\s/) {
+                my ($branch, $date, $sha, $describe) = split(' ', $patch_level);
+                (my $short_describe = $describe) =~ s/^GitLive-//;
+                return [$sha, $short_describe, $branch];
+            }
+            else {
+                return [$patch_level];
+            }
         }
         return [ '' ];
     }
 
-    # There does not seem to be a '.patch', try 'patchlevel.h'
+    # There does not seem to be a '.patch', try 'git_version.h'
+    # We are looking for the line: #define PERL_PATCHNUM "v5.21.6-224-g6324db4"
+    my $git_version_h = File::Spec->catfile($ddir, 'git_version.h');
+    if (open my $gvh, '<', $git_version_h) {
+        while (my $line = <$gvh>) {
+            if ($line =~ /^#define PERL_PATCHNUM "(.+)"$/) {
+                return $1;
+            }
+        }
+        close $gvh;
+    }
+    # This only applies to
+    # There does not seem to be a '.patch', and we couldn't find git_version.h
+    # Now try 'patchlevel.h'
+    # We are looking for the line: ,"DEVEL19999" (within local_patches[] = {}
     local *PATCHLEVEL_H;
     my $patchlevel_h = File::Spec->catfile( $ddir, 'patchlevel.h' );
     if ( open PATCHLEVEL_H, "< $patchlevel_h" ) {
@@ -1120,6 +1140,7 @@ sub whereis {
     my $prog = shift;
     return undef unless $prog; # you shouldn't call it '0'!
     $^O eq 'VMS' and return vms_whereis( $prog );
+    my $logger = Test::Smoke::Logger->new(v => shift || 0);
 
     my $p_sep = $Config::Config{path_sep};
     my @path = split /\Q$p_sep\E/, $ENV{PATH};
@@ -1127,13 +1148,17 @@ sub whereis {
     unshift @pext, '';
 
     foreach my $dir ( @path ) {
+        $logger->log_debug("Looking in %s for %s", $dir, $prog);
         foreach my $ext ( @pext ) {
             my $fname = File::Spec->catfile( $dir, "$prog$ext" );
+            $logger->log_debug("    check executable %s", $fname);
             if ( -x $fname ) {
+                $logger->log_info("Found %s as %s", $prog, $fname);
                 return $fname =~ /\s/ ? qq/"$fname"/ : $fname;
             }
         }
     }
+    $logger->log_info("Could not find %s", $prog);
     return '';
 }
 

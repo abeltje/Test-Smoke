@@ -15,35 +15,6 @@ Test::Smoke::App::SendReport - Implementation for tssendrpt.pl
 
 =head1 DESCRIPTIN
 
-=head2 Test::Smoke::App::SendReport->new(%optionn);
-
-The config lives in C<< Test::Smoke::App::Options->sendrpt_config() >>.
-
-=cut
-
-sub new {
-    my $class = shift;
-    my $self = $class->SUPER::new(@_);
-
-    if ($self->option('mail')) {
-        $self->{_mailer} = Test::Smoke::Mailer->new(
-            $self->option('mail_type'),
-            $self->options,
-            v => $self->option('verbose'),
-        );
-    }
-    else {
-        $self->log_info("Skipped sending mail.");
-    }
-    $self->{_poster} = Test::Smoke::Poster->new(
-        $self->option('poster'),
-        $self->options,
-        v => $self->option('verbose'),
-    );
-
-    return $self;
-}
-
 =head2 $sendrpt->run()
 
 =over
@@ -62,11 +33,31 @@ sub run {
     $self->check_for_report_and_json;
 
     if ($self->option('mail')) {
+        $self->{_mailer} = Test::Smoke::Mailer->new(
+            $self->option('mail_type'),
+            $self->options,
+            v => $self->option('verbose'),
+        );
+        $self->log_info("==> Starting mailer");
         $self->mailer->mail();
+    }
+    else {
+        $self->log_warn("==> Skipping mailer");
     }
 
     if ($self->option('smokedb_url')) {
-        $self->poster->post();
+        $self->{_poster} = Test::Smoke::Poster->new(
+            $self->option('poster'),
+            $self->options,
+            v => $self->option('verbose'),
+        );
+        $self->log_info("==> Starting poster");
+        my $id = $self->poster->post();
+        $self->log_warn("%s/%s", $self->option('smokedb_url'), $id);
+        return $id;
+    }
+    else {
+        $self->log_warn("==> Skipping poster");
     }
 }
 
@@ -83,14 +74,14 @@ sub check_for_report_and_json {
     my $jsnfile = catfile($self->option('ddir'), $self->option('jsnfile'));
     my $missing = 0;
     if (!-f $rptfile) {
-        $self->log_info("RPTfile ($rptfile) not found");
+        $self->log_warn("RPTfile ($rptfile) not found");
         $missing = 1;
     }
     else {
         $self->log_debug("RPTfile (%s) found.", $rptfile);
     }
     if (!-f $jsnfile) {
-        $self->log_info("JSNfile ($jsnfile) not found");
+        $self->log_warn("JSNfile ($jsnfile) not found");
         $missing = 1;
     }
     else {

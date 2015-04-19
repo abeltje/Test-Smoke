@@ -42,8 +42,8 @@ sub sync {
     $self->pre_sync;
     require Test::Smoke::SourceTree;
 
-    my $tree = Test::Smoke::SourceTree->new( $self->{cdir} );
-    $tree->copy_from_MANIFEST( $self->{ddir}, $self->{v} );
+    my $tree = Test::Smoke::SourceTree->new($self->{cdir}, $self->verbose);
+    $tree->copy_from_MANIFEST($self->{ddir});
 
     $tree = Test::Smoke::SourceTree->new( $self->{ddir} );
     $tree->clean_from_MANIFEST( 'MANIFEST.SKIP' );

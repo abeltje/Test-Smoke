@@ -23,6 +23,18 @@ sub new {
     return bless {@_}, $class;
 }
 
+=head2 $syncer->verbose
+
+Get/Set verbosity.
+
+=cut
+
+sub verbose {
+    my $self = shift;
+    $self->{v} = shift if @_;
+    return $self->{v};
+}
+
 =head2 $syncer->sync()
 
 Abstract method.

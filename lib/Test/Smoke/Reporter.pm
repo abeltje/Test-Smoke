@@ -95,13 +95,13 @@ sub new {
     $self->read_parse(  );
 }
 
-=head2 $reporter->v()
+=head2 $reporter->verbose()
 
 Accessor to the C<v> attribute.
 
 =cut
 
-sub v {
+sub verbose {
     my $self = shift;
 
     $self->{v} = shift if @_;
@@ -150,9 +150,11 @@ C<read_parse()> reads the smokeresults file and parses it.
 sub read_parse {
     my $self = shift;
 
-    my $result_file = @_ ? $_[0] : $self->{outfile} 
+    my $result_file = @_ ? $_[0] : $self->{outfile}
         ? catfile( $self->{ddir}, $self->{outfile} )
         : "";
+    $self->log_debug("[%s::read_parse] found '%s'", ref($self), $result_file);
+
     if ( $result_file ) {
         $self->_read( $result_file );
         $self->_parse;
@@ -210,9 +212,9 @@ sub _read {
         } else { # Allow intentional default_buildcfg()
             $self->{_outfile} = undef;
             $vmsg = "did fail";
-        } 
+        }
     }
-    $self->{v} and print "Reading smokeresult $vmsg\n";
+    $self->log_info("Reading smokeresult %s", $vmsg);
 }
 
 =head2 $self->_parse( )
@@ -596,7 +598,7 @@ sub _post_process {
             my $cfg = $config;
             ($cfg = $cfg ? "$debugging $cfg" : $debugging)
                 if $dbinfo eq "D";
-            $self->{v} and print "Processing [$cfg]\n";
+            $self->log_info("Processing [%s]", $cfg);
             my $status = $self->{_rpt}{$config}{summary}{$dbinfo};
             foreach my $tstenv (reverse sort keys %bldenv) {
                 next if $tstenv eq 'minitest' && !exists $status->{$tstenv};
@@ -650,7 +652,7 @@ sub _post_process {
 
                 }
 
-                $self->{v} > 1 and print "\t[$showenv]: $status->{$tstenv}\n";
+                $self->log_debug("\t[%s]: %s", $showenv, $status->{$tstenv});
                 if ($tstenv eq 'minitest') {
                     $status->{stdio} = "M";
                     delete $status->{minitest};
@@ -799,7 +801,7 @@ locally in the file mktest.jsn
 
 sub smokedb_data {
     my $self = shift;
-    $self->{v} and print "Gathering CoreSmokeDB information...\n";
+    $self->log_info("Gathering CoreSmokeDB information...");
 
     my %rpt  = map { $_ => $self->{$_} } keys %$self;
     $rpt{manifest_msgs}   = delete $rpt{_mani};
@@ -875,10 +877,10 @@ sub smokedb_data {
         binmode($jsn);
         print {$jsn} $json;
         close $jsn;
-        $self->{v} and print "Write to '$jsn_file': ok\n";
+        $self->log_info("Write to '%s': ok", $jsn_file);
     }
     else {
-        print "Error creating '$jsn_file': $!\n";
+        $self->log_warn("Error creating '%s': %s", $jsn_file, $!);
     }
 
     return $self->{_json} = $json;
@@ -945,7 +947,7 @@ sub _get_usernote {
             $self->{user_note} = join('', <$unf>);
         }
         else {
-            print "Cannot read '$self->{un_file}': $!\n" if $self->{v};
+            $self->log_warn("Cannot read '%s': %s", $self->{un_file}, $!);
         }
     }
     elsif (!defined $self->{user_note}) {
@@ -1088,7 +1090,7 @@ sub nonfatalmessages {
 
     if (!$self->{_nonfatal_}) {
 
-        $self->{v} and print "Looking for non-fatal messages: '$cc'\n";
+        $self->log_info("Looking for non-fatal messages: '%s'", $cc);
         $self->{_nonfatal_} = grepnonfatal(
             $cc,
             $self->get_logfile(),

@@ -13,6 +13,8 @@ user-calls on this.
 =cut
 
 use Cwd;
+use Test::Smoke::LogMixin;
+use Test::Smoke::Util::Execute;
 
 =head2 Test::Smoke::Syncer::Rsync->new( %args )
 
@@ -24,7 +26,24 @@ This crates the new object. Keys for C<%args>:
   * rsync:  the full path to the rsync program ( rsync )
   * v:      verbose
 
+=head2 $rsync->pre_sync()
+
+Create the destination directory is it doesn't exist.
+
 =cut
+
+sub pre_sync {
+    my $self = shift;
+    if (! -d $self->{ddir}) {
+        require File::Path;
+        open my $fh, '>', \my $output;
+        my $stdout = select $fh;
+        File::Path::mkpath($self->{ddir}, $self->verbose);
+        select $stdout;
+        $self->log_info($output);
+    }
+    $self->SUPER::pre_sync;
+}
 
 =head2 $object->sync( )
 
@@ -41,20 +60,25 @@ sub sync {
     my $self = shift;
     $self->pre_sync;
 
-    my $command = join " ", $self->{rsync}, $self->{opts};
-    $command .= " -v" if $self->{v};
-    my $redir = $self->{v} ? "" : " >" . File::Spec->devnull;
-
+    my $rsync = Test::Smoke::Util::Execute->new(
+        command => $self->{rsync},
+        verbose => $self->verbose,
+    );
     my $cwd = cwd();
-    chdir $self->{ddir} or do {
+    if (! chdir $self->{ddir}) {
         require Carp;
         Carp::croak( "[rsync] Cannot chdir($self->{ddir}): $!" );
     };
-    $command .= " $self->{source} .$redir";
+    my $rsyncout = $rsync->run(
+        $self->{opts},
+        ($self->verbose ? "-v" : ""),
+        $self->{source},
+        File::Spec->curdir,
+        ($self->verbose ? "" : ">" . File::Spec->devnull)
+    );
+    $self->log_debug($rsyncout);
 
-    $self->{v} > 1 and print "[$command]\n";
-    if ( system $command ) {
-        my $err = $? >> 8;
+    if (my $err = $rsync->exitcode ) {
         require Carp;
         Carp::carp( "Problem during rsync ($err)" );
     }

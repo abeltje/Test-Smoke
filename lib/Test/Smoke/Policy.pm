@@ -6,6 +6,7 @@ use vars qw( $VERSION );
 $VERSION = '0.004';
 
 use File::Spec;
+use Test::Smoke::LogMixin;
 
 =head1 NAME
 
@@ -27,9 +28,7 @@ I wish I understood what Merijn is doeing in the original code.
 
 =head1 METHODS
 
-=over 4
-
-=item Test::Smoke::Policy->new( $srcpath )
+=head2 Test::Smoke::Policy->new( $srcpath )
 
 Create a new instance of the Policy object.
 Read the file or take data from the DATA section.
@@ -46,7 +45,15 @@ sub new {
     $self;
 }
 
-=item $object->set_rules( $rules )
+=head2 $policy->verbose
+
+Get verbosity.
+
+=cut
+
+sub verbose { $_[0]->{v} }
+
+=head2 $policy->set_rules( $rules )
 
 Set the rules for substitutions.
 
@@ -58,7 +65,7 @@ sub set_rules {
     push @{ $self->{_rules} }, $rules;
 }
 
-=item $object->reset_rules( )
+=head2 $policy->reset_rules( )
 
 Reset the C<_rules> property.
 
@@ -69,7 +76,7 @@ sub reset_rules {
     $_[0]->{_new_policy} = undef;
 }
 
-=item $Policy->_do_subst( )
+=head2 $policy->_do_subst( )
 
 C<_do_subst()> does the substitutions and stores the substituted version
 as the B<_new_policy> attribute.
@@ -86,7 +93,7 @@ sub _do_subst {
     my $policy = $self->{_policy};
     while ( my( $target, $values ) = each %substs ) {
         unless ( $policy =~ s{^(\s*ccflags=.*?)$target}
-                             {$1 . join " ", 
+                             {$1 . join " ",
                                    grep $_ && length $_ => @$values}meg ) {
             require Carp;
             Carp::carp( "Policy target '$target' failed to match" );
@@ -95,7 +102,7 @@ sub _do_subst {
     $self->{_new_policy} = $policy;
 }
 
-=item $object->write( )
+=head2 $policy->write( )
 
 =cut
 
@@ -119,7 +126,7 @@ sub write {
     }
 }
 
-=item $self->_read_Policy( $srcpath[, $verbose[, @ccflags]] )
+=head2 $policy->_read_Policy( $srcpath[, $verbose[, @ccflags]] )
 
 C<_read_Policy()> checks the C<< $srcpath >> for these conditions:
 
@@ -163,7 +170,7 @@ sub _read_Policy {
         $vmsg = "anonymous filehandle";
 
     } else {
-        $srcpath = File::Spec->curdir 
+        $srcpath = File::Spec->curdir
             unless defined $srcpath && length $srcpath;
         my $p_name = File::Spec->catfile( $srcpath, 'Policy.sh' );
 
@@ -177,10 +184,10 @@ sub _read_Policy {
         }
 
     }
-    $self->{v} and print "Reading 'Policy.sh' from $vmsg($self->{v})\n";
+    $self->log_info("Reading 'Policy.sh' from %s (v=%d)", $vmsg, $self->verbose);
 }
 
-=item $policy->default_Policy( [@ccflags] )
+=head2 $policy->default_Policy( [@ccflags] )
 
 Generate the default F<Policy.sh> from a set of ccflags, but be
 backward compatible.
@@ -206,11 +213,9 @@ __EOPOLICY__
 
 1;
 
-=back
-
 =head1 COPYRIGHT
 
-(c) 2001-2003, All rights reserved.
+(c) 2001-2015, All rights reserved.
 
   * H.Merijn Brand <hmbrand@hccnet.nl>
   * Nicholas Clark <nick@unfortu.net>

@@ -5,6 +5,7 @@ use Carp;
 
 use base 'Test::Smoke::App::Base';
 
+use Cwd 'cwd';
 use Config;
 use File::Spec::Functions;
 use Test::Smoke::BuildCFG;
@@ -38,9 +39,10 @@ reimplemention of the old C<Test::Smoke::run_smoke()>.
 sub run {
     my $self = shift;
 
+    my $cwd = cwd();
     $self->log_info("[%s] chdir(%s)", $0, $self->option('ddir'));
     chdir $self->option('ddir') or
-        die sprintf("Cannot chdir(%): %s", $self->option('ddir'), $!);
+        die sprintf("Cannot chdir(%s): %s", $self->option('ddir'), $!);
 
     my $timeout = 0;
     if ($Config{d_alarm} && $self->option('killtime')) {
@@ -56,6 +58,7 @@ sub run {
     $Config{d_alarm} and alarm $timeout;
 
    $self->run_smoke();
+   chdir $cwd;
 }
 
 =head2  $smoker->run_smoke();
@@ -65,51 +68,31 @@ sub run {
 sub run_smoke {
     my $self = shift;
 
-    my $BuildCFG = $self->create_buildcfg(@_);
+    my $BuildCFG = $self->{_BuildCFG} = $self->create_buildcfg(@_);
 
     my $mode = $self->option('continue') ? ">>" : ">";
     my $logfile = catfile($self->option('ddir'), $self->option('outfile'));
     open my $log, $mode, $logfile or die "Cannot create($logfile): $!";
 
-    my $Policy = Test::Smoke::Policy->new(
-        updir(),
-        $self->option('verbose'),
-        $BuildCFG->policy_targets
-    );
+    my $policy = $self->{_policy} = $self->create_policy;
 
-    my $smoker = $self->{_smoker} = Test::Smoke::Smoker->new(
-        $log,
-        {
-            $self->options,
-            v => $self->option('verbose')
-        }
-    );
+    my $smoker = $self->{_smoker} = $self->create_smoker($log);
+
     $smoker->mark_in;
 
-    if ($self->option('verbose') && $self->option('defaultenv')) {
-        $smoker->tty( "Running smoke tests without \$ENV{PERLIO}\n" );
-    }
-
-    my $harness_msg;
-    if ( $self->option('harnessonly') ) {
-        $harness_msg = "Running test suite only with 'harness'";
-        if ($self->option('harness3opts')) {
-            $harness_msg .= " with HARNESS_OPTIONS="
-                          . $self->option('harness3opts');
-        }
-    }
-    if ($self->option('verbose') && $harness_msg) {
-        $smoker->tty( "$harness_msg.\n" );
-    }
+    $self->log_info("Running smoke tests without \$ENV{PERLIO}")
+        if $self->option('defaultenv');
+    $self->log_harness_message();
 
     if (! chdir($self->option('ddir'))) {
         die sprintf("Cannot chdir(%s): %s", $self->option('ddir'), $!);
     }
 
     my $patch = get_patch($self->option('ddir'));
+    $self->log_debug("[get_patch] found: '%s'", join("', '", @$patch));
     if (!$self->option('continue')) {
         $smoker->make_distclean();
-        $smoker->ttylog("Smoking patch $patch->[0] $patch->[1]\n");
+        $smoker->ttylog("Smoking patch $patch->[0] @{[$patch->[1]||'']}\n");
         $smoker->ttylog("Smoking branch $patch->[2]\n") if $patch->[2];
         $self->do_manifest_check();
         $self->add_smoke_patchlevel($patch->[0]);
@@ -124,13 +107,32 @@ sub run_smoke {
 
         $smoker->ttylog( join "\n",
                               "", "Configuration: $this_cfg", "-" x 78, "" );
-        $smoker->smoke( $this_cfg, $Policy );
+        $smoker->smoke( $this_cfg, $policy );
     }
 
-    $smoker->ttylog( "Finished smoking $patch->[0] $patch->[1] $patch->[2]\n" );
     $smoker->mark_out;
+    $smoker->ttylog("Finished smoking @$patch\n" );
 
     close $log or $self->log_warn("Error on closing logfile: $!");
+}
+
+=head2 $smoker->log_harness_message()
+
+Log stuff about Test::Harness...
+
+=cut
+
+sub log_harness_message {
+    my $self = shift;
+    my $harness_msg;
+    if ( $self->option('harnessonly') ) {
+        $harness_msg = "Running test suite only with 'harness'";
+        if ($self->option('harness3opts')) {
+            $harness_msg .= " with HARNESS_OPTIONS="
+                          . $self->option('harness3opts');
+        }
+    }
+    $self->log_info($harness_msg) if $harness_msg;
 }
 
 =head2 $smoker->check_for_harness3()
@@ -143,16 +145,44 @@ B<hasharness3> accordingly.
 sub check_for_harness3 {
     my $self = shift;
 
+    my @mod_dirs = (
+        [qw/  ext Test-Harness lib Test /],
+        [qw/ cpan Test-Harness lib Test /],
+        [qw/                   lib Test /],
+    );
+    my @harnesses = grep {
+        $self->log_debug("[filetest] %s: %s", $_, (-f $_ ? 'Y' : 'N'));
+        -f $_;
+    } map {
+        catfile(catdir($self->option('ddir'), @$_), 'Harness.pm')
+    } @mod_dirs;
+
     my $chk = Test::Smoke::Util::Execute->new(
         command => $^X,
         verbose => $self->option('verbose')
     );
-    my $version = $chk->run(
-        sprintf('-I"%s/lib"', $self->option('ddir')),
-        "-MTest::Harness",
-        "-e",
-        'print Test::Harness->VERSION'
-    );
+
+    if (!@harnesses) {
+        $self->log_warn("No Test::Harness found, incomplete source-tree, abandon!");
+        die "No Test::Harness found, incomplete sourc-tree, abandon!";
+    }
+
+    my $version = '0.00';
+    for my $th_candidate (@harnesses) {
+        $self->log_debug("Test::Harness candidate '%s'", $th_candidate);
+        $version = eval {
+            $chk->run(
+                "-e",
+                "require q[$th_candidate];print Test::Harness->VERSION",
+                "2>&1",
+            );
+        };
+        if ($chk->exitcode != 0) {
+            $self->log_warn("Error with Test::Harness->VERSION: $version");
+            $version = '0.00';
+            next;
+        }
+    }
     $self->log_info("Found: Test::Harness version %s.", $version);
 
     return $self->{_hasharness3} = $version >= 3;
@@ -193,6 +223,40 @@ sub create_buildcfg {
     );
 }
 
+=head2 $smoker->create_policy()
+
+Create the L<Test::Smoke::Policy> instance.
+
+=cut
+
+sub create_policy {
+    my $self = shift;
+    return Test::Smoke::Policy->new(
+        updir(),
+        $self->option('verbose'),
+        $self->BuildCFG->policy_targets
+    );
+}
+
+=head2 $smoker->create_smoker($log_handle)
+
+Instantiate L<Test::Smoke::Smoker>.
+
+=cut
+
+sub create_smoker {
+    my $self = shift;
+    my ($log_handle) = @_;
+
+    return Test::Smoke::Smoker->new(
+        $log_handle,
+        {
+            $self->options,
+            v => $self->option('verbose')
+        }
+    );
+}
+
 =head2 $smoker->do_manifest_check()
 
 Calls Test::Smoke::SourceTree->check_MANIFEST().
@@ -202,7 +266,10 @@ Calls Test::Smoke::SourceTree->check_MANIFEST().
 sub do_manifest_check {
     my $self = shift;
 
-    my $tree = Test::Smoke::SourceTree->new($self->option('ddir'));
+    my $tree = Test::Smoke::SourceTree->new(
+        $self->option('ddir'),
+        $self->option('verbose'),
+    );
 
     my $mani_check = $tree->check_MANIFEST(
         $self->option('outfile'),

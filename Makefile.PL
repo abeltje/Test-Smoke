@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 use strict;
-use 5.006;
+use 5.008003;
 use ExtUtils::MakeMaker;
 use Config;
 
@@ -29,7 +29,7 @@ if (-f 'Makefile') {
     open STDERR, ">&SAVEERR"; close SAVEERR;
 }
 
-my $mmver = ExtUtils::MakeMaker->VERSION;
+my $mmver = eval "ExtUtils::MakeMaker->VERSION";
 
 my $iscript = 'INSTALLSITESCRIPT';
 unless ( eval "$mmver" >= eval "6.30_01" ) {
@@ -110,6 +110,21 @@ if (keys %posters == 3) {
     }
 }
 
+my %TEST_REQUIRES = (
+    'Test::More'       => 0.88,
+    'Test::NoWarnings' => 0,
+    'HTTP::Daemon'     => 0,
+    'HTTP::Message'    => 0,
+);
+
+my $test_requires = (
+    $mmver >= 5.5503
+        ? $mmver >= 6.64
+            ? 'TEST_REQUIRES'
+            : "BUILD_REQUIRES"
+        : 'PREREQ_PM'
+);
+
 my %wm = (
     NAME          => "Test-Smoke",
     DISTNAME      => "Test-Smoke",
@@ -125,8 +140,7 @@ my %wm = (
     },
     PREREQ_PM     => {
         'File::Spec'       => 0.82,
-        'Test::More'       => 0,
-        'Test::NoWarnings' => 0,
+        ($test_requires eq 'PREREQ_PM' ? %TEST_REQUIRES : ()),
         %extra_deps,
     },
     PMLIBDIRS     => [qw/ lib inc /],
@@ -136,8 +150,12 @@ my %wm = (
     }
 );
 
-eval "$mmver" > 6.30 and $wm{LICENSE}  = "perl";
-eval "$mmver" > 6.67 and $wm{META_ADD} = {
+if ($test_requires ne 'PREREQ_PM') {
+    $wm{$test_requires} = \%TEST_REQUIRES;
+}
+
+$mmver > 6.31 and $wm{LICENSE}  = "perl_5";
+$mmver > 6.46 and $wm{META_ADD} = {
     "meta-spec" => {
         version    => 2,
     },

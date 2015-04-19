@@ -57,7 +57,7 @@ sub mailer_config { # mailing reports
             ccp5p_onfail(),
             rptfile(),
             mail(),
-            report(),
+            report(0),
         ],
         special_options => {
             mail => [mailbin()],
@@ -99,7 +99,7 @@ sub poster_config { # posting to CoreSmokeDB
             ddir(),
             smokedb_url(),
             jsnfile(),
-            report(),
+            report(0),
         ],
         special_options => {
             'LWP::UserAgent' => [
@@ -159,7 +159,7 @@ sub sendreport_config { # sendreport.pl
 
     return (
         main_options    => [mail_type(), poster() ],
-        general_options => [values %g_o],
+        general_options => [values %g_o, report(0)],
         special_options => \%s_o,
     );
 }
@@ -178,6 +178,7 @@ sub runsmoke_config { # runsmoke.pl
             cfg(),
             harnessonly(),
             harness3opts(),
+            hasharness3(),
             opt_continue(),
             is56x(),
             locale(),
@@ -216,7 +217,14 @@ sub smokeperl_config {
     {
         $m_o{$opt->name} ||= $opt;
     }
-    my %g_o;
+    my %g_o = (
+        sync()->name       => sync(),
+        report()->name     => report(),
+        sendreport()->name => sendreport(),
+        archive()->name    => archive(),
+        smartsmoke()->name => smartsmoke(),
+        patchlevel()->name => patchlevel(),
+    );
     for my $opt (@{$stc{general_options}}, @{$rsc{general_options}},
                  @{$arc{general_options}}, @{$src{general_options}})
     {
@@ -247,109 +255,20 @@ sub smokeperl_config {
 #####              Individual options                 #####
 ###########################################################
 
-sub syncer {
+sub archive {
     return $opt->new(
-        name     => 'syncer',
-        option   => '=s',
-        allow    => [qw/git rsync copy/],
-        default  => 'git',
-        helptext => 'The source tree sync method.',
-    );
-}
-
-sub fsync { # How to sync the mdir for Forest.
-    my $s = syncer();
-    $s->name('fsync');
-    return $s;
-}
-
-sub mail_type {
-    my $mail_type = $opt->new(
-        name   => 'mail_type',
-        option => 'mailer=s',
-        allow  => [qw/sendmail mail mailx sendemail Mail::Sendmail MIME::Lite/],
-        default  => 'Mail::Sendmail',
-        helptext => "The type of mailsystem to use.",
-    );
-}
-
-sub poster {
-    return $opt->new(
-        name     => 'poster',
-        option   => '=s',
-        allow    => [qw/LWP::UserAgent HTTP::Lite HTTP::Tiny curl/],
-        default  => 'LWP::UserAgent',
-        helptext => "The type of HTTP post system to use.",
-    );
-}
-
-sub ddir {
-    return $opt->new(
-        name => 'ddir',
-        option => 'd=s',
-        helptext => 'Directory where perl is smoked.',
-    );
-}
-
-sub rptfile {
-    return $opt->new(
-        name => 'rptfile',
-        option => '=s',
-        default => 'mktest.rpt',
-        helptext => 'Name of the file to store the email report in.',
-    );
-}
-
-sub outfile {
-    return $opt->new(
-        name => 'outfile',
-        option => '=s',
-        default => 'mktest.out',
-        helptext => 'Name of the file to store the raw smoke log in.',
-    );
-}
-
-sub jsnfile {
-    return $opt->new(
-        name => 'jsnfile',
-        option => '=s',
-        default => 'mktest.jsn',
-        helptext => 'Name of the file to store the JSON report in.',
-    );
-}
-
-sub lfile {
-    return $opt->new(
-        name => 'lfile',
-        option => '=s',
-        default => undef,
-        helptext => 'Name of the file to store the smoke log in.',
-    );
-}
-
-sub mail {
-    return $opt->new(
-        name => 'mail',
+        name => 'archive',
         option => '!',
-        helptext => "Send report via mail.",
+        default => 1,
+        helptext => "Archive the reports after smoking.",
     );
 }
 
-sub to {
+sub adir {
     return $opt->new(
-        name => 'to',
+        name => 'adir',
         option => '=s',
-        default => 'daily-build-reports@perl.org',
-        helptext => 'Where to send the reports.',
-    );
-}
-
-sub cc {
-    return $opt->new(
-        name => 'cc',
-        option => '=s',
-        default => '',
-        helptext => 'Where to send a cc of the reports.',
+        helptext => "Directory to archive the smoker files in.",
     );
 }
 
@@ -362,46 +281,12 @@ sub bcc {
     );
 }
 
-sub from {
+sub cc {
     return $opt->new(
-        name => 'from',
+        name => 'cc',
         option => '=s',
         default => '',
-        helptext => 'Where to send the reports from.',
-    );
-}
-
-sub mserver {
-    return $opt->new(
-        name => 'mserver',
-        option => '=s',
-        default => 'localhost',
-        helptext => 'Which SMTP server to send reports.',
-    );
-}
-
-sub msport {
-    return $opt->new(
-        name => 'msport',
-        option => '=i',
-        default => 25,
-        helptext => 'Which port for SMTP server to send reports.',
-    );
-}
-
-sub msuser {
-    return $opt->new(
-        name => 'msuser',
-        option => '=s',
-        helptext => 'Username for SMTP server.',
-    );
-}
-
-sub mspass {
-    return $opt->new(
-        name => 'mspass',
-        option => '=s',
-        helptext => 'Password for <msuser> for SMTP server.',
+        helptext => 'Where to send a cc of the reports.',
     );
 }
 
@@ -414,21 +299,243 @@ sub ccp5p_onfail {
     );
 }
 
-sub swcc {
+sub cdir { # cdir => ddir
     return $opt->new(
-        name => 'swcc',
+        name => 'cdir',
         option => '=s',
-        default => '-c',
-        helptext => 'The syntax of the commandline switch for CC.',
+        helptext => "The local directory from where to copy the perlsources.",
     );
 }
 
-sub swbcc {
+sub cfg {
     return $opt->new(
-        name => 'swbcc',
+        name => 'cfg',
         option => '=s',
-        default => '-b',
-        helptext => 'The syntax of the commandline switch for BCC.',
+        default => undef,
+        helptext => "The name of the BuildCFG file.",
+    );
+}
+
+sub curlbin {
+    return $opt->new(
+        name => 'curlbin',
+        option => '=s',
+        default => 'curl',
+        helptext => "The fqp for the curl program.",
+    );
+}
+
+sub ddir {
+    return $opt->new(
+        name => 'ddir',
+        option => 'd=s',
+        helptext => 'Directory where perl is smoked.',
+    );
+}
+
+sub defaultenv {
+    return $opt->new(
+        name => 'defaultenv',
+        option => '!',
+        default => 0,
+        helptext => "Do not set the test suite environment to locale.",
+    );
+}
+
+sub fdir { # mdir => fdir => ddir
+    return $opt->new(
+        name => 'fdir',
+        option => '=s',
+        helptext => "The local directory to build the hardlink Forest from.",
+    );
+}
+
+sub from {
+    return $opt->new(
+        name => 'from',
+        option => '=s',
+        default => '',
+        helptext => 'Where to send the reports from.',
+    );
+}
+
+sub fsync { # How to sync the mdir for Forest.
+    my $s = syncer();
+    $s->name('fsync');
+    return $s;
+}
+
+sub force_c_locale {
+    return $opt->new(
+        name => 'force_c_locale',
+        default => 0,
+        helptext => "Run test suite under the C locale only.",
+    );
+}
+
+sub gitbin {
+    return $opt->new(
+        name => 'gitbin',
+        option => '=s',
+        default => 'git',
+        helptext => "The name of the 'git' program.",
+    );
+}
+
+sub gitbranchfile {
+    return $opt->new(
+        name => 'gitbranchfile',
+        option => '=s',
+        default => '',
+        helptext => "The name of the file where the gitbranch is stored.",
+    );
+}
+
+sub gitdfbranch {
+    return $opt->new(
+        name => 'gitdfbranch',
+        option => '=s',
+        default => 'blead',
+        helptext => "The name of the gitbranch you smoke.",
+    );
+}
+
+sub gitdir {
+    return $opt->new(
+        name => 'gitdir',
+        option => '=s',
+        default => 'perl-git',
+        helptext => "The local directory of the git repository.",
+    );
+}
+
+sub gitorigin {
+    return $opt->new(
+        name => 'gitorigin',
+        option => '=s',
+        default => 'git://perl5.git.perl.org/perl.git',
+        helptext => "The remote location of the git repository.",
+    );
+}
+
+sub harness_destruct {
+    return $opt->new(
+        name => 'harness_destruct',
+        option => 'harness-destruct=i',
+        default => 2,
+        helptext => "Sets \$ENV{PERL_DESTRUCT_LEVEL} for 'make test_harness'.",
+    );
+}
+
+sub harness3opts {
+    return $opt->new(
+        name => 'harness3opts',
+        option => '=s',
+        helptext => "Extra options to pass to harness v3+.",
+    );
+}
+
+sub harnessonly {
+    return $opt->new(
+        name => 'harnessonly',
+        option => '!',
+        default => 0,
+        helptext => "Run test suite as 'make test_harness' (not make test).",
+    );
+}
+
+sub hasharness3 {
+    return $opt->new(
+        name => 'hasharness3',
+        option => '=i',
+        default => 1,
+        helptext => "Internal option for Test::Smoke::Smoker.",
+    );
+}
+
+sub hdir { # hdir => ddir
+    return $opt->new(
+        name => 'hdir',
+        option => '=s',
+        helptext => "The local directory to hardlink from.",
+    );
+}
+
+sub is56x {
+    return $opt->new(
+        name => 'is56x',
+        option => '!',
+        helptext => "Are we smoking perl maint-5.6?",
+    );
+}
+
+sub is_vms {
+    return $opt->new(
+        name => 'is_vms',
+        default => ($^O eq 'VMS'),
+        helptext => "Internal, shows we're on VMS",
+    );
+}
+
+sub is_win32 {
+    return $opt->new(
+        name => 'is_win32',
+        default => ($^O eq 'MSWin32'),
+        helptext => "Internal, shows we're on MSWin32",
+    );
+}
+
+sub jsnfile {
+    return $opt->new(
+        name => 'jsnfile',
+        option => '=s',
+        default => 'mktest.jsn',
+        helptext => 'Name of the file to store the JSON report in.',
+    );
+}
+
+sub killtime {
+    return $opt->new(
+        name => 'killtime',
+        option => '=s',
+        default => undef,
+        allow => [undef, '', qr/^\+?[0-9]{1,2}:[0-9]{2}$/],
+        helptext => "The absolute or relative time the smoke may run.",
+    );
+}
+
+sub lfile {
+    return $opt->new(
+        name => 'lfile',
+        option => '=s',
+        default => undef,
+        helptext => 'Name of the file to store the smoke log in.',
+    );
+}
+
+sub locale {
+    return $opt->new(
+        name => 'locale',
+        option => '=s',
+        helptext => "Choose a locale to run the test suite under.",
+    );
+}
+
+sub mail {
+    return $opt->new(
+        name => 'mail',
+        option => '!',
+        helptext => "Send report via mail.",
+    );
+}
+
+sub mail_type {
+    my $mail_type = $opt->new(
+        name   => 'mail_type',
+        option => 'mailer=s',
+        allow  => [qw/sendmail mail mailx sendemail Mail::Sendmail MIME::Lite/],
+        default  => 'Mail::Sendmail',
+        helptext => "The type of mailsystem to use.",
     );
 }
 
@@ -450,66 +557,108 @@ sub mailxbin {
     );
 }
 
-sub sendemailbin {
+sub makeopt {
     return $opt->new(
-        name => 'sendemailbin',
+        name => 'makeopt',
         option => '=s',
-        default => 'sendemail',
-        helptext => "The name of the 'sendemail' program.",
+        helptext => "Extra option to pass to make.",
     );
 }
 
-sub sendmailbin {
+sub mdir { # mdir => fdir => ddir
     return $opt->new(
-        name => 'sendmailbin',
+        name => 'mdir',
         option => '=s',
-        default => 'sendmail',
-        helptext => "The name of the 'sendmail' program.",
+        helptext => "The master directory of the Hardlink-Forest.",
     );
 }
 
-sub gitbin {
+sub mspass {
     return $opt->new(
-        name => 'gitbin',
+        name => 'mspass',
         option => '=s',
-        default => 'git',
-        helptext => "The name of the 'git' program.",
+        helptext => 'Password for <msuser> for SMTP server.',
     );
 }
 
-sub gitorigin {
+sub msport {
     return $opt->new(
-        name => 'gitorigin',
-        option => '=s',
-        default => 'git://perl5.git.perl.org/perl.git',
-        helptext => "The remote location of the git repository.",
+        name => 'msport',
+        option => '=i',
+        default => 25,
+        helptext => 'Which port for SMTP server to send reports.',
     );
 }
 
-sub gitdir {
+sub msuser {
     return $opt->new(
-        name => 'gitdir',
+        name => 'msuser',
         option => '=s',
-        default => 'perl-git',
-        helptext => "The local directory of the git repository.",
+        helptext => 'Username for SMTP server.',
     );
 }
 
-sub gitdfbranch {
+sub mserver {
     return $opt->new(
-        name => 'gitdfbranch',
+        name => 'mserver',
         option => '=s',
-        default => 'blead',
-        helptext => "The name of the gitbranch you smoke.",
+        default => 'localhost',
+        helptext => 'Which SMTP server to send reports.',
     );
 }
 
-sub gitbranchfile {
+sub opt_continue {
     return $opt->new(
-        name => 'gitbranchfile',
+        name => 'continue',
+        option => '',
+        default => 0,
+        helptext => "Continue where last smoke left-off.",
+    );
+}
+
+sub outfile {
+    return $opt->new(
+        name => 'outfile',
         option => '=s',
-        default => '',
-        helptext => "The name of the file where the gitbranch is stored.",
+        default => 'mktest.out',
+        helptext => 'Name of the file to store the raw smoke log in.',
+    );
+}
+
+sub patchlevel {
+    return $opt->new(
+        name => 'patchlevel',
+        option => '=s',
+        helptext => "State the 'patchlevel' of the source-tree (for --nosync).",
+    );
+}
+
+sub poster {
+    return $opt->new(
+        name     => 'poster',
+        option   => '=s',
+        allow    => [qw/LWP::UserAgent HTTP::Lite HTTP::Tiny curl/],
+        default  => 'LWP::UserAgent',
+        helptext => "The type of HTTP post system to use.",
+    );
+}
+
+sub report {
+    my $default = @_ ? shift : 1;
+    return $opt->new(
+        name => 'report',
+        option => '!',
+        default => $default,
+        helptext => "Create the report/json files.",
+    );
+}
+
+sub rptfile {
+    return $opt->new(
+        name => 'rptfile',
+        option => '=s',
+        default => 'mktest.rpt',
+        helptext => 'Name of the file to store the email report in.',
     );
 }
 
@@ -540,74 +689,6 @@ sub rsyncsource {
     );
 }
 
-sub cdir { # cdir => ddir
-    return $opt->new(
-        name => 'cdir',
-        option => '=s',
-        helptext => "The local directory from where to copy the perlsources.",
-    );
-}
-
-sub fdir { # mdir => fdir => ddir
-    return $opt->new(
-        name => 'fdir',
-        option => '=s',
-        helptext => "The local directory to build the hardlink Forest from.",
-    );
-}
-
-sub hdir { # hdir => ddir
-    return $opt->new(
-        name => 'hdir',
-        option => '=s',
-        helptext => "The local directory to hardlink from.",
-    );
-}
-
-sub mdir { # mdir => fdir => ddir
-    return $opt->new(
-        name => 'mdir',
-        option => '=s',
-        helptext => "The master directory of the Hardlink-Forest.",
-    );
-}
-
-sub report {
-    return $opt->new(
-        name => 'report',
-        option => '!',
-        default => 0,
-        helptext => "Force recreation of the report/json files.",
-    );
-}
-
-sub smokedb_url {
-    return $opt->new(
-        name => 'smokedb_url',
-        option => '=s',
-        default => 'http://perl5.test-smoke.org/report',
-        helptext => "The URL for sending reports to CoreSmokeDB.",
-    );
-}
-
-sub ua_timeout {
-    return $opt->new(
-        name => 'ua_timeout',
-        option => '=i',
-        default => 30,
-        helptext => "The timeout to set the UserAgent.",
-    );
-}
-
-sub curlbin {
-    return $opt->new(
-        name => 'curlbin',
-        option => '=s',
-        default => 'curl',
-        helptext => "The fqp for the curl program.",
-    );
-}
-
 sub send_log {
     return $opt->new(
         name => 'send_log',
@@ -626,12 +707,30 @@ sub send_out {
     );
 }
 
-sub cfg {
+sub sendemailbin {
     return $opt->new(
-        name => 'cfg',
+        name => 'sendemailbin',
         option => '=s',
-        default => undef,
-        helptext => "The name of the BuildCFG file.",
+        default => 'sendemail',
+        helptext => "The name of the 'sendemail' program.",
+    );
+}
+
+sub sendmailbin {
+    return $opt->new(
+        name => 'sendmailbin',
+        option => '=s',
+        default => 'sendmail',
+        helptext => "The name of the 'sendmail' program.",
+    );
+}
+
+sub sendreport {
+    return $opt->new(
+        name => 'sendreport',
+        option => '!',
+        default => 1,
+        helptext => "Send the report mail/CoreSmokeDB.",
     );
 }
 
@@ -644,39 +743,6 @@ sub showcfg {
     );
 }
 
-sub locale {
-    return $opt->new(
-        name => 'locale',
-        option => '=s',
-        helptext => "Choose a locale to run the test suite under.",
-    );
-}
-
-sub force_c_locale {
-    return $opt->new(
-        name => 'force_c_locale',
-        default => 0,
-        helptext => "Run test suite under the C locale only.",
-    );
-}
-
-sub defaultenv {
-    return $opt->new(
-        name => 'defaultenv',
-        option => '!',
-        default => 0,
-        helptext => "Do not set the test suite environment to locale.",
-    );
-}
-
-sub is56x {
-    return $opt->new(
-        name => 'is56x',
-        option => '!',
-        helptext => "Are we smoking perl maint-5.6?",
-    );
-}
-
 sub skip_tests {
     return $opt->new(
         name => 'skip_tests',
@@ -685,37 +751,84 @@ sub skip_tests {
     );
 }
 
-sub harnessonly {
+sub smartsmoke {
     return $opt->new(
-        name => 'harnessonly',
+        name => 'smartsmoke',
         option => '!',
-        default => 0,
-        helptext => "Run test suite as 'make test_harness' (not make test).",
+        default => 1,
+        helptext => "Do not smoke when the source-tree did not change.",
     );
 }
 
-sub harness3opts {
+sub smokedb_url {
     return $opt->new(
-        name => 'harness3opts',
+        name => 'smokedb_url',
         option => '=s',
-        helptext => "Extra options to pass to harness v3+.",
+        default => 'http://perl5.test-smoke.org/report',
+        helptext => "The URL for sending reports to CoreSmokeDB.",
     );
 }
 
-sub harness_destruct {
+sub sync {
     return $opt->new(
-        name => 'harness_destruct',
-        option => 'harness-destruct=i',
-        default => 2,
-        helptext => "Sets \$ENV{PERL_DESTRUCT_LEVEL} for 'make test_harness'.",
+        name => 'sync',
+        option => 'fetch!',
+        default => 1,
+        helptext => "Synchronize the source-tree before smoking.",
     );
 }
 
-sub user_note {
+sub syncer {
     return $opt->new(
-        name => 'user_note',
+        name     => 'syncer',
+        option   => '=s',
+        allow    => [qw/git rsync copy/],
+        default  => 'git',
+        helptext => 'The source tree sync method.',
+    );
+}
+
+sub swbcc {
+    return $opt->new(
+        name => 'swbcc',
         option => '=s',
-        helptext => "Extra text to insert into the smoke report.",
+        default => '-b',
+        helptext => 'The syntax of the commandline switch for BCC.',
+    );
+}
+
+sub swcc {
+    return $opt->new(
+        name => 'swcc',
+        option => '=s',
+        default => '-c',
+        helptext => 'The syntax of the commandline switch for CC.',
+    );
+}
+
+sub testmake { # This was an Alan Burlison request.
+    return $opt->new(
+        name => 'testmake',
+        option => '=s',
+        helptext => "A different make program for 'make test'.",
+    );
+}
+
+sub to {
+    return $opt->new(
+        name => 'to',
+        option => '=s',
+        default => 'daily-build-reports@perl.org',
+        helptext => 'Where to send the reports.',
+    );
+}
+
+sub ua_timeout {
+    return $opt->new(
+        name => 'ua_timeout',
+        option => '=i',
+        default => 30,
+        helptext => "The timeout to set the UserAgent.",
     );
 }
 
@@ -737,20 +850,11 @@ sub un_position {
     );
 }
 
-sub opt_continue {
+sub user_note {
     return $opt->new(
-        name => 'continue',
-        option => '',
-        default => 0,
-        helptext => "Continue where last smoke left-off.",
-    );
-}
-
-sub is_vms {
-    return $opt->new(
-        name => 'is_vms',
-        default => ($^O eq 'VMS'),
-        helptext => "Internal, shows we're on VMS",
+        name => 'user_note',
+        option => '=s',
+        helptext => "Extra text to insert into the smoke report.",
     );
 }
 
@@ -763,12 +867,13 @@ sub vmsmake {
     )
 }
 
-sub is_win32 {
+sub w32args {
     return $opt->new(
-        name => 'is_win32',
-        default => ($^O eq 'MSWin32'),
-        helptext => "Internal, shows we're on MSWin32",
-    );
+        name => 'w32args',
+        option => '=s@',
+        default => [],
+        helptext => "Extra options to pass to W32Configure.",
+    )
 }
 
 sub w32cc {
@@ -785,58 +890,6 @@ sub w32make {
         opt => '=s',
         default => 'dmake',
         helptext => "The make program on MSWin32.",
-    );
-}
-
-sub w32args {
-    return $opt->new(
-        name => 'w32args',
-        option => '=s@',
-        default => [],
-        helptext => "Extra options to pass to W32Configure.",
-    )
-}
-
-sub makeopt {
-    return $opt->new(
-        name => 'makeopt',
-        option => '=s',
-        helptext => "Extra option to pass to make.",
-    );
-}
-
-sub testmake { # This was an Alan Burlison request.
-    return $opt->new(
-        name => 'testmake',
-        option => '=s',
-        helptext => "A different make program for 'make test'.",
-    );
-}
-
-sub killtime {
-    return $opt->new(
-        name => 'killtime',
-        option => '=s',
-        default => undef,
-        allow => [undef, '', qr/^\+?[0-9]{1,2}:[0-9]{2}$/],
-        helptext => "The absolute or relative time the smoke may run.",
-    );
-}
-
-sub archive {
-    return $opt->new(
-        name => 'archive',
-        option => '!',
-        default => 1,
-        helptext => "Archive files after a smokerun.",
-    );
-}
-
-sub adir {
-    return $opt->new(
-        name => 'adir',
-        option => '=s',
-        helptext => "Directory to archive the smoker files in.",
     );
 }
 

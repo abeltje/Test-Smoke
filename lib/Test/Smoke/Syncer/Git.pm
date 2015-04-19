@@ -13,6 +13,7 @@ This handles syncing with git repositories.
 
 use Cwd;
 use File::Spec::Functions;
+use Test::Smoke::LogMixin;
 use Test::Smoke::Util::Execute;
 
 =head2 Test::Smoke::Syncer::Git->new( %args )
@@ -50,7 +51,7 @@ sub sync {
 
     my $gitbin = Test::Smoke::Util::Execute->new(
         command => $self->{gitbin},
-        verbose => $self->{v},
+        verbose => $self->verbose,
     );
     use Carp;
     my $cwd = cwd();
@@ -63,7 +64,7 @@ sub sync {
         if ( my $gitexit = $gitbin->exitcode ) {
             croak("Cannot make inital clone: $self->{gitbin} exit $gitexit");
         }
-        $self->{v} > 1 and print $cloneout;
+        $self->log_debug($cloneout);
     }
 
     my $gitbranch = $self->get_git_branch;
@@ -71,13 +72,13 @@ sub sync {
 
     # SMOKE_ME
     my $gitout = $gitbin->run(pull => '--all');
-    $self->{v} > 1 and print $gitout;
+    $self->log_debug($gitout);
 
     $gitout = $gitbin->run(remote => prune => 'origin');
-    $self->{v} > 1 and print $gitout;
+    $self->log_debug($gitout);
 
     $gitout = $gitbin->run(checkout => $gitbranch, '2>&1');
-    $self->{v} > 1 and print $gitout;
+    $self->log_debug($gitout);
 
     chdir $cwd or croak("Cannot chdir($cwd): $!");
     # make the smoke clone
@@ -92,30 +93,30 @@ sub sync {
         if ( my $gitexit = $gitbin->exitcode ) {
             croak("Cannot make smoke clone: $self->{gitbin} exit $gitexit");
         }
-        $self->{v} > 1 and print $cloneout;
+        $self->log_debug($cloneout);
     }
 
     chdir $self->{ddir} or croak("Cannot chdir($self->{ddir}): $!");
 
     $gitout = $gitbin->run(reset => '--hard');
-    $self->{v} > 1 and print $gitout;
+    $self->log_debug($gitout);
 
     $gitout = $gitbin->run(clean => '-dfx');
-    $self->{v} > 1 and print $gitout;
+    $self->log_debug($gitout);
 
     $gitout = $gitbin->run(pull => '--all');
-    $self->{v} > 1 and print $gitout;
+    $self->log_debug($gitout);
 
     # SMOKE_ME
     $gitout = $gitbin->run(checkout => $gitbranch, '2>&1');
-    $self->{v} > 1 and print $gitout;
+    $self->log_debug($gitout);
 
     my $mk_dot_patch = Test::Smoke::Util::Execute->new(
         command => "$^X Porting/make_dot_patch.pl > .patch",
-        verbose => $self->{v},
+        verbose => $self->verbose,
     );
     my $perlout = $mk_dot_patch->run();
-    $self->{v} > 1 and print $perlout;
+    $self->log_debug($perlout);
 
     chdir $cwd;
 
@@ -136,14 +137,13 @@ sub get_git_branch {
     return $self->{gitdfbranch} if ! -f $self->{gitbranchfile};
 
     if (open my $fh, '<', $self->{gitbranchfile}) {
-        $self->{v} > 1
-            and print "Reading branch to smoke from: '$self->{gitbranchfile}'\n";
+        $self->log_debug("Reading branch to smoke from: '$self->{gitbranchfile}'");
 
         my $branch = <$fh>;
         close $fh;
         return $branch;
     }
-    $self->{v} > 0 and print "Error opening '$self->{gitbranchfile}': $!";
+    $self->log_warn("Error opening '$self->{gitbranchfile}': $!");
     return $self->{gitdfbranch};
 }
 

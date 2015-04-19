@@ -7,6 +7,7 @@ our $VERSION = '0.046';
 use Config;
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
+use Test::Smoke::LogMixin;
 use Test::Smoke::Util qw( get_smoked_Config skip_filter );
 
 BEGIN { eval q{ use Time::HiRes qw( time ) } }
@@ -172,6 +173,14 @@ sub new {
     return $self;
 }
 
+=head2 $smoker->verbose
+
+Get verbosity.
+
+=cut
+
+sub verbose { $_[0]->{v} }
+
 =head2 $smoker->mark_in()
 
 Write the current timestamp with 'Start' marker to the logfile.
@@ -233,7 +242,7 @@ Prints a message to the default filehandle.
 sub tty {
     my $self = shift;
     my $message = join "", @_;
-    print $message;
+    $self->log_warn($message);
 }
 
 =head2 $smoker->log( $message )
@@ -549,6 +558,7 @@ sub make_test {
         }
 
         if  ( $self->{harnessonly} ) {
+            $self->log_debug("[make test] Test::Harness ONLY");
 
             $self->{harness3opts} and
                 local $ENV{HARNESS_OPTIONS} = $self->{harness3opts};
@@ -659,8 +669,10 @@ sub make_test_harness {
     }
 
     if ( $self->{hasharness3} ) {
+        $self->log_debug("[make_test_harness] Test::Harness >= 3");
         $self->_run_harness3_target( $target, $debugging );
     } else {
+        $self->log_debug("[make_test_harness] Test::Harness < 3");
         $self->_run_harness_target( $target, $debugging );
     }
 }
@@ -687,7 +699,7 @@ sub _run_harness_target {
 
     my ($line, $last);
     while ( $line = <$tst> ) {
-        $self->{v} > 1 and $self->tty( $line );
+        #$self->log_debug($line);
 
         # This line with timings only has to be logged to .out.
         $line =~ / \b (?:Files | u) = .+ Tests = [0-9]+ /xi
@@ -704,6 +716,7 @@ sub _run_harness_target {
         my( $name, $fail ) = $line =~ m/$harness_re1/;
         if ( $name ) {
             my $dots = '.' x (40 - length $name );
+            $self->log_debug("[known failed test] $name");
             push @failed, "    $name${dots}FAILED $fail\n";
         } else {
             ( $fail ) = $line =~ m/$harness_re2/;
@@ -747,7 +760,7 @@ sub _run_harness3_target {
     my $file;
     my $found = 0;
     while ( $line = <$tst> ) {
-        $self->{v} > 1 and $self->tty( $line );
+        #$self->log_debug($line);
 
         # This line with timings only has to be logged to .out.
         $line =~ / \b (?:Files | u) = .+ Tests = [0-9]+ /xi
@@ -762,6 +775,7 @@ sub _run_harness3_target {
         my( $tname ) = $line =~ /^\s*(.+(?:\.t)?)\s+\(Wstat/;
         if ( $tname ) {
             if ($file and not $found) {
+                $self->log_debug("[weird failed test] $file");
                 push @failed, "${file}??????\n";
             }
             my $ntest = $self->_normalize_testname( $tname );
@@ -773,6 +787,7 @@ sub _run_harness3_target {
 
         my( $failed ) = $line =~ /$harness3_failed/x;
         if ( $failed ) {
+            $self->log_debug("[known failed test] $file");
             push @failed, "${file}FAILED\n";
             push @failed, "    $failed\n";
             $found = 1;
@@ -781,6 +796,7 @@ sub _run_harness3_target {
 
         my( $todo ) = $line =~ /$harness3_todo/x;
         if ( $todo ) {
+            $self->log_debug("[todo test passed] $file");
             push @failed, "${file}PASSED\n";
             push @failed, "    $todo\n";
             $found = 1;
@@ -792,9 +808,10 @@ sub _run_harness3_target {
             push @failed, "    $extra\n";
             next;
         }
-    
+
         my( $parse_error ) = $line =~ /^  Parse errors: (.+)/;
         if ( $parse_error ) {
+            $self->log_debug("[TAP-error test] $file");
             push @failed, "${file}FAILED\n";
             push @failed, "    $parse_error\n";
             $found = 1;
@@ -803,6 +820,7 @@ sub _run_harness3_target {
 
         my( $exit_status ) = $line =~ /^  (Non-zero exit status: .+)/;
         if ( $exit_status ) {
+            $self->log_debug("[died test] $file");
             push @failed, "${file}FAILED\n";
             push @failed, "    $exit_status\n";
             $found = 1;
@@ -810,6 +828,7 @@ sub _run_harness3_target {
         }
     }
     if ($file and not $found) {
+        $self->log_debug("[unknown failure] $file");
         push @failed, "${file}??????\n";
     }
 
@@ -837,7 +856,7 @@ sub _run_TEST_target {
     my $ok;
 
     while (<$tst>) {
-        $self->{v} > 1 and $self->tty( $_ );
+        $self->log_debug($_);
         skip_filter( $_ ) and next;
 
         # make mkovz.pl's life easier
@@ -920,7 +939,7 @@ sub _parse_harness_output {
         }
     } grep m/$harness_re2/ || m/$harness_re1/ => map {
         /All tests successful/ && $all_ok++;
-        $self->{v} and $self->tty( $_ );
+        $self->log_info( $_ );
         $_;
     } @lines;
 
@@ -990,7 +1009,7 @@ sub _parse_harness3_output {
     } grep defined $_ && length $_ => map {
         $seenheader or $seenheader = $_ =~ /Test Summary Report/;
         /All tests successful/ && $all_ok++;
-        $self->{v} and $self->tty( $_ );
+        $self->log_info($_);
         $seenheader ? $_ : '';
     } @lines;
     if ($file and not $found) {
@@ -1074,8 +1093,7 @@ sub set_skip_tests {
 
     if ( open SKIPTESTS, "< $self->{skip_tests}" ) {
         my $action = $unset ? 'Unskip' : 'Skip';
-        $self->{v} and
-            $self->tty( "$action tests from '$self->{skip_tests}'\n" );
+        $self->log_info("$action tests from '$self->{skip_tests}'");
         my @libext;
         my $raw;
         while ( $raw = <SKIPTESTS> ) {
@@ -1096,9 +1114,7 @@ sub set_skip_tests {
             chmod 0755, $tsrc;
             my $did_mv = rename $tsrc, $tdst;
             my $error = $did_mv ? "" : " ($!)";
-            $self->{v} and
-                $self->tty( sprintf "\t%s: %sok%s\n", $raw, $did_mv ?  '' : 'not ',
-                                    $error );
+            $self->log_info("\t%s: %sok%s\n", $raw, $did_mv ?  '' : 'not ', $error);
             -f $tdst and chmod $perms, $tdst;
         }
         close SKIPTESTS;
@@ -1147,7 +1163,7 @@ sub change_manifest {
                     if ( ! grep /\Q$fn\E/ => @$tests ) {
                         print MANIN "$mline\n";
                     } else {
-                        $self->{v} and $self->tty( "\t$fn\n" );
+                        $self->log_info("\t$fn");
                     }
                 }
                 close MANIN;
@@ -1170,7 +1186,7 @@ sub _run {
     my $self = shift;
     my( $command, $sub, @args ) = @_;
 
-    $self->{v} > 1 and print "[$command]\n";
+    $self->log_debug("[$command]");
     defined $sub and return &$sub( $command, @args );
 
     my @output = qx( $command );

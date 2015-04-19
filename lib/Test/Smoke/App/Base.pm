@@ -5,9 +5,11 @@ use Carp;
 
 use base 'Test::Smoke::ObjectBase';
 
+use Cwd 'abs_path';
 use Getopt::Long qw/:config pass_through/;
 use Test::Smoke::App::AppOption;
 use Test::Smoke::App::AppOptionCollection;
+use Test::Smoke::LogMixin;
 
 =head1 NAME
 
@@ -418,7 +420,7 @@ sub _obtain_config_file {
     }
 
     if (-f $cf_name) {
-        $self->cli_options->{'configfile'} = $cf_name;
+        $self->cli_options->{'configfile'} = abs_path($cf_name);
 
         # Read the config-file in a localized environment
         our $conf;
@@ -434,115 +436,6 @@ sub _obtain_config_file {
     else {
         $self->{_configfile_error} = "Could not find a configfile for '$cf_name'.";
     }
-}
-
-=head2 $app->log_warn($fmt, @values)
-
-C<< prinf $fmt, @values >> to the currently selected filehandle.
-
-=head3 Arguments
-
-Positional.
-
-=over
-
-=item $fmt => a (s)printf format
-
-The format gets an extra new line if one wasn't present.
-
-=item @values => optional vaules for the template.
-
-=back
-
-=head3 Returns
-
-use in void context.
-
-=head3 Exceptions
-
-None.
-
-=cut
-
-sub log_warn {
-    my $self = shift;
-    my ($fmt, @args) = @_;
-    $fmt .= "\n" if $fmt !~ /\n\z/;
-    printf $fmt, @args;
-}
-
-=head2 $app->log_info($fmt, @values)
-
-C<< prinf $fmt, @values >> to the currently selected filehandle if the 'verbose'
-option is set.
-
-=head3 Arguments
-
-Positional.
-
-=over
-
-=item $fmt => a (s)printf format
-
-The format gets an extra new line if one wasn't present.
-
-=item @values => optional vaules for the template.
-
-=back
-
-=head3 Returns
-
-use in void context.
-
-=head3 Exceptions
-
-None.
-
-=cut
-
-sub log_info {
-    my $self = shift;
-    return if !$self->option('verbose');
-    my ($fmt, @args) = @_;
-    $fmt .= "\n" if $fmt !~ /\n\z/;
-    printf $fmt, @args;
-}
-
-=head2 $app->log_debug($fmt, @values)
-
-C<< prinf $fmt, @values >> to the currently selected filehandle if the 'verbose'
-option is set to a value > 1.
-
-=head3 Arguments
-
-Positional.
-
-=over
-
-=item $fmt => a (s)printf format
-
-The format gets an extra new line if one wasn't present.
-
-=item @values => optional vaules for the template.
-
-=back
-
-=head3 Returns
-
-use in void context.
-
-=head3 Exceptions
-
-None.
-
-=cut
-
-sub log_debug {
-    my $self = shift;
-    return if $self->option('verbose') < 2;
-    my ($fmt, @args) = @_;
-    $fmt .= "\n" if $fmt !~ /\n\z/;
-    printf $fmt, @args;
 }
 
 1;

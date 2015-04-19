@@ -10,10 +10,15 @@ BEGIN {
 use lib 'inc';
 use lib $lib;
 
-use JSON; # Should be our factory type module.
+# Do not import, it will find installed JSON::PP/XS :(
+use JSON ();
 
-require Scalar::Util;	# Now needed for Test::More (isa_ok)
-use Test::More 'no_plan';
+# Preload modules before we mess with @INC
+require Data::Dumper;  # Test::More::explain()
+require Scalar::Util;  # Test::More::isa_ok()
+require Carp;          # our JSON.pm might need it;
+use Test::More;
+use Test::NoWarnings ();
 
 my %code = (
     'PP' => <<'    EOPP',
@@ -44,16 +49,32 @@ sub decode_json { return __PACKAGE__ . "\::decode_json()"; }
     print $pkg $code{$type};
     print $pkg $code{General};
     close $pkg;
+    note(sprintf("Written JSON::%s %sOk", $type, -f $fname ? "" : "NOT "));
 
+    delete($INC{'JSON.pm'}); reset 'JSON';
     local @INC = ('inc', $lib);
+    JSON->import();
     my $obj = JSON->new;
     isa_ok($obj, 'JSON::PP');
 
     is(encode_json(), 'JSON::PP::encode_json()', "JSON::PP::encode_json()");
     is(decode_json(), 'JSON::PP::decode_json()', "JSON::PP::decode_json()");
+    is($obj->encode_json(), 'JSON::PP::encode_json()', "JSON::PP->encode_json()");
+    is($obj->decode_json(), 'JSON::PP::decode_json()', "JSON::PP->decode_json()");
+
+    # Clean up stuff for the next test.
+    delete($INC{'JSON/PP.pm'});
+    unlink $fname;
 }
 
 {
+# This test will spew 'Subroutine main::encode_json redefined at Exporter.pm'
+# I don't know how to stop it from doing that.
+    local $SIG{__WARN__} = sub {
+        if ($_[0] !~ /^Subroutine main::(?:en|de)code_json redefined at/) {
+            warn @_;
+        }
+    };
     my $type = 'XS';
     my $fname = "$lib/JSON/$type.pm";
     note("Check we can find JSON::$type");
@@ -61,13 +82,22 @@ sub decode_json { return __PACKAGE__ . "\::decode_json()"; }
     print $pkg $code{$type};
     print $pkg $code{General};
     close $pkg;
+    note(sprintf("Written JSON::%s %sOk", $type, -f $fname ? "" : "NOT "));
 
+    delete($INC{'JSON.pm'});
     local @INC = ('inc', $lib);
+    JSON->import();
     my $obj = JSON->new;
     isa_ok($obj, 'JSON::XS');
 
     is(encode_json(), 'JSON::XS::encode_json()', "JSON::XS::encode_json()");
     is(decode_json(), 'JSON::XS::decode_json()', "JSON::XS::decode_json()");
+    is($obj->encode_json(), 'JSON::XS::encode_json()', "JSON::XS->encode_json()");
+    is($obj->decode_json(), 'JSON::XS::decode_json()', "JSON::XS->decode_json()");
 }
 
 rmtree($lib, $ENV{TEST_VERBOSE});
+
+Test::NoWarnings::had_no_warnings();
+$Test::NoWarnings::do_end_test = 0;
+done_testing();

@@ -13,55 +13,13 @@ use Test::Smoke::App::SyncTree;
 use Test::Smoke::App::Options;
 my $opt = 'Test::Smoke::App::Options';
 
+use Test::Smoke::Util 'get_patch';
+
 =head1 NAME
 
 Test::Smoke::App::SmokePerl - The tssmokeperl.pl application.
 
 =head1 DESCRIPTION
-
-=head2 Test::Smoke::App::SmokePerl->new()
-
-Return an instance.
-
-=cut
-
-sub new {
-    my $class = shift;
-    my $self = $class->SUPER::new(@_);
-
-    {
-        local @ARGV = @{$self->ARGV};
-        $self->{_synctree} = Test::Smoke::App::SyncTree->new(
-            $opt->synctree_config()
-        );
-    }
-    {
-        local @ARGV = @{$self->ARGV};
-        $self->{_runsmoke} = Test::Smoke::App::RunSmoke->new(
-            $opt->runsmoke_config()
-        );
-    }
-    {
-        local @ARGV = @{$self->ARGV};
-        $self->{_reporter} = Test::Smoke::App::Reporter->new(
-            $opt->reporter_config()
-        );
-    }
-    {
-        local @ARGV = @{$self->ARGV};
-        $self->{_sendreport} = Test::Smoke::App::SendReport->new(
-            $opt->sendreport_config()
-        );
-    }
-    {
-        local @ARGV = @{$self->ARGV};
-        $self->{_archiver} = Test::Smoke::App::Archiver->new(
-            $opt->archiver_config()
-        );
-    }
-
-    return $self;
-}
 
 =head2 $app->run();
 
@@ -86,20 +44,75 @@ Run all the parts:
 sub run {
     my $self = shift;
 
-    $self->log_debug("==> Starting synctree");
-    $self->synctree->run();
+    my $old_commit = get_patch($self->option('ddir'))->[0] || "";
+    if ($self->option('smartsmoke') && $self->option('patchlevel')) {
+        $old_commit = $self->option('patchlevel');
+    }
+    $self->log_debug("Commitlevel before sync: %s", $old_commit);
 
-    $self->log_debug("==> Starting runsmoke");
-    $self->runsmoke->run();
+    my $current_commit;
+    if ($self->option('sync')) {
+        local @ARGV = @{$self->ARGV};
+        $self->{_synctree} = Test::Smoke::App::SyncTree->new(
+            $opt->synctree_config()
+        );
+        $self->log_info("==> Starting synctree");
+        $current_commit = $self->synctree->run();
+    }
+    else {
+        $self->log_warn("==> Skipping synctree");
+        $current_commit = get_patch($self->option('ddir'))->[0];
+    }
+    $self->log_debug("Commitlevel after sync: %s", $current_commit);
 
-    $self->log_debug("==> Starting reporter");
-    $self->reporter->run();
+    if ($self->option('smartsmoke') && ($current_commit eq $old_commit)) {
+        $self->log_warn("Skipping this smoke, commit(%s) did not change.", $old_commit);
+        return;
+    }
+    {
+        local @ARGV = @{$self->ARGV};
+        $self->{_runsmoke} = Test::Smoke::App::RunSmoke->new(
+            $opt->runsmoke_config()
+        );
+        $self->log_info("==> Starting runsmoke");
+        $self->runsmoke->run();
+    }
 
-    $self->log_debug("==> Starting sendreport");
-    $self->sendreport->run();
+    if ($self->option('report')) {
+        local @ARGV = @{$self->ARGV};
+        $self->{_reporter} = Test::Smoke::App::Reporter->new(
+            $opt->reporter_config()
+        );
+        $self->log_info("==> Starting reporter");
+        $self->reporter->run();
+    }
+    else {
+        $self->log_warn("==> Skipping reporter");
+    }
 
-    $self->log_debug("==> Starting archiver");
-    $self->archiver->run();
+    if ($self->option('sendreport')) {
+        local @ARGV = @{$self->ARGV};
+        $self->{_sendreport} = Test::Smoke::App::SendReport->new(
+            $opt->sendreport_config()
+        );
+        $self->log_info("==> Starting sendreport");
+        $self->sendreport->run();
+    }
+    else {
+        $self->log_warn("==> Skipping sendreport");
+    }
+
+    if ($self->option('archive')) {
+        local @ARGV = @{$self->ARGV};
+        $self->{_archiver} = Test::Smoke::App::Archiver->new(
+            $opt->archiver_config()
+        );
+        $self->log_info("==> Starting archiver");
+        $self->archiver->run();
+    }
+    else {
+        $self->log_warn("==> Skipping archiver");
+    }
 }
 
 1;

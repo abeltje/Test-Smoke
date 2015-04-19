@@ -1,7 +1,12 @@
 #! perl -w
 use strict;
 
-use Test::More 'no_plan';
+BEGIN {
+    *CORE::GLOBAL::localtime = sub { @_ ? CORE::localtime(shift) : CORE::localtime() };
+}
+
+use Test::More;
+use Test::NoWarnings ();
 
 use File::Path;
 use File::Spec::Functions;
@@ -13,25 +18,84 @@ my $ddir = catdir('t', 'perl');
 mkpath($ddir);
 {
     fake_out($ddir);
-    local @ARGV = ('--ddir', $ddir, '--poster', 'curl', '--curlbin', 'curl');
-    my $app = Test::Smoke::App::SmokePerl->new(
-        main_options    => [$opt->syncer(), $opt->poster()],
-        general_options => [$opt->ddir()],
-        special_options => {
-            'git' => [
-                $opt->gitbin(),
-                $opt->gitdir(),
-            ],
-            'curl' => [ $opt->curlbin() ],
-        },
-    );
-    isa_ok($app, 'Test::Smoke::App::SmokePerl');
+    no warnings 'redefine';
+    local *CORE::GLOBAL::localtime = sub {
+        return (2, 11, 14, 15, 3, 115, 3, 104, 1);
+    };
+    local *Test::Smoke::App::SyncTree::run = \&smarty_pants;
+    local *Test::Smoke::App::RunSmoke::run = \&smarty_pants;
+    local *Test::Smoke::App::Reporter::run = \&smarty_pants;
+    local *Test::Smoke::App::SendReport::run = \&smarty_pants;
+    local *Test::Smoke::App::Archiver::run = \&smarty_pants;
+
+    {
+        open my $log, '>', \my $logfile;
+        my $stdout = select $log;
+        local @ARGV = (
+            '--ddir'    => $ddir,
+            '--verbose' => 1,
+        );
+        my $app = Test::Smoke::App::SmokePerl->new($opt->smokeperl_config());
+        isa_ok($app, 'Test::Smoke::App::SmokePerl');
+
+        $app->run();
+        select $log;
+        is($logfile, <<'        EOL', "basic run");
+[2015-04-15 14:11:02+0200] ==> Starting synctree
+[2015-04-15 14:11:02+0200] calling ->run() from Test::Smoke::App::SyncTree
+[2015-04-15 14:11:02+0200] ==> Starting runsmoke
+[2015-04-15 14:11:02+0200] calling ->run() from Test::Smoke::App::RunSmoke
+[2015-04-15 14:11:02+0200] Reading smokeresult from t/perl/mktest.out
+[2015-04-15 14:11:02+0200] Processing [-Duse64bitint]
+[2015-04-15 14:11:02+0200] Processing [-DDEBUGGING -Duse64bitint]
+[2015-04-15 14:11:02+0200] ==> Starting reporter
+[2015-04-15 14:11:02+0200] calling ->run() from Test::Smoke::App::Reporter
+[2015-04-15 14:11:02+0200] ==> Starting sendreport
+[2015-04-15 14:11:02+0200] calling ->run() from Test::Smoke::App::SendReport
+[2015-04-15 14:11:02+0200] ==> Starting archiver
+[2015-04-15 14:11:02+0200] calling ->run() from Test::Smoke::App::Archiver
+        EOL
+    }
+    {
+        local @ARGV = (
+            '--ddir'    => $ddir,
+            '--verbose' => 1,
+            '--nosync',
+            '--noreport',
+            '--nosendreport',
+            '--noarchive',
+            '--nosmartsmoke',
+        );
+        my $app = Test::Smoke::App::SmokePerl->new($opt->smokeperl_config());
+        isa_ok($app, 'Test::Smoke::App::SmokePerl');
+
+        open my $log, '>', \my $logfile;
+        my $stdout = select $log;
+        $app->run();
+        select $log;
+        is($logfile, <<'        EOL', "basic run");
+[2015-04-15 14:11:02+0200] ==> Skipping synctree
+[2015-04-15 14:11:02+0200] ==> Starting runsmoke
+[2015-04-15 14:11:02+0200] calling ->run() from Test::Smoke::App::RunSmoke
+[2015-04-15 14:11:02+0200] ==> Skipping reporter
+[2015-04-15 14:11:02+0200] ==> Skipping sendreport
+[2015-04-15 14:11:02+0200] ==> Skipping archiver
+        EOL
+    }
 }
 
-# done_testing();
+Test::NoWarnings::had_no_warnings();
+$Test::NoWarnings::do_end_test = 0;
+done_testing();
+
 END {
     unlink catfile($ddir, Test::Smoke::App::Options->outfile->default);
     rmtree($ddir);
+}
+
+sub smarty_pants {
+    my $self = shift;
+    $self->log_warn("calling ->run() from %s", ref($self));
 }
 
 sub fake_out {
