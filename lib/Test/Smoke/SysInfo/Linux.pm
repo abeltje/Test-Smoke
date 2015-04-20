@@ -63,9 +63,10 @@ sub prepare_os {
     my $self = shift;
 
     my $etc = $ENV{SMOKE_USE_ETC} || "/etc";
-    my @dist_file = grep { -s $_ }
-        glob("$etc/*[-_][rRvV][eE][lLrR]*"), "$etc/issue",
-             "$etc.defaults/VERSION", "$etc/VERSION", "$etc/release";
+    my @dist_file = grep { -f $_ && -s _ } map {
+        -d $_ ? glob("$_/*") : ($_)
+    } glob("$etc/*[-_][rRvV][eE][lLrR]*"), "$etc/issue",
+           "$etc.defaults/VERSION", "$etc/VERSION", "$etc/release";
     return unless @dist_file;
 
     my $os = $self->_os();
