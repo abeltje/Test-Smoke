@@ -8,6 +8,10 @@ BEGIN {
 use Test::More;
 use Test::NoWarnings ();
 
+# Make sure the tests use the same TZ!
+use POSIX 'tzset';
+$ENV{TZ} = 'UTC'; tzset();
+
 {
     no warnings 'redefine';
     local *CORE::GLOBAL::localtime = sub {
@@ -24,7 +28,7 @@ use Test::NoWarnings ();
         select $stdout;
     }
     is($o0, <<'    EOL', "v==0 => log_warn");
-[2015-04-15 14:11:02+0200] ->log_warn()
+[2015-04-15 14:11:02+0000] ->log_warn()
     EOL
 
     my $t1 = LogTest->new(v => 1);
@@ -38,8 +42,8 @@ use Test::NoWarnings ();
         select $stdout;
     }
     is($o1, <<'    EOL', "v==1 => log_warn, log_info");
-[2015-04-15 14:11:02+0200] ->log_warn()
-[2015-04-15 14:11:02+0200] ->log_info()
+[2015-04-15 14:11:02+0000] ->log_warn()
+[2015-04-15 14:11:02+0000] ->log_info()
     EOL
 
     my $t2 = LogTest->new(v => 2);
@@ -53,9 +57,9 @@ use Test::NoWarnings ();
         select $stdout;
     }
     is($o2, <<'    EOL', "v==2 => log_warn, log_info, log_debug");
-[2015-04-15 14:11:02+0200] ->log_warn()
-[2015-04-15 14:11:02+0200] ->log_info()
-[2015-04-15 14:11:02+0200] ->log_debug()
+[2015-04-15 14:11:02+0000] ->log_warn()
+[2015-04-15 14:11:02+0000] ->log_info()
+[2015-04-15 14:11:02+0000] ->log_debug()
     EOL
 
     my $t4 = LogTest->new(verbose => 1);
@@ -69,8 +73,8 @@ use Test::NoWarnings ();
         select $stdout;
     }
     is($o4, <<'    EOL', "verbose==1 => log_warn, log_info");
-[2015-04-15 14:11:02+0200] ->log_warn()
-[2015-04-15 14:11:02+0200] ->log_info()
+[2015-04-15 14:11:02+0000] ->log_warn()
+[2015-04-15 14:11:02+0000] ->log_info()
     EOL
 
 }
@@ -89,7 +93,7 @@ use Test::NoWarnings ();
     $logger->log_debug("do_log_debug()");
     select $stdout;
     is($logfile, <<'    EOL', "logfile (v=0)");
-[2015-04-15 14:11:02+0200] do_log_warn()
+[2015-04-15 14:11:02+0000] do_log_warn()
     EOL
 }
 
