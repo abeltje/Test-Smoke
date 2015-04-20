@@ -5,6 +5,42 @@ Changes on 2015-04-20 for github repository at:
 Enjoy!
 
 ________________________________________________________________________________
+[ea1902d] by Abe Timmerman on Mon, 20 Apr 2015 16:50:51 +0200
+
+     More fixing of MANIFEST and tests
+
+        Another file, not caught by the manifest-test, added Tux fixed a
+        longtime test-bug for sysinfo_proc.t where the generated 
+        GLOBref-names weren't unique within the test. Removed the locale
+        setting/restoring where we don't need it.
+
+
+M	MANIFEST
+M	Makefile.PL
+M	lib/Test/Smoke/SysInfo/Linux.pm
+D	t/.gitignore
+M	t/app/110-runsmoke.t
+D	t/ftppub/perl-current/lib/.gitignore
+M	t/sysinfo_proc.t
+________________________________________________________________________________
+[bd8a216] by Abe Timmerman on Mon, 20 Apr 2015 12:08:15 +0200
+
+     BUG FIX: strftime %F %T doesn't work everywhere :(
+
+        At least Windows (and old HP-UX partially) do not undstand. Change
+        to: %Y-%m-%d %H:%M:%S
+
+
+M	lib/Test/Smoke/LogMixin.pm
+________________________________________________________________________________
+[8400ede] by Abe Timmerman on Mon, 20 Apr 2015 11:19:23 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_05
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
 [a450fbf] by Abe Timmerman on Mon, 20 Apr 2015 10:56:03 +0200
 
      Test FIX: Do not rely on textual $!, use numbers
