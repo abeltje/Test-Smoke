@@ -1,11 +1,56 @@
-Changes on 2015-04-19 for github repository at:
+Changes on 2015-04-20 for github repository at:
   Fetch URL: ssh://git@github.com/abeltje/Test-Smoke
   Push  URL: ssh://git@github.com/abeltje/Test-Smoke
 
 Enjoy!
 
 ________________________________________________________________________________
-[75f0695] by Abe Timmerman on Sun, 19 Apr 2015 12:05:48 +0200
+[a450fbf] by Abe Timmerman on Mon, 20 Apr 2015 10:56:03 +0200
+
+     Test FIX: Do not rely on textual $!, use numbers
+
+        Textual $! is dependent on locale settings, use numerical context.
+        "No such file or directory" => 2
+
+
+M	t/app/110-runsmoke.t
+________________________________________________________________________________
+[e1a735d] by Abe Timmerman on Mon, 20 Apr 2015 07:24:35 +0200
+
+     FIX BUG: Tests with logging in different TZ
+
+        Machines not configured in CEST/CET, would fail tests with explicit 
+        logging, because of the timezone. We have disabled the timestamp-tag
+        for the normal tests. The tests for the logging Module now fix the
+        timezone at UTC
+
+
+M	t/20-logger.t
+M	t/app/030-app-base.t
+M	t/app/110-runsmoke.t
+M	t/app/130-smokeperl.t
+M	t/app/150-reporter.t
+________________________________________________________________________________
+[e8e23b4] by Abe Timmerman on Mon, 20 Apr 2015 07:11:21 +0200
+
+     BUGFIX: forgot to ship 2 files.
+
+        Thanks to CPANTesters we found that we forgot to ship 2 files from
+        the fake source-tree
+
+
+M	MANIFEST
+M	t/ftppub/perl-current/MANIFEST
+________________________________________________________________________________
+[230aa1e] by Abe Timmerman on Sun, 19 Apr 2015 18:03:08 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_04
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
+[217c749] by Abe Timmerman on Sun, 19 Apr 2015 12:05:48 +0200
 
      Berlin2015: Test::Smoke 1.71 to be
 
@@ -62,7 +107,7 @@ M	t/syncer_rsync.t
 M	t/util-execute.t
 M	xt/03-pod-coverage.t
 ________________________________________________________________________________
-[34ac00b] by Abe Timmerman on Fri, 12 Dec 2014 15:02:50 +0100
+[90408e7] by Abe Timmerman on Fri, 12 Dec 2014 15:02:50 +0100
 
      Fixes for the new tsapps architecture
 
@@ -71,19 +116,142 @@ M	lib/Test/Smoke/App/Reporter.pm
 M	lib/Test/Smoke/App/SmokePerl.pm
 M	lib/Test/Smoke/Reporter.pm
 ________________________________________________________________________________
-[2011f71] by Paul Cochrane on Mon, 17 Nov 2014 09:35:48 +0100
+[5583dd5] by Paul Cochrane on Mon, 17 Nov 2014 09:35:48 +0100
 
      Capitalising JSON in error message for consistency
 
 
 M	sendrpt.pl
 ________________________________________________________________________________
-[531fcf7] by Paul Cochrane on Mon, 17 Nov 2014 09:35:09 +0100
+[91a87ee] by Paul Cochrane on Mon, 17 Nov 2014 09:35:09 +0100
 
      Correcting typo in sendrpt error message
 
 
 M	sendrpt.pl
+________________________________________________________________________________
+[5b754c4] by H.Merijn Brand - Tux on Thu, 2 Apr 2015 12:38:53 +0200
+
+     Add openSUSE 11.4 and more consistent nickname reporting
+
+        openSUSE 11.2 "Emerald"  => openSUSE 11.2 (Emerald) openSUSE 11.3
+        "Teal"     => openSUSE 11.3 (Teal)
+
+        use the OS name from welcome if it *contains* the part of the distro 
+        file*name* that was used by default
+
+        And yes, I found an old openSUSE 11.4 server that was still used in 
+        production. :/
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+M	t/etc/suse-11.2/DISTNAME
+M	t/etc/suse-11.3/DISTNAME
+A	t/etc/suse-11.4/DISTNAME
+A	t/etc/suse-11.4/SuSE-release
+A	t/etc/suse-11.4/issue
+________________________________________________________________________________
+[e567ec5] by H.Merijn Brand - Tux on Thu, 2 Apr 2015 12:08:36 +0200
+
+     notice *folders* in release info
+
+        Most files are - both on SUSE and CentOS - empty in
+        /etc/lsb-release.d/ but things might change
+
+
+M	t/etc/get-lsb.pl
+A	t/etc/suse-13.2/lsb-release.d/desktop-4.0-amd64
+A	t/etc/suse-13.2/lsb-release.d/desktop-4.0-noarch
+A	t/etc/suse-13.2/lsb-release.d/graphics-2.0-amd64
+A	t/etc/suse-13.2/lsb-release.d/graphics-2.0-noarch
+A	t/etc/suse-13.2/lsb-release.d/graphics-3.2-amd64
+A	t/etc/suse-13.2/lsb-release.d/graphics-3.2-noarch
+A	t/etc/suse-13.2/lsb-release.d/graphics-4.0-amd64
+A	t/etc/suse-13.2/lsb-release.d/graphics-4.0-noarch
+________________________________________________________________________________
+[700de11] by H.Merijn Brand - Tux on Thu, 2 Apr 2015 11:52:25 +0200
+
+     Add distcheck for centos-6.6
+
+
+A	t/etc/centos-6.6/DISTNAME
+A	t/etc/centos-6.6/centos-release
+A	t/etc/centos-6.6/issue
+A	t/etc/centos-6.6/lsb-release
+A	t/etc/centos-6.6/lsb-release.d/base-4.0-amd64
+A	t/etc/centos-6.6/lsb-release.d/base-4.0-noarch
+A	t/etc/centos-6.6/lsb-release.d/core-4.0-amd64
+A	t/etc/centos-6.6/lsb-release.d/core-4.0-noarch
+A	t/etc/centos-6.6/redhat-release
+A	t/etc/centos-6.6/system-release
+A	t/etc/centos-6.6/system-release-cpe
+________________________________________________________________________________
+[fddc9fe] by H.Merijn Brand - Tux on Thu, 2 Apr 2015 11:42:54 +0200
+
+     Added distcheck for Debian 8.0 (jessie)
+
+
+A	t/etc/debian-jessie-8/DISTNAME
+A	t/etc/debian-jessie-8/debian_version
+A	t/etc/debian-jessie-8/issue
+A	t/etc/debian-jessie-8/os-release
+________________________________________________________________________________
+[d1fe199] by H.Merijn Brand - Tux on Sat, 7 Mar 2015 11:03:10 +0100
+
+     Add dsm-5.1
+
+
+A	t/etc/dsm-5.1/DISTNAME
+A	t/etc/dsm-5.1/VERSION
+________________________________________________________________________________
+[bc766ca] by H.Merijn Brand - Tux on Tue, 27 Jan 2015 19:15:00 +0100
+
+     Add Oracle Linux Server 7.0
+
+
+A	t/etc/oracle-7.0/DISTNAME
+A	t/etc/oracle-7.0/issue
+A	t/etc/oracle-7.0/oracle-release
+A	t/etc/oracle-7.0/os-release
+A	t/etc/oracle-7.0/redhat-release
+A	t/etc/oracle-7.0/system-release
+A	t/etc/oracle-7.0/system-release-cpe
+________________________________________________________________________________
+[7ea290f] by H.Merijn Brand - Tux on Wed, 21 Jan 2015 14:36:58 +0100
+
+     unTABify (to make Abe happ{y|ier}
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+________________________________________________________________________________
+[49507a7] by H.Merijn Brand - Tux on Wed, 21 Jan 2015 14:36:00 +0100
+
+     extract subversion of OS (wheezy) in SysInfo
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+A	t/etc/debian-wheezy-7.2/DISTNAME
+A	t/etc/debian-wheezy-7.2/debian_version
+A	t/etc/debian-wheezy-7.2/issue
+A	t/etc/debian-wheezy-7.2/os-release
+A	t/etc/debian-wheezy-7.8/DISTNAME
+A	t/etc/debian-wheezy-7.8/debian_version
+A	t/etc/debian-wheezy-7.8/issue
+A	t/etc/debian-wheezy-7.8/os-release
+D	t/etc/debian-wheezy/DISTNAME
+D	t/etc/debian-wheezy/debian_version
+D	t/etc/debian-wheezy/issue
+D	t/etc/debian-wheezy/os-release
+________________________________________________________________________________
+[6add4e7] by H.Merijn Brand - Tux on Thu, 8 Jan 2015 12:53:01 +0100
+
+     Add test and small subst for RHEL 4.x distname
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+A	t/etc/rhel-4.2/DISTNAME
+A	t/etc/rhel-4.2/issue
+A	t/etc/rhel-4.2/redhat-release
 ________________________________________________________________________________
 [2bcc262] by H.Merijn Brand - Tux on Sun, 26 Oct 2014 21:45:57 +0100
 
