@@ -21,6 +21,10 @@ use Test::Smoke::App::Options;
 $Test::Smoke::LogMixin::USE_TIMESTAMP = 0;
 
 { # Basic test, check we die() if the directory doesn't exist.
+    # Locale-issue reported, FORCE LC_ALL=C
+    require POSIX;
+    my $lc_all = POSIX::setlocale(POSIX::LC_ALL() => 'C');
+
     my $ddir = 't/will_not_exist_..._ever_I_hope';
     local @ARGV = ('--ddir', $ddir);
     my $app = Test::Smoke::App::RunSmoke->new(
@@ -29,7 +33,9 @@ $Test::Smoke::LogMixin::USE_TIMESTAMP = 0;
     isa_ok($app, 'Test::Smoke::App::RunSmoke');
 
     eval { $app->run() };
-    like($@, qr/^Cannot chdir\($ddir\): No such file or directory/, "->run() fails");
+    is(0+$!, 2, "->run() fails: $!");
+
+    POSIX::setlocale(POSIX::LC_ALL() => $lc_all)
 }
 
 my $ddir = catdir(abs_path(), 't', 'perl');
