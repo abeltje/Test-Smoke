@@ -1,9 +1,29 @@
-Changes on 2015-04-20 for github repository at:
+Changes on 2015-04-22 for github repository at:
   Fetch URL: ssh://git@github.com/abeltje/Test-Smoke
   Push  URL: ssh://git@github.com/abeltje/Test-Smoke
 
 Enjoy!
 
+________________________________________________________________________________
+[9c8e0cc] by Abe Timmerman on Wed, 22 Apr 2015 09:48:18 +0200
+
+     Test FIX: fix failing tests
+
+        The fallback-test calculated the wrong result @inc. The logging-test
+        assumed the wrong things about strftime(), timezones cannot be
+        "manipulated", now we recalculate the prefix in the test.
+
+
+M	t/10-fallback.t
+M	t/20-logger.t
+________________________________________________________________________________
+[41a26a3] by Abe Timmerman on Mon, 20 Apr 2015 17:01:56 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_06
+
+
+M	Changes
+M	lib/Test/Smoke.pm
 ________________________________________________________________________________
 [ea1902d] by Abe Timmerman on Mon, 20 Apr 2015 16:50:51 +0200
 
