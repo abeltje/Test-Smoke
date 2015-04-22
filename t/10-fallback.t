@@ -1,7 +1,8 @@
 #! perl -w
 use strict;
 
-use Test::More 'no_plan';
+use Test::More;
+use Test::NoWarnings ();
 
 use Config;
 use File::Path qw/mkpath rmtree/;
@@ -21,8 +22,15 @@ use File::Spec::Functions;
     }
     use fallback catdir('t', 'fallback');
 
-    is_deeply(\@INC, [@inc, reverse @tree], "Complete stack added to \@INC");
+    my %names;
+    @inc = reverse( grep ++$names{$_} == 1, reverse(@inc, reverse(@tree)) );
+
+    is_deeply(\@INC, \@inc, "Complete stack added to \@INC")
+        or diag(explain({inc => \@inc, INC => \@INC}));
 
     rmtree($base);
 }
-#done_testing();
+
+Test::NoWarnings::had_no_warnings();
+$Test::NoWarnings::do_end_test = 0;
+done_testing();
