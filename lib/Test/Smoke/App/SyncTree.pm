@@ -50,8 +50,9 @@ sub new {
     my $class = shift;
     my $self = $class->SUPER::new(@_);
 
+    my $syncer = $self->{_final_options}->{sync_type} || $self->option('syncer');
     $self->{_syncer} = Test::Smoke::Syncer->new(
-        $self->option('syncer'),
+	$syncer,
         $self->options,
         v => $self->option('verbose'),
     );
