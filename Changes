@@ -1,9 +1,40 @@
-Changes on 2015-04-22 for github repository at:
+Changes on 2015-05-05 for github repository at:
   Fetch URL: ssh://git@github.com/abeltje/Test-Smoke
   Push  URL: ssh://git@github.com/abeltje/Test-Smoke
 
 Enjoy!
 
+________________________________________________________________________________
+[3d58941] by Abe Timmerman on Tue, 5 May 2015 10:56:03 +0200
+
+     TestFIX: problem with IPv6
+
+        It lookes like HTTP::Daemon->url resolves back to IPv6 on my
+        machine, and the client gets a 'Connection refused', so now we
+        replace the host-name with 127.0.0.1, that seems to work for the
+        moment. See what CPANtesters make of that.
+
+
+M	lib/Test/Smoke/Poster.pm
+M	t/poster-post.t
+________________________________________________________________________________
+[f64b61f] by Abe Timmerman on Tue, 5 May 2015 09:42:02 +0200
+
+     TestFix: different approach
+
+        We only need to test that the fallback directories are at the end of
+        @INC, not interested in the rest of @INC.
+
+
+M	t/10-fallback.t
+________________________________________________________________________________
+[5a98411] by Abe Timmerman on Wed, 22 Apr 2015 09:52:39 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_07
+
+
+M	Changes
+M	lib/Test/Smoke.pm
 ________________________________________________________________________________
 [9c8e0cc] by Abe Timmerman on Wed, 22 Apr 2015 09:48:18 +0200
 
