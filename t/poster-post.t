@@ -31,14 +31,14 @@ my $timeout = 60;
 my $jsnfile = 'testsuite.jsn';
 {
     $daemon = HTTP::Daemon->new() || die "Could not initialize a Daemon";
-    $url = $daemon->url;
+    # IPv6 doesn't work, so force IPv4 localhost
+    ($url = $daemon->url) =~ s{(http://)([^:]+)}{${1}127.0.0.1};
 
     $pid = fork();
     if ($pid) { # Continue
         note("$url");
     }
     else { # HTTP-Server for dummies
-        my $CRLF = "\015\012";
         while (my $c = $daemon->accept) {
             while (my $r = $c->get_request) {
                 if ($r->method eq 'POST' && $r->uri->path eq '/report') {

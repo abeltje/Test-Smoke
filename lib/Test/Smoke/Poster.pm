@@ -90,6 +90,7 @@ sub new {
         $fields{ddir} = catdir( abs_path(), $fields{ddir} );
     }
     $fields{ddir} = rel2abs( $fields{ddir}, abs_path() );
+    $fields{poster} = $poster;
 
     my @missing;
     for my $required (@{ $CONFIG{$poster}{required} }) {
