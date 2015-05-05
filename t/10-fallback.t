@@ -22,11 +22,8 @@ use File::Spec::Functions;
     }
     use fallback catdir('t', 'fallback');
 
-    my %names;
-    @inc = reverse( grep ++$names{$_} == 1, reverse(@inc, reverse(@tree)) );
-
-    is_deeply(\@INC, \@inc, "Complete stack added to \@INC")
-        or diag(explain({inc => \@inc, INC => \@INC}));
+    is_deeply([@INC[-5..-1]], [reverse @tree], "Complete stack added to \@INC")
+        or diag(explain({tail => [reverse @tree], INC => \@INC}));
 
     rmtree($base);
 }
