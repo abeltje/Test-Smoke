@@ -1,20 +1,15 @@
 #! perl -w
 use strict;
+use 5.008003;
 
 use Test::More;
-
-# 5.005xx doesn't support three argumented open()
-# 5.6 has trouble with TIEHANDLE
-BEGIN {
-    plan $] < 5.008
-        ? ( skip_all => "Tests not supported on $]" )
-        : ( tests => 6 );
-}
 
 my %files;
 BEGIN {
     # redefine the CORE functions to mimic themselfs at compile-time
     # so we can re-redefine them at run-time
+
+    our $tux = 0; # Counter for unique GLOBrefs
     *CORE::GLOBAL::open = sub (*;$@) {
         my ($handle, $second, @args) = @_;
         my ($pkg) = caller;
@@ -25,10 +20,10 @@ BEGIN {
         elsif ( !defined $handle ) {    # undefined scalar, provide GLOBref
             $_[0] = $handle = do {
                 no strict 'refs';
-                \*{ sprintf "%s::NH%d%d%d", $pkg, $$, time, rand 100 };
+                \*{ sprintf "%s::TUX%06d", $pkg, $tux++ };
             };
         }
-        CORE::open $handle, $second, @args;
+        CORE::open($handle, $second, @args);
     };
 
     *CORE::GLOBAL::close = sub (*) {
@@ -38,7 +33,7 @@ BEGIN {
             no strict 'refs';
             $handle = *{ "$pkg\:\:$handle" };
         }
-        CORE::close $handle;
+        CORE::close($handle);
     };
 }
 
@@ -62,7 +57,7 @@ my $this_system = Test::Smoke::SysInfo::Generic->new();
         elsif ( !defined $handle ) {    # undefined scalar, provide GLOBref
             $_[0] = $handle = do {
                 no strict 'refs';
-                \*{ sprintf "%s::NH%d%d%d", $pkg, $$, time, rand 100 };
+                \*{ sprintf "%s::TUX%06d", $pkg, our $tux++ };
             };
         }
 
@@ -75,7 +70,7 @@ my $this_system = Test::Smoke::SysInfo::Generic->new();
             tie *$handle, 'ReadProc', $files{$fn};
         }
         else {
-            CORE::open $handle, $second, @args;
+            CORE::open($handle, $second, @args);
         }
     };
     local *CORE::GLOBAL::close = sub (*) {
@@ -163,6 +158,8 @@ my $this_system = Test::Smoke::SysInfo::Generic->new();
     }, "Read /proc/cpuinfo for i386/16";
 
 }
+
+done_testing();
 
 # Assign file contents
 BEGIN {

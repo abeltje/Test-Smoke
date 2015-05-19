@@ -147,7 +147,7 @@ sub _log_message {
     (my $fmt = shift) =~ s/\n*\z//;
 
     my $stamp = $USE_TIMESTAMP
-        ? POSIX::strftime("[%F %T%z] ", localtime)
+        ? POSIX::strftime("[%Y-%m-%d %H:%M:%S%z] ", localtime)
         : "";
 
     # use the $stamp for every line.

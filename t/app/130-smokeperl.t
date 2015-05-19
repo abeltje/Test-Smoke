@@ -13,6 +13,7 @@ use File::Spec::Functions;
 use Test::Smoke::App::SmokePerl;
 use Test::Smoke::App::Options;
 my $opt = 'Test::Smoke::App::Options';
+$Test::Smoke::LogMixin::USE_TIMESTAMP = 0;
 
 my $ddir = catdir('t', 'perl');
 mkpath($ddir);
@@ -41,19 +42,19 @@ mkpath($ddir);
         $app->run();
         select $log;
         is($logfile, <<'        EOL', "basic run");
-[2015-04-15 14:11:02+0200] ==> Starting synctree
-[2015-04-15 14:11:02+0200] calling ->run() from Test::Smoke::App::SyncTree
-[2015-04-15 14:11:02+0200] ==> Starting runsmoke
-[2015-04-15 14:11:02+0200] calling ->run() from Test::Smoke::App::RunSmoke
-[2015-04-15 14:11:02+0200] Reading smokeresult from t/perl/mktest.out
-[2015-04-15 14:11:02+0200] Processing [-Duse64bitint]
-[2015-04-15 14:11:02+0200] Processing [-DDEBUGGING -Duse64bitint]
-[2015-04-15 14:11:02+0200] ==> Starting reporter
-[2015-04-15 14:11:02+0200] calling ->run() from Test::Smoke::App::Reporter
-[2015-04-15 14:11:02+0200] ==> Starting sendreport
-[2015-04-15 14:11:02+0200] calling ->run() from Test::Smoke::App::SendReport
-[2015-04-15 14:11:02+0200] ==> Starting archiver
-[2015-04-15 14:11:02+0200] calling ->run() from Test::Smoke::App::Archiver
+==> Starting synctree
+calling ->run() from Test::Smoke::App::SyncTree
+==> Starting runsmoke
+calling ->run() from Test::Smoke::App::RunSmoke
+Reading smokeresult from t/perl/mktest.out
+Processing [-Duse64bitint]
+Processing [-DDEBUGGING -Duse64bitint]
+==> Starting reporter
+calling ->run() from Test::Smoke::App::Reporter
+==> Starting sendreport
+calling ->run() from Test::Smoke::App::SendReport
+==> Starting archiver
+calling ->run() from Test::Smoke::App::Archiver
         EOL
     }
     {
@@ -74,12 +75,12 @@ mkpath($ddir);
         $app->run();
         select $log;
         is($logfile, <<'        EOL', "basic run");
-[2015-04-15 14:11:02+0200] ==> Skipping synctree
-[2015-04-15 14:11:02+0200] ==> Starting runsmoke
-[2015-04-15 14:11:02+0200] calling ->run() from Test::Smoke::App::RunSmoke
-[2015-04-15 14:11:02+0200] ==> Skipping reporter
-[2015-04-15 14:11:02+0200] ==> Skipping sendreport
-[2015-04-15 14:11:02+0200] ==> Skipping archiver
+==> Skipping synctree
+==> Starting runsmoke
+calling ->run() from Test::Smoke::App::RunSmoke
+==> Skipping reporter
+==> Skipping sendreport
+==> Skipping archiver
         EOL
     }
 }
