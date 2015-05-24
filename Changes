@@ -1,9 +1,33 @@
-Changes on 2015-05-05 for github repository at:
+Changes on 2015-05-24 for github repository at:
   Fetch URL: ssh://git@github.com/abeltje/Test-Smoke
   Push  URL: ssh://git@github.com/abeltje/Test-Smoke
 
 Enjoy!
 
+________________________________________________________________________________
+[59576e1] by abeltje on Sun, 24 May 2015 12:05:22 +0200
+
+     TestFixes for fallback.pm and MSWin32
+
+        Like the 'use fallback' test, the 'no fallback' test now tests what
+        it actually does. MSWin32 had failing tests with (back-)slashes in
+        file paths Makefile.PL: Add installed modules to the dependencies.
+
+
+M	Makefile.PL
+M	t/11-no_fallback.t
+M	t/app/110-runsmoke.t
+M	t/app/130-smokeperl.t
+M	t/poster-post.t
+M	t/sysinfo.t
+________________________________________________________________________________
+[0dd7e3e] by Abe Timmerman on Tue, 5 May 2015 11:27:34 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_08
+
+
+M	Changes
+M	lib/Test/Smoke.pm
 ________________________________________________________________________________
 [3d58941] by Abe Timmerman on Tue, 5 May 2015 10:56:03 +0200
 
