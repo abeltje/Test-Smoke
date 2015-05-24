@@ -22,7 +22,12 @@ use File::Spec::Functions;
     use fallback 't/fallback';
 
     no fallback 't/fallback';
-    is_deeply(\@INC, \@inc, "\@INC restored");
+    # We only need to test that the elements of @tree are no longer in @INC
+    my @seen;
+    for my $dir (@tree) {
+        push @seen, $dir if grep $_ eq $dir, @INC;
+    }
+    is(scalar @seen, 0, "No fallback directories left behind");
 
     rmtree($base);
 }

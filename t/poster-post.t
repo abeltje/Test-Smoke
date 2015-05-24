@@ -19,7 +19,7 @@ if (!has_module('HTTP::Daemon')) {
     plan skip_all => "Need 'HTTP::Daemon' for this test!";
 }
 require HTTP::Daemon;
-require HTTP::Status; HTTP::Status->import('RC_OK');
+require HTTP::Status; HTTP::Status->import('RC_OK', 'RC_NOT_IMPLEMENTED');
 require HTTP::Response;
 require HTTP::Headers;
 
@@ -45,7 +45,10 @@ my $jsnfile = 'testsuite.jsn';
                     (my $json = unescape($r->decoded_content)) =~ s/^json=//;
                     my $data;
                     $data  =  2 if $r->header('User-Agent') =~ /Test::Smoke/;
-                    $data += 40 if decode_json($json)->{sysinfo} eq $^O;
+                    eval {
+                        $data += 40 if decode_json($json)->{sysinfo} eq $^O;
+                    };
+                    $data = $@ if $@;
                     my $response = HTTP::Response->new(
                         RC_OK(), "OK",
                         HTTP::Headers->new('Content-Type', 'application/json'),
@@ -54,6 +57,12 @@ my $jsnfile = 'testsuite.jsn';
                     $c->send_response($response);
                 }
                 else {
+                    my $response = HTTP::Response->new(
+                        RC_NOT_IMPLEMENTED(), 'NOT IMPLEMENTED',
+                        HTTP::Headers->new('Content-Type', 'application/json'),
+                        unescape($r->decoded_content),
+                    );
+                    $c->send_response($response);
                     diag("<<<Error: @{[$r->as_string]}>>>");
                 }
                 $c->close;

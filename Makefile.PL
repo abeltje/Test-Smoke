@@ -84,13 +84,15 @@ for ($^O) {
         last;
     };
 }
-if ($] < 5.008) { # Encode is core from 5.8.0
-    $extra_deps{'Encode'} = 0;
-}
+
+# We won't enforce JSON::PP if JSON::XS is installed.
+# But JSON serialisation is needed.
 eval { require JSON::XS };
 if ( $@ ) {
-    eval { require JSON::PP };
-    $extra_deps{'JSON::PP'} = 0 if $@;
+    $extra_deps{'JSON::PP'} = 0;
+}
+else {
+    $extra_deps{'JSON::XS'} = 0;
 }
 my %posters;
 for my $poster (qw/LWP::UserAgent HTTP::Lite HTTP::Tiny/) {
@@ -98,16 +100,20 @@ for my $poster (qw/LWP::UserAgent HTTP::Lite HTTP::Tiny/) {
     if ($@) { $posters{$poster} = 0 }
 }
 if (keys %posters == 3) {
-    # Check for the curlbin
+    # Check for the curlbin as fallback
     local @INC = (@INC, 'lib');
     require Test::Smoke::Util;
     my $curlbin = Test::Smoke::Util::whereis('curl');
     if (!$curlbin) {
-        $extra_deps{'LWP::UserAgent'} = 0;
+        $extra_deps{'HTTP::Tiny'} = 0;
     }
     else {
         print "Found $curlbin\n";
     }
+}
+else {
+    exists $posters{$_} and $extra_deps{$_} = 0, last
+        for qw/HTTP::Tiny LWP::UserAgent HTTP::Lite/;
 }
 
 my %TEST_REQUIRES = (

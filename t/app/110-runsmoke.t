@@ -115,13 +115,14 @@ Test::Smoke::App::RunSmoke::run_smoke...
     eval { $app->run() };
     select $stdout;
 
+    my $plh = catfile($ddir, 'patchlevel.h');
     is($logfile, <<"    EOL", "logfile after RunSmoke") and note($logfile);
 [$0] chdir($ddir)
 qx[$^X -e "require q[$ddir/cpan/Test-Harness/lib/Test/Harness.pm];print Test::Harness->VERSION" 2>&1]
 Found: Test::Harness version 3.42.
 Reading build configurations from internal content
 Reading 'Policy.sh' from default content (v=1)
-Locally applied patches from '$ddir/patchlevel.h'
+Locally applied patches from '$plh'
 Patches: 'DEVEL19999'
 Adding 'SMOKE20000' to the registered patches.
     EOL

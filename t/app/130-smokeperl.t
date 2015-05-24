@@ -39,14 +39,15 @@ mkpath($ddir);
         my $app = Test::Smoke::App::SmokePerl->new($opt->smokeperl_config());
         isa_ok($app, 'Test::Smoke::App::SmokePerl');
 
+        my $outfile = catfile($ddir, 'mktest.out');
         $app->run();
         select $log;
-        is($logfile, <<'        EOL', "basic run");
+        is($logfile, <<"        EOL", "basic run");
 ==> Starting synctree
 calling ->run() from Test::Smoke::App::SyncTree
 ==> Starting runsmoke
 calling ->run() from Test::Smoke::App::RunSmoke
-Reading smokeresult from t/perl/mktest.out
+Reading smokeresult from $outfile
 Processing [-Duse64bitint]
 Processing [-DDEBUGGING -Duse64bitint]
 ==> Starting reporter
