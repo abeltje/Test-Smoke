@@ -2,7 +2,7 @@
 use strict;
 $|++;
 
-use Test::More tests => 56;
+use Test::More tests => 57;
 use Test::NoWarnings;
 my $verbose = 0;
 
@@ -32,19 +32,24 @@ ok defined &tsuname, "tsuname() imported";
 {
     my $si = Test::Smoke::SysInfo->new;
 
-    isa_ok $si, 'Test::Smoke::SysInfo::Base';
-    ok $si->cpu_type, "cpu_type: " . $si->cpu_type;
-    ok $si->cpu,      "cpu: " . $si->cpu;
+    my ($counter, $expect) = (0, 4);
+
+    isa_ok($si, 'Test::Smoke::SysInfo::Base');
+    $counter += ok($si->cpu_type, "cpu_type: " . $si->cpu_type);
+    $counter += ok($si->cpu,      "cpu: " . $si->cpu);
     SKIP: {
         $si->ncpu or skip "No #cpu code for this platform", 1;
-        ok $si->ncpu,     "number of cpus: " . $si->ncpu
+        $counter += ok($si->ncpu,     "number of cpus: " . $si->ncpu);
+        $expect++;
     }
-    ok $si->os, $si->os;
-    ok $si->host, $si->host;
+    $counter += ok($si->os, $si->os);
+    $counter += ok($si->host, $si->host);
 
     my $sysinfo = sysinfo();
     is join( " ", @{ $si }{map "_$_" => qw( host os cpu_type )} ),
        $sysinfo, "test sysinfo() $sysinfo";
+
+    is($counter, $expect, "sysinfo: $sysinfo");
 }
 
 {
