@@ -130,6 +130,14 @@ t/etc/centos-6.6/lsb-release.d/core-4.0-noarch
 t/etc/centos-6.6/redhat-release
 t/etc/centos-6.6/system-release
 t/etc/centos-6.6/system-release-cpe
+t/etc/centos-7.1/centos-release
+t/etc/centos-7.1/centos-release-upstream
+t/etc/centos-7.1/DISTNAME
+t/etc/centos-7.1/issue
+t/etc/centos-7.1/os-release
+t/etc/centos-7.1/redhat-release
+t/etc/centos-7.1/system-release
+t/etc/centos-7.1/system-release-cpe
 t/etc/debian-jessie-8/debian_version
 t/etc/debian-jessie-8/DISTNAME
 t/etc/debian-jessie-8/issue
@@ -160,6 +168,8 @@ t/etc/dsm-5.0/DISTNAME
 t/etc/dsm-5.0/VERSION
 t/etc/dsm-5.1/DISTNAME
 t/etc/dsm-5.1/VERSION
+t/etc/dsm-5.2/DISTNAME
+t/etc/dsm-5.2/VERSION
 t/etc/fedora-19/DISTNAME
 t/etc/fedora-19/fedora-release
 t/etc/fedora-19/issue
@@ -307,9 +317,6 @@ t/ftppub/perl-current/cpan/t/test.t
 t/ftppub/perl-current/cpan/Test-Harness/lib/Test/Harness.pm
 t/ftppub/perl-current/dist/t/skip.t
 t/ftppub/perl-current/dist/t/test.t
-t/ftppub/perl-current/ext/t/skip.t
-t/ftppub/perl-current/ext/t/test.t
-t/ftppub/perl-current/git_version.h
 t/ftppub/perl-current/lib/t/skip.t
 t/ftppub/perl-current/lib/t/test.t
 t/ftppub/perl-current/MANIFEST
