@@ -20,6 +20,9 @@ require Carp;          # our JSON.pm might need it;
 use Test::More;
 use Test::NoWarnings ();
 
+if (exists $INC{'JSON/XS.pm'} or exists $INC{'JSON/PP.pm'}) {
+    plan skip_all => 'Running with working JSON module.';
+}
 my %code = (
     'PP' => <<'    EOPP',
 package JSON::PP;
