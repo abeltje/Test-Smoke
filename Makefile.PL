@@ -95,7 +95,7 @@ else {
     $extra_deps{'JSON::XS'} = 0;
 }
 my %posters;
-for my $poster (qw/LWP::UserAgent HTTP::Lite HTTP::Tiny/) {
+for my $poster (qw/HTTP::Tiny LWP::UserAgent HTTP::Lite/) {
     eval "require $poster;";
     if ($@) { $posters{$poster} = 0 }
 }
@@ -112,7 +112,7 @@ if (keys %posters == 3) {
     }
 }
 else {
-    exists $posters{$_} and $extra_deps{$_} = 0, last
+    exists $posters{$_} or $extra_deps{$_} = 0, last
         for qw/HTTP::Tiny LWP::UserAgent HTTP::Lite/;
 }
 
