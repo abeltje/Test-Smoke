@@ -731,7 +731,9 @@ sub __posixdate {
     #  HP-UX:  April 08:53:32 METDST
     # ENOTPORTABLE!  %F is C99 only!
     my $stamp = shift || time;
-    return POSIX::strftime("%Y-%m-%d %T %z", localtime $stamp);
+    return $^O eq 'MSWin32
+        ? POSIX::strftime("%Y-%m-%d %H:%M:%S Z", gmtime $stamp)
+        : POSIX::strftime("%Y-%m-%d %H:%M:%S %z", localtime $stamp);
 }
 
 =head2 __rm_common_args( $cfg, \%common )
