@@ -5,6 +5,21 @@ Changes on 2015-05-31 for github repository at:
 Enjoy!
 
 ________________________________________________________________________________
+[939c1b4] by abeltje on Sun, 31 May 2015 12:24:31 +0200
+
+     TestFIX: another path in a test that failed on MSWin32
+
+
+M	t/app/110-runsmoke.t
+________________________________________________________________________________
+[0446a2e] by abeltje on Sun, 31 May 2015 11:44:01 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_10
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
 [91565d1] by abeltje on Sun, 31 May 2015 11:25:44 +0200
 
      Fix skip_tests
