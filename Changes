@@ -1,9 +1,47 @@
-Changes on 2015-05-24 for github repository at:
+Changes on 2015-05-31 for github repository at:
   Fetch URL: ssh://git@github.com/abeltje/Test-Smoke
   Push  URL: ssh://git@github.com/abeltje/Test-Smoke
 
 Enjoy!
 
+________________________________________________________________________________
+[91565d1] by abeltje on Sun, 31 May 2015 11:25:44 +0200
+
+     Fix skip_tests
+
+        The 'skip_tests' argument needs to be passed to
+        Test::Smoke::App::RunSmoke
+
+
+M	lib/Test/Smoke/App/Options.pm
+M	lib/Test/Smoke/App/SmokePerl.pm
+________________________________________________________________________________
+[87b5b43] by abeltje on Mon, 25 May 2015 22:16:27 +0200
+
+     FIX: MANIFEST (new files)
+
+
+M	MANIFEST
+________________________________________________________________________________
+[9a1ea4d] by abeltje on Mon, 25 May 2015 22:13:19 +0200
+
+     Merge remote-tracking branch 'origin/si-dsm-5.2' into
+        Belin2015_Aftermath
+
+________________________________________________________________________________
+[c166164] by abeltje on Mon, 25 May 2015 22:12:41 +0200
+
+     Merge remote-tracking branch 'origin/si-centos7' into
+        Belin2015_Aftermath
+
+________________________________________________________________________________
+[2936dc8] by abeltje on Sun, 24 May 2015 12:16:03 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_09
+
+
+M	Changes
+M	lib/Test/Smoke.pm
 ________________________________________________________________________________
 [59576e1] by abeltje on Sun, 24 May 2015 12:05:22 +0200
 
@@ -20,6 +58,14 @@ M	t/app/110-runsmoke.t
 M	t/app/130-smokeperl.t
 M	t/poster-post.t
 M	t/sysinfo.t
+________________________________________________________________________________
+[06c18c0] by H.Merijn Brand - Tux on Tue, 19 May 2015 09:41:57 +0200
+
+     Add DSM-5.2
+
+
+A	t/etc/dsm-5.2/DISTNAME
+A	t/etc/dsm-5.2/VERSION
 ________________________________________________________________________________
 [0dd7e3e] by Abe Timmerman on Tue, 5 May 2015 11:27:34 +0200
 
@@ -51,6 +97,21 @@ ________________________________________________________________________________
 
 
 M	t/10-fallback.t
+________________________________________________________________________________
+[4443c5d] by H.Merijn Brand - Tux on Wed, 29 Apr 2015 10:30:41 +0200
+
+     SysInfo (CentOS 7.1)
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+A	t/etc/centos-7.1/DISTNAME
+A	t/etc/centos-7.1/centos-release
+A	t/etc/centos-7.1/centos-release-upstream
+A	t/etc/centos-7.1/issue
+A	t/etc/centos-7.1/os-release
+A	t/etc/centos-7.1/redhat-release
+A	t/etc/centos-7.1/system-release
+A	t/etc/centos-7.1/system-release-cpe
 ________________________________________________________________________________
 [5a98411] by Abe Timmerman on Wed, 22 Apr 2015 09:52:39 +0200
 
