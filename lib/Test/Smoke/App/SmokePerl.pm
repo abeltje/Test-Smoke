@@ -43,6 +43,7 @@ Run all the parts:
 
 sub run {
     my $self = shift;
+    $self->log_debug("Read configuration from: %s", $self->option('configfile'));
 
     my $old_commit = get_patch($self->option('ddir'))->[0] || "";
     if ($self->option('smartsmoke') && $self->option('patchlevel')) {
