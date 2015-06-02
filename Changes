@@ -1,9 +1,50 @@
-Changes on 2015-05-31 for github repository at:
+Changes on 2015-06-02 for github repository at:
   Fetch URL: ssh://git@github.com/abeltje/Test-Smoke
   Push  URL: ssh://git@github.com/abeltje/Test-Smoke
 
 Enjoy!
 
+________________________________________________________________________________
+[8ce3312] by abeltje on Tue, 2 Jun 2015 21:16:49 +0200
+
+     BUGFIX: fix a199fafaadf08a1c94c1a1a27f1732269afc0b33
+
+
+M	lib/Test/Smoke/Reporter.pm
+________________________________________________________________________________
+[d9c8992] by abeltje on Tue, 2 Jun 2015 20:30:19 +0200
+
+     MergeFIX: restore MANIFEST
+
+
+M	MANIFEST
+________________________________________________________________________________
+[ad34c2b] by abeltje on Sun, 31 May 2015 13:41:34 +0200
+
+     ThinkoFIX: Set the correct dependency
+
+        For the "browser"-dependency we picked the wrong (and/or)
+
+
+M	Makefile.PL
+________________________________________________________________________________
+[a199faf] by abeltje on Sun, 31 May 2015 13:37:49 +0200
+
+     BUGFIX: my Windows doesn't support strftime("%T")
+
+        On strawberry it seems POSIX::strftime() has some issues:
+        %z acts like %Z and %T doesn't work
+
+
+M	lib/Test/Smoke/Reporter.pm
+________________________________________________________________________________
+[505f078] by abeltje on Sun, 31 May 2015 12:26:56 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_11
+
+
+M	Changes
+M	lib/Test/Smoke.pm
 ________________________________________________________________________________
 [939c1b4] by abeltje on Sun, 31 May 2015 12:24:31 +0200
 
