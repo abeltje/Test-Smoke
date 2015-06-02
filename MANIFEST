@@ -312,6 +312,9 @@ t/ftppub/perl-current/cpan/t/test.t
 t/ftppub/perl-current/cpan/Test-Harness/lib/Test/Harness.pm
 t/ftppub/perl-current/dist/t/skip.t
 t/ftppub/perl-current/dist/t/test.t
+t/ftppub/perl-current/ext/t/skip.t
+t/ftppub/perl-current/ext/t/test.t
+t/ftppub/perl-current/git_version.h
 t/ftppub/perl-current/lib/t/skip.t
 t/ftppub/perl-current/lib/t/test.t
 t/ftppub/perl-current/MANIFEST
