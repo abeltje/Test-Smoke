@@ -245,6 +245,11 @@ t/etc/ubuntu-13.10/DISTNAME
 t/etc/ubuntu-13.10/issue
 t/etc/ubuntu-13.10/lsb-release
 t/etc/ubuntu-13.10/os-release
+t/etc/ubuntu-15.04/debian_version
+t/etc/ubuntu-15.04/DISTNAME
+t/etc/ubuntu-15.04/issue
+t/etc/ubuntu-15.04/lsb-release
+t/etc/ubuntu-15.04/os-release
 t/for_dmake.t
 t/for_nmake.t
 t/ftppub/bugtst01.out
