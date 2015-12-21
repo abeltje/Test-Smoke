@@ -88,7 +88,7 @@ sub prepare_os {
 
     if ( $os{DISTRIB_DESCRIPTION} ) {
         $distro = $os{DISTRIB_DESCRIPTION};
-        $os{DISTRIB_CODENAME} and
+        $os{DISTRIB_CODENAME} && $distro !~ m{\b$os{DISTRIB_CODENAME}\b} and
             $distro .= " ($os{DISTRIB_CODENAME})";
     }
     elsif ( $os{PRETTY_NAME} ) {
@@ -117,7 +117,8 @@ sub prepare_os {
         if ( my @welcome = grep s{^\s*Welcome\s+to\s+(\S*$distro\S*)\b.*}{$1}i => keys %os ) {
             $distro = $welcome[0];
         }
-        $distro .= qq{ $os{VERSION} ($os{CODENAME})};
+        $distro =~ m/\b$os{CODENAME}\b/ or
+	    $distro .= qq{ $os{VERSION} ($os{CODENAME})};
     }
     elsif ( $os{MAJORVERSION} && defined $os{MINORVERSION} ) {
         -d "/usr/syno" || "@dist_file" =~ m{^\S*/VERSION$} and $distro .= "DSM";
