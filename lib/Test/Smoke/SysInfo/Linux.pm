@@ -117,8 +117,9 @@ sub prepare_os {
         if ( my @welcome = grep s{^\s*Welcome\s+to\s+(\S*$distro\S*)\b.*}{$1}i => keys %os ) {
             $distro = $welcome[0];
         }
+	$distro .= qq{ $os{VERSION}};
         $distro =~ m/\b$os{CODENAME}\b/ or
-	    $distro .= qq{ $os{VERSION} ($os{CODENAME})};
+	    $distro .= qq{ ($os{CODENAME})};
     }
     elsif ( $os{MAJORVERSION} && defined $os{MINORVERSION} ) {
         -d "/usr/syno" || "@dist_file" =~ m{^\S*/VERSION$} and $distro .= "DSM";
