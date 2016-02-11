@@ -109,6 +109,7 @@ sub prepare_os {
 	    }
         }
         $distro =~ s/\)\s+\(\w+\)\s*$/)/;    # remove architectural part
+        $distro =~ s/\s+\(?(?:i\s86|x86_64)\)?\s*$//; # i386 i486 i586 x86_64
     }
     elsif ( $os{VERSION} && $os{NAME} ) {
         $distro = qq{$os{NAME} $os{VERSION}};
@@ -147,6 +148,7 @@ sub prepare_os {
         #  Welcome to openSUSE 12.3 "Dartmouth" - Kernel \r (\l).
         #  Welcome to openSUSE 13.1 "Bottle" - Kernel \r (\l).
         #  Welcome to openSUSE 13.2 "Harlequin" - Kernel \r (\l).
+        #  Welcome to openSUSE Leap 42.1 - Kernel \r (\l).
         #  Welcome to openSUSE 20151218 "Tumbleweed" - Kernel \r (\l).
         #  Welcome to SUSE Linux Enterprise Server 11 SP1 for VMware  (x86_64) - Kernel \r (\l).
         #  Ubuntu 10.04.4 LTS \n \l
