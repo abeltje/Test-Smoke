@@ -184,6 +184,7 @@ sub Configure_win32 {
         "-DCCTYPE"              => "CCTYPE",
         "-Dgcc_v3_2"            => "USE_GCC_V3_2",
         "-DGCC_4XX"             => "GCC_4XX",
+        "-DGCCWRAPV"            => "GCCWRAPV",
         "-DGCCHELPERDLL"        => "GCCHELPERDLL",
         "-Dbccold"              => "BCCOLD",
         "-DCCHOME"              => "CCHOME",
@@ -214,6 +215,7 @@ sub Configure_win32 {
         CCTYPE          => undef,  # used to be $win32_cctype,
         USE_GCC_V3_2    => 0,
         GCC_4XX         => 0,
+        GCCWRAPV        => 0,
         GCCHELPERDLL    => undef,
         BCCOLD          => 0,
         CCHOME          => undef,
@@ -228,7 +230,7 @@ sub Configure_win32 {
     my $undef_re  = qr/WIN64/;
 
     # $def_re: regex for options that should be UNcommented for -Dxxx
-    my $def_re = qr/((?:(?:PERL|USE|IS|GCC)_\w+)|BCCOLD)/;
+    my $def_re = qr/((?:(?:PERL|USE|IS|GCC)_\w+)|BCCOLD|GCCWRAPV)/;
 
     my @w32_opts = grep ! /^$def_re/, keys %opts;
     my $config_args = join " ",
