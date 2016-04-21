@@ -88,7 +88,7 @@ sub prepare_os {
 
     if ( $os{DISTRIB_DESCRIPTION} ) {
         $distro = $os{DISTRIB_DESCRIPTION};
-        $os{DISTRIB_CODENAME} and
+        $os{DISTRIB_CODENAME} && $distro !~ m{\b$os{DISTRIB_CODENAME}\b} and
             $distro .= " ($os{DISTRIB_CODENAME})";
     }
     elsif ( $os{PRETTY_NAME} ) {
@@ -117,7 +117,9 @@ sub prepare_os {
         if ( my @welcome = grep s{^\s*Welcome\s+to\s+(\S*$distro\S*)\b.*}{$1}i => keys %os ) {
             $distro = $welcome[0];
         }
-        $distro .= qq{ $os{VERSION} ($os{CODENAME})};
+	$distro .= qq{ $os{VERSION}};
+        $distro =~ m/\b$os{CODENAME}\b/ or
+	    $distro .= qq{ ($os{CODENAME})};
     }
     elsif ( $os{MAJORVERSION} && defined $os{MINORVERSION} ) {
         -d "/usr/syno" || "@dist_file" =~ m{^\S*/VERSION$} and $distro .= "DSM";
@@ -144,6 +146,8 @@ sub prepare_os {
         #  Welcome to openSUSE 12.2 "Mantis" - Kernel \r (\l).
         #  Welcome to openSUSE 12.3 "Dartmouth" - Kernel \r (\l).
         #  Welcome to openSUSE 13.1 "Bottle" - Kernel \r (\l).
+        #  Welcome to openSUSE 13.2 "Harlequin" - Kernel \r (\l).
+        #  Welcome to openSUSE 20151218 "Tumbleweed" - Kernel \r (\l).
         #  Welcome to SUSE Linux Enterprise Server 11 SP1 for VMware  (x86_64) - Kernel \r (\l).
         #  Ubuntu 10.04.4 LTS \n \l
         #  Debian GNU/Linux wheezy/sid \n \l
