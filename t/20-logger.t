@@ -99,7 +99,9 @@ do_log_debug()
     local *CORE::GLOBAL::localtime = sub {
         return (2, 11, 14, 15, 3, 115, 3, 104, 1);
     };
-    my $prefix = strftime "[%Y-%m-%d %H:%M:%S%z] ", localtime;
+    my $prefix = $^O eq 'MSWin32'
+        ? strftime "[%Y-%m-%d %H:%M:%SZ] ", gmtime
+        : strftime "[%Y-%m-%d %H:%M:%S%z] ", localtime;
 
     my $logger = Test::Smoke::Logger->new(v => 0);
     isa_ok($logger, 'Test::Smoke::Logger');
