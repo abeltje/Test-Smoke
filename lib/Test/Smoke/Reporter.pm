@@ -113,7 +113,7 @@ sub verbose {
 
 [ Accessor | Public ]
 
-C<config()> is an interface to the package lexical C<%CONFIG>, 
+C<config()> is an interface to the package lexical C<%CONFIG>,
 which holds all the default values for the C<new()> arguments.
 
 With the special key B<all_defaults> this returns a reference
@@ -393,7 +393,7 @@ sub _parse {
                             }
                         : # TEST output from minitest
                     $_info =~ m/^ (\w+) \s+at\ test\s+ (\d+) \s* $/x
-                 || $_info =~ m/^ (\w+)--(\S.*\S) \s* $/x 
+                 || $_info =~ m/^ (\w+)--(\S.*\S) \s* $/x
                         ? {
                             test   => $_test,
                             status => $1,
@@ -968,7 +968,7 @@ sub ccinfo {
     my $self = shift;
     my $cinfo = $self->{_rpt}{cinfo};
     unless ( $cinfo ) { # Old .out file?
-        my %Config = get_smoked_Config( $self->{ddir} => qw( 
+        my %Config = get_smoked_Config( $self->{ddir} => qw(
             cc ccversion gccversion
         ));
         $cinfo = "? ";
@@ -1120,7 +1120,7 @@ Returns the header of the report.
 sub preamble {
     my $self = shift;
 
-    my %Config = get_smoked_Config( $self->{ddir} => qw( 
+    my %Config = get_smoked_Config( $self->{ddir} => qw(
         version libc gnulibc_version
     ));
     my $si = Test::Smoke::SysInfo->new;
@@ -1176,7 +1176,7 @@ sub smoke_matrix {
     my $rptl = length $rpt->{patchdescr};
     my $pad = $rptl >= 11 ? "" : " " x int( (11 - $rptl)/2 );
     my $patch = $pad . $rpt->{patchdescr};
-    my $report = sprintf "%-11s  Configuration (common) %s\n", 
+    my $report = sprintf "%-11s  Configuration (common) %s\n",
                          $patch, $rpt->{common_args};
     $report .= ("-" x 11) . " " . ("-" x 57) . "\n";
 

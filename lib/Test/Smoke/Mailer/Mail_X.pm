@@ -24,7 +24,7 @@ Keys for C<%args>:
 
 =head2 $mailer->mail( )
 
-C<mail()> sets up the commandline and body and pipes it to either the 
+C<mail()> sets up the commandline and body and pipes it to either the
 B<mail> or the B<mailx> program.
 
 =cut
@@ -48,7 +48,7 @@ sub mail {
     local *MAILER;
     if ( open MAILER, "| $cmdline " ) {
         print MAILER $self->{body};
-        close MAILER or 
+        close MAILER or
             $self->{error} = "Error in pipe to '$mailer': $! (" . $?>>8 . ")";
     } else {
         $self->{error} = "Cannot fork '$mailer': $!";

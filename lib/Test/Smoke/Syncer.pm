@@ -155,35 +155,35 @@ At this moment we support three basic types of syncing the perl source-tree.
 
 =item rsync
 
-This method uses the B<rsync> program with the C<< --delete >> option 
+This method uses the B<rsync> program with the C<< --delete >> option
 to get your perl source-tree up to date.
 
 =item snapshot
 
-This method uses the B<Net::FTP> or the B<LWP> module to get the 
+This method uses the B<Net::FTP> or the B<LWP> module to get the
 latest snapshot. When the B<server> attribute starts with I<http://>
 the fetching is done by C<LWP::Simple::mirror()>.
 To emulate the C<< rsync --delete >> effect, the current source-tree
 is removed.
 
-The snapshot tarball is handled by either B<tar>/B<gzip> or 
+The snapshot tarball is handled by either B<tar>/B<gzip> or
 B<Archive::Tar>/B<Compress::Zlib>.
 
 =item copy
 
 This method uses the B<File::Copy> module to copy an existing source-tree
-from somewhere on the system (in case rsync doesn't work), this also 
+from somewhere on the system (in case rsync doesn't work), this also
 removes the current source-tree first.
 
 =item forest
 
 This method will sync the source-tree in one of the above basic methods.
-After that, it will create an intermediate copy of the master directory 
+After that, it will create an intermediate copy of the master directory
 as hardlinks and run the F<regen_headers.pl> script. This should yield
-an up-to-date source-tree. The intermadite directory is now copied as 
+an up-to-date source-tree. The intermadite directory is now copied as
 hardlinks to its final directory ({ddir}).
 
-This can be used to change the way B<make distclean> is run from 
+This can be used to change the way B<make distclean> is run from
 F<mktest.pl> (removes all files that are not in the intermediate
 directory, which may prove faster than traditional B<make distclean>).
 
@@ -244,7 +244,7 @@ sub new {
 
 [ Accessor | Public ]
 
-C<config()> is an interface to the package lexical C<%CONFIG>, 
+C<config()> is an interface to the package lexical C<%CONFIG>,
 which holds all the default values for the C<new()> arguments.
 
 With the special key B<all_defaults> this returns a reference

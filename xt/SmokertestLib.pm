@@ -6,7 +6,7 @@ use vars qw( $VERSION @EXPORT );
 $VERSION = '0.004';
 
 use base 'Exporter';
-@EXPORT = qw( 
+@EXPORT = qw(
     &clean_mktest_stuff
     &make_report &get_report
     &get_Win32_args
@@ -51,10 +51,10 @@ sub get_report {
 sub get_Win32_args {
     my %w32args  = ( w32cct => "", is_win32 => 0 );
     if ( $^O eq 'MSWin32' ) {
-        my $w32make = exists $ENV{SMOKE_W32MAKE} 
+        my $w32make = exists $ENV{SMOKE_W32MAKE}
             ? $ENV{SMOKE_W32MAKE} : 'dmake';
         $w32make ||= 'dmake';
-        my $w32cc = exists $ENV{SMOKE_W32CC} 
+        my $w32cc = exists $ENV{SMOKE_W32CC}
             ? $ENV{SMOKE_W32CC} : "GCC";
         $w32cc ||= "GCC";
         %w32args = (

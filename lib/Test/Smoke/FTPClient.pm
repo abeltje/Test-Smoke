@@ -49,7 +49,7 @@ Test::Smoke::FTPClient - Implement a mirror like object
 
 This module was written specifically to fetch a perl source-tree
 from the APC. It will not suffice as a general purpose mirror module!
-It only distinguishes between files and directories and relies on the 
+It only distinguishes between files and directories and relies on the
 output of the C<< Net::FTP->dir >> method.
 
 This solution is B<slow>, you'd better use B<rsync>!
@@ -119,7 +119,7 @@ sub connect {
 
     $self->{v} and print "Authenticating ";
     unless ( $self->{client}->login( $self->{fuser}, $self->{fpasswd} ) ) {
-        $self->{error} = $@ || 
+        $self->{error} = $@ ||
             "Could not login($self->{fuser}) on $self->{fserver}";
         $self->{v} and print "NOT OK ($self->{error})\n";
         return;
@@ -184,7 +184,7 @@ sub bye {
 
 =head2 Test::Smoke::FTPClient->config( $key[, $value] )
 
-C<config()> is an interface to the package lexical C<%CONFIG>, 
+C<config()> is an interface to the package lexical C<%CONFIG>,
 which holds all the default values for the C<new()> arguments.
 
 With the special key B<all_defaults> this returns a reference
@@ -232,7 +232,7 @@ sub __do_mirror {
 
     foreach my $entry ( sort { $a->{type} cmp $b->{type} ||
                                $a->{name} cmp $b->{name} } @list ) {
-        
+
         if ( $entry->{type} eq 'd' ) {
             $entry->{name} =~ m/^\.\.?$/ and next;
             my $new_locald = File::Spec->catdir( $localdir, $entry->{name} );
@@ -242,7 +242,7 @@ sub __do_mirror {
                 $@ and return;
             }
             chdir $new_locald;
-            $mirror_ok &&= __do_mirror( $ftp, $entry->{name}, 
+            $mirror_ok &&= __do_mirror( $ftp, $entry->{name},
                                         $new_locald, $lroot, $verbose,
                                         $cleanup, $totsize, $tottime );
             $entry->{time} ||= $entry->{date};
@@ -260,7 +260,7 @@ sub __do_mirror {
             if ( -e $destname ) {
                 my( $l_size, $l_mode, $l_time ) = (stat $destname)[7, 2, 9];
                 $l_mode &= 07777;
-                $skip = ($l_size == $entry->{size}) && 
+                $skip = ($l_size == $entry->{size}) &&
                         ($l_mode == $entry->{mode}) &&
 		        ($l_time == $entry->{time});
             }
@@ -286,7 +286,7 @@ sub __do_mirror {
                 chmod $entry->{mode}, $dest;
                 $verbose and printf "$size (%.${dig}f $sn[$ord]/s)\n",
                                      $speed;
-            } else { 
+            } else {
                 $verbose > 1 and
                     printf "%s: %d/skipped\n", abs2rel( $destname, $lroot),
                                                $entry->{size};
@@ -305,7 +305,7 @@ sub __do_mirror {
                 my $cmpname = clean_filename( $_ );
                 $^O eq 'VMS' and $cmpname =~ s/\.$//;
                 if( -f $cmpname ) {
-                    unless ( exists $ok_file{ $cmpname } && 
+                    unless ( exists $ok_file{ $cmpname } &&
                              $ok_file{ $cmpname } eq 'f' ) {
                         $verbose and printf "Delete %s\n",
                                              abs2rel( rel2abs( $cmpname ),
@@ -364,7 +364,7 @@ sub __parse_line_from_dir {
             type => $type,
             mode => __get_mode_from_text( substr $field[0], 1 ),
             size => $field[4],
-            time => 0, 
+            time => 0,
             date => __time_from_ls( @field[5, 6, 7] ),
         }
     } else { # Windowsy dir entry
@@ -407,7 +407,7 @@ and returns a localtime-stamp.
 
 =cut
 
-sub __time_from_ls { 
+sub __time_from_ls {
     my( $mname, $day, $time_or_year ) = @_;
 
     my( $local_year, $local_month) = (localtime)[5, 4];
