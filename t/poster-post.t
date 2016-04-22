@@ -92,7 +92,9 @@ SKIP: {
     isa_ok($poster, 'Test::Smoke::Poster::LWP_UserAgent');
 
     ok(write_json($poster->json_filename, {sysinfo => $^O}), "write_json");
-    is($poster->post(), 42, "Got id");
+    my $response = eval { $poster->post() };
+    $response = $@ if $@;
+    is($response, 42, "Got id");
 
     unlink $poster->json_filename;
 }
@@ -112,7 +114,9 @@ SKIP: {
     isa_ok($poster, 'Test::Smoke::Poster::Curl');
 
     ok(write_json($poster->json_filename, {sysinfo => $^O}), "write_json");
-    is($poster->post(), 42, "Got id");
+    my $response = eval { $poster->post() };
+    $response = $@ if $@;
+    is($response, 42, "Got id");
 
     unlink $poster->json_filename;
 }
@@ -130,7 +134,9 @@ SKIP: {
     isa_ok($poster, 'Test::Smoke::Poster::HTTP_Tiny');
 
     ok(write_json($poster->json_filename, {sysinfo => $^O}), "write_json");
-    is($poster->post(), 42, "Got id");
+    my $response = eval { $poster->post() };
+    $response = $@ if $@;
+    is($response, 42, "Got id");
 
     unlink $poster->json_filename;
 }
@@ -148,7 +154,9 @@ SKIP: {
     isa_ok($poster, 'Test::Smoke::Poster::HTTP_Lite');
 
     ok(write_json($poster->json_filename, {sysinfo => $^O}), "write_json");
-    is($poster->post(), 42, "Got id");
+    my $response = eval { $poster->post() };
+    $response = $@ if $@;
+    is($response, 42, "Got id");
 
     unlink $poster->json_filename;
 }
