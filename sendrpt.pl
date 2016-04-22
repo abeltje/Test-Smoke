@@ -168,7 +168,8 @@ if ($json && $opt{smokedb_url}) {
         ),
     );
     $opt{v} and print "Posting to SmokeDB ($opt{smokedb_url})\n";
-    my $response = $ua->post($opt{smokedb_url}, {json => $json});
+    my $response = eval {$ua->post($opt{smokedb_url}, {json => $json})};
+    print $@ if $@
     $opt{v} and print $response->content;
 }
 
@@ -187,7 +188,7 @@ sub check_for_report {
     my $reporter = Test::Smoke::Reporter->new( $conf );
     if ( defined $reporter->{_outfile} ) {
         $reporter->write_to_file;
-    
+
         if (!-f $report) {
             die "Hmmm... cannot find [$report]";
         }
