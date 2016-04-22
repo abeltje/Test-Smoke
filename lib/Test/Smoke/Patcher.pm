@@ -1,7 +1,6 @@
 package Test::Smoke::Patcher;
 use strict;
 
-# $Id$
 use vars qw( $VERSION @EXPORT );
 $VERSION = '0.012';
 

@@ -1,7 +1,6 @@
 package Test::Smoke::Util;
 use strict;
 
-# $Id$
 our $VERSION = '0.58';
 
 use Exporter 'import';

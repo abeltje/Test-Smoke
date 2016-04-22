@@ -1,7 +1,6 @@
 package Test::Smoke::SourceTree;
 use strict;
 
-# $Id$
 use vars qw( $VERSION @EXPORT_OK %EXPORT_TAGS $NOCASE );
 $VERSION = '0.008';
 
