@@ -1,9 +1,58 @@
-Changes on 2015-06-02 for github repository at:
-  Fetch URL: ssh://git@github.com/abeltje/Test-Smoke
-  Push  URL: ssh://git@github.com/abeltje/Test-Smoke
+Changes on 2016-04-21 for repository at:
+  Fetch URL: github.com:abeltje/Test-Smoke
+  Push  URL: github.com:abeltje/Test-Smoke
 
 Enjoy!
 
+________________________________________________________________________________
+[3c2e10a] by abeltje on Thu, 21 Apr 2016 17:43:35 +0100
+
+     Merge branch 'Belin2015_Aftermath' of
+        ssh://github.com/abeltje/Test-Smoke into Belin2015_Aftermath
+
+________________________________________________________________________________
+[59dd052] by abeltje on Thu, 21 Apr 2016 17:37:50 +0100
+
+     Add -DGCCWRAPV for Win32 configuration
+
+        Also make Win32 log with gmtime() and Z(ulu)
+
+
+M	lib/Test/Smoke/LogMixin.pm
+M	lib/Test/Smoke/Util.pm
+________________________________________________________________________________
+[bcdeed5] by H.Merijn Brand - Tux on Mon, 21 Dec 2015 14:52:41 +0100
+
+     Comment: two more .etc/issue lines
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+________________________________________________________________________________
+[f1719a0] by H.Merijn Brand - Tux on Mon, 21 Dec 2015 14:46:54 +0100
+
+     still want the version though
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+________________________________________________________________________________
+[2e4aa95] by H.Merijn Brand - Tux on Mon, 21 Dec 2015 14:43:04 +0100
+
+     Prevent distribution code name appearing twice in description
+
+        [openSUSE Tumbleweed (20151124) (x86_64) (Tumbleweed)]
+        =>
+        [openSUSE Tumbleweed (20151124) (x86_64)]
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+________________________________________________________________________________
+[5a311ed] by abeltje on Tue, 2 Jun 2015 21:25:49 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_12
+
+
+M	Changes
+M	lib/Test/Smoke.pm
 ________________________________________________________________________________
 [8ce3312] by abeltje on Tue, 2 Jun 2015 21:16:49 +0200
 
