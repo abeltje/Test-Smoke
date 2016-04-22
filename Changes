@@ -1,9 +1,31 @@
-Changes on 2016-04-21 for repository at:
+Changes on 2016-04-22 for repository at:
   Fetch URL: github.com:abeltje/Test-Smoke
   Push  URL: github.com:abeltje/Test-Smoke
 
 Enjoy!
 
+________________________________________________________________________________
+[25eaec6] by abeltje on Fri, 22 Apr 2016 07:33:57 +0100
+
+     confess() on failing decode of restult from report-post
+
+        Some platforms (Mac, but not mine) have a problem in the poster-post 
+        test. Added a way to find the problem.
+
+
+A	.gitattributes
+M	lib/Test/Smoke/Poster/Base.pm
+M	sendrpt.pl
+M	smokeperl.pl
+M	t/poster-post.t
+________________________________________________________________________________
+[c9ab06f] by abeltje on Fri, 22 Apr 2016 07:22:51 +0100
+
+     Autocommit for distribution Test-Smoke 1.61_13
+
+
+M	Changes
+M	lib/Test/Smoke.pm
 ________________________________________________________________________________
 [3c2e10a] by abeltje on Thu, 21 Apr 2016 17:43:35 +0100
 
