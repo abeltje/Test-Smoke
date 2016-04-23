@@ -35,7 +35,7 @@ Known args for this class:
 This does the actual syncing:
 
     * Check {ftpcdir} for the latest changenumber
-    * Mirror 
+    * Mirror
 
 =cut
 

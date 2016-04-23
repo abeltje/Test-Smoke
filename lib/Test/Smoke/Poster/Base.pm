@@ -143,7 +143,8 @@ HTTP or Test::Smoke::Gateway-application errors.
 
 sub post {
     my $self = shift;
-    my $response_body = decode_json($self->_post_data());
+    my $response_body = eval {decode_json($self->_post_data())};
+    confess("[$response_body]: " . $@) if $@;
     $self->_process_post_result($response_body);
 }
 

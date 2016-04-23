@@ -6,9 +6,9 @@ use base 'Test::Smoke::Syncer::Base';
 
 =head1 Test::Smoke::Syncer::Copy
 
-This handles syncing with the B<File::Copy> module from a local 
+This handles syncing with the B<File::Copy> module from a local
 directory. It uses the B<MANIFEST> file is the source directory
-to determine which fiels to copy. The current source-tree removed 
+to determine which fiels to copy. The current source-tree removed
 before the actual copying.
 
 =cut

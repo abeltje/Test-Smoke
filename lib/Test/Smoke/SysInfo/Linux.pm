@@ -63,9 +63,10 @@ sub prepare_os {
     my $self = shift;
 
     my $etc = $ENV{SMOKE_USE_ETC} || "/etc";
-    my @dist_file = grep { -s $_ }
-        glob("$etc/*[-_][rRvV][eE][lLrR]*"), "$etc/issue",
-             "$etc.defaults/VERSION", "$etc/VERSION", "$etc/release";
+    my @dist_file = grep { -f $_ && -s _ } map {
+        -d $_ ? glob("$_/*") : ($_)
+    } glob("$etc/*[-_][rRvV][eE][lLrR]*"), "$etc/issue",
+           "$etc.defaults/VERSION", "$etc/VERSION", "$etc/release";
     return unless @dist_file;
 
     my $os = $self->_os();
@@ -87,19 +88,28 @@ sub prepare_os {
 
     if ( $os{DISTRIB_DESCRIPTION} ) {
         $distro = $os{DISTRIB_DESCRIPTION};
-        $os{DISTRIB_CODENAME} and
+        $os{DISTRIB_CODENAME} && $distro !~ m{\b$os{DISTRIB_CODENAME}\b} and
             $distro .= " ($os{DISTRIB_CODENAME})";
     }
     elsif ( $os{PRETTY_NAME} ) {
         $distro = $os{PRETTY_NAME};          # "openSUSE 12.1 (Asparagus) (x86_64)"
         if (my $vid = $os{VERSION_ID}) {     # wheezy 7 => 7.2
-            if (my @rv = grep m{^$vid\.} => sort keys %os) {
+            my @rv;
+            if (@rv = grep m{^$vid\.} => sort keys %os) {
                 # from /etc/debian_version
                 $rv[0] =~ m/^[0-9]+\.\w+$/ and
                     $distro =~ s/\b$vid\b/$rv[0]/;
             }
+            if (!@rv && defined $os{NAME} and # CentOS Linux 7 = CentOS Linux 7.1.1503
+		 @rv = grep m{^$os{NAME} (?:(?:release|version)\s+)?$vid\.} => sort keys %os) {
+		if ($rv[0] =~ m/\s($vid\.[-.\w]+)/) {
+		    my $vr = $1;
+		    $distro =~ s/\s$vid\b/ $vr/;
+		}
+	    }
         }
         $distro =~ s/\)\s+\(\w+\)\s*$/)/;    # remove architectural part
+        $distro =~ s/\s+\(?(?:i\s86|x86_64)\)?\s*$//; # i386 i486 i586 x86_64
     }
     elsif ( $os{VERSION} && $os{NAME} ) {
         $distro = qq{$os{NAME} $os{VERSION}};
@@ -108,7 +118,9 @@ sub prepare_os {
         if ( my @welcome = grep s{^\s*Welcome\s+to\s+(\S*$distro\S*)\b.*}{$1}i => keys %os ) {
             $distro = $welcome[0];
         }
-        $distro .= qq{ $os{VERSION} ($os{CODENAME})};
+	$distro .= qq{ $os{VERSION}};
+        $distro =~ m/\b$os{CODENAME}\b/ or
+	    $distro .= qq{ ($os{CODENAME})};
     }
     elsif ( $os{MAJORVERSION} && defined $os{MINORVERSION} ) {
         -d "/usr/syno" || "@dist_file" =~ m{^\S*/VERSION$} and $distro .= "DSM";
@@ -135,6 +147,9 @@ sub prepare_os {
         #  Welcome to openSUSE 12.2 "Mantis" - Kernel \r (\l).
         #  Welcome to openSUSE 12.3 "Dartmouth" - Kernel \r (\l).
         #  Welcome to openSUSE 13.1 "Bottle" - Kernel \r (\l).
+        #  Welcome to openSUSE 13.2 "Harlequin" - Kernel \r (\l).
+        #  Welcome to openSUSE Leap 42.1 - Kernel \r (\l).
+        #  Welcome to openSUSE 20151218 "Tumbleweed" - Kernel \r (\l).
         #  Welcome to SUSE Linux Enterprise Server 11 SP1 for VMware  (x86_64) - Kernel \r (\l).
         #  Ubuntu 10.04.4 LTS \n \l
         #  Debian GNU/Linux wheezy/sid \n \l
@@ -286,7 +301,7 @@ sub linux_ppc {
         $info{detected} =~ s/.*(\b.+Mac G\d).*/$1/;
         $info{machine} = $info{detected};
     }
-        
+
     $self->{__cpu} = sprintf "%s %s (%s)", map $info{ $_ } => @parts;
 }
 

@@ -282,10 +282,13 @@ sub sendrpt {
             ),
         );
         $conf->{v} and print "Posting to SmokeDB ($conf->{smokedb_url})\n";
-        my $response = $ua->post(
-            $conf->{smokedb_url},
-            {json => $reporter->smokedb_data}
-        );
+        my $response = eval {
+            $ua->post(
+                $conf->{smokedb_url},
+                {json => $reporter->smokedb_data}
+            );
+        };
+        print $@ if $@;
         $conf->{v} and print $response->content;
     }
     else {

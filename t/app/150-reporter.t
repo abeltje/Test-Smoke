@@ -10,6 +10,7 @@ use Test::NoWarnings ();
 use File::Spec::Functions;
 use Test::Smoke::App::Options;
 use Test::Smoke::App::Reporter;
+$Test::Smoke::LogMixin::USE_TIMESTAMP = 0;
 
 my $ddir = 't';
 {
@@ -38,8 +39,8 @@ my $ddir = 't';
     select $stdout;
 
     is($logfile, <<'    EOL', "logfile");
-[2015-04-15 14:11:02+0200] Test::Smoke::Reporter::write_to_file(): ''
-[2015-04-15 14:11:02+0200] Test::Smoke::Reporter::smokedb_data(): ''
+Test::Smoke::Reporter::write_to_file(): ''
+Test::Smoke::Reporter::smokedb_data(): ''
     EOL
 }
 

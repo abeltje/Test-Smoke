@@ -1,11 +1,818 @@
-Changes on 2015-04-19 for github repository at:
-  Fetch URL: ssh://git@github.com/abeltje/Test-Smoke
-  Push  URL: ssh://git@github.com/abeltje/Test-Smoke
+Changes on 2016-04-23 for repository at:
+  Fetch URL: github.com:abeltje/Test-Smoke
+  Push  URL: github.com:abeltje/Test-Smoke
 
 Enjoy!
 
 ________________________________________________________________________________
-[75f0695] by Abe Timmerman on Sun, 19 Apr 2015 12:05:48 +0200
+[8600318] by abeltje on Sat, 23 Apr 2016 09:48:59 +0100
+
+     Merge upstream
+
+________________________________________________________________________________
+[4b7092c] by abeltje on Sat, 23 Apr 2016 09:36:50 +0100
+
+     Fix MANIFEST after merging all the SysInfo branches from Tux
+
+
+M	MANIFEST
+________________________________________________________________________________
+[79ccb30] by abeltje on Sat, 23 Apr 2016 09:15:21 +0100
+
+     More debug data for poster->post
+
+
+M	lib/Test/Smoke/Poster/Base.pm
+________________________________________________________________________________
+[980bc53] by abeltje on Fri, 22 Apr 2016 12:01:57 +0100
+
+     Fix faulty test (MSWin32)
+
+
+M	t/20-logger.t
+________________________________________________________________________________
+[50897d1] by abeltje on Fri, 22 Apr 2016 09:59:22 +0100
+
+     Remove svn $Id$ keywords
+
+
+M	lib/Test/Smoke/BuildCFG.pm
+M	lib/Test/Smoke/FTPClient.pm
+M	lib/Test/Smoke/Patcher.pm
+M	lib/Test/Smoke/Policy.pm
+M	lib/Test/Smoke/SourceTree.pm
+M	lib/Test/Smoke/Util.pm
+M	t/TestLib.pm
+M	xt/SmokertestLib.pm
+________________________________________________________________________________
+[c36b2b7] by abeltje on Fri, 22 Apr 2016 09:50:27 +0100
+
+     Remove trailing whitespace
+
+
+M	inc/Mail/Sendmail.pm
+M	lib/Test/Smoke.pm
+M	lib/Test/Smoke/App/Base.pm
+M	lib/Test/Smoke/FTPClient.pm
+M	lib/Test/Smoke/Mailer.pm
+M	lib/Test/Smoke/Mailer/Base.pm
+M	lib/Test/Smoke/Mailer/Mail_X.pm
+M	lib/Test/Smoke/Mailer/SendEmail.pm
+M	lib/Test/Smoke/Mailer/Sendmail.pm
+M	lib/Test/Smoke/Patcher.pm
+M	lib/Test/Smoke/Reporter.pm
+M	lib/Test/Smoke/SourceTree.pm
+M	lib/Test/Smoke/Syncer.pm
+M	lib/Test/Smoke/Syncer/Base.pm
+M	lib/Test/Smoke/Syncer/Copy.pm
+M	lib/Test/Smoke/Syncer/FTP.pm
+M	lib/Test/Smoke/Syncer/Rsync.pm
+M	lib/Test/Smoke/Syncer/Snapshot.pm
+M	lib/Test/Smoke/SysInfo/BSD.pm
+M	lib/Test/Smoke/SysInfo/Darwin.pm
+M	lib/Test/Smoke/SysInfo/HPUX.pm
+M	lib/Test/Smoke/SysInfo/Linux.pm
+M	lib/Test/Smoke/Util.pm
+M	t/TestLib.pm
+M	xt/SmokertestLib.pm
+________________________________________________________________________________
+[445d5d5] by abeltje on Fri, 22 Apr 2016 07:36:31 +0100
+
+     Autocommit for distribution Test::Smoke 1.61_14 (same)
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
+[8b5de30] by abeltje on Fri, 22 Apr 2016 07:33:57 +0100
+
+     confess() on failing decode of restult from report-post
+
+        Some platforms (Mac, but not mine) have a problem in the poster-post 
+        test. Added a way to find the problem.
+
+
+A	.gitattributes
+M	lib/Test/Smoke/Poster/Base.pm
+M	sendrpt.pl
+M	smokeperl.pl
+M	t/poster-post.t
+________________________________________________________________________________
+[ba79d89] by abeltje on Fri, 22 Apr 2016 07:22:51 +0100
+
+     Autocommit for distribution Test-Smoke 1.61_13
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
+[d7f17e3] by abeltje on Thu, 21 Apr 2016 17:37:50 +0100
+
+     Add -DGCCWRAPV for Win32 configuration
+
+        Also make Win32 log with gmtime() and Z(ulu)
+
+
+M	lib/Test/Smoke/LogMixin.pm
+M	lib/Test/Smoke/Util.pm
+________________________________________________________________________________
+[f1dd8d3] by abeltje on Mon, 25 May 2015 22:16:27 +0200
+
+     FIX: MANIFEST (new files)
+
+
+M	MANIFEST
+________________________________________________________________________________
+[b8cc362] by H.Merijn Brand - Tux on Thu, 11 Feb 2016 11:55:03 +0100
+
+     Add SysInfo for OpenSUSE Leap
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+A	t/etc/suse-42.1/DISTNAME
+A	t/etc/suse-42.1/SuSE-release
+A	t/etc/suse-42.1/issue
+A	t/etc/suse-42.1/os-release
+________________________________________________________________________________
+[4a0942b] by H.Merijn Brand - Tux on Mon, 21 Dec 2015 14:52:41 +0100
+
+     Comment: two more .etc/issue lines
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+________________________________________________________________________________
+[0a4f386] by H.Merijn Brand - Tux on Mon, 21 Dec 2015 14:46:54 +0100
+
+     still want the version though
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+________________________________________________________________________________
+[16e6312] by H.Merijn Brand - Tux on Mon, 21 Dec 2015 14:43:04 +0100
+
+     Prevent distribution code name appearing twice in description
+
+        [openSUSE Tumbleweed (20151124) (x86_64) (Tumbleweed)]
+        =>
+        [openSUSE Tumbleweed (20151124) (x86_64)]
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+________________________________________________________________________________
+[8e985b2] by H.Merijn Brand - Tux on Mon, 14 Sep 2015 19:08:58 +0200
+
+     fix get-lsb output
+
+
+M	t/etc/get-lsb.pl
+________________________________________________________________________________
+[2842c0f] by H.Merijn Brand - Tux on Mon, 14 Sep 2015 19:08:41 +0200
+
+     Add Redhat Enterprise Workstation 6.6 sysinfo
+
+
+M	MANIFEST
+A	t/etc/rhel-6.6/DISTNAME
+A	t/etc/rhel-6.6/issue
+A	t/etc/rhel-6.6/lsb-release
+A	t/etc/rhel-6.6/lsb-release.d/base-4.0-amd64
+A	t/etc/rhel-6.6/lsb-release.d/base-4.0-noarch
+A	t/etc/rhel-6.6/lsb-release.d/core-4.0-amd64
+A	t/etc/rhel-6.6/lsb-release.d/core-4.0-noarch
+A	t/etc/rhel-6.6/lsb-release.d/graphics-4.0-amd64
+A	t/etc/rhel-6.6/lsb-release.d/graphics-4.0-noarch
+A	t/etc/rhel-6.6/lsb-release.d/printing-4.0-amd64
+A	t/etc/rhel-6.6/lsb-release.d/printing-4.0-noarch
+A	t/etc/rhel-6.6/redhat-release
+A	t/etc/rhel-6.6/system-release
+A	t/etc/rhel-6.6/system-release-cpe
+________________________________________________________________________________
+[0e3fc44] by abeltje on Tue, 2 Jun 2015 21:25:49 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_12
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
+[4730803] by abeltje on Tue, 2 Jun 2015 21:16:49 +0200
+
+     BUGFIX: fix a199fafaadf08a1c94c1a1a27f1732269afc0b33
+
+
+M	lib/Test/Smoke/Reporter.pm
+________________________________________________________________________________
+[cc79ce0] by abeltje on Tue, 2 Jun 2015 20:30:19 +0200
+
+     MergeFIX: restore MANIFEST
+
+
+M	MANIFEST
+________________________________________________________________________________
+[e42aab3] by abeltje on Sun, 31 May 2015 13:41:34 +0200
+
+     ThinkoFIX: Set the correct dependency
+
+        For the "browser"-dependency we picked the wrong (and/or)
+
+
+M	Makefile.PL
+________________________________________________________________________________
+[18648c5] by abeltje on Sun, 31 May 2015 13:37:49 +0200
+
+     BUGFIX: my Windows doesn't support strftime("%T")
+
+        On strawberry it seems POSIX::strftime() has some issues:
+        %z acts like %Z and %T doesn't work
+
+
+M	lib/Test/Smoke/Reporter.pm
+________________________________________________________________________________
+[6ed3bba] by abeltje on Sun, 31 May 2015 12:26:56 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_11
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
+[5c4025d] by abeltje on Sun, 31 May 2015 12:24:31 +0200
+
+     TestFIX: another path in a test that failed on MSWin32
+
+
+M	t/app/110-runsmoke.t
+________________________________________________________________________________
+[4da9387] by abeltje on Sun, 31 May 2015 11:44:01 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_10
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
+[42ab7a8] by abeltje on Sun, 31 May 2015 11:25:44 +0200
+
+     Fix skip_tests
+
+        The 'skip_tests' argument needs to be passed to
+        Test::Smoke::App::RunSmoke
+
+
+M	lib/Test/Smoke/App/Options.pm
+M	lib/Test/Smoke/App/SmokePerl.pm
+________________________________________________________________________________
+[447674d] by abeltje on Mon, 25 May 2015 22:16:27 +0200
+
+     FIX: MANIFEST (new files)
+
+
+M	MANIFEST
+________________________________________________________________________________
+[866f8c7] by abeltje on Sun, 24 May 2015 12:16:03 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_09
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
+[d2c7fd3] by abeltje on Sun, 24 May 2015 12:05:22 +0200
+
+     TestFixes for fallback.pm and MSWin32
+
+        Like the 'use fallback' test, the 'no fallback' test now tests what
+        it actually does. MSWin32 had failing tests with (back-)slashes in
+        file paths Makefile.PL: Add installed modules to the dependencies.
+
+
+M	Makefile.PL
+M	t/11-no_fallback.t
+M	t/app/110-runsmoke.t
+M	t/app/130-smokeperl.t
+M	t/poster-post.t
+M	t/sysinfo.t
+________________________________________________________________________________
+[538068f] by H.Merijn Brand - Tux on Tue, 19 May 2015 09:41:57 +0200
+
+     Add DSM-5.2
+
+
+A	t/etc/dsm-5.2/DISTNAME
+A	t/etc/dsm-5.2/VERSION
+________________________________________________________________________________
+[cbef863] by Abe Timmerman on Tue, 5 May 2015 11:27:34 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_08
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
+[e7d11c0] by Abe Timmerman on Tue, 5 May 2015 10:56:03 +0200
+
+     TestFIX: problem with IPv6
+
+        It lookes like HTTP::Daemon->url resolves back to IPv6 on my
+        machine, and the client gets a 'Connection refused', so now we
+        replace the host-name with 127.0.0.1, that seems to work for the
+        moment. See what CPANtesters make of that.
+
+
+M	lib/Test/Smoke/Poster.pm
+M	t/poster-post.t
+________________________________________________________________________________
+[87848a1] by Abe Timmerman on Tue, 5 May 2015 09:42:02 +0200
+
+     TestFix: different approach
+
+        We only need to test that the fallback directories are at the end of
+        @INC, not interested in the rest of @INC.
+
+
+M	t/10-fallback.t
+________________________________________________________________________________
+[09fe42c] by H.Merijn Brand - Tux on Wed, 29 Apr 2015 10:30:41 +0200
+
+     SysInfo (CentOS 7.1)
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+A	t/etc/centos-7.1/DISTNAME
+A	t/etc/centos-7.1/centos-release
+A	t/etc/centos-7.1/centos-release-upstream
+A	t/etc/centos-7.1/issue
+A	t/etc/centos-7.1/os-release
+A	t/etc/centos-7.1/redhat-release
+A	t/etc/centos-7.1/system-release
+A	t/etc/centos-7.1/system-release-cpe
+________________________________________________________________________________
+[7847d3b] by Abe Timmerman on Wed, 22 Apr 2015 09:52:39 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_07
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
+[f8b5ab1] by Abe Timmerman on Wed, 22 Apr 2015 09:48:18 +0200
+
+     Test FIX: fix failing tests
+
+        The fallback-test calculated the wrong result @inc. The logging-test
+        assumed the wrong things about strftime(), timezones cannot be
+        "manipulated", now we recalculate the prefix in the test.
+
+
+M	t/10-fallback.t
+M	t/20-logger.t
+________________________________________________________________________________
+[77f7c63] by Abe Timmerman on Mon, 20 Apr 2015 17:01:56 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_06
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
+[60fbb55] by Abe Timmerman on Mon, 20 Apr 2015 16:50:51 +0200
+
+     More fixing of MANIFEST and tests
+
+        Another file, not caught by the manifest-test, added Tux fixed a
+        longtime test-bug for sysinfo_proc.t where the generated 
+        GLOBref-names weren't unique within the test. Removed the locale
+        setting/restoring where we don't need it.
+
+
+M	MANIFEST
+M	Makefile.PL
+M	lib/Test/Smoke/SysInfo/Linux.pm
+D	t/.gitignore
+M	t/app/110-runsmoke.t
+D	t/ftppub/perl-current/lib/.gitignore
+M	t/sysinfo_proc.t
+________________________________________________________________________________
+[013cedc] by Abe Timmerman on Mon, 20 Apr 2015 12:08:15 +0200
+
+     BUG FIX: strftime %F %T doesn't work everywhere :(
+
+        At least Windows (and old HP-UX partially) do not undstand. Change
+        to: %Y-%m-%d %H:%M:%S
+
+
+M	lib/Test/Smoke/LogMixin.pm
+________________________________________________________________________________
+[5b1a34d] by Abe Timmerman on Mon, 20 Apr 2015 11:19:23 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_05
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
+[0af3cb4] by Abe Timmerman on Mon, 20 Apr 2015 10:56:03 +0200
+
+     Test FIX: Do not rely on textual $!, use numbers
+
+        Textual $! is dependent on locale settings, use numerical context.
+        "No such file or directory" => 2
+
+
+M	t/app/110-runsmoke.t
+________________________________________________________________________________
+[74f5f23] by Abe Timmerman on Mon, 20 Apr 2015 07:24:35 +0200
+
+     FIX BUG: Tests with logging in different TZ
+
+        Machines not configured in CEST/CET, would fail tests with explicit 
+        logging, because of the timezone. We have disabled the timestamp-tag
+        for the normal tests. The tests for the logging Module now fix the
+        timezone at UTC
+
+
+M	t/20-logger.t
+M	t/app/030-app-base.t
+M	t/app/110-runsmoke.t
+M	t/app/130-smokeperl.t
+M	t/app/150-reporter.t
+________________________________________________________________________________
+[c9c7f50] by Abe Timmerman on Mon, 20 Apr 2015 07:11:21 +0200
+
+     BUGFIX: forgot to ship 2 files.
+
+        Thanks to CPANTesters we found that we forgot to ship 2 files from
+        the fake source-tree
+
+
+M	MANIFEST
+M	t/ftppub/perl-current/MANIFEST
+________________________________________________________________________________
+[9545cc0] by abeltje on Fri, 22 Apr 2016 07:36:31 +0100
+
+     Autocommit for distribution Test::Smoke 1.61_14 (same)
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
+[25eaec6] by abeltje on Fri, 22 Apr 2016 07:33:57 +0100
+
+     confess() on failing decode of restult from report-post
+
+        Some platforms (Mac, but not mine) have a problem in the poster-post 
+        test. Added a way to find the problem.
+
+
+A	.gitattributes
+M	lib/Test/Smoke/Poster/Base.pm
+M	sendrpt.pl
+M	smokeperl.pl
+M	t/poster-post.t
+________________________________________________________________________________
+[c9ab06f] by abeltje on Fri, 22 Apr 2016 07:22:51 +0100
+
+     Autocommit for distribution Test-Smoke 1.61_13
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
+[3c2e10a] by abeltje on Thu, 21 Apr 2016 17:43:35 +0100
+
+     Merge branch 'Belin2015_Aftermath' of
+        ssh://github.com/abeltje/Test-Smoke into Belin2015_Aftermath
+
+________________________________________________________________________________
+[59dd052] by abeltje on Thu, 21 Apr 2016 17:37:50 +0100
+
+     Add -DGCCWRAPV for Win32 configuration
+
+        Also make Win32 log with gmtime() and Z(ulu)
+
+
+M	lib/Test/Smoke/LogMixin.pm
+M	lib/Test/Smoke/Util.pm
+________________________________________________________________________________
+[bcdeed5] by H.Merijn Brand - Tux on Mon, 21 Dec 2015 14:52:41 +0100
+
+     Comment: two more .etc/issue lines
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+________________________________________________________________________________
+[f1719a0] by H.Merijn Brand - Tux on Mon, 21 Dec 2015 14:46:54 +0100
+
+     still want the version though
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+________________________________________________________________________________
+[2e4aa95] by H.Merijn Brand - Tux on Mon, 21 Dec 2015 14:43:04 +0100
+
+     Prevent distribution code name appearing twice in description
+
+        [openSUSE Tumbleweed (20151124) (x86_64) (Tumbleweed)]
+        =>
+        [openSUSE Tumbleweed (20151124) (x86_64)]
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+________________________________________________________________________________
+[f34a23f] by H.Merijn Brand - Tux on Thu, 6 Aug 2015 16:35:51 +0200
+
+     Add SysInfo data-files for Ubuntu-15.04 tests
+
+
+M	MANIFEST
+A	t/etc/ubuntu-15.04/DISTNAME
+A	t/etc/ubuntu-15.04/debian_version
+A	t/etc/ubuntu-15.04/issue
+A	t/etc/ubuntu-15.04/lsb-release
+A	t/etc/ubuntu-15.04/os-release
+________________________________________________________________________________
+[5a311ed] by abeltje on Tue, 2 Jun 2015 21:25:49 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_12
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
+[8ce3312] by abeltje on Tue, 2 Jun 2015 21:16:49 +0200
+
+     BUGFIX: fix a199fafaadf08a1c94c1a1a27f1732269afc0b33
+
+
+M	lib/Test/Smoke/Reporter.pm
+________________________________________________________________________________
+[d9c8992] by abeltje on Tue, 2 Jun 2015 20:30:19 +0200
+
+     MergeFIX: restore MANIFEST
+
+
+M	MANIFEST
+________________________________________________________________________________
+[ad34c2b] by abeltje on Sun, 31 May 2015 13:41:34 +0200
+
+     ThinkoFIX: Set the correct dependency
+
+        For the "browser"-dependency we picked the wrong (and/or)
+
+
+M	Makefile.PL
+________________________________________________________________________________
+[a199faf] by abeltje on Sun, 31 May 2015 13:37:49 +0200
+
+     BUGFIX: my Windows doesn't support strftime("%T")
+
+        On strawberry it seems POSIX::strftime() has some issues:
+        %z acts like %Z and %T doesn't work
+
+
+M	lib/Test/Smoke/Reporter.pm
+________________________________________________________________________________
+[505f078] by abeltje on Sun, 31 May 2015 12:26:56 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_11
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
+[939c1b4] by abeltje on Sun, 31 May 2015 12:24:31 +0200
+
+     TestFIX: another path in a test that failed on MSWin32
+
+
+M	t/app/110-runsmoke.t
+________________________________________________________________________________
+[0446a2e] by abeltje on Sun, 31 May 2015 11:44:01 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_10
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
+[91565d1] by abeltje on Sun, 31 May 2015 11:25:44 +0200
+
+     Fix skip_tests
+
+        The 'skip_tests' argument needs to be passed to
+        Test::Smoke::App::RunSmoke
+
+
+M	lib/Test/Smoke/App/Options.pm
+M	lib/Test/Smoke/App/SmokePerl.pm
+________________________________________________________________________________
+[87b5b43] by abeltje on Mon, 25 May 2015 22:16:27 +0200
+
+     FIX: MANIFEST (new files)
+
+
+M	MANIFEST
+________________________________________________________________________________
+[9a1ea4d] by abeltje on Mon, 25 May 2015 22:13:19 +0200
+
+     Merge remote-tracking branch 'origin/si-dsm-5.2' into
+        Belin2015_Aftermath
+
+________________________________________________________________________________
+[c166164] by abeltje on Mon, 25 May 2015 22:12:41 +0200
+
+     Merge remote-tracking branch 'origin/si-centos7' into
+        Belin2015_Aftermath
+
+________________________________________________________________________________
+[2936dc8] by abeltje on Sun, 24 May 2015 12:16:03 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_09
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
+[59576e1] by abeltje on Sun, 24 May 2015 12:05:22 +0200
+
+     TestFixes for fallback.pm and MSWin32
+
+        Like the 'use fallback' test, the 'no fallback' test now tests what
+        it actually does. MSWin32 had failing tests with (back-)slashes in
+        file paths Makefile.PL: Add installed modules to the dependencies.
+
+
+M	Makefile.PL
+M	t/11-no_fallback.t
+M	t/app/110-runsmoke.t
+M	t/app/130-smokeperl.t
+M	t/poster-post.t
+M	t/sysinfo.t
+________________________________________________________________________________
+[06c18c0] by H.Merijn Brand - Tux on Tue, 19 May 2015 09:41:57 +0200
+
+     Add DSM-5.2
+
+
+A	t/etc/dsm-5.2/DISTNAME
+A	t/etc/dsm-5.2/VERSION
+________________________________________________________________________________
+[0dd7e3e] by Abe Timmerman on Tue, 5 May 2015 11:27:34 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_08
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
+[3d58941] by Abe Timmerman on Tue, 5 May 2015 10:56:03 +0200
+
+     TestFIX: problem with IPv6
+
+        It lookes like HTTP::Daemon->url resolves back to IPv6 on my
+        machine, and the client gets a 'Connection refused', so now we
+        replace the host-name with 127.0.0.1, that seems to work for the
+        moment. See what CPANtesters make of that.
+
+
+M	lib/Test/Smoke/Poster.pm
+M	t/poster-post.t
+________________________________________________________________________________
+[f64b61f] by Abe Timmerman on Tue, 5 May 2015 09:42:02 +0200
+
+     TestFix: different approach
+
+        We only need to test that the fallback directories are at the end of
+        @INC, not interested in the rest of @INC.
+
+
+M	t/10-fallback.t
+________________________________________________________________________________
+[4443c5d] by H.Merijn Brand - Tux on Wed, 29 Apr 2015 10:30:41 +0200
+
+     SysInfo (CentOS 7.1)
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+A	t/etc/centos-7.1/DISTNAME
+A	t/etc/centos-7.1/centos-release
+A	t/etc/centos-7.1/centos-release-upstream
+A	t/etc/centos-7.1/issue
+A	t/etc/centos-7.1/os-release
+A	t/etc/centos-7.1/redhat-release
+A	t/etc/centos-7.1/system-release
+A	t/etc/centos-7.1/system-release-cpe
+________________________________________________________________________________
+[5a98411] by Abe Timmerman on Wed, 22 Apr 2015 09:52:39 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_07
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
+[9c8e0cc] by Abe Timmerman on Wed, 22 Apr 2015 09:48:18 +0200
+
+     Test FIX: fix failing tests
+
+        The fallback-test calculated the wrong result @inc. The logging-test
+        assumed the wrong things about strftime(), timezones cannot be
+        "manipulated", now we recalculate the prefix in the test.
+
+
+M	t/10-fallback.t
+M	t/20-logger.t
+________________________________________________________________________________
+[41a26a3] by Abe Timmerman on Mon, 20 Apr 2015 17:01:56 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_06
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
+[ea1902d] by Abe Timmerman on Mon, 20 Apr 2015 16:50:51 +0200
+
+     More fixing of MANIFEST and tests
+
+        Another file, not caught by the manifest-test, added Tux fixed a
+        longtime test-bug for sysinfo_proc.t where the generated 
+        GLOBref-names weren't unique within the test. Removed the locale
+        setting/restoring where we don't need it.
+
+
+M	MANIFEST
+M	Makefile.PL
+M	lib/Test/Smoke/SysInfo/Linux.pm
+D	t/.gitignore
+M	t/app/110-runsmoke.t
+D	t/ftppub/perl-current/lib/.gitignore
+M	t/sysinfo_proc.t
+________________________________________________________________________________
+[bd8a216] by Abe Timmerman on Mon, 20 Apr 2015 12:08:15 +0200
+
+     BUG FIX: strftime %F %T doesn't work everywhere :(
+
+        At least Windows (and old HP-UX partially) do not undstand. Change
+        to: %Y-%m-%d %H:%M:%S
+
+
+M	lib/Test/Smoke/LogMixin.pm
+________________________________________________________________________________
+[8400ede] by Abe Timmerman on Mon, 20 Apr 2015 11:19:23 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_05
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
+[a450fbf] by Abe Timmerman on Mon, 20 Apr 2015 10:56:03 +0200
+
+     Test FIX: Do not rely on textual $!, use numbers
+
+        Textual $! is dependent on locale settings, use numerical context.
+        "No such file or directory" => 2
+
+
+M	t/app/110-runsmoke.t
+________________________________________________________________________________
+[e1a735d] by Abe Timmerman on Mon, 20 Apr 2015 07:24:35 +0200
+
+     FIX BUG: Tests with logging in different TZ
+
+        Machines not configured in CEST/CET, would fail tests with explicit 
+        logging, because of the timezone. We have disabled the timestamp-tag
+        for the normal tests. The tests for the logging Module now fix the
+        timezone at UTC
+
+
+M	t/20-logger.t
+M	t/app/030-app-base.t
+M	t/app/110-runsmoke.t
+M	t/app/130-smokeperl.t
+M	t/app/150-reporter.t
+________________________________________________________________________________
+[e8e23b4] by Abe Timmerman on Mon, 20 Apr 2015 07:11:21 +0200
+
+     BUGFIX: forgot to ship 2 files.
+
+        Thanks to CPANTesters we found that we forgot to ship 2 files from
+        the fake source-tree
+
+
+M	MANIFEST
+M	t/ftppub/perl-current/MANIFEST
+________________________________________________________________________________
+[230aa1e] by Abe Timmerman on Sun, 19 Apr 2015 18:03:08 +0200
+
+     Autocommit for distribution Test::Smoke 1.61_04
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
+[217c749] by Abe Timmerman on Sun, 19 Apr 2015 12:05:48 +0200
 
      Berlin2015: Test::Smoke 1.71 to be
 
@@ -62,7 +869,7 @@ M	t/syncer_rsync.t
 M	t/util-execute.t
 M	xt/03-pod-coverage.t
 ________________________________________________________________________________
-[34ac00b] by Abe Timmerman on Fri, 12 Dec 2014 15:02:50 +0100
+[90408e7] by Abe Timmerman on Fri, 12 Dec 2014 15:02:50 +0100
 
      Fixes for the new tsapps architecture
 
@@ -71,19 +878,142 @@ M	lib/Test/Smoke/App/Reporter.pm
 M	lib/Test/Smoke/App/SmokePerl.pm
 M	lib/Test/Smoke/Reporter.pm
 ________________________________________________________________________________
-[2011f71] by Paul Cochrane on Mon, 17 Nov 2014 09:35:48 +0100
+[5583dd5] by Paul Cochrane on Mon, 17 Nov 2014 09:35:48 +0100
 
      Capitalising JSON in error message for consistency
 
 
 M	sendrpt.pl
 ________________________________________________________________________________
-[531fcf7] by Paul Cochrane on Mon, 17 Nov 2014 09:35:09 +0100
+[91a87ee] by Paul Cochrane on Mon, 17 Nov 2014 09:35:09 +0100
 
      Correcting typo in sendrpt error message
 
 
 M	sendrpt.pl
+________________________________________________________________________________
+[5b754c4] by H.Merijn Brand - Tux on Thu, 2 Apr 2015 12:38:53 +0200
+
+     Add openSUSE 11.4 and more consistent nickname reporting
+
+        openSUSE 11.2 "Emerald"  => openSUSE 11.2 (Emerald) openSUSE 11.3
+        "Teal"     => openSUSE 11.3 (Teal)
+
+        use the OS name from welcome if it *contains* the part of the distro 
+        file*name* that was used by default
+
+        And yes, I found an old openSUSE 11.4 server that was still used in 
+        production. :/
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+M	t/etc/suse-11.2/DISTNAME
+M	t/etc/suse-11.3/DISTNAME
+A	t/etc/suse-11.4/DISTNAME
+A	t/etc/suse-11.4/SuSE-release
+A	t/etc/suse-11.4/issue
+________________________________________________________________________________
+[e567ec5] by H.Merijn Brand - Tux on Thu, 2 Apr 2015 12:08:36 +0200
+
+     notice *folders* in release info
+
+        Most files are - both on SUSE and CentOS - empty in
+        /etc/lsb-release.d/ but things might change
+
+
+M	t/etc/get-lsb.pl
+A	t/etc/suse-13.2/lsb-release.d/desktop-4.0-amd64
+A	t/etc/suse-13.2/lsb-release.d/desktop-4.0-noarch
+A	t/etc/suse-13.2/lsb-release.d/graphics-2.0-amd64
+A	t/etc/suse-13.2/lsb-release.d/graphics-2.0-noarch
+A	t/etc/suse-13.2/lsb-release.d/graphics-3.2-amd64
+A	t/etc/suse-13.2/lsb-release.d/graphics-3.2-noarch
+A	t/etc/suse-13.2/lsb-release.d/graphics-4.0-amd64
+A	t/etc/suse-13.2/lsb-release.d/graphics-4.0-noarch
+________________________________________________________________________________
+[700de11] by H.Merijn Brand - Tux on Thu, 2 Apr 2015 11:52:25 +0200
+
+     Add distcheck for centos-6.6
+
+
+A	t/etc/centos-6.6/DISTNAME
+A	t/etc/centos-6.6/centos-release
+A	t/etc/centos-6.6/issue
+A	t/etc/centos-6.6/lsb-release
+A	t/etc/centos-6.6/lsb-release.d/base-4.0-amd64
+A	t/etc/centos-6.6/lsb-release.d/base-4.0-noarch
+A	t/etc/centos-6.6/lsb-release.d/core-4.0-amd64
+A	t/etc/centos-6.6/lsb-release.d/core-4.0-noarch
+A	t/etc/centos-6.6/redhat-release
+A	t/etc/centos-6.6/system-release
+A	t/etc/centos-6.6/system-release-cpe
+________________________________________________________________________________
+[fddc9fe] by H.Merijn Brand - Tux on Thu, 2 Apr 2015 11:42:54 +0200
+
+     Added distcheck for Debian 8.0 (jessie)
+
+
+A	t/etc/debian-jessie-8/DISTNAME
+A	t/etc/debian-jessie-8/debian_version
+A	t/etc/debian-jessie-8/issue
+A	t/etc/debian-jessie-8/os-release
+________________________________________________________________________________
+[d1fe199] by H.Merijn Brand - Tux on Sat, 7 Mar 2015 11:03:10 +0100
+
+     Add dsm-5.1
+
+
+A	t/etc/dsm-5.1/DISTNAME
+A	t/etc/dsm-5.1/VERSION
+________________________________________________________________________________
+[bc766ca] by H.Merijn Brand - Tux on Tue, 27 Jan 2015 19:15:00 +0100
+
+     Add Oracle Linux Server 7.0
+
+
+A	t/etc/oracle-7.0/DISTNAME
+A	t/etc/oracle-7.0/issue
+A	t/etc/oracle-7.0/oracle-release
+A	t/etc/oracle-7.0/os-release
+A	t/etc/oracle-7.0/redhat-release
+A	t/etc/oracle-7.0/system-release
+A	t/etc/oracle-7.0/system-release-cpe
+________________________________________________________________________________
+[7ea290f] by H.Merijn Brand - Tux on Wed, 21 Jan 2015 14:36:58 +0100
+
+     unTABify (to make Abe happ{y|ier}
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+________________________________________________________________________________
+[49507a7] by H.Merijn Brand - Tux on Wed, 21 Jan 2015 14:36:00 +0100
+
+     extract subversion of OS (wheezy) in SysInfo
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+A	t/etc/debian-wheezy-7.2/DISTNAME
+A	t/etc/debian-wheezy-7.2/debian_version
+A	t/etc/debian-wheezy-7.2/issue
+A	t/etc/debian-wheezy-7.2/os-release
+A	t/etc/debian-wheezy-7.8/DISTNAME
+A	t/etc/debian-wheezy-7.8/debian_version
+A	t/etc/debian-wheezy-7.8/issue
+A	t/etc/debian-wheezy-7.8/os-release
+D	t/etc/debian-wheezy/DISTNAME
+D	t/etc/debian-wheezy/debian_version
+D	t/etc/debian-wheezy/issue
+D	t/etc/debian-wheezy/os-release
+________________________________________________________________________________
+[6add4e7] by H.Merijn Brand - Tux on Thu, 8 Jan 2015 12:53:01 +0100
+
+     Add test and small subst for RHEL 4.x distname
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+A	t/etc/rhel-4.2/DISTNAME
+A	t/etc/rhel-4.2/issue
+A	t/etc/rhel-4.2/redhat-release
 ________________________________________________________________________________
 [2bcc262] by H.Merijn Brand - Tux on Sun, 26 Oct 2014 21:45:57 +0100
 

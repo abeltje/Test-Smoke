@@ -1,11 +1,10 @@
 package Test::Smoke::Util;
 use strict;
 
-# $Id$
 our $VERSION = '0.58';
 
 use Exporter 'import';
-our @EXPORT = qw( 
+our @EXPORT = qw(
     &Configure_win32
     &get_cfg_filename &get_config
     &get_patch
@@ -14,7 +13,7 @@ our @EXPORT = qw(
 
 our @EXPORT_OK = qw(
     &grepccmsg &grepnonfatal &get_local_patches &set_local_patch
-    &get_ncpu &get_smoked_Config &parse_report_Config 
+    &get_ncpu &get_smoked_Config &parse_report_Config
     &get_regen_headers &run_regen_headers
     &whereis &clean_filename &read_logfile
     &calc_timeout &time_in_hhmm
@@ -46,7 +45,7 @@ C<Configure_win32()> alters the settings of the makefile for MSWin32.
 
 C<$command> is in the form of './Configure -des -Dusedevel ...'
 
-C<$win32_maker> should either be C<nmake> or C<dmake>, the default 
+C<$win32_maker> should either be C<nmake> or C<dmake>, the default
 is C<nmake>.
 
 C<@args> is a list of C<< option=value >> pairs that will (eventually)
@@ -104,21 +103,21 @@ sets INST_DRV to a new value (default is "c:")
 
 =item * B<-DINST_TOP=...>
 
-sets INST_DRV to a new value (default is "$(INST_DRV)\perl"), this is 
+sets INST_DRV to a new value (default is "$(INST_DRV)\perl"), this is
 where perl will be installed when C<< [nd]make install >> is run.
 
 =item * B<-DINST_VER=...>
 
 sets INST_VER to a new value (default is forced not set), this is also used
 as part of the installation path to get a more unixy installation.
-Without C<INST_VER> and C<INST_ARCH> you get an ActiveState like 
+Without C<INST_VER> and C<INST_ARCH> you get an ActiveState like
 installation.
 
 =item * B<-DINST_ARCH=...>
 
 sets INST_ARCH to a new value (default is forced not set), this is also used
 as part of the installation path to get a more unixy  installation.
-Without C<INST_VER> and C<INST_ARCH> you get an ActiveState like 
+Without C<INST_VER> and C<INST_ARCH> you get an ActiveState like
 installation.
 
 =item * B<-DCCHOME=...>
@@ -144,7 +143,7 @@ Set the cf_email option (Config.pm)
 
 =item * B<-Accflags=...>
 
-Adds the option to BUILDOPT. This is implemented differently for 
+Adds the option to BUILDOPT. This is implemented differently for
 B<nmake> and B<dmake>.
 Returns the name of the outputfile.
 
@@ -184,6 +183,7 @@ sub Configure_win32 {
         "-DCCTYPE"              => "CCTYPE",
         "-Dgcc_v3_2"            => "USE_GCC_V3_2",
         "-DGCC_4XX"             => "GCC_4XX",
+        "-DGCCWRAPV"            => "GCCWRAPV",
         "-DGCCHELPERDLL"        => "GCCHELPERDLL",
         "-Dbccold"              => "BCCOLD",
         "-DCCHOME"              => "CCHOME",
@@ -214,6 +214,7 @@ sub Configure_win32 {
         CCTYPE          => undef,  # used to be $win32_cctype,
         USE_GCC_V3_2    => 0,
         GCC_4XX         => 0,
+        GCCWRAPV        => 0,
         GCCHELPERDLL    => undef,
         BCCOLD          => 0,
         CCHOME          => undef,
@@ -228,7 +229,7 @@ sub Configure_win32 {
     my $undef_re  = qr/WIN64/;
 
     # $def_re: regex for options that should be UNcommented for -Dxxx
-    my $def_re = qr/((?:(?:PERL|USE|IS|GCC)_\w+)|BCCOLD)/;
+    my $def_re = qr/((?:(?:PERL|USE|IS|GCC)_\w+)|BCCOLD|GCCWRAPV)/;
 
     my @w32_opts = grep ! /^$def_re/, keys %opts;
     my $config_args = join " ",
@@ -429,7 +430,7 @@ This is a port of Jarkko Hietaniemi's grepccerr script.
 sub grepccmsg {
     my( $cc, $smokelog, $verbose ) = @_;
     defined $smokelog or return;
-    $cc = 'gcc' if !$cc || $cc eq 'g++';
+    $cc = 'gcc' if !$cc || $cc eq 'g++' || $cc eq 'clang';
     my %OS2PAT = (
         'aix' =>
             # "foo.c", line n.c: pppp-qqq (W) ...error description...
@@ -454,12 +455,12 @@ sub grepccmsg {
         'irix' =>
             # cc-pppp cc: WARNING File = foo.c, Line = nnnn
             # ...error description...
-            # 
+            #
             # ...error line...
             #   ^
             # cc-pppp cc: ERROR File = foo.c, Line = nnnn
             # ...error description...
-            # 
+            #
             # ...error line...
             #   ^
             '^(cc-\d+ cc: (?:WARNING|ERROR) File = .+?, ' .
@@ -822,7 +823,7 @@ sub get_patch {
 
 =head2 version_from_patchlevel_h( $ddir )
 
-C<version_from_patchlevel_h()> returns a "dotted" version as derived 
+C<version_from_patchlevel_h()> returns a "dotted" version as derived
 from the F<patchlevel.h> file in the distribution.
 
 =cut
@@ -855,7 +856,7 @@ sub version_from_patchlevel_h {
     }
     return "$revision.$version.$subversion";
 }
- 
+
 =head2 get_ncpu( $osname )
 
 C<get_ncpu()> returns the number of available (online/active/enabled) CPUs.
@@ -864,7 +865,7 @@ It does this by using some operating system specific trick (usually
 by running some external command and parsing the output).
 
 If it cannot recognize your operating system an empty string is returned.
-If it can recognize it but the external command failed, C<"? cpus"> 
+If it can recognize it but the external command failed, C<"? cpus">
 is returned.
 
 In the first case (where we really have no idea how to proceed),
@@ -935,7 +936,7 @@ sub get_ncpu {
         };
 
         /mswin32|cygwin/i && do {
-            $cpus = exists $ENV{NUMBER_OF_PROCESSORS} 
+            $cpus = exists $ENV{NUMBER_OF_PROCESSORS}
                 ? $ENV{NUMBER_OF_PROCESSORS} : '';
             last OS_CHECK;
         };
@@ -968,7 +969,7 @@ sub get_ncpu {
 C<get_smoked_Config()> returns a hash (a listified hash) with the
 specified keys. It will try to find F<lib/Config.pm> to get those
 values, if that cannot be found (make error?) we can try F<config.sh>
-which is used to build F<lib/Config.pm>. 
+which is used to build F<lib/Config.pm>.
 If F<config.sh> is not there (./Configure error?) we try to get some
 fallback information from C<POSIX::uname()> and F<patchlevel.h>.
 
@@ -1028,7 +1029,7 @@ sub get_smoked_Config {
     %conf2 = map {
         ( $_ => undef )
     } grep !defined $Config{ $_ } => keys %Config;
-    if ( keys %conf2 ) { 
+    if ( keys %conf2 ) {
         # Fall-back values from POSIX::uname() (not reliable)
         require POSIX;
         my( $osname, undef, $osvers, undef, $arch) = POSIX::uname();
@@ -1048,7 +1049,7 @@ sub get_smoked_Config {
 
 C<parse_report_Config()> returns a list attributes from a smoke report.
 
-    my( $version, $plevel, $os, $osvers, $archname, $summary, $branch ) = 
+    my( $version, $plevel, $os, $osvers, $archname, $summary, $branch ) =
         parse_report_Config( $rpt );
 
 =cut
@@ -1074,7 +1075,7 @@ sub parse_report_Config {
 
 =head2 get_regen_headers( $ddir )
 
-C<get_regen_headers()> looks in C<$ddir> to find either 
+C<get_regen_headers()> looks in C<$ddir> to find either
 F<regen_headers.pl> or F<regen.pl> (change 18851).
 
 Returns undef if not found or a string like C<< $^X "$regen_headers_pl" >>
@@ -1229,7 +1230,7 @@ sub clean_filename {
 
 =head2 calc_timeout( $killtime[, $from] )
 
-C<calc_timeout()> calculates the timeout in seconds. 
+C<calc_timeout()> calculates the timeout in seconds.
 C<$killtime> can be one of two formats:
 
 =over 8
@@ -1325,7 +1326,7 @@ EO_MSG
     }
 }
 
-=head2 skip_config( $config ) 
+=head2 skip_config( $config )
 
 Returns true if this config should be skipped.
 C<$config> should be a B<Test::Smoke::BuildCFG::Config> object.
@@ -1337,7 +1338,7 @@ sub skip_config {
 
     my $skip = $config->has_arg(qw( -Uuseperlio -Dusethreads )) ||
                $config->has_arg(qw( -Uuseperlio -Duseithreads )) ||
-               ( $^O eq 'MSWin32' && 
+               ( $^O eq 'MSWin32' &&
                (( $config->has_arg(qw( -Duseithreads -Dusemymalloc )) &&
                 !$config->has_arg( '-Uuseimpsys' ) ) ||
                ( $config->has_arg(qw( -Dusethreads -Dusemymalloc )) &&

@@ -10,8 +10,8 @@ foreach my $vf (glob ("/etc/*[-_][rRvV][eE][lLrR]*"), "/etc/issue",
 	print "mkdir $d\n";
 	foreach my $f (grep { -f } glob "$vf/*") {
 	    open my $fh, "<", $f or next;
-	    (my $lf = $f) =~ s{.*/}{};
-	    print "cat > $f/$lf <<EOFV\n", <$fh>, "EOFV\n";
+	    $f =~ s{.*/}{};
+	    print "cat > $d/$f <<EOFV\n", <$fh>, "EOFV\n";
 	    }
 	next;
 	}
