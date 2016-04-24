@@ -109,7 +109,7 @@ sub prepare_os {
 	    }
         }
         $distro =~ s/\)\s+\(\w+\)\s*$/)/;    # remove architectural part
-        $distro =~ s/\s+\(?(?:i\s86|x86_64)\)?\s*$//; # i386 i486 i586 x86_64
+        $distro =~ s/\s+\(?(?:i\d86|x86_64)\)?\s*$//; # i386 i486 i586 x86_64
     }
     elsif ( $os{VERSION} && $os{NAME} ) {
         $distro = qq{$os{NAME} $os{VERSION}};
