@@ -86,7 +86,7 @@ sub _get_cc {
     my $p5p = $Test::Smoke::Mailer::P5P or return $self->{cc};
     my @cc = $self->{cc} ? $self->{cc} : ();
 
-    push @cc, $p5p unless $self->{to} =~ /\Q$p5p\E/ || 
+    push @cc, $p5p unless $self->{to} =~ /\Q$p5p\E/ ||
                           $self->{cc} =~ /\Q$p5p\E/;
     return join ", ", @cc;
 }

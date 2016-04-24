@@ -19,7 +19,7 @@ if (!has_module('HTTP::Daemon')) {
     plan skip_all => "Need 'HTTP::Daemon' for this test!";
 }
 require HTTP::Daemon;
-require HTTP::Status; HTTP::Status->import('RC_OK');
+require HTTP::Status; HTTP::Status->import('RC_OK', 'RC_NOT_IMPLEMENTED');
 require HTTP::Response;
 require HTTP::Headers;
 
@@ -31,21 +31,24 @@ my $timeout = 60;
 my $jsnfile = 'testsuite.jsn';
 {
     $daemon = HTTP::Daemon->new() || die "Could not initialize a Daemon";
-    $url = $daemon->url;
+    # IPv6 doesn't work, so force IPv4 localhost
+    ($url = $daemon->url) =~ s{(http://)([^:]+)}{${1}127.0.0.1};
 
     $pid = fork();
     if ($pid) { # Continue
         note("$url");
     }
     else { # HTTP-Server for dummies
-        my $CRLF = "\015\012";
         while (my $c = $daemon->accept) {
             while (my $r = $c->get_request) {
                 if ($r->method eq 'POST' && $r->uri->path eq '/report') {
                     (my $json = unescape($r->decoded_content)) =~ s/^json=//;
                     my $data;
                     $data  =  2 if $r->header('User-Agent') =~ /Test::Smoke/;
-                    $data += 40 if decode_json($json)->{sysinfo} eq $^O;
+                    eval {
+                        $data += 40 if decode_json($json)->{sysinfo} eq $^O;
+                    };
+                    $data = $@ if $@;
                     my $response = HTTP::Response->new(
                         RC_OK(), "OK",
                         HTTP::Headers->new('Content-Type', 'application/json'),
@@ -54,6 +57,12 @@ my $jsnfile = 'testsuite.jsn';
                     $c->send_response($response);
                 }
                 else {
+                    my $response = HTTP::Response->new(
+                        RC_NOT_IMPLEMENTED(), 'NOT IMPLEMENTED',
+                        HTTP::Headers->new('Content-Type', 'application/json'),
+                        unescape($r->decoded_content),
+                    );
+                    $c->send_response($response);
                     diag("<<<Error: @{[$r->as_string]}>>>");
                 }
                 $c->close;
@@ -83,7 +92,9 @@ SKIP: {
     isa_ok($poster, 'Test::Smoke::Poster::LWP_UserAgent');
 
     ok(write_json($poster->json_filename, {sysinfo => $^O}), "write_json");
-    is($poster->post(), 42, "Got id");
+    my $response = eval { $poster->post() };
+    $response = $@ if $@;
+    is($response, 42, "Got id");
 
     unlink $poster->json_filename;
 }
@@ -103,7 +114,9 @@ SKIP: {
     isa_ok($poster, 'Test::Smoke::Poster::Curl');
 
     ok(write_json($poster->json_filename, {sysinfo => $^O}), "write_json");
-    is($poster->post(), 42, "Got id");
+    my $response = eval { $poster->post() };
+    $response = $@ if $@;
+    is($response, 42, "Got id");
 
     unlink $poster->json_filename;
 }
@@ -121,7 +134,9 @@ SKIP: {
     isa_ok($poster, 'Test::Smoke::Poster::HTTP_Tiny');
 
     ok(write_json($poster->json_filename, {sysinfo => $^O}), "write_json");
-    is($poster->post(), 42, "Got id");
+    my $response = eval { $poster->post() };
+    $response = $@ if $@;
+    is($response, 42, "Got id");
 
     unlink $poster->json_filename;
 }
@@ -139,7 +154,9 @@ SKIP: {
     isa_ok($poster, 'Test::Smoke::Poster::HTTP_Lite');
 
     ok(write_json($poster->json_filename, {sysinfo => $^O}), "write_json");
-    is($poster->post(), 42, "Got id");
+    my $response = eval { $poster->post() };
+    $response = $@ if $@;
+    is($response, 42, "Got id");
 
     unlink $poster->json_filename;
 }

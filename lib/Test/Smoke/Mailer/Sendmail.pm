@@ -23,7 +23,7 @@ sub mail {
     my $subject   = $self->fetch_report();
     my $cc = $self->_get_cc( $subject );
     my $header = "To: $self->{to}\n";
-    $header   .= "From: $self->{from}\n" 
+    $header   .= "From: $self->{from}\n"
         if exists $self->{from} && $self->{from};
     $header   .= "Cc: $cc\n" if $cc;
     $header   .= "Bcc: $self->{bcc}\n" if $self->{bcc};

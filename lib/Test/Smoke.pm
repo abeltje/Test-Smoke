@@ -2,7 +2,7 @@ package Test::Smoke;
 use strict;
 
 use vars qw($VERSION $conf @EXPORT);
-$VERSION  = '1.61_04';
+$VERSION  = '1.61_15';
 
 use base 'Exporter';
 @EXPORT  = qw( $conf &read_config &run_smoke );
@@ -28,8 +28,8 @@ Test::Smoke - The Perl core test smoke suite
     use vars qw( $VERSION );
     $VERSION = Test::Smoke->VERSION;
 
-    read_config( $config_name ) or warn Test::Smoke->config_error; 
-    
+    read_config( $config_name ) or warn Test::Smoke->config_error;
+
 
 =head1 DESCRIPTION
 
@@ -46,9 +46,9 @@ Read (require) the configfile.
 sub read_config {
     my( $config_name ) = @_;
 
-    $config_name = 'smokecurrent_config' 
+    $config_name = 'smokecurrent_config'
         unless defined $config_name && length $config_name;
-    $config_name .= '_config' 
+    $config_name .= '_config'
         unless $config_name =~ /_config$/ || -f $config_name;
 
     # Enable reloading by hackery
@@ -79,7 +79,7 @@ sub is_win32() { $^O eq "MSWin32" }
 
 =head2 do_manifest_check( $ddir, $smoker )
 
-C<do_manifest_check()> uses B<Test::Smoke::SourceTree> to do the 
+C<do_manifest_check()> uses B<Test::Smoke::SourceTree> to do the
 MANIFEST check.
 
 =cut
@@ -117,7 +117,7 @@ sub set_smoke_patchlevel {
 =head2 run_smoke( [$continue[, @df_buildopts]] )
 
 C<run_smoke()> sets up de build environment and gets the private Policy
-file and build configurations and then runs the smoke stuff for all 
+file and build configurations and then runs the smoke stuff for all
 configurations.
 
 All arguments after the C<$continue> are taken as default buildoptions
@@ -131,7 +131,7 @@ sub run_smoke {
 
     my @df_buildopts = @_ ? grep /^-[DUA]/ => @_ : ();
     # We *always* want -Dusedevel!
-    push @df_buildopts, '-Dusedevel' 
+    push @df_buildopts, '-Dusedevel'
         unless grep /^-Dusedevel$/ => @df_buildopts;
     Test::Smoke::BuildCFG->config( dfopts => join " ", @df_buildopts );
 
@@ -147,8 +147,8 @@ sub run_smoke {
     }
 
     my $logfile = File::Spec->catfile( $conf->{ddir}, 'mktest.out' );
-    my $BuildCFG = $continue 
-        ? Test::Smoke::BuildCFG->continue( $logfile, $conf->{cfg}, 
+    my $BuildCFG = $continue
+        ? Test::Smoke::BuildCFG->continue( $logfile, $conf->{cfg},
                                            v => $conf->{v} )
         : Test::Smoke::BuildCFG->new( $conf->{cfg}, v => $conf->{v} );
 
@@ -176,7 +176,7 @@ sub run_smoke {
     chdir $conf->{ddir} or die "Cannot chdir($conf->{ddir}): $!";
     unless ( $continue ) {
         $smoker->make_distclean( );
-        $smoker->ttylog("Smoking patch $patch->[0] $patch->[1]\n"); 
+        $smoker->ttylog("Smoking patch $patch->[0] $patch->[1]\n");
         $smoker->ttylog("Smoking branch $patch->[2]\n") if $patch->[2];
         do_manifest_check( $conf->{ddir}, $smoker );
         set_smoke_patchlevel( $conf->{ddir}, $patch->[0] );
@@ -189,7 +189,7 @@ sub run_smoke {
             next;
         }
 
-        $smoker->ttylog( join "\n", 
+        $smoker->ttylog( join "\n",
                               "", "Configuration: $this_cfg", "-" x 78, "" );
         $smoker->smoke( $this_cfg, $Policy );
     }

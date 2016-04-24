@@ -15,6 +15,7 @@ BEGIN {
 use Cwd 'abs_path', 'cwd';
 use Data::Dumper;
 use Test::Smoke::App::AppOption;
+$Test::Smoke::LogMixin::USE_TIMESTAMP = 0;
 
 {
     create_config(
@@ -113,7 +114,7 @@ use Test::Smoke::App::AppOption;
         $app->run1("no newline %s", 'single value');
         select $stdout;
         is($logfile, <<'        EOL', "log_info() no newline");
-[2015-04-15 14:11:02+0200] no newline single value
+no newline single value
         EOL
     }
     {
@@ -122,7 +123,7 @@ use Test::Smoke::App::AppOption;
         $app->run1("With newline %s\n\n", 'single value');
         select $stdout;
         is($logfile, <<'        EOL', "log_info() 2newline");
-[2015-04-15 14:11:02+0200] With newline single value
+With newline single value
         EOL
     }
     {
@@ -131,7 +132,7 @@ use Test::Smoke::App::AppOption;
         $app->run2("no newline %s", 'single value');
         select $stdout;
         is($logfile, <<'        EOL', "log_debug() no newline");
-[2015-04-15 14:11:02+0200] no newline single value
+no newline single value
         EOL
     }
     {
@@ -140,7 +141,7 @@ use Test::Smoke::App::AppOption;
         $app->run2("With newline %s\n", 'single value');
         select $stdout;
         is($logfile, <<'        EOL', "log_debug() newline");
-[2015-04-15 14:11:02+0200] With newline single value
+With newline single value
         EOL
     }
     {

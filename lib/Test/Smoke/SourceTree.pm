@@ -1,7 +1,6 @@
 package Test::Smoke::SourceTree;
 use strict;
 
-# $Id$
 use vars qw( $VERSION @EXPORT_OK %EXPORT_TAGS $NOCASE );
 $VERSION = '0.008';
 
@@ -99,7 +98,7 @@ sub verbose { return $_[0]->{verbose} }
 
 =head2 $tree->canonpath( )
 
-C<canonpath()> returns the canonical name for the path, 
+C<canonpath()> returns the canonical name for the path,
 see L<File::Spec>.
 
 =cut
@@ -122,7 +121,7 @@ sub rel2abs {
 
 =head2 $tree->abs2rel( [$base_dir] )
 
-C<abs2rel()> returns  a relative path, 
+C<abs2rel()> returns  a relative path,
 see L<File::Spec>.
 
 =cut
@@ -134,7 +133,7 @@ sub abs2rel {
 
 =head2 $tree->mani2abs( $file[, $base_path] )
 
-C<mani2abs()> returns the absolute filename of C<$file>, which should 
+C<mani2abs()> returns the absolute filename of C<$file>, which should
 be in "MANIFEST" format (i.e. using '/' as directory separator).
 
 =cut
@@ -159,7 +158,7 @@ sub mani2abs {
 
 =head2 $tree->mani2absdir( $dir[, $base_path] )
 
-C<mani2abs()> returns the absolute dirname of C<$dir>, which should 
+C<mani2abs()> returns the absolute dirname of C<$dir>, which should
 be in "MANIFEST" format (i.e. using '/' as directory separator).
 
 =cut
@@ -193,7 +192,7 @@ sub abs2mani {
 C<check_MANIFEST()> reads the B<MANIFEST> file from C<< $self->tree_dir >> and
 compares it with the actual contents of C<< $self->tree_dir >>.
 
-Returns a hashref with suspicious entries (if any) as keys that have a 
+Returns a hashref with suspicious entries (if any) as keys that have a
 value of either B<ST_MISSING> (not in directory) or B<ST_UNDECLARED>
 (not in MANIFEST).
 
@@ -213,7 +212,7 @@ sub check_MANIFEST {
     $self->log_debug("Found %d entries in MANIFEST.SKIP", scalar(keys %ignore));
 
     # Walk the tree, remove all found files from %manifest
-    # and add other files to %manifest 
+    # and add other files to %manifest
     # unless they are in the ignore list
     my $cwd = cwd();
     chdir $self->tree_dir or die "Cannot chdir($self->tree_dir): $!";
