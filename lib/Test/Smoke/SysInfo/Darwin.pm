@@ -70,6 +70,7 @@ sub __get_system_profiler {
         }
     }
 
+    $system_profiler{'CPU Type'} ||= 'Unknown';
     $system_profiler{'CPU Type'} =~ s/PowerPC\s*(\w+).*/macppc$1/;
     $system_profiler{'CPU Speed'} =~
         s/(0(?:\.\d+)?)\s*GHz/sprintf("%d MHz", $1 * 1000)/e;
