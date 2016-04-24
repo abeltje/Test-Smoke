@@ -1,9 +1,97 @@
-Changes on 2016-04-23 for repository at:
+Changes on 2016-04-24 for repository at:
   Fetch URL: github.com:abeltje/Test-Smoke
   Push  URL: github.com:abeltje/Test-Smoke
 
 Enjoy!
 
+________________________________________________________________________________
+[d5e20e8] by H.Merijn Brand - Tux on Sun, 24 Apr 2016 13:29:48 +0200
+
+     CPU type is unknown on a virtualized Darwin
+
+
+M	lib/Test/Smoke/SysInfo/Darwin.pm
+________________________________________________________________________________
+[0b59804] by abeltje on Sun, 24 Apr 2016 11:13:36 +0100
+
+     Fix MANIFEST after merge of origin/si-netbsd7994
+
+
+M	MANIFEST
+________________________________________________________________________________
+[10b10f2] by abeltje on Sun, 24 Apr 2016 11:11:36 +0100
+
+     Merge remote-tracking branch 'origin/si-netbsd7994' into
+        Belin2015_Aftermath
+
+________________________________________________________________________________
+[86c5b75] by abeltje on Sun, 24 Apr 2016 11:11:21 +0100
+
+     Merge remote-tracking branch 'origin/clang-2014' into
+        Belin2015_Aftermath
+
+________________________________________________________________________________
+[d723bca] by abeltje on Sun, 24 Apr 2016 11:09:41 +0100
+
+     Merge branch 'Belin2015_Aftermath' of github.com:abeltje/Test-Smoke
+        into Belin2015_Aftermath
+
+________________________________________________________________________________
+[155e158] by abeltje on Sun, 24 Apr 2016 11:04:14 +0100
+
+     Merge branch 'pr/sendrpt_error_msg_fixes' of
+        https://github.com/paultcochrane/Test-Smoke into Belin2015_Aftermath
+
+________________________________________________________________________________
+[9c3fba8] by abeltje on Sun, 24 Apr 2016 11:02:27 +0100
+
+     Merge branch 'pr/faq_correction_rt_94329' of
+        https://github.com/paultcochrane/Test-Smoke into Belin2015_Aftermath
+
+________________________________________________________________________________
+[e328c65] by H.Merijn Brand - Tux on Sun, 24 Apr 2016 11:55:15 +0200
+
+    
+        \s != \d
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+________________________________________________________________________________
+[2b84f49] by H.Merijn Brand - Tux on Sun, 24 Apr 2016 11:32:15 +0200
+
+     SI for NetBSD-7.99.4
+
+
+A	t/etc/netbsd-7.99.4/DISTNAME
+A	t/etc/netbsd-7.99.4/release
+________________________________________________________________________________
+[7c5deb2] by abeltje on Sun, 24 Apr 2016 10:08:01 +0100
+
+     NAME in WriteMakefile() must be packagename
+
+
+M	Makefile.PL
+________________________________________________________________________________
+[16beb8f] by H.Merijn Brand - Tux on Sat, 23 Apr 2016 23:48:53 +0200
+
+     clang = gcc
+
+        https://github.com/abeltje/Test-Smoke/issues/2
+
+        While you are at it, maybe also:
+
+        $cc = 'gcc' if $cc eq 'clang';
+
+
+M	lib/Test/Smoke/Util.pm
+________________________________________________________________________________
+[6b27c08] by abeltje on Sat, 23 Apr 2016 09:51:00 +0100
+
+     Autocommit for distribution Test::Smoke 1.61_15 (same)
+
+
+M	Changes
+M	lib/Test/Smoke.pm
 ________________________________________________________________________________
 [8600318] by abeltje on Sat, 23 Apr 2016 09:48:59 +0100
 
@@ -1014,6 +1102,31 @@ M	lib/Test/Smoke/SysInfo/Linux.pm
 A	t/etc/rhel-4.2/DISTNAME
 A	t/etc/rhel-4.2/issue
 A	t/etc/rhel-4.2/redhat-release
+________________________________________________________________________________
+[2011f71] by Paul Cochrane on Mon, 17 Nov 2014 09:35:48 +0100
+
+     Capitalising JSON in error message for consistency
+
+
+M	sendrpt.pl
+________________________________________________________________________________
+[531fcf7] by Paul Cochrane on Mon, 17 Nov 2014 09:35:09 +0100
+
+     Correcting typo in sendrpt error message
+
+
+M	sendrpt.pl
+________________________________________________________________________________
+[060a073] by Paul Cochrane on Sat, 15 Nov 2014 16:54:04 +0100
+
+     Correcting FAQ as per RT#94329
+
+        This change merely adds the extra "a" needed to make the
+        introductory sentence after the "What is Text::Smoke?" heading
+        grammatically correct. This change would also thus close RT#94329.
+
+
+M	lib/Test/Smoke/FAQ
 ________________________________________________________________________________
 [2bcc262] by H.Merijn Brand - Tux on Sun, 26 Oct 2014 21:45:57 +0100
 
