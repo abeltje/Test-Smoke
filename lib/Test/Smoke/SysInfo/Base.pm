@@ -2,6 +2,8 @@ package Test::Smoke::SysInfo::Base;
 use warnings;
 use strict;
 
+our $VERSION = '0.001';
+
 use POSIX ();
 
 =head1 NAME

@@ -2,6 +2,8 @@ package Test::Smoke::Util::FindHelpers;
 use warnings;
 use strict;
 
+our $VERSION = '0.001';
+
 =head1 NAME
 
 Test::Smoke::Util::FindHelpers - Functions to help find Helpers (modules/bins)

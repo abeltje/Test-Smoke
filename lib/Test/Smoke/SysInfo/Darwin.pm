@@ -2,6 +2,8 @@ package Test::Smoke::SysInfo::Darwin;
 use warnings;
 use strict;
 
+our $VERSION = '0.001';
+
 use base 'Test::Smoke::SysInfo::BSD';
 
 =head1 NAME

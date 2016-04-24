@@ -2,6 +2,8 @@ package Test::Smoke::Util::Execute;
 use warnings;
 use strict;
 
+our $VERSION = '0.001';
+
 use Cwd;
 
 use Test::Smoke::LogMixin;

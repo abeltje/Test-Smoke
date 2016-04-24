@@ -3,6 +3,8 @@ use warnings;
 use strict;
 use Carp;
 
+our $VERSION = '0.001';
+
 use base 'Test::Smoke::App::Base';
 
 use Cwd 'cwd';

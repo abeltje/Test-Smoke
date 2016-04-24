@@ -3,6 +3,8 @@ use warnings;
 use strict;
 use Carp;
 
+our $VERSION = '0.001';
+
 use Cwd qw/cwd abs_path/;
 
 =head1 NAME

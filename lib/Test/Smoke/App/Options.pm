@@ -2,6 +2,8 @@ package Test::Smoke::App::Options;
 use warnings;
 use strict;
 
+our $VERSION = '0.001';
+
 use Test::Smoke::App::AppOption;
 
 =head1 NAME

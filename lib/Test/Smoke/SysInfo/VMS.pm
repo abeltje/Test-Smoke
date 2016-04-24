@@ -2,6 +2,8 @@ package Test::Smoke::SysInfo::VMS;
 use warnings;
 use strict;
 
+our $VERSION = '0.001';
+
 use base 'Test::Smoke::SysInfo::Base';
 
 use POSIX ();

@@ -2,6 +2,8 @@ package Test::Smoke::SysInfo::Cygwin;
 use warnings;
 use strict;
 
+our $VERSION = '0.001';
+
 use base 'Test::Smoke::SysInfo::Linux';
 
 use POSIX ();
