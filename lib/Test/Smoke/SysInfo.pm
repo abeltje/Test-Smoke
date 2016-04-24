@@ -47,7 +47,7 @@ or
 
 =head1 DESCRIPTION
 
-Sometimes one wants a more eleborate description of the system one is
+Sometimes one wants a more elaborate description of the system one is
 smoking.
 
 =head1 METHODS
