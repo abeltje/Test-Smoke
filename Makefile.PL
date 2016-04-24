@@ -132,7 +132,7 @@ my $test_requires = (
 );
 
 my %wm = (
-    NAME          => "Test-Smoke",
+    NAME          => "Test::Smoke",
     DISTNAME      => "Test-Smoke",
     VERSION_FROM  => "lib/Test/Smoke.pm",
     AUTHOR        => 'H.Merijn Brand <h.m.brand@xs4all.nl>, '.
