@@ -37,9 +37,9 @@ BEGIN {
     };
 }
 
-use Test::Smoke::SysInfo::Linux;
-use Test::Smoke::SysInfo::Generic;
-my $this_system = Test::Smoke::SysInfo::Generic->new();
+use System::Info::Linux;
+use System::Info::Generic;
+my $this_system = System::Info::Generic->new();
 
 {
     our $CPU_TYPE = 'Generic';
@@ -69,6 +69,16 @@ my $this_system = Test::Smoke::SysInfo::Generic->new();
             no strict 'refs';
             tie *$handle, 'ReadProc', $files{$fn};
         }
+        elsif ( $second eq '<' && $args[0] eq '/proc/cpuinfo' ) {
+            shift @args;
+
+            my $fn = $::CPU_TYPE;
+
+            # we can do this fully qualified filehandle as we only use GLOBs
+            # to keep up with 5.005xx
+            no strict 'refs';
+            tie *$handle, 'ReadProc', $files{$fn};
+	}
         else {
             CORE::open($handle, $second, @args);
         }
@@ -79,14 +89,14 @@ my $this_system = Test::Smoke::SysInfo::Generic->new();
         untie *{ "$pkg\:\:$_[0]" } if tied $_[0];
     };
 
-    *Test::Smoke::SysInfo::Base::get_cpu_type = sub {
+    *System::Info::Base::get_cpu_type = sub {
         my $self = shift;
         return $self->{__cpu_type} = $::CPU_TYPE;
     };
     $^W = 1;
 
     $CPU_TYPE = 'i386';
-    my $i386 = Test::Smoke::SysInfo::Linux->new();
+    my $i386 = System::Info::Linux->new();
     $this_system->{_os} = $i386->_os;
 
     is_deeply $i386->old_dump, {
@@ -100,7 +110,7 @@ my $this_system = Test::Smoke::SysInfo::Generic->new();
 
     $CPU_TYPE = 'ppc';
 
-    my $ppc = Test::Smoke::SysInfo::Linux->new();
+    my $ppc = System::Info::Linux->new();
 
     is_deeply $ppc->old_dump, {
         _host     => $this_system->host,
@@ -112,7 +122,7 @@ my $this_system = Test::Smoke::SysInfo::Generic->new();
 
     $CPU_TYPE = 'i386_2';
 
-    my $i386_2 = Test::Smoke::SysInfo::Linux->new();
+    my $i386_2 = System::Info::Linux->new();
 
     is_deeply $i386_2->old_dump, {
         _host     => $this_system->host,
@@ -124,7 +134,7 @@ my $this_system = Test::Smoke::SysInfo::Generic->new();
 
     $CPU_TYPE = 'arm_v6';
 
-    my $arm_v6 = Test::Smoke::SysInfo::Linux->new();
+    my $arm_v6 = System::Info::Linux->new();
 
     is_deeply $arm_v6->old_dump, {
         _host     => $this_system->host,
@@ -136,7 +146,7 @@ my $this_system = Test::Smoke::SysInfo::Generic->new();
 
     $CPU_TYPE = 'arm_v7';
 
-    my $arm_v7 = Test::Smoke::SysInfo::Linux->new();
+    my $arm_v7 = System::Info::Linux->new();
 
     is_deeply $arm_v7->old_dump, {
         _host     => $this_system->host,
@@ -147,7 +157,7 @@ my $this_system = Test::Smoke::SysInfo::Generic->new();
     }, "Read /proc/cpuinfo for ARM v6";
 
     $CPU_TYPE = 'i386_16';
-    my $i386_16 = Test::Smoke::SysInfo::Linux->new();
+    my $i386_16 = System::Info::Linux->new();
 
     is_deeply $i386_16->old_dump, {
         _host     => $this_system->host,

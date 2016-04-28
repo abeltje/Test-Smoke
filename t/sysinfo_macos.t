@@ -12,7 +12,7 @@ use Test::More $not595
 use Carp qw/ cluck /;
 our $DEBUG = 0;
 
-require Test::Smoke::SysInfo::Darwin;
+require System::Info::Darwin;
 
 my %output = (
     mini_intel => {
@@ -91,9 +91,9 @@ for my $model ( keys %output ) {
     $OUTPUT = $output{ $model }{output};
 
     local $^O = 'Darwin';
-    my $info = Test::Smoke::SysInfo::Darwin->new;
+    my $info = System::Info::Darwin->new;
     is(
-        $info->tsuname( 'm c p' ),
+        $info->si_uname( 'm c p' ),
         $output{ $model }{uname},
         "$output{ $model }{uname}"
     );

@@ -145,9 +145,10 @@ my %wm = (
         SUFFIX   => ".gz",
     },
     PREREQ_PM     => {
-        'CGI::Util'  => 0,
-        'File::Spec' => 0.82,
-        'POSIX'      => 0,
+        'CGI::Util'    => 0,
+        'File::Spec'   => 0.82,
+        'POSIX'        => 0,
+        'System::Info' => 0.050,
         ($test_requires eq 'PREREQ_PM' ? %TEST_REQUIRES : ()),
         %extra_deps,
     },
