@@ -1,9 +1,92 @@
-Changes on 2016-04-24 for repository at:
-  Fetch URL: github.com:abeltje/Test-Smoke
-  Push  URL: github.com:abeltje/Test-Smoke
+Changes on 2016-05-04 for repository at:
+  Fetch URL: ssh://git@github.com/abeltje/Test-Smoke
+  Push  URL: ssh://git@github.com/abeltje/Test-Smoke
 
 Enjoy!
 
+________________________________________________________________________________
+[83cb6b1] by abeltje on Tue, 3 May 2016 23:23:27 +0200
+
+     Resolve a backward incompatibilty
+
+        In pre 1.70 Test::Smoke 'sync_type' was the way to specify what sync 
+        method to use. In 1.70 this became 'syncer', now switched back to
+        'sync_type'.
+
+
+M	lib/Test/Smoke/App/Options.pm
+M	lib/Test/Smoke/App/SyncTree.pm
+M	t/app/110-runsmoke.t
+M	t/app/140-synctree.t
+________________________________________________________________________________
+[41c64e3] by H.Merijn Brand - Tux on Sun, 24 Apr 2016 18:37:42 +0200
+
+     Spelling error
+
+
+M	lib/Test/Smoke/SysInfo.pm
+________________________________________________________________________________
+[21c4ae7] by abeltje on Sun, 24 Apr 2016 15:56:49 +0100
+
+     Add versions to all the new modules
+
+
+M	lib/Test/Smoke/App/AppOption.pm
+M	lib/Test/Smoke/App/AppOptionCollection.pm
+M	lib/Test/Smoke/App/Archiver.pm
+M	lib/Test/Smoke/App/Base.pm
+M	lib/Test/Smoke/App/Options.pm
+M	lib/Test/Smoke/App/Reporter.pm
+M	lib/Test/Smoke/App/RunSmoke.pm
+M	lib/Test/Smoke/App/SendReport.pm
+M	lib/Test/Smoke/App/SmokePerl.pm
+M	lib/Test/Smoke/App/SyncTree.pm
+M	lib/Test/Smoke/Archiver.pm
+M	lib/Test/Smoke/LogMixin.pm
+M	lib/Test/Smoke/Mailer/Base.pm
+M	lib/Test/Smoke/Mailer/MIME_Lite.pm
+M	lib/Test/Smoke/Mailer/Mail_Sendmail.pm
+M	lib/Test/Smoke/Mailer/Mail_X.pm
+M	lib/Test/Smoke/Mailer/SendEmail.pm
+M	lib/Test/Smoke/Mailer/Sendmail.pm
+M	lib/Test/Smoke/ObjectBase.pm
+M	lib/Test/Smoke/Poster.pm
+M	lib/Test/Smoke/Poster/Base.pm
+M	lib/Test/Smoke/Poster/Curl.pm
+M	lib/Test/Smoke/Poster/HTTP_Lite.pm
+M	lib/Test/Smoke/Poster/HTTP_Tiny.pm
+M	lib/Test/Smoke/Poster/LWP_UserAgent.pm
+M	lib/Test/Smoke/Syncer/Base.pm
+M	lib/Test/Smoke/Syncer/Copy.pm
+M	lib/Test/Smoke/Syncer/FTP.pm
+M	lib/Test/Smoke/Syncer/Forest.pm
+M	lib/Test/Smoke/Syncer/Git.pm
+M	lib/Test/Smoke/Syncer/Hardlink.pm
+M	lib/Test/Smoke/Syncer/Rsync.pm
+M	lib/Test/Smoke/Syncer/Snapshot.pm
+M	lib/Test/Smoke/SysInfo/AIX.pm
+M	lib/Test/Smoke/SysInfo/BSD.pm
+M	lib/Test/Smoke/SysInfo/Base.pm
+M	lib/Test/Smoke/SysInfo/Cygwin.pm
+M	lib/Test/Smoke/SysInfo/Darwin.pm
+M	lib/Test/Smoke/SysInfo/Generic.pm
+M	lib/Test/Smoke/SysInfo/HPUX.pm
+M	lib/Test/Smoke/SysInfo/Haiku.pm
+M	lib/Test/Smoke/SysInfo/Irix.pm
+M	lib/Test/Smoke/SysInfo/Linux.pm
+M	lib/Test/Smoke/SysInfo/Solaris.pm
+M	lib/Test/Smoke/SysInfo/VMS.pm
+M	lib/Test/Smoke/SysInfo/Windows.pm
+M	lib/Test/Smoke/Util/Execute.pm
+M	lib/Test/Smoke/Util/FindHelpers.pm
+________________________________________________________________________________
+[6197f5b] by abeltje on Sun, 24 Apr 2016 12:57:52 +0100
+
+     Autocommit for distribution Test::Smoke 1.70 (minor)
+
+
+M	Changes
+M	lib/Test/Smoke.pm
 ________________________________________________________________________________
 [d5e20e8] by H.Merijn Brand - Tux on Sun, 24 Apr 2016 13:29:48 +0200
 
