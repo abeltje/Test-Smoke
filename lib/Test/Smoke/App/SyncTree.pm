@@ -53,7 +53,7 @@ sub new {
     my $self = $class->SUPER::new(@_);
 
     $self->{_syncer} = Test::Smoke::Syncer->new(
-        $self->option('syncer'),
+        $self->option('sync_type'),
         $self->options,
         v => $self->option('verbose'),
     );

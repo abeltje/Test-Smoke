@@ -18,7 +18,7 @@ my $opt = 'Test::Smoke::App::AppOption';
 sub synctree_config { # synctree.pl
     return (
         main_options => [
-            syncer(),
+            sync_type(),
         ],
         general_options => [
             ddir(),
@@ -363,7 +363,7 @@ sub from {
 }
 
 sub fsync { # How to sync the mdir for Forest.
-    my $s = syncer();
+    my $s = sync_type();
     $s->name('fsync');
     return $s;
 }
@@ -781,9 +781,9 @@ sub sync {
     );
 }
 
-sub syncer {
+sub sync_type {
     return $opt->new(
-        name     => 'syncer',
+        name     => 'sync_type',
         option   => '=s',
         allow    => [qw/git rsync copy/],
         default  => 'git',

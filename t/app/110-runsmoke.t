@@ -72,10 +72,10 @@ Test::Smoke::App::RunSmoke::run_smoke...
 { # Test with overridden Test::Smoke::Smoker
     my $cdir = catdir(abs_path(), 't', 'ftppub', 'perl-current');
     local @ARGV = (
-        '--ddir'    => $ddir,
-        '--syncer'  => 'copy',
-        '--cdir'    => $cdir,
-        '--verbose' => 0,
+        '--ddir'      => $ddir,
+        '--sync_type' => 'copy',
+        '--cdir'      => $cdir,
+        '--verbose'   => 0,
     );
     require Test::Smoke::App::SyncTree;
     my $sync = Test::Smoke::App::SyncTree->new(
@@ -84,10 +84,10 @@ Test::Smoke::App::RunSmoke::run_smoke...
     $sync->run();
 
     local @ARGV = (
-        '--ddir'    => $ddir,
-        '--syncer'  => 'copy',
-        '--cdir'    => $cdir,
-        '--verbose' => 1,
+        '--ddir'      => $ddir,
+        '--sync_type' => 'copy',
+        '--cdir'      => $cdir,
+        '--verbose'   => 1,
     );
     my $app = Test::Smoke::App::RunSmoke->new(
         Test::Smoke::App::Options->runsmoke_config()
