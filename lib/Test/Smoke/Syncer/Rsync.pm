@@ -72,7 +72,7 @@ sub sync {
         Carp::croak( "[rsync] Cannot chdir($self->{ddir}): $!" );
     };
     my $rsyncout = $rsync->run(
-        $self->{opts},
+        split( / /, $self->{opts} ),
         ($self->verbose ? "-v" : ""),
         $self->{source},
         File::Spec->curdir,
