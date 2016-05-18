@@ -88,7 +88,7 @@ SKIP: { # Let's try to test the ->sync method
 
     my $cwd = abs_path();
     my $source = catdir($cwd, 't', 'ftppub', 'perl-current');
-    my $options = '-a';
+    my $options = '-az -v'; # make sure to include a space to check this gets split into 2 arguments
     my $ddir = catdir($cwd, 't', 'smoketest');
 
     my $rsync = Test::Smoke::Syncer->new(
