@@ -125,7 +125,7 @@ Accessor that returns the arguments.
 
 sub arguments {
     my $self = shift;
-    if (@_) { $self->{arguments} = [@_]; }
+    if (@_) { $self->{arguments} = [ split / /, join(' ', @_) ]; }
 
     return $self->{arguments} ? @{ $self->{arguments} } : ()
 }
