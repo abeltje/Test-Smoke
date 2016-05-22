@@ -1,9 +1,65 @@
-Changes on 2016-05-04 for repository at:
+Changes on 2016-05-22 for repository at:
   Fetch URL: ssh://git@github.com/abeltje/Test-Smoke
   Push  URL: ssh://git@github.com/abeltje/Test-Smoke
 
 Enjoy!
 
+________________________________________________________________________________
+[92616c2] by abeltje on Sun, 22 May 2016 12:48:48 +0200
+
+     Rework of Andy Grundman's patch to split rsync options
+
+        Use shellwords($args) rather than split(" ", $args) to split the 
+        configured options to rsync(1) Thanks Andy!
+
+
+M	lib/Test/Smoke/Syncer/Rsync.pm
+M	lib/Test/Smoke/Util/Execute.pm
+________________________________________________________________________________
+[e2d1df2] by Andy Grundman on Wed, 18 May 2016 11:30:27 -0400
+
+     Split rsync arguments that are combined into one string, such as the
+        default '-az --delete'.
+
+
+M	lib/Test/Smoke/Syncer/Rsync.pm
+M	t/syncer_rsync.t
+________________________________________________________________________________
+[d477575] by Andy Grundman on Wed, 18 May 2016 11:19:27 -0400
+
+     Revert previous change, breaks args where spaces are expected
+
+
+M	lib/Test/Smoke/Util/Execute.pm
+________________________________________________________________________________
+[ee16405] by Andy Grundman on Wed, 18 May 2016 10:40:50 -0400
+
+     Split arguments that might be combined into one string, such as the
+        rsync default '-az --delete'.
+
+
+M	lib/Test/Smoke/Util/Execute.pm
+________________________________________________________________________________
+[8d87d5c] by H.Merijn Brand - Tux on Sun, 8 May 2016 12:34:14 +0200
+
+     Skip testing git that does not support "git init folder"
+
+        There might be a higher bound than this, but at least git-1.6.4.2
+        does NOT support this syntax
+
+        usage: git init [-q | --quiet] [--bare]
+        [--template=<template-directory>] [--shared[=<permissions>]]
+
+
+M	t/syncer_git.t
+________________________________________________________________________________
+[eca7717] by abeltje on Wed, 4 May 2016 00:19:12 +0200
+
+     Autocommit for distribution Test::Smoke 1.70_01 (test)
+
+
+M	Changes
+M	lib/Test/Smoke.pm
 ________________________________________________________________________________
 [83cb6b1] by abeltje on Tue, 3 May 2016 23:23:27 +0200
 
