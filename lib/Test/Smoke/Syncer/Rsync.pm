@@ -17,6 +17,7 @@ user-calls on this.
 use Cwd;
 use Test::Smoke::LogMixin;
 use Test::Smoke::Util::Execute;
+use Text::ParseWords;
 
 =head2 Test::Smoke::Syncer::Rsync->new( %args )
 
@@ -72,7 +73,7 @@ sub sync {
         Carp::croak( "[rsync] Cannot chdir($self->{ddir}): $!" );
     };
     my $rsyncout = $rsync->run(
-        split( / /, $self->{opts} ),
+        shellwords($self->{opts}),
         ($self->verbose ? "-v" : ""),
         $self->{source},
         File::Spec->curdir,
