@@ -87,8 +87,8 @@ sub sync {
         Carp::carp( "Problem during rsync ($err)" );
     }
 
-    if (!-e catdir($self->{ddir}, '.patch') &&
-	 -d catdir($self->{ddir}, '.git')) {
+    if (!-e catfile($self->{ddir}, '.patch') &&
+	 -d catdir( $self->{ddir}, '.git'  )) {
         my $mk_dot_patch = Test::Smoke::Util::Execute->new(
             command => "$^X Porting/make_dot_patch.pl > .patch",
             verbose => $self->verbose,
