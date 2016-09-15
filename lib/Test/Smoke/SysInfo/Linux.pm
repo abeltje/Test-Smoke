@@ -92,8 +92,12 @@ sub prepare_os {
         $distro = $os{DISTRIB_DESCRIPTION};
         $os{DISTRIB_CODENAME} && $distro !~ m{\b$os{DISTRIB_CODENAME}\b}i and
             $distro .= " ($os{DISTRIB_CODENAME})";
-        $os{DISTRIB_RELEASE}  && $distro !~ m{\b$os{DISTRIB_RELEASE}\b}i  and
+        if ( $os{VERSION_ID} && $distro !~ m{\b$os{VERSION_ID}\b}i ) {
+            $distro .= " $os{VERSION_ID}";
+        }
+        elsif ( $os{DISTRIB_RELEASE} && $distro !~ m{\b$os{DISTRIB_RELEASE}\b}i ) {
             $distro .= " $os{DISTRIB_RELEASE}";
+        }
     }
     elsif ( $os{PRETTY_NAME} ) {
         $distro = $os{PRETTY_NAME};          # "openSUSE 12.1 (Asparagus) (x86_64)"
