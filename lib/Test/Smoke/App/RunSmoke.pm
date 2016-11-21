@@ -10,6 +10,7 @@ use base 'Test::Smoke::App::Base';
 use Cwd 'cwd';
 use Config;
 use File::Spec::Functions;
+use version 0.77;
 use Test::Smoke::BuildCFG;
 use Test::Smoke::Policy;
 use Test::Smoke::Smoker;
@@ -187,7 +188,8 @@ sub check_for_harness3 {
     }
     $self->log_info("Found: Test::Harness version %s.", $version);
 
-    return $self->{_hasharness3} = $version >= 3;
+    my $nversion = version->parse($version)->numify;
+    return $self->{_hasharness3} = $nversion >= 3;
 }
 
 =head2 $smoker->create_buildcfg()
