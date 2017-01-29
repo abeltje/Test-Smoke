@@ -491,7 +491,7 @@ sub make_ {
 
 =head2 make_test_prep( )
 
-Run C<< I<make test-perp> >> and check if F<t/perl> exists.
+Run C<< I<make test-prep> >> and check if F<t/perl> exists.
 
 =cut
 
