@@ -44,6 +44,7 @@ use_ok( 'Test::Smoke::Smoker' );
         cfg  => $config,
         %w32args,
     } );
+    undef $smoker->{locale};
 
     isa_ok( $smoker, 'Test::Smoke::Smoker' );
     $smoker->mark_in;
