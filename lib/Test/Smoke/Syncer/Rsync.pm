@@ -15,6 +15,7 @@ user-calls on this.
 =cut
 
 use Cwd;
+use File::Spec::Functions;
 use Test::Smoke::LogMixin;
 use Test::Smoke::Util::Execute;
 use Text::ParseWords;
@@ -84,6 +85,16 @@ sub sync {
     if (my $err = $rsync->exitcode ) {
         require Carp;
         Carp::carp( "Problem during rsync ($err)" );
+    }
+
+    if (!-e catfile($self->{ddir}, '.patch') &&
+	 -d catdir( $self->{ddir}, '.git'  )) {
+        my $mk_dot_patch = Test::Smoke::Util::Execute->new(
+            command => "$^X Porting/make_dot_patch.pl > .patch",
+            verbose => $self->verbose,
+        );
+        my $perlout = $mk_dot_patch->run();
+        $self->log_debug($perlout);
     }
 
     chdir $cwd;
