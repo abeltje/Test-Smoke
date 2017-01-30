@@ -5,6 +5,19 @@ Changes on 2017-01-30 for github repository at:
 Enjoy!
 
 ________________________________________________________________________________
+[1e5c893] by abeltje on Mon, 30 Jan 2017 22:07:40 +0100
+
+     Merge branch 'master' of ssh://github.com/abeltje/Test-Smoke
+
+________________________________________________________________________________
+[a655fa3] by abeltje on Mon, 30 Jan 2017 22:06:31 +0100
+
+     Autocommit for distribution Test::Smoke 1.70_03
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
 [b5fa25b] by James E Keenan on Sun, 29 Jan 2017 08:50:15 -0500
 
      Correct spelling errors.
@@ -70,6 +83,61 @@ M	lib/Test/Smoke/Syncer/Git.pm
 M	lib/Test/Smoke/Syncer/Rsync.pm
 M	t/syncer_git.t
 M	t/syncer_rsync.t
+________________________________________________________________________________
+[03bfb70] by H.Merijn Brand on Sun, 29 Jan 2017 15:04:22 +0100
+
+     Merge pull request #25 from jkeenan/correct-spelling
+
+        Correct spelling errors.
+________________________________________________________________________________
+[5476b81] by James E Keenan on Sun, 29 Jan 2017 08:50:15 -0500
+
+     Correct spelling errors.
+
+
+M	lib/Test/Smoke/App/SyncTree.pm
+M	lib/Test/Smoke/Smoker.pm
+________________________________________________________________________________
+[ab330b3] by H.Merijn Brand - Tux on Thu, 15 Sep 2016 18:13:39 +0200
+
+     In Tumbleweed VERSION_ID is the most recent tag
+
+          ANSI_COLOR          => '0;32',
+         BUG_REPORT_URL      => 'https://bugs.opensuse.org',
+         CPE_NAME            => 'cpe:/o:opensuse:tumbleweed:20160913',
+         DISTRIB_CODENAME    => '',
+         DISTRIB_DESCRIPTION => 'openSUSE Tumbleweed',
+         DISTRIB_ID          => 'openSUSE Tumbleweed',
+         DISTRIB_RELEASE     => 20160901,
+         HOME_URL            => 'https://www.opensuse.org/',
+         ID                  => 'opensuse',
+         ID_LIKE             => 'suse',
+         LSB_VERSION         =>
+        'core-2.0-noarch:core-3.2-noarch:core-4.0-noarch:core-2.0-x86_64:core-3.2-x86_64:core-4.0-x86_64',
+         NAME                => 'openSUSE Tumbleweed',
+         PRETTY_NAME         => 'openSUSE Tumbleweed',
+         VERSION_ID          => 20160913,
+
+        Welcome to openSUSE Tumbleweed 20160913 - Kernel \\r (\\l).
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+________________________________________________________________________________
+[c889d30] by H.Merijn Brand - Tux on Sun, 11 Sep 2016 14:19:53 +0200
+
+     Without parens
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+________________________________________________________________________________
+[1db21a4] by H.Merijn Brand - Tux on Sun, 11 Sep 2016 14:16:38 +0200
+
+     Note DISTRIB_RELEASE in SysInfo
+
+        (Also available in System::Info)
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
 ________________________________________________________________________________
 [47f479f] by abeltje on Sun, 22 May 2016 13:07:39 +0200
 
