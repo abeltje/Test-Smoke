@@ -1022,7 +1022,7 @@ sub _parse_harness3_output {
     return $output;
 }
 
-=head2 $self->_trasnaform_testnames( @notok )
+=head2 $self->_transform_testnames( @notok )
 
 C<_transform_testnames()> takes a list of testnames, as found by
 C<TEST> (testname without C<.t> suffix followed by dots and a reason)
@@ -1057,7 +1057,7 @@ sub _normalize_testname {
     $test_name =~ s/\s+$//;
     $test_name =~ /\.t$/ or $test_name .= '.t';
     if ( $test_name !~ m|^\Q../| ) {
-        $test_name = $test_name =~ /^(?:ext|lib|t)\b/
+        $test_name = $test_name =~ /^(?:cpan|dist|ext|lib|t)\b/
             ? catfile( updir(), $test_name )
             : catfile( updir(), 't', $test_name );
     }
