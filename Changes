@@ -1,9 +1,83 @@
-Changes on 2016-05-22 for repository at:
+Changes on 2017-01-30 for github repository at:
   Fetch URL: ssh://git@github.com/abeltje/Test-Smoke
   Push  URL: ssh://git@github.com/abeltje/Test-Smoke
 
 Enjoy!
 
+________________________________________________________________________________
+[b5fa25b] by James E Keenan on Sun, 29 Jan 2017 08:50:15 -0500
+
+     Correct spelling errors.
+
+
+M	lib/Test/Smoke/App/SyncTree.pm
+M	lib/Test/Smoke/Smoker.pm
+________________________________________________________________________________
+[cb60cc7] by H.Merijn Brand - Tux on Thu, 15 Sep 2016 18:13:39 +0200
+
+     In Tumbleweed VERSION_ID is the most recent tag
+
+          ANSI_COLOR          => '0;32',
+         BUG_REPORT_URL      => 'https://bugs.opensuse.org',
+         CPE_NAME            => 'cpe:/o:opensuse:tumbleweed:20160913',
+         DISTRIB_CODENAME    => '',
+         DISTRIB_DESCRIPTION => 'openSUSE Tumbleweed',
+         DISTRIB_ID          => 'openSUSE Tumbleweed',
+         DISTRIB_RELEASE     => 20160901,
+         HOME_URL            => 'https://www.opensuse.org/',
+         ID                  => 'opensuse',
+         ID_LIKE             => 'suse',
+         LSB_VERSION         =>
+        'core-2.0-noarch:core-3.2-noarch:core-4.0-noarch:core-2.0-x86_64:core-3.2-x86_64:core-4.0-x86_64',
+         NAME                => 'openSUSE Tumbleweed',
+         PRETTY_NAME         => 'openSUSE Tumbleweed',
+         VERSION_ID          => 20160913,
+
+        Welcome to openSUSE Tumbleweed 20160913 - Kernel \\r (\\l).
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+________________________________________________________________________________
+[f71e09c] by H.Merijn Brand - Tux on Sun, 11 Sep 2016 14:19:53 +0200
+
+     Without parens
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+________________________________________________________________________________
+[3f1613f] by H.Merijn Brand - Tux on Sun, 11 Sep 2016 14:16:38 +0200
+
+     Note DISTRIB_RELEASE in SysInfo
+
+        (Also available in System::Info)
+
+
+M	lib/Test/Smoke/SysInfo/Linux.pm
+________________________________________________________________________________
+[eb383a1] by abeltje on Mon, 30 Jan 2017 21:42:48 +0100
+
+     Rsync from a git-repository should run Porting/make_dot_patch.pl
+
+        Pullrequest 18: https://github.com/abeltje/Test-Smoke/pull/18
+        , implemented in a more general way (imo)
+        - typo in configsmoke.pl
+
+
+M	configsmoke.pl
+M	lib/Test/Smoke/Smoker.pm
+M	lib/Test/Smoke/Syncer/Base.pm
+M	lib/Test/Smoke/Syncer/Git.pm
+M	lib/Test/Smoke/Syncer/Rsync.pm
+M	t/syncer_git.t
+M	t/syncer_rsync.t
+________________________________________________________________________________
+[47f479f] by abeltje on Sun, 22 May 2016 13:07:39 +0200
+
+     Autocommit for distribution Test::Smoke 1.70_02 (t)
+
+
+M	Changes
+M	lib/Test/Smoke.pm
 ________________________________________________________________________________
 [92616c2] by abeltje on Sun, 22 May 2016 12:48:48 +0200
 
@@ -1220,17 +1294,14 @@ ________________________________________________________________________________
 
 M	lib/Test/Smoke/SysInfo/Linux.pm
 A	t/etc/debian-wheezy-7.2/DISTNAME
-A	t/etc/debian-wheezy-7.2/debian_version
-A	t/etc/debian-wheezy-7.2/issue
-A	t/etc/debian-wheezy-7.2/os-release
+R100	t/etc/debian-wheezy/debian_version	t/etc/debian-wheezy-7.2/debian_version
+R100	t/etc/debian-wheezy/issue	t/etc/debian-wheezy-7.2/issue
+R100	t/etc/debian-wheezy/os-release	t/etc/debian-wheezy-7.2/os-release
 A	t/etc/debian-wheezy-7.8/DISTNAME
 A	t/etc/debian-wheezy-7.8/debian_version
 A	t/etc/debian-wheezy-7.8/issue
 A	t/etc/debian-wheezy-7.8/os-release
 D	t/etc/debian-wheezy/DISTNAME
-D	t/etc/debian-wheezy/debian_version
-D	t/etc/debian-wheezy/issue
-D	t/etc/debian-wheezy/os-release
 ________________________________________________________________________________
 [6add4e7] by H.Merijn Brand - Tux on Thu, 8 Jan 2015 12:53:01 +0100
 
@@ -1460,18 +1531,12 @@ ________________________________________________________________________________
      tests for DSM called dsm, not ds213
 
 
-D	t/etc/ds213-4.2/DISTNAME
-D	t/etc/ds213-4.2/VERSION
-D	t/etc/ds213-4.3/DISTNAME
-D	t/etc/ds213-4.3/VERSION
-D	t/etc/ds213-5.0/DISTNAME
-D	t/etc/ds213-5.0/VERSION
-A	t/etc/dsm-4.2/DISTNAME
-A	t/etc/dsm-4.2/VERSION
-A	t/etc/dsm-4.3/DISTNAME
-A	t/etc/dsm-4.3/VERSION
-A	t/etc/dsm-5.0/DISTNAME
-A	t/etc/dsm-5.0/VERSION
+R100	t/etc/ds213-4.2/DISTNAME	t/etc/dsm-4.2/DISTNAME
+R100	t/etc/ds213-4.2/VERSION	t/etc/dsm-4.2/VERSION
+R100	t/etc/ds213-4.3/DISTNAME	t/etc/dsm-4.3/DISTNAME
+R100	t/etc/ds213-4.3/VERSION	t/etc/dsm-4.3/VERSION
+R100	t/etc/ds213-5.0/DISTNAME	t/etc/dsm-5.0/DISTNAME
+R100	t/etc/ds213-5.0/VERSION	t/etc/dsm-5.0/VERSION
 ________________________________________________________________________________
 [0f4ce22] by H.Merijn Brand - Tux on Tue, 15 Apr 2014 11:42:04 +0200
 
@@ -1733,14 +1798,10 @@ ________________________________________________________________________________
 
 M	.gitignore
 M	MANIFEST.SKIP
-A	sandbox/logaf25b78.log
-A	sandbox/outaf25b78.jsn
-A	sandbox/outaf25b78.out
-A	sandbox/rptaf25b78.rpt
-D	t/logs/logaf25b78.log
-D	t/logs/outaf25b78.jsn
-D	t/logs/outaf25b78.out
-D	t/logs/rptaf25b78.rpt
+R100	t/logs/logaf25b78.log	sandbox/logaf25b78.log
+R100	t/logs/outaf25b78.jsn	sandbox/outaf25b78.jsn
+R100	t/logs/outaf25b78.out	sandbox/outaf25b78.out
+R100	t/logs/rptaf25b78.rpt	sandbox/rptaf25b78.rpt
 ________________________________________________________________________________
 [97d133f] by H.Merijn Brand - Tux on Sat, 15 Mar 2014 10:00:25 +0100
 
@@ -2357,70 +2418,43 @@ M	lib/Test/Smoke/SysInfo/Solaris.pm
 M	lib/Test/Smoke/SysInfo/VMS.pm
 M	lib/Test/Smoke/SysInfo/Windows.pm
 M	lib/Test/Smoke/Util.pm
-D	private/00-manifest.t
-D	private/10-smoker_basic.t
-D	private/20-smoker_fail.t
-D	private/30-smoker_mini.t
-D	private/40-smoker_ok.t
-D	private/50-smoker_smoke.t
-D	private/SmokertestLib.pm
-D	private/perl/.patch
-D	private/perl/01test.c
-D	private/perl/Configure
-D	private/perl/MANIFEST
-D	private/perl/Makefile.PL
-D	private/perl/patchlevel.h
-D	private/perl/t/TEST
-D	private/perl/t/TestInit.pm
-D	private/perl/t/harness
-D	private/perl/t/smoke/die.t
-D	private/perl/t/smoke/many.t
-D	private/perl/t/smoke/minitest.t
-D	private/perl/t/smoke/test.t
-D	private/perl/win32/Makefile
-D	private/perl/win32/makefile.mk
-D	private/sysinfo/macos.t
 D	private/test_compile.pl
 D	private/test_pod.pl
 M	release.sh
-D	t/app/00-appobjects.t
-A	t/app/000-appobjects.t
-A	t/app/010-appoptions.t
-A	t/app/020-appoptioncollection.t
-A	t/app/030-app-base.t
-D	t/app/10-appoptions.t
-D	t/app/20-appoptioncollection.t
-D	t/app/30-app-base.t
+R100	t/app/00-appobjects.t	t/app/000-appobjects.t
+R100	t/app/10-appoptions.t	t/app/010-appoptions.t
+R100	t/app/20-appoptioncollection.t	t/app/020-appoptioncollection.t
+R100	t/app/30-app-base.t	t/app/030-app-base.t
 M	tsrunsmoke.pl
 M	tssendrpt.pl
 A	tssmokeperl.pl
 M	tssynctree.pl
-A	xt/00-manifest.t
+R100	private/00-manifest.t	xt/00-manifest.t
 A	xt/01-compile.t
 A	xt/02-pod_syntax.t
 A	xt/03-pod-coverage.t
-A	xt/10-smoker_basic.t
-A	xt/20-smoker_fail.t
-A	xt/30-smoker_mini.t
-A	xt/40-smoker_ok.t
-A	xt/50-smoker_smoke.t
-A	xt/SmokertestLib.pm
-A	xt/perl/.patch
-A	xt/perl/01test.c
-A	xt/perl/Configure
-A	xt/perl/MANIFEST
-A	xt/perl/Makefile.PL
-A	xt/perl/patchlevel.h
-A	xt/perl/t/TEST
-A	xt/perl/t/TestInit.pm
-A	xt/perl/t/harness
-A	xt/perl/t/smoke/die.t
-A	xt/perl/t/smoke/many.t
-A	xt/perl/t/smoke/minitest.t
-A	xt/perl/t/smoke/test.t
-A	xt/perl/win32/Makefile
-A	xt/perl/win32/makefile.mk
-A	xt/sysinfo/macos.t
+R100	private/10-smoker_basic.t	xt/10-smoker_basic.t
+R100	private/20-smoker_fail.t	xt/20-smoker_fail.t
+R100	private/30-smoker_mini.t	xt/30-smoker_mini.t
+R100	private/40-smoker_ok.t	xt/40-smoker_ok.t
+R100	private/50-smoker_smoke.t	xt/50-smoker_smoke.t
+R100	private/SmokertestLib.pm	xt/SmokertestLib.pm
+R100	private/perl/.patch	xt/perl/.patch
+R100	private/perl/01test.c	xt/perl/01test.c
+R100	private/perl/Configure	xt/perl/Configure
+R100	private/perl/MANIFEST	xt/perl/MANIFEST
+R100	private/perl/Makefile.PL	xt/perl/Makefile.PL
+R100	private/perl/patchlevel.h	xt/perl/patchlevel.h
+R100	private/perl/t/TEST	xt/perl/t/TEST
+R100	private/perl/t/TestInit.pm	xt/perl/t/TestInit.pm
+R100	private/perl/t/harness	xt/perl/t/harness
+R100	private/perl/t/smoke/die.t	xt/perl/t/smoke/die.t
+R100	private/perl/t/smoke/many.t	xt/perl/t/smoke/many.t
+R100	private/perl/t/smoke/minitest.t	xt/perl/t/smoke/minitest.t
+R100	private/perl/t/smoke/test.t	xt/perl/t/smoke/test.t
+R100	private/perl/win32/Makefile	xt/perl/win32/Makefile
+R100	private/perl/win32/makefile.mk	xt/perl/win32/makefile.mk
+R100	private/sysinfo/macos.t	xt/sysinfo/macos.t
 ________________________________________________________________________________
 [57abd56] by abeltje on Mon, 27 May 2013 23:14:46 +0200
 
@@ -2537,18 +2571,12 @@ ________________________________________________________________________________
 
 
 M	MANIFEST
-A	private/00-manifest.t
-D	private/00basic.t
-A	private/10-smoker_basic.t
-A	private/20-smoker_fail.t
-A	private/30-smoker_mini.t
-A	private/40-smoker_ok.t
-A	private/50-smoker_smoke.t
-D	private/smoker_fail.t
-D	private/smoker_mini.t
-D	private/smoker_ok.t
-D	private/smoker_smoke.t
-D	t/00-manifest.t
+R091	t/00-manifest.t	private/00-manifest.t
+R100	private/00basic.t	private/10-smoker_basic.t
+R100	private/smoker_fail.t	private/20-smoker_fail.t
+R100	private/smoker_mini.t	private/30-smoker_mini.t
+R100	private/smoker_ok.t	private/40-smoker_ok.t
+R100	private/smoker_smoke.t	private/50-smoker_smoke.t
 ________________________________________________________________________________
 [eaf0941] by abeltje on Wed, 29 May 2013 21:46:20 +0200
 
@@ -2612,70 +2640,43 @@ M	lib/Test/Smoke/SysInfo/Solaris.pm
 M	lib/Test/Smoke/SysInfo/VMS.pm
 M	lib/Test/Smoke/SysInfo/Windows.pm
 M	lib/Test/Smoke/Util.pm
-D	private/00-manifest.t
-D	private/10-smoker_basic.t
-D	private/20-smoker_fail.t
-D	private/30-smoker_mini.t
-D	private/40-smoker_ok.t
-D	private/50-smoker_smoke.t
-D	private/SmokertestLib.pm
-D	private/perl/.patch
-D	private/perl/01test.c
-D	private/perl/Configure
-D	private/perl/MANIFEST
-D	private/perl/Makefile.PL
-D	private/perl/patchlevel.h
-D	private/perl/t/TEST
-D	private/perl/t/TestInit.pm
-D	private/perl/t/harness
-D	private/perl/t/smoke/die.t
-D	private/perl/t/smoke/many.t
-D	private/perl/t/smoke/minitest.t
-D	private/perl/t/smoke/test.t
-D	private/perl/win32/Makefile
-D	private/perl/win32/makefile.mk
-D	private/sysinfo/macos.t
 D	private/test_compile.pl
 D	private/test_pod.pl
 M	release.sh
-D	t/app/00-appobjects.t
-A	t/app/000-appobjects.t
-A	t/app/010-appoptions.t
-A	t/app/020-appoptioncollection.t
-A	t/app/030-app-base.t
-D	t/app/10-appoptions.t
-D	t/app/20-appoptioncollection.t
-D	t/app/30-app-base.t
+R100	t/app/00-appobjects.t	t/app/000-appobjects.t
+R100	t/app/10-appoptions.t	t/app/010-appoptions.t
+R100	t/app/20-appoptioncollection.t	t/app/020-appoptioncollection.t
+R100	t/app/30-app-base.t	t/app/030-app-base.t
 M	tsrunsmoke.pl
 M	tssendrpt.pl
 A	tssmokeperl.pl
 M	tssynctree.pl
-A	xt/00-manifest.t
+R100	private/00-manifest.t	xt/00-manifest.t
 A	xt/01-compile.t
 A	xt/02-pod_syntax.t
 A	xt/03-pod-coverage.t
-A	xt/10-smoker_basic.t
-A	xt/20-smoker_fail.t
-A	xt/30-smoker_mini.t
-A	xt/40-smoker_ok.t
-A	xt/50-smoker_smoke.t
-A	xt/SmokertestLib.pm
-A	xt/perl/.patch
-A	xt/perl/01test.c
-A	xt/perl/Configure
-A	xt/perl/MANIFEST
-A	xt/perl/Makefile.PL
-A	xt/perl/patchlevel.h
-A	xt/perl/t/TEST
-A	xt/perl/t/TestInit.pm
-A	xt/perl/t/harness
-A	xt/perl/t/smoke/die.t
-A	xt/perl/t/smoke/many.t
-A	xt/perl/t/smoke/minitest.t
-A	xt/perl/t/smoke/test.t
-A	xt/perl/win32/Makefile
-A	xt/perl/win32/makefile.mk
-A	xt/sysinfo/macos.t
+R100	private/10-smoker_basic.t	xt/10-smoker_basic.t
+R100	private/20-smoker_fail.t	xt/20-smoker_fail.t
+R100	private/30-smoker_mini.t	xt/30-smoker_mini.t
+R100	private/40-smoker_ok.t	xt/40-smoker_ok.t
+R100	private/50-smoker_smoke.t	xt/50-smoker_smoke.t
+R100	private/SmokertestLib.pm	xt/SmokertestLib.pm
+R100	private/perl/.patch	xt/perl/.patch
+R100	private/perl/01test.c	xt/perl/01test.c
+R100	private/perl/Configure	xt/perl/Configure
+R100	private/perl/MANIFEST	xt/perl/MANIFEST
+R100	private/perl/Makefile.PL	xt/perl/Makefile.PL
+R100	private/perl/patchlevel.h	xt/perl/patchlevel.h
+R100	private/perl/t/TEST	xt/perl/t/TEST
+R100	private/perl/t/TestInit.pm	xt/perl/t/TestInit.pm
+R100	private/perl/t/harness	xt/perl/t/harness
+R100	private/perl/t/smoke/die.t	xt/perl/t/smoke/die.t
+R100	private/perl/t/smoke/many.t	xt/perl/t/smoke/many.t
+R100	private/perl/t/smoke/minitest.t	xt/perl/t/smoke/minitest.t
+R100	private/perl/t/smoke/test.t	xt/perl/t/smoke/test.t
+R100	private/perl/win32/Makefile	xt/perl/win32/Makefile
+R100	private/perl/win32/makefile.mk	xt/perl/win32/makefile.mk
+R100	private/sysinfo/macos.t	xt/sysinfo/macos.t
 ________________________________________________________________________________
 [8cfbb5a] by abeltje on Mon, 27 May 2013 23:14:46 +0200
 
@@ -2824,18 +2825,12 @@ ________________________________________________________________________________
 
 
 M	MANIFEST
-A	private/00-manifest.t
-D	private/00basic.t
-A	private/10-smoker_basic.t
-A	private/20-smoker_fail.t
-A	private/30-smoker_mini.t
-A	private/40-smoker_ok.t
-A	private/50-smoker_smoke.t
-D	private/smoker_fail.t
-D	private/smoker_mini.t
-D	private/smoker_ok.t
-D	private/smoker_smoke.t
-D	t/00-manifest.t
+R091	t/00-manifest.t	private/00-manifest.t
+R100	private/00basic.t	private/10-smoker_basic.t
+R100	private/smoker_fail.t	private/20-smoker_fail.t
+R100	private/smoker_mini.t	private/30-smoker_mini.t
+R100	private/smoker_ok.t	private/40-smoker_ok.t
+R100	private/smoker_smoke.t	private/50-smoker_smoke.t
 ________________________________________________________________________________
 [0910ae3] by abeltje on Thu, 16 May 2013 18:45:05 +0200
 
@@ -3120,8 +3115,7 @@ ________________________________________________________________________________
 
 
 M	MANIFEST.SKIP
-D	distgit.sh
-A	release.sh
+R100	distgit.sh	release.sh
 ________________________________________________________________________________
 [274a3f2] by Abe Timmerman on Fri, 3 May 2013 18:43:50 +0200
 
@@ -3460,8 +3454,7 @@ ________________________________________________________________________________
 M	MANIFEST
 M	configsmoke.pl
 M	lib/Test/Smoke/Reporter.pm
-A	lib/Test/Smoke/maint_dfconfig
-D	lib/Test/Smoke/smoke510x_dfconfig
+R100	lib/Test/Smoke/smoke510x_dfconfig	lib/Test/Smoke/maint_dfconfig
 M	sendrpt.pl
 M	smokeperl.pl
 ________________________________________________________________________________
@@ -3508,10 +3501,9 @@ ________________________________________________________________________________
 
 M	configsmoke.pl
 M	lib/Test/Smoke/Reporter.pm
-D	lib/Test/Smoke/perl510x.cfg
 D	lib/Test/Smoke/perl55x.cfg
 D	lib/Test/Smoke/perl562.cfg
-A	lib/Test/Smoke/perlmaint.cfg
+R097	lib/Test/Smoke/perl510x.cfg	lib/Test/Smoke/perlmaint.cfg
 M	sendrpt.pl
 M	smokeperl.pl
 ________________________________________________________________________________
@@ -4567,39 +4559,27 @@ M	README
 M	ReleaseNotes
 M	archiverpt.pl
 M	configsmoke.pl
-A	inc/Mail/Sendmail.pm
-D	lib/Mail/Sendmail.pm
+R100	lib/Mail/Sendmail.pm	inc/Mail/Sendmail.pm
 M	lib/Test/Smoke.pm
 M	lib/Test/Smoke/Reporter.pm
 M	lib/Test/Smoke/Smoker.pm
 M	lib/Test/Smoke/SysInfo.pm
-A	lib/Test/Smoke/perl510x.cfg
-A	lib/Test/Smoke/perl55x.cfg
-A	lib/Test/Smoke/perl562.cfg
-A	lib/Test/Smoke/perl58x.cfg
-A	lib/Test/Smoke/perlcurrent.cfg
-A	lib/Test/Smoke/smoke510x_dfconfig
-A	lib/Test/Smoke/smoke55x_dfconfig
-A	lib/Test/Smoke/smoke56x_dfconfig
-A	lib/Test/Smoke/smoke58x_dfconfig
-A	lib/Test/Smoke/vmsperl.cfg
-A	lib/Test/Smoke/w32current.cfg
+R100	perl510x.cfg	lib/Test/Smoke/perl510x.cfg
+R100	perl55x.cfg	lib/Test/Smoke/perl55x.cfg
+R100	perl562.cfg	lib/Test/Smoke/perl562.cfg
+R100	perl58x.cfg	lib/Test/Smoke/perl58x.cfg
+R100	perlcurrent.cfg	lib/Test/Smoke/perlcurrent.cfg
+R100	smoke510x_dfconfig	lib/Test/Smoke/smoke510x_dfconfig
+R100	smoke55x_dfconfig	lib/Test/Smoke/smoke55x_dfconfig
+R100	smoke56x_dfconfig	lib/Test/Smoke/smoke56x_dfconfig
+R100	smoke58x_dfconfig	lib/Test/Smoke/smoke58x_dfconfig
+R100	vmsperl.cfg	lib/Test/Smoke/vmsperl.cfg
+R100	w32current.cfg	lib/Test/Smoke/w32current.cfg
 M	mailrpt.pl
-D	perl510x.cfg
-D	perl55x.cfg
-D	perl562.cfg
-D	perl58x.cfg
-D	perlcurrent.cfg
-D	smoke510x_dfconfig
-D	smoke55x_dfconfig
-D	smoke56x_dfconfig
-D	smoke58x_dfconfig
 M	smokeperl.pl
 M	t/cfgstuff.t
 M	t/mailer.t
 M	t/smoker.t
-D	vmsperl.cfg
-D	w32current.cfg
 ________________________________________________________________________________
 [8ada404] by abeltje on Thu, 27 Dec 2007 11:19:51 +0000
 
@@ -6511,10 +6491,8 @@ ________________________________________________________________________________
 
 
 M	MANIFEST
-D	t/darwin.log
-D	t/darwin.out
-A	t/gccmsg.log
-A	t/gccmsg.out
+R100	t/darwin.log	t/gccmsg.log
+R100	t/darwin.out	t/gccmsg.out
 M	t/reporter.t
 ________________________________________________________________________________
 [96cb39c] by abeltje on Thu, 21 Jul 2005 17:01:47 +0000
@@ -7308,9 +7286,8 @@ ________________________________________________________________________________
         f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
 
-D	FAQ
 M	MANIFEST
-A	lib/Test/Smoke/FAQ
+R099	FAQ	lib/Test/Smoke/FAQ
 ________________________________________________________________________________
 [3a9ca7b] by abeltje on Fri, 3 Dec 2004 11:14:47 +0000
 
@@ -7323,51 +7300,31 @@ ________________________________________________________________________________
         f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
 
-A	FAQ
+R100	lib/Test/Smoke/FAQ	FAQ
 M	MANIFEST
 M	Makefile.PL
-A	W32Configure.pl
-A	archiverpt.pl
-D	bin/W32Configure.pl
-D	bin/archiverpt.pl
-D	bin/configsmoke.pl
-D	bin/mailrpt.pl
-D	bin/patchtree.pl
-D	bin/perl55x.cfg
-D	bin/perl562.cfg
-D	bin/perl58x.cfg
-D	bin/perlcurrent.cfg
-D	bin/runsmoke.pl
-D	bin/smoke55x_dfconfig
-D	bin/smoke562_dfconfig
-D	bin/smoke56x_dfconfig
-D	bin/smoke58x_dfconfig
-D	bin/smokeperl.pl
-D	bin/smokestatus.pl
-D	bin/synctree.pl
-D	bin/vmsperl.cfg
-D	bin/w32current.cfg
-A	configsmoke.pl
-D	lib/Test/Smoke/FAQ
-A	mailrpt.pl
-A	patchtree.pl
-A	perl55x.cfg
-A	perl562.cfg
-A	perl58x.cfg
-A	perlcurrent.cfg
+R100	bin/W32Configure.pl	W32Configure.pl
+R100	bin/archiverpt.pl	archiverpt.pl
+R100	bin/configsmoke.pl	configsmoke.pl
+R100	bin/mailrpt.pl	mailrpt.pl
+R100	bin/patchtree.pl	patchtree.pl
+R100	bin/perl55x.cfg	perl55x.cfg
+R100	bin/perl562.cfg	perl562.cfg
+R100	bin/perl58x.cfg	perl58x.cfg
+R100	bin/perlcurrent.cfg	perlcurrent.cfg
 M	private/test_compile.pl
 M	private/test_pod.pl
-A	runsmoke.pl
-A	smoke55x_dfconfig
-A	smoke562_dfconfig
-A	smoke56x_dfconfig
-A	smoke58x_dfconfig
-A	smokeperl.pl
-A	smokestatus.pl
-A	synctree.pl
+R100	bin/runsmoke.pl	runsmoke.pl
+R100	bin/smoke55x_dfconfig	smoke55x_dfconfig
+R100	bin/smoke562_dfconfig	smoke562_dfconfig
+R100	bin/smoke56x_dfconfig	smoke56x_dfconfig
+R100	bin/smoke58x_dfconfig	smoke58x_dfconfig
+R100	bin/smokeperl.pl	smokeperl.pl
+R100	bin/smokestatus.pl	smokestatus.pl
+R100	bin/synctree.pl	synctree.pl
 M	t/cfgstuff.t
-A	vmsperl.cfg
-A	w32current.cfg
+R100	bin/vmsperl.cfg	vmsperl.cfg
+R100	bin/w32current.cfg	w32current.cfg
 ________________________________________________________________________________
 [64cada9] by abeltje on Fri, 3 Dec 2004 11:07:26 +0000
 
@@ -7480,52 +7437,32 @@ ________________________________________________________________________________
         f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
 
-D	FAQ
 M	MANIFEST
 M	Makefile.PL
 M	SIGNATURE
-D	W32Configure.pl
-D	archiverpt.pl
-A	bin/W32Configure.pl
-A	bin/archiverpt.pl
-A	bin/configsmoke.pl
-A	bin/mailrpt.pl
-A	bin/patchtree.pl
-A	bin/perl55x.cfg
-A	bin/perl562.cfg
-A	bin/perl58x.cfg
-A	bin/perlcurrent.cfg
-A	bin/runsmoke.pl
-A	bin/smoke55x_dfconfig
-A	bin/smoke562_dfconfig
-A	bin/smoke56x_dfconfig
-A	bin/smoke58x_dfconfig
-A	bin/smokeperl.pl
-A	bin/smokestatus.pl
+R100	W32Configure.pl	bin/W32Configure.pl
+R100	archiverpt.pl	bin/archiverpt.pl
+R100	configsmoke.pl	bin/configsmoke.pl
+R100	mailrpt.pl	bin/mailrpt.pl
+R100	patchtree.pl	bin/patchtree.pl
+R100	perl55x.cfg	bin/perl55x.cfg
+R100	perl562.cfg	bin/perl562.cfg
+R100	perl58x.cfg	bin/perl58x.cfg
+R100	perlcurrent.cfg	bin/perlcurrent.cfg
+R100	runsmoke.pl	bin/runsmoke.pl
+R100	smoke55x_dfconfig	bin/smoke55x_dfconfig
+R100	smoke562_dfconfig	bin/smoke562_dfconfig
+R100	smoke56x_dfconfig	bin/smoke56x_dfconfig
+R100	smoke58x_dfconfig	bin/smoke58x_dfconfig
+R100	smokeperl.pl	bin/smokeperl.pl
+R100	smokestatus.pl	bin/smokestatus.pl
 A	bin/sprove.pl
-A	bin/synctree.pl
-A	bin/vmsperl.cfg
-A	bin/w32current.cfg
-D	configsmoke.pl
+R100	synctree.pl	bin/synctree.pl
+R100	vmsperl.cfg	bin/vmsperl.cfg
+R100	w32current.cfg	bin/w32current.cfg
 M	lib/Test/Smoke.pm
-A	lib/Test/Smoke/FAQ
-D	mailrpt.pl
-D	patchtree.pl
-D	perl55x.cfg
-D	perl562.cfg
-D	perl58x.cfg
-D	perlcurrent.cfg
-D	runsmoke.pl
-D	smoke55x_dfconfig
-D	smoke562_dfconfig
-D	smoke56x_dfconfig
-D	smoke58x_dfconfig
-D	smokeperl.pl
-D	smokestatus.pl
-D	synctree.pl
+R100	FAQ	lib/Test/Smoke/FAQ
 M	t/cfgstuff.t
-D	vmsperl.cfg
-D	w32current.cfg
 ________________________________________________________________________________
 [718c986] by abeltje on Fri, 19 Nov 2004 22:05:54 +0000
 
@@ -11260,8 +11197,7 @@ ________________________________________________________________________________
 M	MANIFEST
 M	ReleaseNotes
 M	configsmoke.pl
-A	perl562.cfg
-D	perl56x.cfg
+R091	perl56x.cfg	perl562.cfg
 ________________________________________________________________________________
 [8e6eb11] by abeltje on Thu, 31 Jul 2003 20:55:52 +0000
 
@@ -11336,10 +11272,8 @@ ________________________________________________________________________________
 
 
 M	mkdist.sh
-A	private/test_compile.pl
-A	private/test_pod.pl
-D	test_compile.pl
-D	test_pod.pl
+R100	test_compile.pl	private/test_compile.pl
+R100	test_pod.pl	private/test_pod.pl
 ________________________________________________________________________________
 [21baa78] by abeltje on Wed, 30 Jul 2003 18:17:27 +0000
 
@@ -11423,10 +11357,8 @@ ________________________________________________________________________________
 
 M	private/SmokertestLib.pm
 M	private/perl/Makefile.PL
-D	private/perl/t/base/minitest.t
-D	private/perl/t/base/test.t
-A	private/perl/t/smoke/minitest.t
-A	private/perl/t/smoke/test.t
+R055	private/perl/t/base/minitest.t	private/perl/t/smoke/minitest.t
+R100	private/perl/t/base/test.t	private/perl/t/smoke/test.t
 ________________________________________________________________________________
 [e8a2956] by abeltje on Wed, 30 Jul 2003 14:22:15 +0000
 
@@ -11509,9 +11441,8 @@ ________________________________________________________________________________
 
 M	mkdist.sh
 A	private/SmokertestLib.pm
-D	private/smoker.t
 A	private/smoker_mini.t
-A	private/smoker_ok.t
+R056	private/smoker.t	private/smoker_ok.t
 ________________________________________________________________________________
 [3d76aab] by abeltje on Sun, 27 Jul 2003 16:22:34 +0000
 
@@ -12135,8 +12066,7 @@ ________________________________________________________________________________
         f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
 
-A	FAQ
-D	FAQ.pod
+R100	FAQ.pod	FAQ
 M	MANIFEST
 M	test_pod.pl
 ________________________________________________________________________________
@@ -12551,8 +12481,7 @@ ________________________________________________________________________________
         f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
 
-D	t/builcfg.t
-A	t/buildcfg.t
+R084	t/builcfg.t	t/buildcfg.t
 ________________________________________________________________________________
 [159ee41] by abeltje on Sun, 18 May 2003 11:05:07 +0000
 
