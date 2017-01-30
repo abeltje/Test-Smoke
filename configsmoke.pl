@@ -1254,7 +1254,7 @@ if ( $config{is56x} ) {
     $config{ $arg } = prompt_yn( $arg );
     if ( is_win32 && ! $config{ $arg } ) {
         print "*** WHOA THERE!!! ***\n";
-        print "\tYou should not try to use PERLIO=stdio on MSWin332!\n";
+        print "\tYou should not try to use PERLIO=stdio on MSWin32!\n";
     }
 }
 =item locale

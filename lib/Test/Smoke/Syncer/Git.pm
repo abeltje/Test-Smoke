@@ -113,12 +113,7 @@ sub sync {
     $gitout = $gitbin->run(checkout => $gitbranch, '2>&1');
     $self->log_debug($gitout);
 
-    my $mk_dot_patch = Test::Smoke::Util::Execute->new(
-        command => "$^X Porting/make_dot_patch.pl > .patch",
-        verbose => $self->verbose,
-    );
-    my $perlout = $mk_dot_patch->run();
-    $self->log_debug($perlout);
+    $self->make_dot_patch();
 
     chdir $cwd;
 

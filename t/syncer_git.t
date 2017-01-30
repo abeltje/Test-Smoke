@@ -36,26 +36,26 @@ else {
     chdir '../..';
     mkpath('t/smokeme');
     {
-	my $syncer = Test::Smoke::Syncer->new(
-	    git => (
-		gitbin      => $gitbin,
-		gitorigin   => 't/tsgit',
-		gitdfbranch => 'master',
-		gitdir      => 't/smokeme/git-perl',
-		ddir        => 't/smokeme/perl-current',
-		v           => 0,
-	    ),
-	);
-	isa_ok($syncer, 'Test::Smoke::Syncer::Git');
-	is(
-	    $syncer->{gitdfbranch},
-	    'master',
-	    "  Right defaultbranch: $syncer->{gitdfbranch}"
-	);
+        my $syncer = Test::Smoke::Syncer->new(
+            git => (
+                gitbin      => $gitbin,
+                gitorigin   => 't/tsgit',
+                gitdfbranch => 'master',
+                gitdir      => 't/smokeme/git-perl',
+                ddir        => 't/smokeme/perl-current',
+                v           => 0,
+            ),
+        );
+        isa_ok($syncer, 'Test::Smoke::Syncer::Git');
+        is(
+            $syncer->{gitdfbranch},
+            'master',
+            "  Right defaultbranch: $syncer->{gitdfbranch}"
+        );
 
-	$syncer->sync();
-	ok(!-e 't/smokeme/git-perl/.patch', "  no .patch for gitdir");
-	ok(-e 't/smokeme/perl-current/.patch', "  .patch created");
+        $syncer->sync();
+        ok(!-e 't/smokeme/git-perl/.patch', "  no .patch for gitdir");
+        ok(-e 't/smokeme/perl-current/.patch', "  .patch created");
     }
 }
 

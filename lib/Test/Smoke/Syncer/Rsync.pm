@@ -86,6 +86,10 @@ sub sync {
         Carp::carp( "Problem during rsync ($err)" );
     }
 
+    if ($self->is_git_dir()) {
+        $self->make_dot_patch();
+    }
+
     chdir $cwd;
 
     my $plevel = $self->check_dot_patch;

@@ -526,9 +526,10 @@ sub make_test {
     my @layers = ( ($config_args =~ /-Uuseperlio\b/) || $self->{defaultenv} )
                ? qw( stdio ) : qw( stdio perlio );
 
-    my @locales = split ' ', $self->{locale};
+    my @locales;
     if ( !($config_args =~ /-Uuseperlio\b/ || $self->{defaultenv}) &&
          $self->{locale} ) {
+        @locales = split ' ', $self->{locale};
         push @layers, ( 'locale' ) x @locales;
     }
 
