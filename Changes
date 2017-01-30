@@ -5,6 +5,21 @@ Changes on 2017-01-30 for github repository at:
 Enjoy!
 
 ________________________________________________________________________________
+[f2dfc11] by abeltje on Mon, 30 Jan 2017 22:36:42 +0100
+
+     Merge branch 'dcollins/normalize_testname' of
+        https://github.com/dcollinsn/Test-Smoke into
+        dcollinsn-dcollins/normalize_testname
+
+________________________________________________________________________________
+[e956e35] by abeltje on Mon, 30 Jan 2017 22:08:49 +0100
+
+     Autocommit for distribution Test::Smoke 1.70_04
+
+
+M	Changes
+M	lib/Test/Smoke.pm
+________________________________________________________________________________
 [1e5c893] by abeltje on Mon, 30 Jan 2017 22:07:40 +0100
 
      Merge branch 'master' of ssh://github.com/abeltje/Test-Smoke
@@ -96,6 +111,20 @@ ________________________________________________________________________________
 
 
 M	lib/Test/Smoke/App/SyncTree.pm
+M	lib/Test/Smoke/Smoker.pm
+________________________________________________________________________________
+[c5607fa] by Dan Collins on Wed, 26 Oct 2016 20:39:06 -0400
+
+     RT #118488: Proper normalization for tests in cpan/, dist
+
+        There is a function that is intended to transform from the
+        "stripped" test name (without leading ../ or trailing .t) to a
+        usable relative path. That function prepends '../t/' to tests,
+        unless their name begins with ext/ or lib/, in which case it
+        prepends only '../'. This patch adds cpan/ and dist/ to the list of
+        special cases.
+
+
 M	lib/Test/Smoke/Smoker.pm
 ________________________________________________________________________________
 [ab330b3] by H.Merijn Brand - Tux on Thu, 15 Sep 2016 18:13:39 +0200
