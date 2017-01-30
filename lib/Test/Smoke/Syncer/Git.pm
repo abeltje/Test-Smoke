@@ -17,7 +17,7 @@ use Cwd;
 use File::Spec::Functions;
 use Test::Smoke::LogMixin;
 use Test::Smoke::Util::Execute;
-use File::Path 2.12;
+use File::Path;
 
 =head2 Test::Smoke::Syncer::Git->new( %args )
 
@@ -113,7 +113,7 @@ sub sync {
     # up-to-date with origin, we'll simply create it de novo from that in
     # gitdir.  So the branch we want to test will already be set.
 
-    my $removed_count = File::Path::remove_tree($self->{ddir})
+    my $removed_count = File::Path::rmtree($self->{ddir})
         if (-d $self->{ddir});
 
     my $cloneout = $gitbin->run(
