@@ -59,13 +59,11 @@ sub sync {
     use Carp;
     my $cwd = cwd();
     if ( ! -d $self->{gitdir} || ! -d catdir($self->{gitdir}, '.git') ) {
-        my @clone_args = (
-            'clone',
-            $self->{gitorigin},
+        my $cloneout = $gitbin->run(
+            clone => $self->{gitorigin},
             $self->{gitdir},
             '2>&1'
         );
-        my $cloneout = $gitbin->run(@clone_args);
         if ( my $gitexit = $gitbin->exitcode ) {
             croak("Cannot make inital clone: $self->{gitbin} exit $gitexit");
         }
@@ -79,7 +77,7 @@ sub sync {
     $gitout = $gitbin->run(clean => '-dfx');
     $self->log_debug($gitout);
 
-    $gitout = $gitbin->run(fetch => ('--prune', 'origin'));
+    $gitout = $gitbin->run(fetch => ('--prune', $self->{gitorigin}));
     $self->log_debug($gitout);
 
     # We'll assume that 'blead' already exists, but we want it in sync with
@@ -87,7 +85,7 @@ sub sync {
     $gitout = $gitbin->run(checkout => 'blead');
     $self->log_debug($gitout);
 
-    $gitout = $gitbin->run(rebase => 'origin/blead');
+    $gitout = $gitbin->run(reset => ('--hard', "$self->{gitorigin}/blead"));
     $self->log_debug($gitout);
 
     # get_git_branch() returns first line in file smokecurrent.gitbranch
@@ -103,7 +101,7 @@ sub sync {
         $gitout = $gitbin->run(branch => ('-D', $testingbranch));
         $self->log_debug($gitout);
 
-        $gitout = $gitbin->run(checkout => ('-b', $testingbranch, "origin/$testingbranch"));
+        $gitout = $gitbin->run(checkout => ('-b', $testingbranch, "$self->{gitorigin}/$testingbranch"));
         $self->log_debug($gitout);
     }
 
