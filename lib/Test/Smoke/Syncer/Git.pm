@@ -77,7 +77,7 @@ sub sync {
     $gitout = $gitbin->run(clean => '-dfx');
     $self->log_debug($gitout);
 
-    $gitout = $gitbin->run(fetch => ('--prune', $self->{gitorigin}));
+    $gitout = $gitbin->run(fetch => ('--prune', 'origin'));
     $self->log_debug($gitout);
 
     # We'll assume that 'blead' already exists, but we want it in sync with
@@ -85,7 +85,7 @@ sub sync {
     $gitout = $gitbin->run(checkout => 'blead');
     $self->log_debug($gitout);
 
-    $gitout = $gitbin->run(reset => ('--hard', "$self->{gitorigin}/blead"));
+    $gitout = $gitbin->run(reset => ('--hard', "origin/blead"));
     $self->log_debug($gitout);
 
     # get_git_branch() returns first line in file smokecurrent.gitbranch
@@ -101,7 +101,7 @@ sub sync {
         $gitout = $gitbin->run(branch => ('-D', $testingbranch));
         $self->log_debug($gitout);
 
-        $gitout = $gitbin->run(checkout => ('-b', $testingbranch, "$self->{gitorigin}/$testingbranch"));
+        $gitout = $gitbin->run(checkout => ('-b', $testingbranch, "origin/$testingbranch"));
         $self->log_debug($gitout);
     }
 
