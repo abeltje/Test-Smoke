@@ -646,7 +646,7 @@ sub extend_with_harness {
     }
 }
 
-=head2 $moker->make_test_harness
+=head2 $smoker->make_test_harness
 
 Use Test::Harness (the test_harness target) to get the failing test
 information and do not bother with TEST.
