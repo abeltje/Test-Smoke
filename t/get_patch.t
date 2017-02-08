@@ -144,10 +144,8 @@ EO_GIT_VERSION
 
     my $get_patch = get_patch();
 
-TODO: { eval {
     is $get_patch->[0], "1.2.3.4",
        "Found snaplevel: $get_patch->[0]";
-}; local $TODO = "Shouldn't die!" if $@; }
 }
 
 END {
