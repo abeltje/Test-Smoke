@@ -194,7 +194,7 @@ This script copies the report and the logfile to a configurable place.
 
 =item B<smokestatus.pl>
 
-This script prints a little status report for a smoke confifuration:
+This script prints a little status report for a smoke configuration:
 
     $ ./smokestatus.pl -c smoke58x
     Checking status for configuration 'smoke58x' (5.8.x)
