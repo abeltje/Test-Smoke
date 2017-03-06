@@ -153,7 +153,7 @@ EOF
 echo "Distribution for $mynewversion (was $myoldversion)"
 if [ "$NOAUTOCOMMIT" != "1" ]; then
     git commit -m "Autocommit for distribution Test::Smoke $mynewversion" -- lib/Test/Smoke.pm Changes
-    git tag "Test-Smoke-$mynewversion"
+    git tag -a "Test-Smoke-$mynewversion" -m "Autocommit $mynewversion"
     git push --all
     git push --tags
 fi
