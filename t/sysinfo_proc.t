@@ -129,7 +129,7 @@ my $this_system = System::Info::Generic->new();
         _os       => $this_system->os,
         _cpu_type => 'i386_2',
         _cpu      => 'Intel(R) Core(TM)2 CPU T5600 @ 1.83GHz (GenuineIntel 1000MHz)',
-        _ncpu     => "2 [4 cores]",
+        _ncpu     => "1 [2 cores]",
     }, "Read /proc/cpuinfo for duo i386";
 
     $CPU_TYPE = 'arm_v6';
@@ -164,7 +164,7 @@ my $this_system = System::Info::Generic->new();
         _os       => $this_system->os,
         _cpu_type => $CPU_TYPE,
         _cpu      => 'Intel(R) Xeon(R) CPU L5520 @ 2.27GHz (GenuineIntel 2268MHz)',
-        _ncpu     => "16 [64 cores]",
+        _ncpu     => "2 [16 cores]",
     }, "Read /proc/cpuinfo for i386/16";
 
 }
