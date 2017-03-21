@@ -17,7 +17,7 @@ BEGIN { $findbin = dirname $0 }
 use lib $findbin;
 use fallback 'inc', 'lib', catdir($findbin, 'inc');
 
-use Test::Smoke::SysInfo;
+use System::Info;
 use Test::Smoke::Util qw(do_pod2usage whereis);
 use Test::Smoke::Util::FindHelpers ':all';
 
@@ -2282,8 +2282,8 @@ sub schedule_entry {
 }
 
 sub get_Win_version {
-    require Test::Smoke::SysInfo::Windows;
-    my $si = Test::Smoke::SysInfo::Windows->new();
+    require System::Info::Windows;
+    my $si = System::Info::Windows->new();
     (my $win_version = $si->os) =~ s/^[^-]*- //;
     return $win_version;
 }
@@ -2343,7 +2343,7 @@ sub check_buildcfg {
         ? _perl_numeric_version( $config{perl_version} )
         : $config{perl_version};
 
-    my $uname_s = Test::Smoke::SysInfo::tsuname( 's' );
+    my $uname_s = System::Info::si_uname( 's' );
     my( $os, $osver ) = split /\s+-\s+/, $uname_s;
     # May assume much too much about OS version number formats.
     my( $osvermaj, $osvermin ) = ($osver =~ /^\D*(\d+)\D+(\d+)/);
