@@ -156,9 +156,6 @@ t/syncer_ftpclient.t
 t/syncer_link.t
 t/syncer_rsync.t
 t/syncer_snap.t
-t/sysinfo.t
-t/sysinfo_macos.t
-t/sysinfo_proc.t
 t/TestLib.pm
 t/tree.t
 t/ts_config.t
