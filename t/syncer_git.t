@@ -7,6 +7,7 @@ use Test::More;
 
 use Test::Smoke::Syncer;
 use Test::Smoke::Util::Execute;
+use File::Spec::Functions;
 
 my $gitbin = whereis('git');
 plan $gitbin ? ('no_plan') : (skip_all => 'No gitbin found');
@@ -16,34 +17,41 @@ my $git = Test::Smoke::Util::Execute->new(command => $gitbin);
 $gitversion =~ s/^\s*git\s+version\s+//;
 pass("Git version $gitversion");
 
+my $upstream = catdir('t', 'tsgit');
+my $playground = catdir('t', 'playground');
+
 if ($gitversion =~ m/^1\.([0-5]|6\.[0-4])/) {
     diag "Git version $gitversion is too old";
 }
 else {
     # Set up a basic git repository
-    my $repopath = 't/tsgit';
-    $git->run(init => $repopath);
-    is($git->exitcode, 0, "git init $repopath");
+    $git->run(init => $upstream);
+    is($git->exitcode, 0, "git init $upstream");
 
-    mkpath("$repopath/Porting");
-    chdir $repopath;
+    mkpath("$upstream/Porting");
+    chdir $upstream;
     put_file($gitversion => 'first.file');
-    $git->run(add => 'first.file');
+    $git->run(add => q/first.file/);
+
     put_file("#! $^X -w\nsystem q/cat first.file/" => qw/Porting make_dot_patch.pl/);
     $git->run(add => 'Porting/make_dot_patch.pl');
-    $git->run(commit => '-m', "'We need a first file committed'");
 
-    chdir '../..';
-    mkpath('t/smokeme');
+    put_file(".patch" => q/.gitignore/);
+    $git->run(add => '.gitignore');
+
+    $git->run(commit => '-m', "'We need a first file committed'", '2>&1');
+
+    chdir catdir(updir, updir);
+    mkpath($playground);
     {
         my $syncer = Test::Smoke::Syncer->new(
             git => (
                 gitbin      => $gitbin,
-                gitorigin   => 't/tsgit',
+                gitorigin   => $upstream,
                 gitdfbranch => 'master',
-                gitdir      => 't/smokeme/git-perl',
-                ddir        => 't/smokeme/perl-current',
-                v           => 0,
+                gitdir      => catdir($playground, 'git-perl'),
+                ddir        => catdir($playground, 'perl-current'),
+                v           => 0, #($ENV{TEST_VERBOSE} ? 1 : 0),
             ),
         );
         isa_ok($syncer, 'Test::Smoke::Syncer::Git');
@@ -54,12 +62,46 @@ else {
         );
 
         $syncer->sync();
-        ok(!-e 't/smokeme/git-perl/.patch', "  no .patch for gitdir");
-        ok(-e 't/smokeme/perl-current/.patch', "  .patch created");
+        ok(!-e catfile(catdir($playground, 'git-perl'), '.patch'), "  no .patch for gitdir");
+        ok(-e catfile(catdir($playground, 'perl-current'), '.patch'), "  .patch created");
+
+        # Update upstream/master
+        chdir $upstream;
+        put_file('any content' => q/new_file/);
+        $git->run(add => 'new_file', '2>&1');
+        $git->run(commit => '-m', "'2nd commit message'", '2>&1');
+        chdir catdir(updir, updir);
+
+        $syncer->sync();
+        ok(-e catfile(catdir($playground, 'git-perl'), 'new_file'), "new_file exits after sync()");
+        ok(-e catfile(catdir($playground, 'perl-current'), 'new_file'), "new_file exits after sync()");
+
+        # Create upstream/branch
+        chdir $upstream;
+        $git->run(checkout => '-b', 'branch', '2>&1');
+        put_file('new file in branch' => 'branch_file');
+        $git->run(add => 'branch_file', '2>&1');
+        $git->run(commit => '-m', "File in branch!", '2>&1');
+        chdir catdir(updir, updir);
+
+        # Sync master.
+        $syncer->sync();
+        ok(
+            !-e catfile(catdir($playground, 'perl-current'), 'branch_file'),
+            "branch_file doesn't exit after sync()!"
+        );
+
+        # Change to 'branch' and sync
+        $syncer->{gitdfbranch} = 'branch';
+        $syncer->sync();
+        ok(
+            -e catfile(catdir($playground, 'perl-current'), 'branch_file'),
+            "branch_file does exit after sync()!"
+        );
     }
 }
 
 END {
-    rmtree('t/smokeme', 0, 0);
-    rmtree('t/tsgit', 0, 0);
+    rmtree($playground, 0, 0);
+    rmtree($upstream, 0, 0);
 }
