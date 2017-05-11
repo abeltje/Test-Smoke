@@ -17,6 +17,7 @@ use Cwd;
 use File::Spec::Functions;
 use Test::Smoke::LogMixin;
 use Test::Smoke::Util::Execute;
+use File::Path;
 
 =head2 Test::Smoke::Syncer::Git->new( %args )
 
@@ -69,49 +70,62 @@ sub sync {
         $self->log_debug($cloneout);
     }
 
-    my $gitbranch = $self->get_git_branch;
+    # gitdir typically is 'git-perl'
     chdir $self->{gitdir} or croak("Cannot chdir($self->{gitdir}): $!");
 
-    # SMOKE_ME
-    my $gitout = $gitbin->run(pull => '--all');
-    $self->log_debug($gitout);
-
-    $gitout = $gitbin->run(remote => prune => 'origin');
-    $self->log_debug($gitout);
-
-    $gitout = $gitbin->run(checkout => $gitbranch, '2>&1');
-    $self->log_debug($gitout);
-
-    chdir $cwd or croak("Cannot chdir($cwd): $!");
-    # make the smoke clone
-    if ( ! -d $self->{ddir} || ! -d catdir($self->{ddir}, '.git') ) {
-        # It needs to be empty ...
-        my $cloneout = $gitbin->run(
-            clone         => $self->{gitdir},
-            '--reference' => $self->{gitdir},
-            $self->{ddir},
-            '2>&1'
-        );
-        if ( my $gitexit = $gitbin->exitcode ) {
-            croak("Cannot make smoke clone: $self->{gitbin} exit $gitexit");
-        }
-        $self->log_debug($cloneout);
-    }
-
-    chdir $self->{ddir} or croak("Cannot chdir($self->{ddir}): $!");
-
-    $gitout = $gitbin->run(reset => '--hard');
-    $self->log_debug($gitout);
-
+    my $gitout;
     $gitout = $gitbin->run(clean => '-dfx');
     $self->log_debug($gitout);
 
-    $gitout = $gitbin->run(pull => '--all');
+    $gitout = $gitbin->run(fetch => ('--prune', 'origin'));
     $self->log_debug($gitout);
 
-    # SMOKE_ME
-    $gitout = $gitbin->run(checkout => $gitbranch, '2>&1');
+    # We'll assume that 'blead' already exists, but we want it in sync with
+    # origin
+    $gitout = $gitbin->run(checkout => 'blead');
     $self->log_debug($gitout);
+
+    $gitout = $gitbin->run(reset => ('--hard', "origin/blead"));
+    $self->log_debug($gitout);
+
+    # get_git_branch() returns first line in file smokecurrent.gitbranch
+    my $testingbranch = $self->get_git_branch;
+    chomp($testingbranch);
+
+    unless ($testingbranch eq 'blead') {
+
+        # For smoke-testing, we (probably) always want to test a branch in its
+        # current state out there on the origin.  We don't want to test any
+        # previously created branch by that name in this repository.
+
+        $gitout = $gitbin->run(branch => ('-D', $testingbranch));
+        $self->log_debug($gitout);
+
+        $gitout = $gitbin->run(checkout => ('-b', $testingbranch, "origin/$testingbranch"));
+        $self->log_debug($gitout);
+    }
+
+    chdir $cwd or croak("Cannot chdir($cwd): $!");
+
+    # Make the smoke clone.  Rather than trying to keep the repository in ddir
+    # up-to-date with origin, we'll simply create it de novo from that in
+    # gitdir.  So the branch we want to test will already be set.
+
+    my $removed_count = File::Path::rmtree($self->{ddir})
+        if (-d $self->{ddir});
+
+    my $cloneout = $gitbin->run(
+        clone         => $self->{gitdir},
+        '--reference' => $self->{gitdir},
+        $self->{ddir},
+        '2>&1'
+    );
+    if ( my $gitexit = $gitbin->exitcode ) {
+        croak("Cannot make smoke clone: $self->{gitbin} exit $gitexit");
+    }
+    $self->log_debug($cloneout);
+
+    chdir $self->{ddir} or croak("Cannot chdir($self->{ddir}): $!");
 
     $self->make_dot_patch();
 
