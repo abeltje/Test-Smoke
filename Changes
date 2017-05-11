@@ -1,10 +1,20 @@
-Changes on 2017-03-21 for repository at:
-  Fetch URL: ssh://git@github.com/abeltje/Test-Smoke
-   Push  URL: ssh://git@github.com/abeltje/Test-Smoke
+Changes on 2017-05-11 for repository at:
+  Fetch URL: git@github.com:abeltje/Test-Smoke
+   Push  URL: git@github.com:abeltje/Test-Smoke
 
 Enjoy!
 
-1.70_07 2017-03-21T18:53:08+01:00 (9f10509 => abeltje)
+1.70_08 2017-05-11T13:05:39+02:00 (81b361a => abeltje)
+ - Autocommit for distribution Test::Smoke 1.70_08 (test)
+
+1.70_070002 2017-05-11T12:06:21+02:00 (caefc5a => abeltje)
+ - Merge branch 'jkeenan-rt-121283-sendrpt-pl' into pr/sndrpt.pl
+
+1.70_070001 2017-04-21T23:08:10-04:00 (7b40282 => James E Keenan)
+ - Fix compilation error. For:
+   https://rt.cpan.org/Ticket/Display.html?id=121283
+
+1.70_07 2017-03-21T18:53:08+01:00 (dd9947a => abeltje)
  - Autocommit for distribution Test::Smoke 1.70_07 (same)
 
 1.70_060004 2017-03-21T18:52:02+01:00 (343d1f1 => abeltje)
