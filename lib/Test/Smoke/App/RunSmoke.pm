@@ -61,6 +61,7 @@ sub run {
 
     if ($self->option('is_win32')) {
         require Test::Smoke::Util::Win32ErrorMode;
+        $self->log_info("Changing ErrorMode settings to prevent popups");
         Test::Smoke::Util::Win32ErrorMode::lower_error_settings();
     }
 
