@@ -61,7 +61,7 @@ END {
     select $stdout;
 
     is($logfile, <<"    EOL", "logfile");
-[t/app/110-runsmoke.t] chdir($ddir)
+[$0] chdir($ddir)
 Test::Smoke::App::RunSmoke::run_smoke...
     EOL
 
