@@ -57,6 +57,7 @@ lib/Test/Smoke/Syncer/Snapshot.pm
 lib/Test/Smoke/Util.pm
 lib/Test/Smoke/Util/Execute.pm
 lib/Test/Smoke/Util/FindHelpers.pm
+lib/Test/Smoke/Util/Win32ErrorMode.pm
 lib/Test/Smoke/vmsperl.cfg
 lib/Test/Smoke/w32current.cfg
 mailrpt.pl

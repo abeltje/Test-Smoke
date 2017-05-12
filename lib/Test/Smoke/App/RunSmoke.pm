@@ -59,6 +59,11 @@ sub run {
     };
     $Config{d_alarm} and alarm $timeout;
 
+    if ($self->is_win32) {
+        require Test::Smoke::Util::Win32ErrorMode;
+        Test::Smoke::Util::Win32ErrorMode::lower_error_settings();
+    }
+
    $self->run_smoke();
    chdir $cwd;
 }
