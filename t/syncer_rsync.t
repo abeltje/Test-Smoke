@@ -97,7 +97,10 @@ SKIP: {
     skip "No rsync binary found...", 3 if !$rsync_bin;
 
     my $source = catdir($cwd, 't', 'ftppub', 'perl-current');
-    my $options = '-az -v'; # make sure to include a space to check this gets split into 2 arguments
+    $source = UNCify_path($source) if $^O eq 'MSWin32';
+
+    # make sure to include a space to check this gets split into 2 arguments
+    my $options = '-az -v';
     my $ddir = catdir($cwd, 't', 'smoketest');
 
     my $rsync = Test::Smoke::Syncer->new(
@@ -132,3 +135,10 @@ SKIP: {
 }
 
 done_testing();
+
+sub UNCify_path {
+    my ($path) = @_;
+    $path =~ s{\\}{/}g;
+    $path =~ s{^([a-z]):}{//localhost/$1\$}i;
+    return $path;
+}
