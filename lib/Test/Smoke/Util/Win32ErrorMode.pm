@@ -8,16 +8,17 @@ BEGIN {
         require Win32;
     }
     else {
-        die "This is not MSWin32, don't try to use this module on $^O\n";
+        warn "# This is not MSWin32, don't try to use this module on $^O\n";
     }
 }
 
 sub lower_error_settings {
+    return if $^O ne 'MSWin32';
     # Call kernel32.SetErrorMode(SEM_FAILCRITICALERRORS):
     # "The system does not display the critical-error-handler message box.
     # Instead, the system sends the error to the calling process." and
     # "A child process inherits the error mode of its parent process."
-    {    
+    {
         my $SetErrorMode = Win32::API->new('kernel32', 'SetErrorMode', 'I', 'I');
         my $SEM_FAILCRITICALERRORS = 0x0001;
         my $SEM_NOGPFAULTERRORBOX  = 0x0002;
