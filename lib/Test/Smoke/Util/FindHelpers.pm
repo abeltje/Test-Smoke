@@ -189,7 +189,7 @@ sub get_avail_w32compilers {
     my $CC = 'MSVC';
     if ( $map{ $CC }->{ccbin} = whereis( $map{ $CC }->{ccname} ) ) {
         # No, cl doesn't support --version (One can but try)
-        my $output =`"$map{ $CC }->{ccbin}" --version 2>&1`;
+        my $output =`$map{ $CC }->{ccbin} --version 2>&1`;
         my $ccvers = $output =~ /^.*Version\s+([\d.]+)/ ? $1 : '?';
         $map{ $CC }->{ccversarg} = "ccversion=$ccvers";
         my $mainvers = $ccvers =~ /^(\d+)/ ? $1 : 1;
@@ -199,7 +199,7 @@ sub get_avail_w32compilers {
     $CC = 'BCC';
     if ( $map{ $CC }->{ccbin} = whereis( $map{ $CC }->{ccname} ) ) {
         # No, bcc32 doesn't support --version (One can but try)
-        my $output = `"$map{ $CC }->{ccbin}" --version 2>&1`;
+        my $output = `$map{ $CC }->{ccbin} --version 2>&1`;
         my $ccvers = $output =~ /([\d.]+)/ ? $1 : '?';
         $map{ $CC }->{ccversarg} = "ccversion=$ccvers";
         $map{ $CC }->{CCTYPE} = 'BORLAND';
@@ -210,7 +210,7 @@ sub get_avail_w32compilers {
         local *STDERR;
         open STDERR, ">&STDOUT"; #do we need an error?
         select( (select( STDERR ), $|++ )[0] );
-        my $output = `"$map{ $CC }->{ccbin}" --version`;
+        my $output = `$map{ $CC }->{ccbin} --version`;
         my $ccvers = $output =~ /(\d+.*)/ ? $1 : '?';
         $ccvers =~ s/\s+copyright.*//i;
         $map{ $CC }->{ccversarg} = "gccversion=$ccvers";
