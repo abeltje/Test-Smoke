@@ -163,6 +163,7 @@ t/ts_config.t
 t/util-execute.t
 t/util_times.t
 t/vms_rl.t
+t/win32_error_mode.t
 t/win32/Makefile
 t/win32/makefile.mk
 tsarchive.pl

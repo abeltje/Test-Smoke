@@ -12,7 +12,7 @@ MINITESTS = smoke\minitest.t
 CCHOME          *= C:\borland\bcc55
 CCCMD            = bcc
 .ELIF "$(CCTYPE)" == "GCC"
-CCHOME          *= C:\MinGW
+CCHOME          *= C:\strawberry\c
 CCCMD            = gcc
 .ELSE
 CCHOME          *= $(MSVCDIR)
@@ -21,7 +21,7 @@ CCCMD            = cl
 CCINCDIR        *= $(CCHOME)\include
 CCLIBDIR        *= $(CCHOME)\lib
 
-#BUILDOPT          =
+#BUILDOPT         =
 
 ##################### CHANGE THESE ONLY IF YOU MUST #####################
 
@@ -64,8 +64,6 @@ distclean:
 [
 	del smoke.mk
 	cd ..
-	rm -f perl.exe miniperl.exe t/perl.exe
-	rm -f *~
-	rm -f Makefile
-	rm -f config.sh
+	del /F/Q perl.exe miniperl.exe t\perl.exe
+	del /F Makefile
 ]
