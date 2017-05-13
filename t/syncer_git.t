@@ -8,6 +8,7 @@ use Test::More;
 use Test::Smoke::Syncer;
 use Test::Smoke::Util::Execute;
 use File::Spec::Functions;
+use Cwd 'abs_path';
 
 my $gitbin = whereis('git');
 plan $gitbin ? ('no_plan') : (skip_all => 'No gitbin found');
@@ -17,6 +18,7 @@ my $git = Test::Smoke::Util::Execute->new(command => $gitbin);
 $gitversion =~ s/^\s*git\s+version\s+//;
 pass("Git version $gitversion");
 
+my $cwd = abs_path();
 my $upstream = catdir('t', 'tsgit');
 my $playground = catdir('t', 'playground');
 
@@ -33,7 +35,11 @@ else {
     put_file($gitversion => 'first.file');
     $git->run(add => q/first.file/);
 
-    put_file("#! $^X -w\nsystem q/cat first.file/" => qw/Porting make_dot_patch.pl/);
+    put_file(<<"    CAT" => qw/Porting make_dot_patch.pl/);
+#! $^X -w
+(\@ARGV,\$/)=q/first.file/;
+print <>;
+    CAT
     $git->run(add => 'Porting/make_dot_patch.pl');
 
     put_file(".patch" => q/.gitignore/);
@@ -102,6 +108,7 @@ else {
 }
 
 END {
-    rmtree($playground, 0, 0);
-    rmtree($upstream, 0, 0);
+    chdir $cwd;
+    note("$playground: ", rmtree($playground, 1, 0));
+    note("$upstream: ", rmtree($upstream, 1, 0));
 }
