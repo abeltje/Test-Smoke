@@ -20,6 +20,10 @@ use Test::Smoke::App::RunSmoke;
 use Test::Smoke::App::Options;
 $Test::Smoke::LogMixin::USE_TIMESTAMP = 0;
 
+my $win_error_setting = $^O eq 'MSWin32'
+    ? "\012Changing ErrorMode settings to prevent popups"
+    : '';
+
 { # Basic test, check we die() if the directory doesn't exist.
 
     my $ddir = 't/will_not_exist_..._ever_I_hope';
@@ -61,7 +65,7 @@ END {
     select $stdout;
 
     is($logfile, <<"    EOL", "logfile");
-[$0] chdir($ddir)
+[$0] chdir($ddir)$win_error_setting
 Test::Smoke::App::RunSmoke::run_smoke...
     EOL
 
@@ -119,7 +123,7 @@ Test::Smoke::App::RunSmoke::run_smoke...
     my $thp = catfile(catdir($ddir, 'cpan', 'Test-Harness', 'lib', 'Test'), 'Harness.pm');
 
     is($logfile, <<"    EOL", "logfile after RunSmoke") and note($logfile);
-[$0] chdir($ddir)
+[$0] chdir($ddir)$win_error_setting
 qx[$^X -e "require q[$thp];print Test::Harness->VERSION" 2>&1]
 Found: Test::Harness version 3.42.
 Reading build configurations from internal content
