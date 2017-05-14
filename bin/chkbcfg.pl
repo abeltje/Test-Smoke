@@ -5,10 +5,11 @@ use strict;
 use vars qw ( $VERSION );
 $VERSION = '0.002';
 
-use File::Spec;
+use File::Spec::Functions;
 use FindBin;
-use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
 use lib $FindBin::Bin;
+use lib catdir( $FindBin::Bin, 'lib' );
+use lib catdir( $FindBin::Bin, updir(), 'lib' );
 use Test::Smoke::Util qw( skip_config );
 use Test::Smoke::BuildCFG;
 

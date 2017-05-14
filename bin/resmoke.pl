@@ -5,11 +5,12 @@ use strict;
 use vars qw( $VERSION );
 $VERSION = '0.001';
 
-use File::Spec::Functions;
 use Cwd;
+use File::Spec::Functions;
 use FindBin;
-use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
 use lib $FindBin::Bin;
+use lib catdir( $FindBin::Bin, 'lib' );
+use lib catdir( $FindBin::Bin, updir(), 'lib' );
 use Test::Smoke;
 use Test::Smoke::Smoker;
 use Test::Smoke::BuildCFG;

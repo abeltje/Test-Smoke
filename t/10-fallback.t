@@ -8,6 +8,8 @@ use Config;
 use File::Path qw/mkpath rmtree/;
 use File::Spec::Functions;
 
+END { rmtree($base) }
+
 {
     my ($base, @tree, @inc);
     BEGIN {
@@ -24,8 +26,6 @@ use File::Spec::Functions;
 
     is_deeply([@INC[-5..-1]], [reverse @tree], "Complete stack added to \@INC")
         or diag(explain({tail => [reverse @tree], INC => \@INC}));
-
-    rmtree($base);
 }
 
 Test::NoWarnings::had_no_warnings();
