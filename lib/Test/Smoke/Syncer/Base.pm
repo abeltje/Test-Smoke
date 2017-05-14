@@ -202,7 +202,7 @@ sub version_from_patchlevel_h {
 
 =head2 is_git_dir()
 
-Checks in a git way, if we ar in a real git repository directory.
+Checks, in a git way, if we are in a real git repository directory.
 
 =cut
 
