@@ -4,7 +4,13 @@ Changes on 2017-05-14 for repository at:
 
 Enjoy!
 
-1.70_12 2017-05-14T12:15:14+02:00 (611818a => abeltje)
+1.71 2017-05-14T13:18:36+02:00 (f516276 => abeltje)
+ - Autocommit for distribution Test::Smoke 1.71 (minor)
+
+1.70_120001 2017-05-14T13:14:40+02:00 (bda035c => abeltje)
+ - Add tsreport.pl to list of scripts.
+
+1.70_12 2017-05-14T12:15:14+02:00 (eb7c599 => abeltje)
  - Autocommit for distribution Test::Smoke 1.70_12 (test)
 
 1.70_110003 2017-05-14T12:12:26+02:00 (0a3f9ec => abeltje)
