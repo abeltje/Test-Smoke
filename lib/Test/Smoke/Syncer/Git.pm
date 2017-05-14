@@ -45,7 +45,7 @@ For the proxy-repository we do:
     git remote prune origin
     git reset --hard origin/$gitbranch
 
-For the worknig-repository we do:
+For the working-repository we do:
 
     git clean -dfx
     git fetch --all
