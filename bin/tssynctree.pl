@@ -1,9 +1,11 @@
 #! /usr/bin/perl -w
 use strict;
 
+use File::Spec::Functions;
 use FindBin;
 use lib $FindBin::Bin;
-use lib 'lib';
+use lib catdir($FindBin::Bin, 'lib');
+use lib catdir($FindBin::Bin, updir(), 'lib');
 
 use Test::Smoke::App::Options;
 use Test::Smoke::App::SyncTree;

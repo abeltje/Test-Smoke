@@ -4,25 +4,24 @@ $| = 1;
 
 # $Id$
 use vars qw( $VERSION );
-$VERSION = '0.005';
+$VERSION = '0.008';
 
 use Cwd;
 use File::Spec::Functions;
-use File::Path;
-use File::Copy;
 use FindBin;
-use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
 use lib $FindBin::Bin;
+use lib catdir( $FindBin::Bin, 'lib' );
+use lib catdir( $FindBin::Bin, updir(), 'lib' );
 use Test::Smoke;
-use Test::Smoke::Util qw( get_patch do_pod2usage );
+use Test::Smoke::Patcher;
+use Test::Smoke::Util qw( do_pod2usage );
 
-my $myusage = "Usage: $0 -d <builddir> -a <archivedir> -l <logfile> [options]";
+my $myusage = "Usage: $0 -f <patchesfile> -d <destdir> [options]";
 use Getopt::Long;
 my %opt = (
+    type    => 'multi',
     ddir    => undef,
-    adir    => undef,
-    lfile   => undef,
-    force   => undef,
+    pfile   => undef,
     v       => undef,
 
     config  => undef,
@@ -30,13 +29,17 @@ my %opt = (
     man     => 0,
 );
 
+my $defaults = Test::Smoke::Patcher->config( 'all_defaults' );
+
+my %valid_type = map { $_ => 1 } qw( single multi );
+
 =head1 NAME
 
-archiverpt.pl - Patch the sourcetree
+patchtree.pl - Patch the sourcetree
 
 =head1 SYNOPSIS
 
-    $ ./archiverpt.pl -a archive -d ../perl-current -l smokecurrent.log
+    $ ./patchtree.pl -f patchfile -d ../perl-current [--help | more options]
 
 or
 
@@ -56,9 +59,7 @@ Other options can override the settings from the configuration file.
 =item * B<General options>
 
     -d | --ddir <directory>  Set the directory for the source-tree (cwd)
-    -a | --adir <directory>  Set the direcory for the archive
-    -l | --lfile <logfile>   Set the (optional) logfile
-    --[no]force              Overwrite existsing archives
+    -f | --pfile <patchfile> Set the resource containg patch info
 
     -v | --verbose <0..2>    Set verbose level
     -h | --help              Show help message (needs Pod::Usage)
@@ -68,17 +69,14 @@ Other options can override the settings from the configuration file.
 
 =head1 DESCRIPTION
 
-This is a small program that archives the smokereport and logfile like:
-
-    report  -> <adir>/rpt<patchlevel>.rpt
-    logfile -> <adir>/log<patchlevel>.log
+This is a small front-end for L<Test::Smoke::Patcher>.
 
 =cut
 
 GetOptions( \%opt,
-    'adir|a=s', 'ddir|d=s', 'lfile|l=s',
+    'pfile|f=s', 'ddir|d=s', 'v|verbose=i',
 
-    'force!', 'v|verbose=i',
+    'popts=s',
 
     'help|h', 'man',
 
@@ -110,53 +108,22 @@ if ( defined $opt{config} ) {
     }
 }
 
-$opt{ddir} && -d $opt{ddir} or do_pod2usage(verbose => 0, myusage => $myusage);
-$opt{adir} && -d $opt{adir} or do {
-    mkpath( $opt{adir}, 0, 0775 ) or die "Cannot create '$opt{adir}': $!";
-};
-
-my $patch_level = get_patch( $opt{ddir} )->[0];
-$patch_level =~ tr/ //sd;
-
-SKIP_RPT: {
-    my $archived_rpt = catfile( $opt{adir}, "rpt${patch_level}.rpt" );
-    # Do not archive if it is already done
-    last SKIP_RPT
-        if -f $archived_rpt && !$opt{force};
-
-    my $mktest_rpt = catfile( $opt{ddir}, 'mktest.rpt' );
-    if ( -f $mktest_rpt ) {
-        copy( $mktest_rpt, $archived_rpt ) or
-            die "Cannot copy to '$archived_rpt': $!";
-    }
+foreach( keys %$defaults ) {
+    next if defined $opt{ $_ };
+    $opt{ $_ } = defined $conf->{ $_ } ? $conf->{ $_ } : $defaults->{ $_ };
 }
 
-SKIP_OUT: {
-    my $archived_out = catfile( $opt{adir}, "out${patch_level}.out" );
-    # Do not archive if it is already done
-    last SKIP_OUT
-        if -f $archived_out && !$opt{force};
+exists $valid_type{ $opt{type} } or do_pod2usage( verbose => 0 );
 
-    my $mktest_out = catfile( $opt{ddir}, 'mktest.out' );
-    if ( -f $mktest_out ) {
-        copy( $mktest_out, $archived_out ) or
-            die "Cannot copy to '$archived_out': $!";
-    }
-}
+$opt{ddir} && -d $opt{ddir} or do_pod2usage( verbose => 0 );
+$opt{pfile} && -f $opt{pfile} or do_pod2usage( verbose => 0 );
 
-SKIP_LOG: {
-    my $archived_log = "log${patch_level}.log";
-    unless ( defined $opt{lfile} ) {
-        $opt{v} and print "No logfile defined!\n";
-        last SKIP_LOG;
-    }
-    unless ( -f $opt{lfile} ) {
-        $opt{v} and print "Logfile '$opt{lfile}' not found!\n";
-        last SKIP_LOG;
-    }
-    copy( $opt{lfile}, File::Spec->catfile( $opt{adir}, $archived_log ) ) or
-        die "Cannot copy to '$archived_log': $!";
-}
+my $patcher = Test::Smoke::Patcher->new( $opt{type} => \%opt );
+eval{ $patcher->patch };
+
+=head1 SEE ALSO
+
+L<Test::Smoke::Patcher>
 
 =head1 COPYRIGHT
 

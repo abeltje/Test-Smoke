@@ -6,14 +6,12 @@ use vars qw( $VERSION );
 $VERSION = '0.017';
 
 use Cwd;
-use File::Spec;
-my $findbin;
-use File::Basename;
-BEGIN { $findbin = File::Spec->rel2abs( dirname $0 ); }
-use lib File::Spec->catdir( $findbin, 'lib' );
-use lib File::Spec->catdir( $findbin, 'lib', 'inc' );
-use lib $findbin;
-use lib File::Spec->catdir( $findbin, 'inc' );
+use File::Spec::Functions;
+use FindBin;
+use lib $FindBin::Bin;
+use lib catdir( $FindBin::Bin, 'lib' );
+use lib catdir( $FindBin::Bin, updir(), 'lib' );
+use lib catdir( $FindBin::Bin, updir(), 'lib', 'inc' );
 use Test::Smoke::Reporter;
 use Test::Smoke::Mailer;
 use Test::Smoke;
@@ -129,7 +127,7 @@ $opt{help} and do_pod2usage( verbose => 1, exitval => 0, myusage => $my_usage);
 if ( defined $opt{config} ) {
     $opt{config} eq "" and $opt{config} = 'smokecurrent_config';
     read_config( $opt{config} ) or do {
-        my $config_name = File::Spec->catfile( $findbin, $opt{config} );
+        my $config_name = File::Spec->catfile( $FindBin::Bin, $opt{config} );
         read_config( $config_name );
     };
 

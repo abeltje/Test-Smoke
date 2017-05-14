@@ -7,10 +7,11 @@ use vars qw( $VERSION );
 $VERSION = '0.002';
 
 use Cwd;
-use File::Spec;
+use File::Spec::Functions;
 use FindBin;
-use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
 use lib $FindBin::Bin;
+use lib catdir( $FindBin::Bin, 'lib' );
+use lib catdir( $FindBin::Bin, updir(), 'lib' );
 use Config;
 use Test::Smoke::Smoker;
 use Test::Smoke;
