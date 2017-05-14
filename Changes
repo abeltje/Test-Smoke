@@ -4,7 +4,17 @@ Changes on 2017-05-14 for repository at:
 
 Enjoy!
 
-1.70_11 2017-05-14T12:02:42+02:00 (f591d3e => abeltje)
+1.70_12 2017-05-14T12:15:14+02:00 (611818a => abeltje)
+ - Autocommit for distribution Test::Smoke 1.70_12 (test)
+
+1.70_110003 2017-05-14T12:12:26+02:00 (0a3f9ec => abeltje)
+ - Merge branch 'jkeenan-one-typo-20170512'
+
+1.70_110002 2017-05-14T12:11:07+02:00 (09402f4 => abeltje)
+ - Merge branch 'one-typo-20170512' of
+   https://github.com/jkeenan/Test-Smoke into jkeenan-one-typo-20170512
+
+1.70_11 2017-05-14T12:02:42+02:00 (907f1ef => abeltje)
  - Autocommit for distribution Test::Smoke 1.70_11 (test)
 
 1.70_100004 2017-05-14T11:36:29+02:00 (6ef0087 => abeltje)
