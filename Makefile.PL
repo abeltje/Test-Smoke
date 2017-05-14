@@ -65,7 +65,7 @@ my @scripts = qw(
     configsmoke.pl smokeperl.pl runsmoke.pl sendrpt.pl
     archiverpt.pl smokestatus.pl chkbcfg.pl sysinfo.pl
     tssynctree.pl tsrunsmoke.pl tssendrpt.pl tsarchive.pl
-    tssmokeperl.pl
+    tssmokeperl.pl tsreport.pl
 );
 
 my %extra_deps;
