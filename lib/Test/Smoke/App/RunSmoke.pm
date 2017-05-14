@@ -193,7 +193,7 @@ sub check_for_harness3 {
     }
     $self->log_info("Found: Test::Harness version %s.", $version);
 
-    return $self->{_hasharness3} = $version >= 3;
+    return $self->{_hasharness3} = (eval("$version") >= 3);
 }
 
 =head2 $smoker->create_buildcfg()

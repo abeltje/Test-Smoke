@@ -114,18 +114,26 @@ Test::Smoke::App::RunSmoke::run_smoke...
     local *Test::Smoke::Smoker::log    = sub { };
     local *Test::Smoke::Smoker::smoke = sub { };
 
+    # Replace this version of Test::Harness with a beta-version RT-118879
+    my $thp = catfile(catdir($ddir, 'cpan', 'Test-Harness', 'lib', 'Test'), 'Harness.pm');
+    my $th_version = '3.42_01';
+    {
+        open my $fh, '>', $thp;
+        print $fh "package Test::Harness;\nour \$VERSION='$th_version';\n1\n";
+        close $fh;
+    }
+
     open my $fh, '>', \my $logfile;
     my $stdout = select $fh;
     eval { $app->run() };
     select $stdout;
 
     my $plh = catfile($ddir, 'patchlevel.h');
-    my $thp = catfile(catdir($ddir, 'cpan', 'Test-Harness', 'lib', 'Test'), 'Harness.pm');
 
     is($logfile, <<"    EOL", "logfile after RunSmoke") and note($logfile);
 [$0] chdir($ddir)$win_error_setting
 qx[$^X -e "require q[$thp];print Test::Harness->VERSION" 2>&1]
-Found: Test::Harness version 3.42.
+Found: Test::Harness version $th_version.
 Reading build configurations from internal content
 Reading 'Policy.sh' from default content (v=1)
 Locally applied patches from '$plh'
