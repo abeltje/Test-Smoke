@@ -7,7 +7,7 @@ $| = 1;
 use vars qw( $VERSION );
 $VERSION = '0.007';
 
-use File::Spec:Functions;
+use File::Spec::Functions;
 use FindBin;
 use lib $FindBin::Bin;
 use lib catdir( $FindBin::Bin, 'lib' );

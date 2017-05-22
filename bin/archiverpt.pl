@@ -9,7 +9,7 @@ $VERSION = '0.005';
 use Cwd;
 use File::Path;
 use File::Copy;
-use File::Spec:Functions;
+use File::Spec::Functions;
 use FindBin;
 use lib $FindBin::Bin;
 use lib catdir( $FindBin::Bin, 'lib' );
