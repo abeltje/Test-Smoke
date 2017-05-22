@@ -8,9 +8,8 @@ use Config;
 use File::Path qw/mkpath rmtree/;
 use File::Spec::Functions;
 
-END { rmtree($base) }
-
 {
+
     my ($base, @tree, @inc);
     BEGIN {
         @inc = @INC;
@@ -22,6 +21,7 @@ END { rmtree($base) }
         push @tree, catdir($base, $Config{version}, $Config{archname});
         mkpath($_) for @tree;
     }
+    END { rmtree($base) }
     use fallback catdir('t', 'fallback');
 
     is_deeply([@INC[-5..-1]], [reverse @tree], "Complete stack added to \@INC")
