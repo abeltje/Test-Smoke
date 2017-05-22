@@ -10,16 +10,14 @@ use vars qw( $VERSION );
 $VERSION = Test::Smoke->VERSION;
 
 use Cwd;
-use File::Spec::Functions qw(:DEFAULT rel2abs);
+use File::Spec::Functions;
 use File::Path;
 use File::Copy;
-my $findbin;
-use File::Basename;
-BEGIN { $findbin = rel2abs(dirname $0); }
-use lib catdir($findbin, 'lib');
-use lib catdir($findbin, 'lib', 'inc');
-use lib $findbin;
-use lib catdir($findbin, 'inc');
+use FindBin;
+use lib $FindBin::Bin;
+use lib catdir( $FindBin::Bin, 'lib' );
+use lib catdir( $FindBin::Bin, updir(), 'lib' );
+use lib catdir( $FindBin::Bin, updir(), 'lib', 'inc' );
 
 use Config;
 use Test::Smoke::Syncer;
@@ -131,7 +129,7 @@ front-ends internally and does some sanity checking.
 # Try cwd() first, then $findbin
 my $config_file = catfile( cwd(), $options{config} );
 unless ( read_config( $config_file ) ) {
-    $config_file = catfile( $findbin, $options{config} );
+    $config_file = catfile( $FindBin::Bin, $options{config} );
     read_config( $config_file );
 }
 defined Test::Smoke->config_error and 

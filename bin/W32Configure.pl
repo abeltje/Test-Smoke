@@ -7,10 +7,11 @@ $| = 1;
 use vars qw( $VERSION );
 $VERSION = '0.007';
 
-use File::Spec;
+use File::Spec:Functions;
 use FindBin;
-use lib File::Spec->catdir( $FindBin::Bin, 'lib' );
 use lib $FindBin::Bin;
+use lib catdir( $FindBin::Bin, 'lib' );
+use lib catdir( $FindBin::Bin, updir(), 'lib' );
 use Test::Smoke;
 use Test::Smoke::Util qw( Configure_win32 do_pod2usage );
 require System::Info;

@@ -9,13 +9,14 @@ use Data::Dumper;
 use File::Basename;
 use File::Copy;
 use File::Path;
-use File::Spec;
 use File::Spec::Functions;
-my $findbin;
-BEGIN { $findbin = dirname $0 }
+use FindBin;
+use lib $FindBin::Bin;
+use lib catdir( $FindBin::Bin, 'lib' );
+use lib catdir( $FindBin::Bin, updir(), 'lib' );
+use lib catdir( $FindBin::Bin, updir(), 'lib', 'inc' );
 
-use lib $findbin;
-use fallback 'inc', 'lib', catdir($findbin, 'inc');
+use fallback catdir($FindBin::Bin, updir(), 'lib', 'inc'), catdir($FindBin::Bin, updir(), 'lib', 'inc');
 
 use System::Info;
 use Test::Smoke::Util qw(do_pod2usage whereis);
@@ -1778,7 +1779,7 @@ SAVEALL: {
 
 WRAPUP: {
     local $" = "";
-    my $chkbcfg = File::Spec->catfile( $findbin, 'chkbcfg.pl' );
+    my $chkbcfg = File::Spec->catfile( $FindBin::Bin, 'chkbcfg.pl' );
     print <<EOMSG;
 Finished configuration:
 
@@ -1888,7 +1889,7 @@ C<write_sh()> creates the shell-script.
 sub write_sh {
     my $cwd = cwd();
     my $jcl = "$options{jcl}.sh";
-    my $smokeperl = File::Spec->catfile( $findbin, 'tssmokeperl.pl' );
+    my $smokeperl = File::Spec->catfile( $FindBin::Bin, 'tssmokeperl.pl' );
     my $cronline = schedule_entry( File::Spec->catfile( $cwd, $jcl ),
                                    $cron, $crontime );
 
@@ -1935,7 +1936,7 @@ fi
 echo "\$CFGNAME" > "\$LOCKFILE"
 
 $p5lib
-PATH=$findbin:$ENV{PATH}
+PATH=$FindBin::Bin:$ENV{PATH}
 export PATH
 umask $config{umask}
 $^X $smokeperl -c "\$CFGNAME" \$continue \$\* > $options{log} 2>&1
@@ -1959,7 +1960,7 @@ because it uses commands that are not supported by B<COMMAND.COM>
 
 sub write_bat {
     my $cwd = File::Spec->canonpath( cwd() );
-    my $findbin_bin = File::Spec->canonpath( $findbin );
+    my $findbin_bin = File::Spec->canonpath( $FindBin::Bin );
 
     my $smokeperl  = File::Spec->catfile( $findbin_bin, 'tssmokeperl.pl' );
     my $archiverpt = File::Spec->catfile( $findbin_bin, 'tsarchive.pl' );
@@ -2066,7 +2067,7 @@ sub write_com {
 \$$p5opt
 \$! DEFINE/USER sys\$output $options{log}
 \$! DEFINE/USER sys\$error $options{log}
-\$  MCR $^X ${findbin}tssmokeperl.pl "-c=$options{config}"
+\$  MCR $^X ${FindBin::Bin}/tssmokeperl.pl "-c=$options{config}"
 EO_COM
     close MYSMOKECOM or warn "Error writing '$jcl': $!";
 
