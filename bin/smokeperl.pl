@@ -345,7 +345,8 @@ sub archiverpt {
         copy(
             catfile($conf->{ddir}, 'mktest.jsn'),
             catfile($conf->{adir}, $archived_jsn)
-        ) or die "Cannot copy to $archived_jsn: $!";
+	) or die 'Cannot copy ', $conf->{ddir}, '/mktest.jsn to ', $conf->{adir}
+	, "/$archived_jsn: $!";
     }
 }
 
