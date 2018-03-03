@@ -70,7 +70,7 @@ sub sync {
             '2>&1'
         );
         if ( my $gitexit = $gitbin->exitcode ) {
-            croak("Cannot make inital clone: $self->{gitbin} exit $gitexit");
+            croak("Cannot make initial clone: $self->{gitbin} exit $gitexit");
         }
         $self->log_debug($cloneout);
     }
