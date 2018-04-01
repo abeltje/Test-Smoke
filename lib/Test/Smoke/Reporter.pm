@@ -823,7 +823,7 @@ sub smokedb_data {
             git_describe     => $self->{_rpt}{patchdescr},
             git_id           => $self->{_rpt}{patch},
             smoke_branch     => $self->{_rpt}{smokebranch},
-            hostname         => $si->host,
+            hostname         => $ENV{HOSTNAME} || $si->host,
             lang             => $ENV{LANG},
             lc_all           => $ENV{LC_ALL},
             osname           => $osname,
@@ -1131,7 +1131,7 @@ sub preamble {
 
     my $cpu = $si->cpu;
 
-    my $this_host = $si->host;
+    my $this_host = $ENV{HOSTNAME} || $si->host;
     my $time_msg  = time_in_hhmm( $self->{_rpt}{secs} );
     my $savg_msg  = time_in_hhmm( $self->{_rpt}{avg}  );
 
@@ -1371,7 +1371,7 @@ sub signature {
     my $build_info = "$Test::Smoke::VERSION";
 
     my $signature = <<"    __EOS__";
--- 
+--
 Report by Test::Smoke v$build_info running on perl $this_pver
 (Reporter v$VERSION / Smoker v$Test::Smoke::Smoker::VERSION)
     __EOS__
