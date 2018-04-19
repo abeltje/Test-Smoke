@@ -9,6 +9,7 @@ use Test::Smoke::Syncer;
 use Test::Smoke::Util::Execute;
 use File::Spec::Functions;
 use Cwd 'abs_path';
+use File::Temp 'tempdir';
 
 my $gitbin = whereis('git');
 plan $gitbin ? ('no_plan') : (skip_all => 'No gitbin found');
@@ -19,8 +20,9 @@ $gitversion =~ s/^\s*git\s+version\s+//;
 pass("Git version $gitversion");
 
 my $cwd = abs_path();
-my $upstream = catdir('t', 'tsgit');
-my $playground = catdir('t', 'playground');
+my $tmpdir = tempdir(CLEANUP => ($ENV{SMOKE_DEBUG} ? 0 : 1));
+my $upstream = catdir($tmpdir, 'tsgit');
+my $playground = catdir($tmpdir, 'playground');
 
 if ($gitversion =~ m/^1\.([0-5]|6\.[0-4])/) {
     diag "Git version $gitversion is too old";
