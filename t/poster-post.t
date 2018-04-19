@@ -13,7 +13,7 @@ use Test::NoWarnings ();
 use CGI::Util qw/unescape/;
 use Config;
 use Errno qw/EINTR/;
-use JSON;
+use Test::Smoke::Util::LoadAJSON;
 use Test::Smoke::Poster;
 use Test::Smoke::Util qw/whereis/;
 use Test::Smoke::Util::FindHelpers 'has_module';

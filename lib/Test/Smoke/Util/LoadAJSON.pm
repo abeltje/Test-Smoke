@@ -1,17 +1,17 @@
-package JSON;
+package Test::Smoke::Util::LoadAJSON;
 use warnings;
 use strict;
 
-our $VERSION = 0.01;
+our $VERSION = '0.02';
 
 =head1 NAME
 
-JSON - A JSON:PP/JSON::XS Factory Class
+Test::Smoke::Util::LoadAJSON - A JSON:PP/JSON::XS Factory Class
 
 =head1 SYNOPSIS
 
-    use JSON;
-    my $json = JSON->new->utf8->pretty->encode(\%data);
+    use Test::Smoke::Util::LoadAJSON;
+    my $json = Test::Smoke::Util::LoadAJSON->new->utf8->pretty->encode(\%data);
 
 =head1 DESCRIPTION
 
@@ -42,7 +42,7 @@ sub import {
     goto &Exporter::import;
 }
 
-=head2 my $class = JSON->find_base_class()
+=head2 my $class = Test::Smoke::Util::LoadAJSON->find_base_class()
 
 On success returns one of: B<JSON::XS>, B<JSON::PP>
 
@@ -60,7 +60,7 @@ sub find_base_class {
     return;
 }
 
-=head2 my $obj = JSON->new(<arguments>)
+=head2 my $obj = Test::Smoke::Util::LoadAJSON->new(<arguments>)
 
 If a base class is found, will return an instantiated object.
 

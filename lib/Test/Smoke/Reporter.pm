@@ -12,7 +12,7 @@ require Test::Smoke;
 use Cwd;
 use Encode qw( decode encode );
 use File::Spec::Functions;
-use JSON;
+use Test::Smoke::Util::LoadAJSON;
 use POSIX qw( strftime );
 use System::Info;
 use Test::Smoke::Util qw(
