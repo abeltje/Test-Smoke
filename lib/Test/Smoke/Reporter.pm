@@ -3,9 +3,7 @@ use warnings;
 use strict;
 
 use vars qw( $VERSION );
-$VERSION = '0.053';
-
-use fallback 'inc';
+$VERSION = '0.054';
 
 require File::Path;
 require Test::Smoke;
@@ -42,6 +40,7 @@ my %CONFIG = (
     df_harness3opts => undef,
 
     df_v            => 0,
+    df_hostname     => undef,
     df_user_note    => '',
     df_un_file      => undef,
     df_un_position  => 'bottom', # != USERNOTE_ON_TOP for bottom
@@ -823,7 +822,7 @@ sub smokedb_data {
             git_describe     => $self->{_rpt}{patchdescr},
             git_id           => $self->{_rpt}{patch},
             smoke_branch     => $self->{_rpt}{smokebranch},
-            hostname         => $si->host,
+            hostname         => $self->{hostname} || $si->host,
             lang             => $ENV{LANG},
             lc_all           => $ENV{LC_ALL},
             osname           => $osname,
@@ -871,7 +870,7 @@ sub smokedb_data {
     }
     delete $rpt{$_} for "user_note", grep m/^_/ => keys %rpt;
 
-    my $json = JSON->new->utf8(1)->pretty(1)->encode(\%rpt);
+    my $json = Test::Smoke::Util::LoadAJSON->new->utf8(1)->pretty(1)->encode(\%rpt);
 
     # write the json to file:
     my $jsn_file = catfile($self->{ddir}, $self->{jsnfile});

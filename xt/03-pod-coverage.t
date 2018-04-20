@@ -37,6 +37,7 @@ harness_destruct
 harnessonly
 hasharness3
 hdir
+hostname
 is56x
 is_vms
 is_win32
