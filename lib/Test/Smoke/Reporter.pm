@@ -524,7 +524,7 @@ sub _parse {
 
     $rpt{last_cfg} = $statarg;
     exists $rpt{statcfg}{$statarg} or $rpt{running} = $fcnt;
-    $rpt{avg} = $rpt{secs} / $rpt{count};
+    $rpt{avg} = $rpt{count} ? $rpt{secs} / $rpt{count} : 0;
     $self->{_rpt} = \%rpt;
     $self->_post_process;
 }
