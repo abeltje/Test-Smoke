@@ -4,9 +4,24 @@ Changes on 2018-04-20 for repository at:
 
 Enjoy!
 
-1.72_01 2018-04-20T09:42:39+02:00 (d39bbe4 => abeltje)
- - (abeltje, 52 seconds ago) Autocommit for distribution Test::Smoke
-   1.72_01 (test)
+1.72_02 2018-04-20T22:52:14+02:00 (e6a3abd => abeltje)
+ - (abeltje, 48 seconds ago) Autocommit for distribution Test::Smoke
+   1.72_02 (test)
+
+1.72_01 2018-04-20T09:42:39+02:00 (cdd5c85 => abeltje)
+ - (abeltje, 13 hours ago) Autocommit for distribution Test::Smoke 1.72_01
+   (test)
+
+ - (abeltje, 13 hours ago) Make more test parallisable.
+ -     Move the testing-directories from 't' to File::Temp::tempdir().
+
+ - (abeltje, 13 hours ago) Less replication of static data.
+
+ - (abeltje, 15 minutes ago) Solve
+   https://github.com/abeltje/Test-Smoke/pull/37
+ -     I don't like using ENVironment vars for legitimate settings in the
+ -     software, so I'd rather use the configfile for that.
+ -     Add a question in  configsmoke.pl
 
 1.70_11 2017-05-14T12:02:42+02:00 (907f1ef => abeltje)
  - (abeltje, 11 months ago) Autocommit for distribution Test::Smoke 1.70_11
@@ -42,16 +57,16 @@ Enjoy!
  - (abeltje, 7 weeks ago) Autocommit for distribution Test::Smoke 1.72
    (minor)
 
- - (abeltje, 22 hours ago) Fix another victim of 'No-dot-in-at-inc'
+ - (abeltje, 35 hours ago) Fix another victim of 'No-dot-in-at-inc'
  -     We have the absolute path to the config-file, use that so 'require'
  -     doesn't have to loop over @INC to find the file.
 
- - (abeltje, 15 hours ago) Don't use a 'fallback' JSON.pm
+ - (abeltje, 28 hours ago) Don't use a 'fallback' JSON.pm
  -     We now just call it 'Test::Smoke::Util::LoadAJSON' and have it
    export
  -     'encode_json' en 'decode_json' that's all we need.
 
- - (abeltje, 15 hours ago) First try to run the tests in parallel
+ - (abeltje, 28 hours ago) First try to run the tests in parallel
  -     For this to work we need all the activity to move from 't/' to a
  -     temporary directory.
 
@@ -972,8 +987,8 @@ Enjoy!
 1.6 2013-05-06T17:15:26+02:00 (0f0e72f => abeltje)
  - (abeltje, 5 years ago) Autocommit for distribution Test::Smoke 1.6
 
- - (abeltje, 4 years, 11 months ago) Make sure we have 2 digits after the
-   decimal point (aesthetic).
+ - (abeltje, 5 years ago) Make sure we have 2 digits after the decimal
+   point (aesthetic).
 
  - (abeltje, 4 years, 11 months ago) Refactor the mail modules.
 
