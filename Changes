@@ -1,23 +1,32 @@
-Changes on 2018-04-20 for repository at:
+Changes on 2018-04-22 for repository at:
   Fetch URL: ssh://git@source.test-smoke.org:9999/~/Test-Smoke
   Push  URL: ssh://git@source.test-smoke.org:9999/~/Test-Smoke
 
 Enjoy!
 
-1.72_02 2018-04-20T22:52:14+02:00 (e6a3abd => abeltje)
- - (abeltje, 48 seconds ago) Autocommit for distribution Test::Smoke
-   1.72_02 (test)
+1.72_03 2018-04-22T09:00:03+02:00 (f95c4f0 => abeltje)
+ - (abeltje, 55 seconds ago) Autocommit for distribution Test::Smoke
+   1.72_03 (test)
 
-1.72_01 2018-04-20T09:42:39+02:00 (cdd5c85 => abeltje)
- - (abeltje, 13 hours ago) Autocommit for distribution Test::Smoke 1.72_01
+1.72_02 2018-04-20T22:52:14+02:00 (2856c2b => abeltje)
+ - (abeltje, 34 hours ago) Autocommit for distribution Test::Smoke 1.72_02
    (test)
 
- - (abeltje, 13 hours ago) Make more test parallisable.
+ - (abeltje, 7 minutes ago) https://github.com/abeltje/CoreSmokeDB/issues/8
+ -     These configuration options were not passed to the software. Neither
+   did
+ -     they have a sane default.
+
+1.72_01 2018-04-20T09:42:39+02:00 (cdd5c85 => abeltje)
+ - (abeltje, 2 days ago) Autocommit for distribution Test::Smoke 1.72_01
+   (test)
+
+ - (abeltje, 2 days ago) Make more test parallisable.
  -     Move the testing-directories from 't' to File::Temp::tempdir().
 
- - (abeltje, 13 hours ago) Less replication of static data.
+ - (abeltje, 2 days ago) Less replication of static data.
 
- - (abeltje, 15 minutes ago) Solve
+ - (abeltje, 34 hours ago) Solve
    https://github.com/abeltje/Test-Smoke/pull/37
  -     I don't like using ENVironment vars for legitimate settings in the
  -     software, so I'd rather use the configfile for that.
@@ -57,16 +66,16 @@ Enjoy!
  - (abeltje, 7 weeks ago) Autocommit for distribution Test::Smoke 1.72
    (minor)
 
- - (abeltje, 35 hours ago) Fix another victim of 'No-dot-in-at-inc'
+ - (abeltje, 3 days ago) Fix another victim of 'No-dot-in-at-inc'
  -     We have the absolute path to the config-file, use that so 'require'
  -     doesn't have to loop over @INC to find the file.
 
- - (abeltje, 28 hours ago) Don't use a 'fallback' JSON.pm
+ - (abeltje, 3 days ago) Don't use a 'fallback' JSON.pm
  -     We now just call it 'Test::Smoke::Util::LoadAJSON' and have it
    export
  -     'encode_json' en 'decode_json' that's all we need.
 
- - (abeltje, 28 hours ago) First try to run the tests in parallel
+ - (abeltje, 3 days ago) First try to run the tests in parallel
  -     For this to work we need all the activity to move from 't/' to a
  -     temporary directory.
 
@@ -103,27 +112,27 @@ Enjoy!
  - (abeltje, 1 year, 1 month ago) Autocommit for distribution Test::Smoke
    1.70_07 (same)
 
- - (James E Keenan, 12 months ago) Fix compilation error.
+ - (James E Keenan, 1 year ago) Fix compilation error.
  -     For: https://rt.cpan.org/Ticket/Display.html?id=121283
 
- - (abeltje, 11 months ago) Merge branch 'jkeenan-rt-121283-sendrpt-pl'
+ - (abeltje, 12 months ago) Merge branch 'jkeenan-rt-121283-sendrpt-pl'
    into pr/sndrpt.pl
 
- - (abeltje, 11 months ago) Autocommit for distribution Test::Smoke 1.70_08
+ - (abeltje, 12 months ago) Autocommit for distribution Test::Smoke 1.70_08
    (test)
 
- - (abeltje, 11 months ago) Autocommit for distribution Test::Smoke 1.70_09
+ - (abeltje, 12 months ago) Autocommit for distribution Test::Smoke 1.70_09
    (test)
 
- - (abeltje, 11 months ago) Autocommit for distribution Test::Smoke 1.70_08
+ - (abeltje, 12 months ago) Autocommit for distribution Test::Smoke 1.70_08
    (test)
 
- - (abeltje, 11 months ago) Try to resolve RT-120008 (sync with git)
+ - (abeltje, 12 months ago) Try to resolve RT-120008 (sync with git)
  -     removed the `git pull` command and replaced with `git reset --hard
  -     origin/$branch` as advised by Yves.
 
 1.70_06 2017-03-06T19:48:10+01:00 (293dc07 => abeltje)
- - (abeltje, 1 year, 1 month ago) Autocommit for distribution Test::Smoke
+ - (abeltje, 1 year, 2 months ago) Autocommit for distribution Test::Smoke
    1.70_06 (same)
 
  - (H.Merijn Brand - Tux, 2 years ago) Replace Test::Smoke::SysInfo with
@@ -155,23 +164,23 @@ Enjoy!
 
  - (James E Keenan, 1 year, 2 months ago) Correct one typo.
 
- - (H.Merijn Brand, 1 year, 1 month ago) Merge pull request #29 from
+ - (H.Merijn Brand, 1 year, 2 months ago) Merge pull request #29 from
    jkeenan/faq-spelling-20170303
  -     Correct one typo.
 
- - (H.Merijn Brand, 1 year, 1 month ago) Merge pull request #27 from
+ - (H.Merijn Brand, 1 year, 2 months ago) Merge pull request #27 from
    jkeenan/one-typo
  -     Correct one typo.
 
- - (abeltje, 1 year, 1 month ago) Merge branch 'master' of
+ - (abeltje, 1 year, 2 months ago) Merge branch 'master' of
    https://github.com/afresh1/Test-Smoke into afresh1-master
 
- - (abeltje, 1 year, 1 month ago) Merge branch 'afresh1-master'
+ - (abeltje, 1 year, 2 months ago) Merge branch 'afresh1-master'
 
- - (abeltje, 1 year, 1 month ago) Merge branch 'master' of
+ - (abeltje, 1 year, 2 months ago) Merge branch 'master' of
    ssh://github.com/abeltje/Test-Smoke
 
- - (abeltje, 1 year, 1 month ago) Use annotated tags
+ - (abeltje, 1 year, 2 months ago) Use annotated tags
 
 1.70_04 2017-01-30T22:08:49+01:00 (e956e35 => abeltje)
  - (abeltje, 1 year, 3 months ago) Autocommit for distribution Test::Smoke
@@ -653,7 +662,7 @@ Enjoy!
  - (H.Merijn Brand - Tux, 3 years, 3 months ago) Add Oracle Linux Server
    7.0
 
- - (H.Merijn Brand - Tux, 3 years, 1 month ago) Add dsm-5.1
+ - (H.Merijn Brand - Tux, 3 years, 2 months ago) Add dsm-5.1
 
  - (H.Merijn Brand - Tux, 3 years, 1 month ago) Added distcheck for Debian
    8.0 (jessie)
@@ -702,7 +711,7 @@ Enjoy!
  -     Unknown regexp modifier "/n" at smokeme.config line 1, at end of
    line
 
- - (abeltje, 4 years, 10 months ago) Introduce fallback.pm (like lib.pm,
+ - (abeltje, 4 years, 11 months ago) Introduce fallback.pm (like lib.pm,
    but do push() not unshift()) and a JSON.pm fallback wrapper for
    JSON::PP.
 
@@ -990,9 +999,9 @@ Enjoy!
  - (abeltje, 5 years ago) Make sure we have 2 digits after the decimal
    point (aesthetic).
 
- - (abeltje, 4 years, 11 months ago) Refactor the mail modules.
+ - (abeltje, 5 years ago) Refactor the mail modules.
 
- - (abeltje, 4 years, 11 months ago) Refactor the Syncer code.
+ - (abeltje, 5 years ago) Refactor the Syncer code.
 
  - (abeltje, 4 years, 11 months ago) * Refactor the SysInfo code, add
    support for Haiku OS.
