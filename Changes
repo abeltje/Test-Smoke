@@ -4,15 +4,25 @@ Changes on 2018-04-22 for repository at:
 
 Enjoy!
 
-1.72_03 2018-04-22T09:00:03+02:00 (f95c4f0 => abeltje)
- - (abeltje, 55 seconds ago) Autocommit for distribution Test::Smoke
-   1.72_03 (test)
+1.72_04 2018-04-22T11:59:51+02:00 (361181f => abeltje)
+ - (abeltje, 51 seconds ago) Autocommit for distribution Test::Smoke
+   1.72_04 (test)
 
-1.72_02 2018-04-20T22:52:14+02:00 (2856c2b => abeltje)
- - (abeltje, 34 hours ago) Autocommit for distribution Test::Smoke 1.72_02
+1.72_03 2018-04-22T09:00:03+02:00 (4b93a62 => abeltje)
+ - (abeltje, 3 hours ago) Autocommit for distribution Test::Smoke 1.72_03
    (test)
 
- - (abeltje, 7 minutes ago) https://github.com/abeltje/CoreSmokeDB/issues/8
+ - (abeltje, 8 minutes ago) Implement $ENV{PERL_JSON_BACKEND} for
+   Test::Smoke::Util::LoadAJSON
+ -     This fixes a problem on MSWin32 where fork() and JSON::XS don't play
+ -     nice together.
+ -     Add a dependency for 'Win32::API' on MSWin32.
+
+1.72_02 2018-04-20T22:52:14+02:00 (2856c2b => abeltje)
+ - (abeltje, 2 days ago) Autocommit for distribution Test::Smoke 1.72_02
+   (test)
+
+ - (abeltje, 3 hours ago) https://github.com/abeltje/CoreSmokeDB/issues/8
  -     These configuration options were not passed to the software. Neither
    did
  -     they have a sane default.
@@ -26,7 +36,7 @@ Enjoy!
 
  - (abeltje, 2 days ago) Less replication of static data.
 
- - (abeltje, 34 hours ago) Solve
+ - (abeltje, 2 days ago) Solve
    https://github.com/abeltje/Test-Smoke/pull/37
  -     I don't like using ENVironment vars for legitimate settings in the
  -     software, so I'd rather use the configfile for that.
@@ -36,7 +46,7 @@ Enjoy!
  - (abeltje, 11 months ago) Autocommit for distribution Test::Smoke 1.70_11
    (test)
 
- - (James E Keenan, 11 months ago) Correct multiple typos.
+ - (James E Keenan, 12 months ago) Correct multiple typos.
  -     Also: some grammatical corrections and improvements in text flow.
 
  - (abeltje, 11 months ago) Autocommit for distribution Test::Smoke 1.70_12
