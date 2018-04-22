@@ -133,6 +133,9 @@ sub reporter_config { # needed for sending out reports
             harnessonly(),
             harness3opts(),
             hostname(),
+            from(),
+            send_log(),
+            send_out(),
             user_note(),
             un_file(),
             un_position(),
@@ -707,6 +710,7 @@ sub send_log {
         name => 'send_log',
         option => '=s',
         default => 'on_fail',
+        allow => [qw/ never on_fail always /],
         helptext => "Send logfile to the CoreSmokeDB server.",
     );
 }
@@ -716,6 +720,7 @@ sub send_out {
         name => 'send_out',
         option => '=s',
         default => 'never',
+        allow => [qw/ never on_fail always /],
         helptext => "Send out-file to the CoreSmokeDB server.",
     );
 }

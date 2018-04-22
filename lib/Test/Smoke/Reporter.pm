@@ -41,6 +41,9 @@ my %CONFIG = (
 
     df_v            => 0,
     df_hostname     => undef,
+    df_from         => '',
+    df_send_log     => 'on_fail',
+    df_send_out     => 'never',
     df_user_note    => '',
     df_un_file      => undef,
     df_un_position  => 'bottom', # != USERNOTE_ON_TOP for bottom
@@ -828,7 +831,7 @@ sub smokedb_data {
             osname           => $osname,
             osversion        => $osversion,
             perl_id          => $Conf{version},
-            reporter         => $self->{_conf_args}{from},
+            reporter         => $self->{from},
             reporter_version => $VERSION,
             smoke_date       => __posixdate($self->{_rpt}{started}),
             smoke_revision   => $Test::Smoke::VERSION,
@@ -848,7 +851,7 @@ sub smokedb_data {
 
     $rpt{log_file} = undef;
     my $rpt_fail = $rpt{summary} eq "PASS" ? 0 : 1;
-    if (my $send_log = $rpt{_conf_args}{send_log}) {
+    if (my $send_log = $self->{send_log}) {
         if (   ($send_log eq "always")
             or ($send_log eq "on_fail" && $rpt_fail))
         {
@@ -856,7 +859,7 @@ sub smokedb_data {
         }
     }
     $rpt{out_file} = undef;
-    if (my $send_out = $rpt{_conf_args}{send_out}) {
+    if (my $send_out = $self->{send_out}) {
         if (   ($send_out eq "always")
             or ($send_out eq "on_fail" && $rpt_fail))
         {
@@ -868,7 +871,7 @@ sub smokedb_data {
             }
         }
     }
-    delete $rpt{$_} for "user_note", grep m/^_/ => keys %rpt;
+    delete $rpt{$_} for qw/from send_log send_out user_note/, grep m/^_/ => keys %rpt;
 
     my $json = Test::Smoke::Util::LoadAJSON->new->utf8(1)->pretty(1)->encode(\%rpt);
 
