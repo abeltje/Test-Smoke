@@ -73,6 +73,7 @@ for ($^O) {
     /MSWin32/ && do {
         %extra_deps = (
             'Win32' => 0,
+            'Win32::API' => 0,
             'Win32::TieRegistry' => 0,
         );
         last;

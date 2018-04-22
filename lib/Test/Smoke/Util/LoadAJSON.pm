@@ -2,7 +2,7 @@ package Test::Smoke::Util::LoadAJSON;
 use warnings;
 use strict;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 =head1 NAME
 
@@ -19,6 +19,8 @@ This is purely a fallback factory class that helps keep our code clean.
 
 This is for people with a clean perl 5.14+ install that have L<JSON::PP> but not
 JSON. Also people that installed L<JSON::XS> on a pre-5.14 system.
+
+Also checks for C<$ENV{PERL_JSON_BACKEND}> to force either of the two.
 
 =cut
 
@@ -51,7 +53,10 @@ Returns undef on failure.
 =cut
 
 sub find_base_class {
-    for my $try_class (qw/JSON::XS JSON::PP/) {
+    my @backends = $ENV{PERL_JSON_BACKEND}
+        ? ($ENV{PERL_JSON_BACKEND})
+        : qw/JSON::XS JSON::PP/;
+    for my $try_class (@backends) {
         eval "use $try_class";
         next if $@;
         return $try_class;

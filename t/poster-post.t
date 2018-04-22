@@ -26,7 +26,7 @@ require HTTP::Status; HTTP::Status->import('RC_OK', 'RC_NOT_IMPLEMENTED');
 require HTTP::Response;
 require HTTP::Headers;
 
-my $debug = $ENV{TSDEBUG};
+my $debug = $ENV{SMOKE_DEBUG};
 
 my ($pid, $daemon, $url);
 
