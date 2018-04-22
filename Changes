@@ -4,15 +4,19 @@ Changes on 2018-04-22 for repository at:
 
 Enjoy!
 
-1.72_04 2018-04-22T11:59:51+02:00 (361181f => abeltje)
- - (abeltje, 51 seconds ago) Autocommit for distribution Test::Smoke
-   1.72_04 (test)
+1.72_05 2018-04-22T13:15:31+02:00 (12cc1ec => abeltje)
+ - (abeltje, 54 seconds ago) Autocommit for distribution Test::Smoke
+   1.72_05 (test)
+
+1.72_04 2018-04-22T13:09:44+02:00 (9868726 => abeltje)
+ - (abeltje, 7 minutes ago) Merge branch 'master' of
+   https://github.com/chorny/Test-Smoke into chorny-master
 
 1.72_03 2018-04-22T09:00:03+02:00 (4b93a62 => abeltje)
- - (abeltje, 3 hours ago) Autocommit for distribution Test::Smoke 1.72_03
+ - (abeltje, 4 hours ago) Autocommit for distribution Test::Smoke 1.72_03
    (test)
 
- - (abeltje, 8 minutes ago) Implement $ENV{PERL_JSON_BACKEND} for
+ - (abeltje, 84 minutes ago) Implement $ENV{PERL_JSON_BACKEND} for
    Test::Smoke::Util::LoadAJSON
  -     This fixes a problem on MSWin32 where fork() and JSON::XS don't play
  -     nice together.
@@ -22,7 +26,7 @@ Enjoy!
  - (abeltje, 2 days ago) Autocommit for distribution Test::Smoke 1.72_02
    (test)
 
- - (abeltje, 3 hours ago) https://github.com/abeltje/CoreSmokeDB/issues/8
+ - (abeltje, 4 hours ago) https://github.com/abeltje/CoreSmokeDB/issues/8
  -     These configuration options were not passed to the software. Neither
    did
  -     they have a sane default.
@@ -42,10 +46,52 @@ Enjoy!
  -     software, so I'd rather use the configfile for that.
  -     Add a question in  configsmoke.pl
 
-1.70_11 2017-05-14T12:02:42+02:00 (907f1ef => abeltje)
- - (abeltje, 11 months ago) Autocommit for distribution Test::Smoke 1.70_11
+1.72 2018-04-22T13:35:26+03:00 (7f9889a => Alexandr Ciornii)
+ - (Alexandr Ciornii, 41 minutes ago) GetErrorMode requires Windows Vista,
+   skip test on earlier versions
+
+1.71_01 2017-05-22T21:55:58+02:00 (8e135a5 => abeltje)
+ - (abeltje, 11 months ago) Autocommit for distribution Test::Smoke 1.71_01
    (test)
 
+ - (Nigel Horne, 5 months ago) Better error message to help diagnose what's
+   wrong
+
+ - (James E Keenan, 7 weeks ago) Correct spelling error.
+
+ - (abeltje, 7 weeks ago) Merge branch 'more-typo-20170514' of
+   git://github.com/jkeenan/Test-Smoke into jkeenan-more-typo-20170514
+
+ - (abeltje, 7 weeks ago) Merge branch 'jkeenan-more-typo-20170514' into
+   bugfix/github_pullrequests
+
+ - (abeltje, 7 weeks ago) Merge branch 'nigelhorne-master' into
+   bugfix/github_pullrequests
+
+ - (abeltje, 7 weeks ago) Merge branch 'jkeenan-typo-20180303' into
+   bugfix/github_pullrequests
+
+1.71 2017-05-14T13:18:36+02:00 (7f2b993 => abeltje)
+ - (abeltje, 11 months ago) Autocommit for distribution Test::Smoke 1.71
+   (minor)
+
+ - (abeltje, 11 months ago) Reorganise directory structures...
+ -     Change `use lib ...` statements
+
+ - (James E Keenan, 11 months ago) Correct typo in
+   Test::Smoke::Syncer::Git.
+
+ - (abeltje, 11 months ago) Merge branch 'feature/no_dot_in_at_inc'
+
+ - (abeltje, 11 months ago) Fix typo's and (extra)test logic
+
+1.70_12 2017-05-14T12:15:14+02:00 (eb7c599 => abeltje)
+ - (abeltje, 11 months ago) Autocommit for distribution Test::Smoke 1.70_12
+   (test)
+
+ - (abeltje, 11 months ago) Add tsreport.pl to list of scripts.
+
+1.70_11 2017-05-12T18:14:37-04:00 (8191c13 => James E Keenan)
  - (James E Keenan, 12 months ago) Correct multiple typos.
  -     Also: some grammatical corrections and improvements in text flow.
 
@@ -111,7 +157,10 @@ Enjoy!
  -     Sometimes a "_nm" release of Test::Harness in blead, we need to deal
  -     with it. eval("$version") seems the easiest way.
 
-1.70_09 2017-05-13T18:17:43+02:00 (0d46677 => abeltje)
+1.70_09 2017-05-12T18:14:37-04:00 (70c7c73 => James E Keenan)
+ - (James E Keenan, 12 months ago) Correct multiple typos.
+ -     Also: some grammatical corrections and improvements in text flow.
+
  - (abeltje, 11 months ago) Fix test syncer_rsync.t for Windows
  -     (Cygwin)rsync doesn't understand Windows-paths (C:\Some\Path) but it
    handles UNC-paths (//localhost/C$/Some/Path), so we fix the test.
