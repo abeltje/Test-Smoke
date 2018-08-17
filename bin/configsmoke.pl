@@ -114,9 +114,9 @@ or regenerate from previous _config:
 Current options:
 
   -d dfvalsprefix   Set prefix for a _dfconfig file (<prefix>)
-  -c configprefix   When ommited 'perlcurrent' is used
-  -j jclprefix      When ommited 'perlcurrent' is used
-  -l logprefix      When ommited 'perlcurrent' is used
+  -c configprefix   When omitted 'perlcurrent' is used
+  -j jclprefix      When omitted 'perlcurrent' is used
+  -l logprefix      When omitted 'perlcurrent' is used
   -p prefix         Set -c and -j and -l at once
 
   -des              confirm all answers (needs previous _config)

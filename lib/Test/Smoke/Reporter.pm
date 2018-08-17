@@ -769,7 +769,7 @@ sub get_logfile {
 
 =head2 $reporter->write_to_file( [$name] )
 
-Write the C<< $self->report >> to file. If name is ommitted it will
+Write the C<< $self->report >> to file. If name is omitted it will
 use C<< catfile( $self->{ddir}, $self->{rptfile} ) >>.
 
 =cut
