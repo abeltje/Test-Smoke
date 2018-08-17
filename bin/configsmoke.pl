@@ -1949,6 +1949,7 @@ sub write_sh {
     my $cwd = cwd();
     my $jcl = "$options{jcl}.sh";
     my $smokeperl = File::Spec->catfile( $FindBin::Bin, 'tssmokeperl.pl' );
+    my $archivelog = File::Spec->catfile( $FindBin::Bin, 'tsarchivelog.pl' );
     my $cronline = schedule_entry( File::Spec->catfile( $cwd, $jcl ),
                                    $cron, $crontime );
 
@@ -1999,6 +2000,7 @@ PATH=$FindBin::Bin:$ENV{PATH}
 export PATH
 umask $config{umask}
 $^X $smokeperl -c "\$CFGNAME" \$continue \$\* > $options{log} 2>&1
+$^X $archivelog -c "\$CFGNAME" \$continue \$\*
 
 rm "\$LOCKFILE"
 EO_SH

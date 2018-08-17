@@ -104,9 +104,9 @@ sub archive_files {
     $self->{_patchlevel} = $patch_level;
 
     my @archived;
-    for my $filetype (qw/rpt out jsn log/) {
+    for my $filetype (qw/rpt out jsn/) {
         my $to_archive = "archive_$filetype";
-        my $filename = $filetype eq 'log' ? 'lfile' : "${filetype}file";
+        my $filename = "${filetype}file";
         push @archived, $self->$filename if $self->$to_archive;
     }
     return \@archived;
@@ -175,31 +175,6 @@ sub archive_jsn {
     my $dst = catfile($self->adir, sprintf("jsn%s.jsn", $self->patchlevel));
     if (-f $dst) {
         return $self->log_info("%s exits, skip archive jsn", $dst);
-    }
-
-    my $success = copy($src, $dst);
-    if (!$success) {
-        $self->log_warn("Failed to cp(%s,%s): %s", $src, $dst, $!);
-    }
-    else {
-        $self->log_info("Copy(%s, %s): ok", $src, $dst);
-    }
-    return $success;
-}
-
-=head2 $archiver->archive_log
-
-=cut
-
-sub archive_log {
-    my $self = shift;
-    my $src = $self->lfile;
-    if (! -f $src) {
-        return $self->log_info("%s not found: skip archive log", $src);
-    }
-    my $dst = catfile($self->adir, sprintf("log%s.log", $self->patchlevel));
-    if (-f $dst) {
-        return $self->log_info("%s exits, skip archive log", $dst);
     }
 
     my $success = copy($src, $dst);
