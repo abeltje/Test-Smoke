@@ -100,6 +100,7 @@ sub sync {
         if ( my $gitexit = $gitbin->exitcode ) {
             croak("Cannot make smoke clone: $self->{gitbin} exit $gitexit");
         }
+        $cloneout =~ s/%/%%/g;
         $self->log_debug($cloneout);
     }
 
