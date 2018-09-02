@@ -154,6 +154,7 @@ Returns the name of the outputfile.
 my %win32_makefile_map = (
     nmake => "Makefile",
     dmake => "makefile.mk",
+    gmake => "GNUmakefile",
 );
 
 sub Configure_win32 {
@@ -161,6 +162,7 @@ sub Configure_win32 {
     $win32_maker ||= 'nmake'; $win32_maker = lc $win32_maker;
     my $is_dmake = $win32_maker eq 'dmake';
     my $is_nmake = $win32_maker eq 'nmake';
+    my $is_gmake = $win32_maker eq 'gmake';
 
     local $_;
     my %opt_map = (
@@ -289,7 +291,7 @@ sub Configure_win32 {
             # need to help the Win95 build
             $is_dmake and s/\b$win32_makefile_map{ $win32_maker }\b/smoke.mk/;
             if (m/^\s*CFG_VARS\s*=/) {
-                my( $extra_char, $quote ) = $is_nmake
+                my( $extra_char, $quote ) = ($is_nmake || $is_gmake)
                     ? ( "\t", '"' ) : ("~", "" );
                 $_ .= join "", map "\t\t$quote$_$quote\t${extra_char}\t\\\n",
                                    grep /\w+=/, @args;
