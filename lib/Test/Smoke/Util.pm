@@ -280,7 +280,9 @@ sub Configure_win32 {
     my $out = "win32/smoke.mk";
 
     open ORG, "< $in"  or die "unable to open '$in': $!";
+    binmode ORG;
     open NEW, "> $out" or die "unable to open '$out': $!";
+    binmode NEW;
     my $donot_change = 0;
     while (<ORG>) {
         if ( $donot_change ) {
