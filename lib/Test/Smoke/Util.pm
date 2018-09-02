@@ -274,7 +274,9 @@ sub Configure_win32 {
     $opts{CCTYPE} = "BORLAND" if $opts{BCCOLD};
 
     local (*ORG, *NEW);
-    my $in =  "win32/$win32_makefile_map{ $win32_maker }";
+    my $maker = $win32_makefile_map{ $win32_maker }
+      or die "no make file for $win32_maker";
+    my $in =  "win32/$maker";
     my $out = "win32/smoke.mk";
 
     open ORG, "< $in"  or die "unable to open '$in': $!";
