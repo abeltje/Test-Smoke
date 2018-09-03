@@ -328,9 +328,11 @@ sub Configure_win32 {
         else {
             foreach my $cfg_var ( grep defined $opts{ $_ }, @w32_opts ) {
                 if (  m/^\s*#?\s*($cfg_var\s*(\*|:)?=)\s*(.*)$/ ) {
+                    my ($name, $val) = ($1, $2);
+                    next if $_ =~ /^#/ and !$opts{ $cfg_var };
                     $_ =  $opts{ $cfg_var } ?
-                        "$1 $opts{ $cfg_var }\n":
-                        "#$1 $2\n";
+                        "$name $opts{ $cfg_var }\n":
+                        "#$name $val\n";
                     last;
                 }
             }
