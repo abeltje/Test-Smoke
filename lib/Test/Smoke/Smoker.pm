@@ -1208,27 +1208,39 @@ sub _make {
     $self->{makeopt} and $cmd = "$self->{makeopt} $cmd";
     $cmd =~ m/clean/ and $cmd =~ s/-j[0-9]+\s+//;
 
-    $self->{is_win32} || $self->{is_vms} or return $self->_run( "make $cmd" );
+    return
+        $self->{is_vms}   ? $self->_make_vms($cmd)
+      : $self->{is_win32} ? $self->_make_win32($cmd)
+      :                     $self->_run("make $cmd");
+}
+
+sub _make_win32 {
+    my $self = shift;
+    my $cmd = shift;
+
+    $cmd =~ s|2\s*>\s*/dev/null\s*$|2>nul|;
+
+    $cmd = "$self->{w32make} -f smoke.mk $cmd";
+    chdir "win32" or die "unable to chdir () into 'win32'";
+    my @output = $self->_run($cmd);
+    chdir ".." or die "unable to chdir() out of 'win32'";
+    return wantarray ? @output : join "", @output;
+}
+
+sub _make_vms {
+    my $self = shift;
+    my $cmd = shift;
 
     my $kill_err;
     # don't capture STDERR
     # @ But why? and what if we do it DOSish? 2>NUL:
 
-    my $maker = $self->{is_vms} ? $self->{vmsmake} : $self->{w32make};
     $cmd =~ s|2\s*>\s*/dev/null\s*$|| and $kill_err = 1;
 
-    if ( $self->{is_win32} ) {
-        $cmd = "$maker -f smoke.mk $cmd";
-        chdir "win32" or die "unable to chdir () into 'win32'";
-    } else {
-        $cmd = "$maker $cmd";
-    }
+    $cmd = "$self->{vmsmake} $cmd";
     my @output = $self->_run(
         $kill_err ? qq{$^X -e "close STDERR; system '$cmd'"} : $cmd
     );
-    if ( $self->{is_win32} ) {
-        chdir ".." or die "unable to chdir() out of 'win32'";
-    }
     return wantarray ? @output : join "", @output;
 }
 
