@@ -470,7 +470,7 @@ sub make_ {
         $self->log( "\nCompiler info: $cinfo{cc} version $version\n" )
             if $cinfo{cc};
 
-        $self->{w32cc} =~ /MSVC|BORLAND/ and $self->tty( "\n$make_output\n" );
+        $self->{w32cc} =~ /MSVC|BORLAND|GCC/ and $self->tty( "\n$make_output\n" );
     }
 
     my $exe_ext  = $Config{_exe} || $Config{exe_ext};
