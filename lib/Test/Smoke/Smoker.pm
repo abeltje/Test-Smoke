@@ -1157,7 +1157,9 @@ sub change_manifest {
         };
         local( *MANIO, *MANIN );
         if ( open MANIO, "< $mani_new" ) {
+            binmode MANIO;
             if ( open MANIN, "> $mani_org" ) {
+                binmode MANIN;
                 my $mline;
                 while ( $mline = <MANIO> ) {
                     chomp $mline;
