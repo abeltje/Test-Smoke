@@ -7,6 +7,7 @@ our $VERSION = '0.046';
 use Config;
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
+use Capture::Tiny 'capture';
 use Test::Smoke::LogMixin;
 use Test::Smoke::Util qw( get_smoked_Config skip_filter );
 
@@ -1190,9 +1191,10 @@ sub _run {
     $self->log_debug("[$command]");
     defined $sub and return &$sub( $command, @args );
 
-    my @output = qx( $command );
-    $self->{_run_exit} = $? >> 8;
-    return wantarray ? @output : join " ", @output;
+    my ( $out, $err, $res ) = capture { system $command };
+    print STDERR $err if $err;
+    $self->{_run_exit} = $res >> 8;
+    return wantarray ? split /(\r\n|\r|\n)/, $out : $out;
 }
 
 =head2 $self->_make( $command )
