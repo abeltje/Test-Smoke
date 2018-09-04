@@ -192,6 +192,7 @@ sub runsmoke_config { # runsmoke.pl
             opt_continue(),
             skip_tests(),
             testmake(),
+            w32args(),
             w32cc(),
             w32make(),
         ],
