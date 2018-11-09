@@ -505,10 +505,14 @@ sub _parse {
             next;
         }
 
-        if (/^\s+(\d+(?:[-\s]+\d+)*)/) {
+        my @captures = ();
+        if (@captures = $_ =~ m/
+            (?:^|,)\s+
+            (\d+(?:-\d+)?)
+            /gx) {
             if (ref $rpt{$cfgarg}->{$debug}{$tstenv}{$previous}) {
                 push @{$rpt{$cfgarg}->{$debug}{$tstenv}{$previous}}, $_;
-                push @{$new[-1]{results}[-1]{failures}[-1]{extra}}, $1;
+                push @{$new[-1]{results}[-1]{failures}[-1]{extra}}, @captures;
             }
             next;
         }
@@ -769,7 +773,7 @@ sub get_logfile {
 
 =head2 $reporter->write_to_file( [$name] )
 
-Write the C<< $self->report >> to file. If name is ommitted it will
+Write the C<< $self->report >> to file. If name is omitted it will
 use C<< catfile( $self->{ddir}, $self->{rptfile} ) >>.
 
 =cut
