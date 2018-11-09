@@ -2201,6 +2201,7 @@ EORESULTS
     436-437, 441, 444, 458
 __EOFAIL__
 
+    unlink $config_sh;
 }
 
 ########## SUBROUTINES ##########
