@@ -1,4 +1,3 @@
-#! perl -w
 use strict;
 
 use lib 't';
@@ -14,7 +13,8 @@ use File::Temp 'tempdir';
 my $gitbin = whereis('git');
 plan $gitbin ? ('no_plan') : (skip_all => 'No gitbin found');
 
-my $git = Test::Smoke::Util::Execute->new(command => $gitbin);
+my $verbose = $ENV{SMOKE_DEBUG} ? 3 : $ENV{TEST_VERBOSE} ? $ENV{TEST_VERBOSE} : 0;
+my $git = Test::Smoke::Util::Execute->new(command => $gitbin, verbose => $verbose);
 (my $gitversion = $git->run('--version')) =~ s/\s*\z//;
 $gitversion =~ s/^\s*git\s+version\s+//;
 pass("Git version $gitversion");
@@ -59,7 +59,7 @@ print <>;
                 gitdfbranch => 'master',
                 gitdir      => catdir($playground, 'git-perl'),
                 ddir        => catdir($playground, 'perl-current'),
-                v           => 0, #($ENV{TEST_VERBOSE} ? 1 : 0),
+                v           => $verbose,
             ),
         );
         isa_ok($syncer, 'Test::Smoke::Syncer::Git');
@@ -84,9 +84,9 @@ print <>;
         ok(-e catfile(catdir($playground, 'git-perl'), 'new_file'), "new_file exits after sync()");
         ok(-e catfile(catdir($playground, 'perl-current'), 'new_file'), "new_file exits after sync()");
 
-        # Create upstream/branch
+        # Create upstream/smoke-me
         chdir $upstream;
-        $git->run(checkout => '-b', 'branch', '2>&1');
+        $git->run(checkout => '-b', 'smoke-me', '2>&1');
         put_file('new file in branch' => 'branch_file');
         $git->run(add => 'branch_file', '2>&1');
         $git->run(commit => '-m', "File in branch!", '2>&1');
@@ -99,18 +99,28 @@ print <>;
             "branch_file doesn't exit after sync()!"
         );
 
+        # update a file in perl-current without commiting
+        # this happens to patchlevel.h during smoke
+        put_file('new content' => ($playground, qw/perl-current first.file/));
+
         # Change to 'branch' and sync
-        $syncer->{gitdfbranch} = 'branch';
+        $syncer->{gitdfbranch} = 'smoke-me';
         $syncer->sync();
         ok(
             -e catfile(catdir($playground, 'perl-current'), 'branch_file'),
             "branch_file does exit after sync()!"
         );
+        {
+            chdir(catdir($playground, 'perl-current'));
+            my $git_out = $git->run('branch');
+            like($git_out, qr/\* \s+ smoke-me/x, "We're on the smoke-me branch");
+            chdir(catdir(updir, updir));
+        }
     }
 }
 
 END {
     chdir $cwd;
-    note("$playground: ", rmtree($playground, 1, 0));
-    note("$upstream: ", rmtree($upstream, 1, 0));
+    note("$playground: ", rmtree($playground, $ENV{TEST_VERBOSE}, 0));
+    note("$upstream: ", rmtree($upstream, $ENV{TEST_VERBOSE}, 0));
 }
