@@ -373,23 +373,7 @@ sub _post_process_options {
             %{$self->cli_options},
         }
     );
-
     my @errors;
-    # Now overrule from commandline
-    my $fo = $self->{_final_options};
-    foreach my $opt (grep m/^-(D\w+=.*|-U\w+)$/ => @{$self->{_ARGV}}) {
-	if ($opt =~ m/^-U(\w+)/) {
-	    exists $fo->{$1}
-		?  $fo->{$1} = ""
-		: push @errors, "Cannot unset non-existent option $1";
-	    next;
-	}
-	$opt =~ m/^-D(\w+)=(.*)/;
-	exists $fo->{$1}
-	    ?  $fo->{$1} = $2
-	    : push @errors, "Cannot set non-existent option $1";
-    }
-
     my %check_options = $self->options;
     for my $opt (keys %check_options) {
         my $oo = $self->_find_option($opt);
