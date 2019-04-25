@@ -65,7 +65,7 @@ sub run {
         Test::Smoke::Util::Win32ErrorMode::lower_error_settings();
     }
 
-   $self->run_smoke(grep m/^-(D\w+=.*|-U\w+)$/ => @{$self->{_ARGV}});
+   $self->run_smoke(grep m/^-(D\w+=.*|-U\w+|-A\w.+)$/ => @{$self->{_ARGV}});
    chdir $cwd;
 }
 
