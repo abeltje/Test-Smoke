@@ -1109,15 +1109,19 @@ sub set_skip_tests {
                 next;
             }
             my $tsrc = File::Spec->catfile( $self->{ddir}, $raw );
-            my $tdst = $tsrc . "skip";
-            $unset and ( $tsrc, $tdst ) = ( $tdst, $tsrc );
-            -f $tsrc or next;
-            my $perms = (stat $tsrc)[2] & 07777;
-            chmod 0755, $tsrc;
-            my $did_mv = rename $tsrc, $tdst;
-            my $error = $did_mv ? "" : " ($!)";
-            $self->log_info("\t%s: %sok%s\n", $raw, $did_mv ?  '' : 'not ', $error);
-            -f $tdst and chmod $perms, $tdst;
+            next if !-f $tsrc;
+            my $skip = qq[print "1..0 # SKIP Disabled by Test::Smoke\\n";\nexit 0;\n__END__\n];
+            use autodie;
+
+            open my $test_fh_r, "<:raw", $tsrc;
+            my $body = do { local $/; <$test_fh_r> };
+            close $test_fh_r;
+
+            open my $test_fh_w, ">:raw", $tsrc;
+            print $test_fh_w !$unset ? "$skip$body" : do { $body =~ s/^\Q$skip\E//; $body; };
+            close $test_fh_w;
+
+            $self->log_info("\t%s: %sok%s\n", $raw, '', "");
         }
         close SKIPTESTS;
         @libext and $self->change_manifest( \@libext, $unset );
