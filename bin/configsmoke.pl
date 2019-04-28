@@ -1232,6 +1232,7 @@ SKIP_TESTS: {
     if ($config{$arg} && !-f $config{$arg}) {
         if (open my $toskip, '>', $config{$arg}) {
             print $toskip "# One test name on a line\n";
+            print $toskip "t/porting/pending-author.t\n" if is_win32;
             close $toskip;
             print "Created skeleton '$config{$arg}'...\n";
         }
