@@ -1326,7 +1326,7 @@ C<< $ENV{PERLIO} = "perlio"; >>). This feature should only be used with
 UTF8 locales, that is why this is checked (by regex only).
 
 B<If you know of a way to get the utf8 locales on your system, which is
-not coverd here, please let me know!>
+not covered here, please let me know!>
 
 =cut
 
