@@ -1222,7 +1222,7 @@ sub summary {
     return $rpt_summary;
 }
 
-=head2 $repoarter->has_test_failures( )
+=head2 $reporter->has_test_failures( )
 
 Returns true if C<< @{ $reporter->{_failures} >>.
 
@@ -1244,7 +1244,7 @@ sub failures {
     } @{ $self->{_failures} };
 }
 
-=head2 $repoarter->has_todo_passed( )
+=head2 $reporter->has_todo_passed( )
 
 Returns true if C<< @{ $reporter->{_todo_pasesd} >>.
 
@@ -1266,7 +1266,7 @@ sub todo_passed {
     } @{ $self->{_todo_passed} };
 }
 
-=head2 $repoarter->has_mani_failures( )
+=head2 $reporter->has_mani_failures( )
 
 Returns true if C<< @{ $reporter->{_mani} >>.
 
