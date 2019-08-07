@@ -200,7 +200,7 @@ sub process_options {
 
 Return the value of an option.
 
-=head3 Argumens
+=head3 Arguments
 
 Positional.
 
