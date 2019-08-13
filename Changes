@@ -1,19 +1,23 @@
-Changes on 2019-08-07 for repository at:
+Changes on 2019-08-13 for repository at:
   Fetch URL: git@github.com:abeltje/Test-Smoke.git
   Push  URL: git@github.com:abeltje/Test-Smoke.git
 
 Enjoy!
 
-1.72_07 2019-08-07T13:10:16+03:00 (c4011ad => Abe Timmerman)
- - (Abe Timmerman, 33 seconds ago) Autocommit for distribution Test::Smoke
+1.73 2019-08-13T09:33:02+02:00 (713a802 => Abe Timmerman)
+ - (Abe Timmerman, 36 seconds ago) Autocommit for distribution Test::Smoke
+   1.73 (minor)
+
+1.72_07 2019-08-07T13:10:16+03:00 (2b62635 => Abe Timmerman)
+ - (Abe Timmerman, 6 days ago) Autocommit for distribution Test::Smoke
    1.72_07 (test)
 
 1.72_05 2018-04-22T13:15:31+02:00 (91ae91a => abeltje)
  - (abeltje, 1 year, 4 months ago) Autocommit for distribution Test::Smoke
    1.72_05 (test)
 
- - (James E Keenan, 12 months ago) Report all failing unit tests and
-   sequences thereof.
+ - (James E Keenan, 1 year ago) Report all failing unit tests and sequences
+   thereof.
  -     The 'log' and 'out' files were correctly identifying failed unit
    tests and
  -     sequences thereof, e.g.:
@@ -50,14 +54,14 @@ Enjoy!
  -     The commit also adds to .gitignore one file created during testing.
  -     For: RTC 125932
 
- - (James E Keenan, 12 months ago) Correct typo in 4 log messages.
+ - (James E Keenan, 1 year ago) Correct typo in 4 log messages.
  -     For: rt.cpan.org 126045
 
  - (James E Keenan, 12 months ago) Correct spelling of 'omitted' in 5
    locations.
 
- - (James E Keenan, 12 months ago) Report all failing unit tests and
-   sequences thereof.
+ - (James E Keenan, 1 year ago) Report all failing unit tests and sequences
+   thereof.
  -     For: https://rt.cpan.org/Ticket/Display.html?id=125932
  -     In directory logs/smokecurrent/, the '.log' and '.out' files were
    correctly
@@ -141,16 +145,16 @@ Enjoy!
  - (Abe Timmerman, 9 months ago) Autocommit for distribution Test::Smoke
    1.72_06 (same)
 
- - (Christian Walde, 11 months ago) prevent git syncer from failing on
+ - (Christian Walde, 12 months ago) prevent git syncer from failing on
    trying to log clone progress with %s
 
- - (Christian Walde, 11 months ago) throw an error if no makefile is known
+ - (Christian Walde, 12 months ago) throw an error if no makefile is known
    for the specified win32 make
 
- - (Christian Walde, 11 months ago) ensure newlines of the munged win32
+ - (Christian Walde, 12 months ago) ensure newlines of the munged win32
    makefile don't get mangled
 
- - (Christian Walde, 11 months ago) allow using gmake on win32
+ - (Christian Walde, 12 months ago) allow using gmake on win32
 
  - (Christian Walde, 11 months ago) recognize win32 gnumakefile assignments
    in makefile preparation
@@ -183,14 +187,14 @@ Enjoy!
    makefile,
  -     but didn't work
 
- - (H.Merijn Brand - Tux, 3 months ago) Revert "[HACK] convert
+ - (H.Merijn Brand - Tux, 4 months ago) Revert "[HACK] convert
    set_skip_tests to replace skipped tests with print ok 1"
  -     This reverts commit 69aeba164af185eaaf93aba106dfaa4583ab104e.
 
- - (Christian Walde, 3 months ago) skip tests by modifying them in place
+ - (Christian Walde, 4 months ago) skip tests by modifying them in place
    instead of renaming them
 
- - (H.Merijn Brand - Tux, 3 months ago) Using Test::Smoke out of the box on
+ - (H.Merijn Brand - Tux, 4 months ago) Using Test::Smoke out of the box on
    Win32
  -     Thank you Christian for the time and effort
 
@@ -200,20 +204,20 @@ Enjoy!
    documentation
  -     For: https://rt.cpan.org/Ticket/Display.html?id=129993
 
- - (Abe Timmerman, 8 minutes ago) Merge branch
+ - (Abe Timmerman, 6 days ago) Merge branch
    'typo-test-smoke-app-base-20180817' of
    https://github.com/jkeenan/Test-Smoke into
    jkeenan-typo-test-smoke-app-base-20180817
 
- - (Abe Timmerman, 6 minutes ago) Merge branch
+ - (Abe Timmerman, 6 days ago) Merge branch
    'jkeenan-typo-test-smoke-app-base-20180817'
 
- - (Abe Timmerman, 6 minutes ago) Merge branch
+ - (Abe Timmerman, 6 days ago) Merge branch
    'rtc-129993-test-smoke-reporter-typos' of
    https://github.com/jkeenan/Test-Smoke into
    jkeenan-rtc-129993-test-smoke-reporter-typos
 
- - (Abe Timmerman, 5 minutes ago) Merge branch
+ - (Abe Timmerman, 6 days ago) Merge branch
    'jkeenan-rtc-129993-test-smoke-reporter-typos'
 
 1.72_04 2018-04-22T13:09:44+02:00 (9868726 => abeltje)
@@ -405,7 +409,7 @@ Enjoy!
  - (abeltje, 2 years, 5 months ago) Autocommit for distribution Test::Smoke
    1.70_06 (same)
 
- - (H.Merijn Brand - Tux, 3 years, 3 months ago) Replace
+ - (H.Merijn Brand - Tux, 3 years, 4 months ago) Replace
    Test::Smoke::SysInfo with System::Info
 
  - (H.Merijn Brand - Tux, 2 years, 5 months ago) Fix cpuinfo test results
@@ -496,7 +500,7 @@ Enjoy!
  -	 VERSION_ID	     => 20160913,
  -     Welcome to openSUSE Tumbleweed 20160913 - Kernel \\r (\\l).
 
- - (Dan Collins, 2 years, 9 months ago) RT #118488: Proper normalization
+ - (Dan Collins, 2 years, 10 months ago) RT #118488: Proper normalization
    for tests in cpan/, dist
  -     There is a function that is intended to transform from the
    "stripped"
@@ -573,12 +577,12 @@ Enjoy!
  -     Thanks Andy!
 
 1.70 2016-04-24T12:57:52+01:00 (6197f5b => abeltje)
- - (abeltje, 3 years, 3 months ago) Autocommit for distribution Test::Smoke
+ - (abeltje, 3 years, 4 months ago) Autocommit for distribution Test::Smoke
    1.70 (minor)
 
- - (abeltje, 3 years, 3 months ago) Add versions to all the new modules
+ - (abeltje, 3 years, 4 months ago) Add versions to all the new modules
 
- - (H.Merijn Brand - Tux, 3 years, 3 months ago) Spelling error
+ - (H.Merijn Brand - Tux, 3 years, 4 months ago) Spelling error
 
  - (abeltje, 3 years, 3 months ago) Resolve a backward incompatibilty
  -     In pre 1.70 Test::Smoke 'sync_type' was the way to specify what sync
@@ -586,46 +590,46 @@ Enjoy!
  -     'sync_type'.
 
 1.61_15 2016-04-23T09:51:00+01:00 (6b27c08 => abeltje)
- - (abeltje, 3 years, 3 months ago) Autocommit for distribution Test::Smoke
+ - (abeltje, 3 years, 4 months ago) Autocommit for distribution Test::Smoke
    1.61_15 (same)
 
- - (H.Merijn Brand - Tux, 3 years, 3 months ago) clang = gcc
+ - (H.Merijn Brand - Tux, 3 years, 4 months ago) clang = gcc
  -     https://github.com/abeltje/Test-Smoke/issues/2
  -     While you are at it, maybe also:
  -     $cc = 'gcc' if $cc eq 'clang';
 
- - (abeltje, 3 years, 3 months ago) NAME in WriteMakefile() must be
+ - (abeltje, 3 years, 4 months ago) NAME in WriteMakefile() must be
    packagename
 
- - (H.Merijn Brand - Tux, 3 years, 3 months ago) SI for NetBSD-7.99.4
+ - (H.Merijn Brand - Tux, 3 years, 4 months ago) SI for NetBSD-7.99.4
 
- - (H.Merijn Brand - Tux, 3 years, 3 months ago) \s != \d
+ - (H.Merijn Brand - Tux, 3 years, 4 months ago) \s != \d
 
- - (abeltje, 3 years, 3 months ago) Merge branch
+ - (abeltje, 3 years, 4 months ago) Merge branch
    'pr/faq_correction_rt_94329' of
    https://github.com/paultcochrane/Test-Smoke into Belin2015_Aftermath
 
- - (abeltje, 3 years, 3 months ago) Merge branch
+ - (abeltje, 3 years, 4 months ago) Merge branch
    'pr/sendrpt_error_msg_fixes' of
    https://github.com/paultcochrane/Test-Smoke into Belin2015_Aftermath
 
- - (abeltje, 3 years, 3 months ago) Merge branch 'Belin2015_Aftermath' of
+ - (abeltje, 3 years, 4 months ago) Merge branch 'Belin2015_Aftermath' of
    github.com:abeltje/Test-Smoke into Belin2015_Aftermath
 
- - (abeltje, 3 years, 3 months ago) Merge remote-tracking branch
+ - (abeltje, 3 years, 4 months ago) Merge remote-tracking branch
    'origin/clang-2014' into Belin2015_Aftermath
 
- - (abeltje, 3 years, 3 months ago) Merge remote-tracking branch
+ - (abeltje, 3 years, 4 months ago) Merge remote-tracking branch
    'origin/si-netbsd7994' into Belin2015_Aftermath
 
- - (abeltje, 3 years, 3 months ago) Fix MANIFEST after merge of
+ - (abeltje, 3 years, 4 months ago) Fix MANIFEST after merge of
    origin/si-netbsd7994
 
- - (H.Merijn Brand - Tux, 3 years, 3 months ago) CPU type is unknown on a
+ - (H.Merijn Brand - Tux, 3 years, 4 months ago) CPU type is unknown on a
    virtualized Darwin
 
 1.61_14 2016-04-23T09:48:59+01:00 (8600318 => abeltje)
- - (abeltje, 3 years, 3 months ago) Merge upstream
+ - (abeltje, 3 years, 4 months ago) Merge upstream
 
 1.61_13 2016-04-22T07:22:51+01:00 (c9ab06f => abeltje)
  - (abeltje, 3 years, 4 months ago) Autocommit for distribution Test-Smoke
@@ -680,16 +684,16 @@ Enjoy!
    failed on MSWin32
 
 1.61_09 2015-05-24T12:16:03+02:00 (2936dc8 => abeltje)
- - (abeltje, 4 years, 2 months ago) Autocommit for distribution Test::Smoke
+ - (abeltje, 4 years, 3 months ago) Autocommit for distribution Test::Smoke
    1.61_09
 
- - (abeltje, 4 years, 2 months ago) Merge remote-tracking branch
+ - (abeltje, 4 years, 3 months ago) Merge remote-tracking branch
    'origin/si-centos7' into Belin2015_Aftermath
 
- - (abeltje, 4 years, 2 months ago) Merge remote-tracking branch
+ - (abeltje, 4 years, 3 months ago) Merge remote-tracking branch
    'origin/si-dsm-5.2' into Belin2015_Aftermath
 
- - (abeltje, 4 years, 2 months ago) FIX: MANIFEST (new files)
+ - (abeltje, 4 years, 3 months ago) FIX: MANIFEST (new files)
 
  - (abeltje, 4 years, 2 months ago) Fix skip_tests
  -     The 'skip_tests' argument needs to be passed to
@@ -701,7 +705,7 @@ Enjoy!
 
  - (H.Merijn Brand - Tux, 4 years, 3 months ago) Add DSM-5.2
 
- - (abeltje, 4 years, 2 months ago) TestFixes for fallback.pm and MSWin32
+ - (abeltje, 4 years, 3 months ago) TestFixes for fallback.pm and MSWin32
  -     Like the 'use fallback' test, the 'no fallback' test now tests what
    it
  -     actually does.
@@ -712,7 +716,7 @@ Enjoy!
  - (Abe Timmerman, 4 years, 4 months ago) Autocommit for distribution
    Test::Smoke 1.61_07
 
- - (H.Merijn Brand - Tux, 4 years, 3 months ago) SysInfo (CentOS 7.1)
+ - (H.Merijn Brand - Tux, 4 years, 4 months ago) SysInfo (CentOS 7.1)
 
  - (Abe Timmerman, 4 years, 3 months ago) TestFix: different approach
  -     We only need to test that the fallback directories are at the end of
@@ -797,7 +801,7 @@ Enjoy!
  - (Abe Timmerman, 4 years, 4 months ago) Autocommit for distribution
    Test::Smoke 1.61_07
 
- - (H.Merijn Brand - Tux, 4 years, 3 months ago) SysInfo (CentOS 7.1)
+ - (H.Merijn Brand - Tux, 4 years, 4 months ago) SysInfo (CentOS 7.1)
 
  - (Abe Timmerman, 4 years, 3 months ago) TestFix: different approach
  -     We only need to test that the fallback directories are at the end of
@@ -816,17 +820,17 @@ Enjoy!
 
  - (H.Merijn Brand - Tux, 4 years, 3 months ago) Add DSM-5.2
 
- - (abeltje, 4 years, 2 months ago) TestFixes for fallback.pm and MSWin32
+ - (abeltje, 4 years, 3 months ago) TestFixes for fallback.pm and MSWin32
  -     Like the 'use fallback' test, the 'no fallback' test now tests what
    it
  -     actually does.
  -     MSWin32 had failing tests with (back-)slashes in file paths
  -     Makefile.PL: Add installed modules to the dependencies.
 
- - (abeltje, 4 years, 2 months ago) Autocommit for distribution Test::Smoke
+ - (abeltje, 4 years, 3 months ago) Autocommit for distribution Test::Smoke
    1.61_09
 
- - (abeltje, 4 years, 2 months ago) FIX: MANIFEST (new files)
+ - (abeltje, 4 years, 3 months ago) FIX: MANIFEST (new files)
 
  - (abeltje, 4 years, 2 months ago) Fix skip_tests
  -     The 'skip_tests' argument needs to be passed to
@@ -877,7 +881,7 @@ Enjoy!
  - (H.Merijn Brand - Tux, 3 years, 6 months ago) Add SysInfo for OpenSUSE
    Leap
 
- - (abeltje, 4 years, 2 months ago) FIX: MANIFEST (new files)
+ - (abeltje, 4 years, 3 months ago) FIX: MANIFEST (new files)
 
  - (abeltje, 3 years, 4 months ago) Add -DGCCWRAPV for Win32 configuration
  -     Also make Win32 log with gmtime() and Z(ulu)
@@ -899,9 +903,9 @@ Enjoy!
 
  - (abeltje, 3 years, 4 months ago) Fix faulty test (MSWin32)
 
- - (abeltje, 3 years, 3 months ago) More debug data for poster->post
+ - (abeltje, 3 years, 4 months ago) More debug data for poster->post
 
- - (abeltje, 3 years, 3 months ago) Fix MANIFEST after merging all the
+ - (abeltje, 3 years, 4 months ago) Fix MANIFEST after merging all the
    SysInfo branches from Tux
 
 1.61_03 2014-08-22T14:39:08+03:00 (9ba91d6 => Abe Timmerman)
@@ -911,7 +915,7 @@ Enjoy!
  - (H.Merijn Brand - Tux, 4 years, 11 months ago) Add CentOS-6.5 to
    distname checks (boring)
 
- - (H.Merijn Brand - Tux, 4 years, 9 months ago) Add OpenSUSE 13.2
+ - (H.Merijn Brand - Tux, 4 years, 10 months ago) Add OpenSUSE 13.2
    (Harlequin)
 
  - (Paul Cochrane, 4 years, 9 months ago) Correcting FAQ as per RT#94329
@@ -936,7 +940,7 @@ Enjoy!
  - (H.Merijn Brand - Tux, 4 years, 7 months ago) unTABify (to make Abe
    happ{y|ier}
 
- - (H.Merijn Brand - Tux, 4 years, 6 months ago) Add Oracle Linux Server
+ - (H.Merijn Brand - Tux, 4 years, 7 months ago) Add Oracle Linux Server
    7.0
 
  - (H.Merijn Brand - Tux, 4 years, 5 months ago) Add dsm-5.1
@@ -3139,16 +3143,16 @@ Enjoy!
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
 1.19_66 2005-02-13T08:36:25+00:00 (c19283d => abeltje)
- - (abeltje, 14 years ago) * Prepare for snapshot of 1.19_66
+ - (abeltje, 15 years ago) * Prepare for snapshot of 1.19_66
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@834
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 14 years ago) * [AUTOCOMMIT]
+ - (abeltje, 15 years ago) * [AUTOCOMMIT]
  -	 Regenerate 'Changes'
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@835
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 14 years ago) * [AUTOCOMMIT]
+ - (abeltje, 15 years ago) * [AUTOCOMMIT]
  -	 Regenerate 'SIGNATURES', 'META.yml'
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@836
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
@@ -3164,48 +3168,48 @@ Enjoy!
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
 1.19_65 2005-02-11T10:03:46+00:00 (092fae5 => abeltje)
- - (abeltje, 14 years ago) * Prepare for 1.19_65 snapshot
+ - (abeltje, 15 years ago) * Prepare for 1.19_65 snapshot
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@824
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 14 years ago) * [AUTOCOMMIT]
+ - (abeltje, 15 years ago) * [AUTOCOMMIT]
  -	 Regenerate 'Changes'
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@825
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 14 years ago) * [AUTOCOMMIT]
+ - (abeltje, 15 years ago) * [AUTOCOMMIT]
  -	 Regenerate 'SIGNATURES', 'META.yml'
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@826
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 14 years ago) * [FIX]
+ - (abeltje, 15 years ago) * [FIX]
  -	 {testmaker} wasn't set properly (VMS/MSWin32)
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@828
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 14 years ago) * [FIX]
+ - (abeltje, 15 years ago) * [FIX]
  -	 tests were failing now that vms_whereis() finds programs
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@829
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 14 years ago) * [ADD]
+ - (abeltje, 15 years ago) * [ADD]
  -	 chkbcfg.pl -  Check the buildconfigfile specified
  -	 configsmoke.pl now shows the output of chkbcfg.pl at the end
  -	 configsmoke.pl new also sets {testmake} on VMS/MSWin32
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@830
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 14 years ago) * [PRIVATE]
+ - (abeltje, 15 years ago) * [PRIVATE]
  -	 add the new chkbcfg.pl script
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@831
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 14 years ago) * [FIX]
+ - (abeltje, 15 years ago) * [FIX]
  -	 the DCL in vms_untargz()
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@832
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 14 years ago) * [CHANGE]
+ - (abeltje, 15 years ago) * [CHANGE]
  -	 relocate the source-tree from within the source-dir (File::Find
    doesn't like VMS paths)
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@833
@@ -3299,47 +3303,47 @@ Enjoy!
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@815
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 14 years ago) * [CHANGE]
+ - (abeltje, 15 years ago) * [CHANGE]
  -	 mirror() returns false/true on fail/success
  -	 make the unlink()s VMS friendly
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@816
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 14 years ago) * [CHANGE]
+ - (abeltje, 15 years ago) * [CHANGE]
  -	 Test::Smoke::Syncer::FTP::sync() now returns true/false for
    success/failure
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@817
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 14 years ago) * [CHANGE]
+ - (abeltje, 15 years ago) * [CHANGE]
  -	 Implement perl-change 23554, that splits Config.pm into two files
    (Config_heavy.pl)
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@818
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 14 years ago) * [CHANGE]
+ - (abeltje, 15 years ago) * [CHANGE]
  -	 Make the tests obey $SMOKE_VERBOSE
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@819
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 14 years ago) * [CHANGE]
+ - (abeltje, 15 years ago) * [CHANGE]
  -	 add tests for change 816/817
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@820
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 14 years ago) * [CHANGE]
+ - (abeltje, 15 years ago) * [CHANGE]
  -	 add support for -Dusethreads -Duemymalloc -Uuseimpsys on MSWin32
  -	 new testfile for Test::Smoke::Util::skip_config()
  -	 skip_config() for -Dusethreads -Dusemymalloc without -Uuseimpsys
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@821
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 14 years ago) * [FIX]
+ - (abeltje, 15 years ago) * [FIX]
  -	 a directory separator thing for MSWin32 (/ and \)
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@822
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 14 years ago) * [FIX]
+ - (abeltje, 15 years ago) * [FIX]
  -	 make sure the reference tests follow $^O!
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@823
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
@@ -4203,7 +4207,7 @@ Enjoy!
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@598
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 15 years ago) * [CHANGE]
+ - (abeltje, 16 years ago) * [CHANGE]
  -	 Win9[58] (with -DIS_WIN95/dmake) rewrites the makefile, but that
    needs to be "smoke.mk" and not "makefile.mk".
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@601
