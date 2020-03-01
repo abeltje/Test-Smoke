@@ -1,59 +1,258 @@
-Changes on 2020-02-09 for repository at:
+Changes on 2020-03-01 for repository at:
   Fetch URL: git@github.com:abeltje/Test-Smoke.git
   Push  URL: git@github.com:abeltje/Test-Smoke.git
 
 Enjoy!
 
+1.75 2020-03-01T12:41:23+01:00 (da10534 => Abe Timmerman)
+ - (Abe Timmerman, 51 seconds ago) Autocommit for distribution Test::Smoke
+   1.75 (same)
+
+1.74 2020-02-09T16:36:26+01:00 (f119510 => Abe Timmerman)
+ - (Abe Timmerman, 3 weeks ago) Autocommit for distribution Test::Smoke
+   1.74 (minor)
+
+ - (Abe Timmerman, 6 minutes ago) FIX: add dependency introduced by
+   be0b7a9438bdc9b25176dc8676641aff3bfc6413
+ -     We forgot to add Capture::Tiny to the dependencies in Makefile.PL
+
 1.73 2019-08-13T09:33:02+02:00 (b6ca9bd => Abe Timmerman)
- - (Abe Timmerman, 6 months ago) Autocommit for distribution Test::Smoke
+ - (Abe Timmerman, 7 months ago) Autocommit for distribution Test::Smoke
    1.73 (minor)
 
- - (James E Keenan, 20 hours ago) Update location of Perl 5 repository
+ - (James E Keenan, 3 weeks ago) Update location of Perl 5 repository
  -     Note that I did not attempt to update all instances of the old
  -     repository in bin/configsmoke.pl.
  -     Needs careful code review.
  -     For: https://rt.cpan.org/Ticket/Display.html?id=131711
 
- - (Abe Timmerman, 47 minutes ago) Merge branch 'master' of
+ - (Abe Timmerman, 3 weeks ago) Merge branch 'master' of
    github.com:abeltje/Test-Smoke
 
- - (Abe Timmerman, 45 minutes ago) Merge branch
-   'rtc-131711-perl5-repository' of https://github.com/jkeenan/Test-Smoke
-   into jkeenan-rtc-131711-perl5-repository
+ - (Abe Timmerman, 3 weeks ago) Merge branch 'rtc-131711-perl5-repository'
+   of https://github.com/jkeenan/Test-Smoke into
+   jkeenan-rtc-131711-perl5-repository
 
- - (Abe Timmerman, 45 minutes ago) Merge branch
+ - (Abe Timmerman, 3 weeks ago) Merge branch
    'jkeenan-rtc-131711-perl5-repository'
 
- - (Abe Timmerman, 52 seconds ago) Autocommit for distribution Test::Smoke
-   1.74 (minor)
-
-1.72_07 2019-05-07T20:18:05+02:00 (cafcb9c => Abe Timmerman)
- - (Abe Timmerman, 9 months ago) Autocommit for distribution Test::Smoke
+1.72_07 2019-08-07T13:10:16+03:00 (2b62635 => Abe Timmerman)
+ - (Abe Timmerman, 7 months ago) Autocommit for distribution Test::Smoke
    1.72_07 (test)
 
-1.72_05 2019-07-06T09:36:58-04:00 (cc8b0c3 => James E Keenan)
- - (James E Keenan, 7 months ago) Correct spelling error in 3 places in
+1.72_05 2018-04-22T13:15:31+02:00 (91ae91a => abeltje)
+ - (abeltje, 1 year, 10 months ago) Autocommit for distribution Test::Smoke
+   1.72_05 (test)
+
+ - (James E Keenan, 1 year, 7 months ago) Report all failing unit tests and
+   sequences thereof.
+ -     The 'log' and 'out' files were correctly identifying failed unit
+   tests and
+ -     sequences thereof, e.g.:
+ -	  
+   ../lib/locale.t.............................................FAILED
+ -	       436-437, 441, 444, 458
+ -     However, only the first of these was being captured by
+ -     Test::Smoke::Reporter::_parse() -- called from within
+ -     Test::Smoke::Reporter::read_parse() -- and, hence, only the first
+   was
+ -     available for recording in the 'jsn' file:
+ -	   "failures" : [
+ -	      {
+ -		 "status" : "FAILED",
+ -		 "extra" : [
+ -		    "436-437"
+ -		 ],
+ -		 "test" : "../lib/locale.t"
+ -	      }
+ -	   ],
+ -     And since it is the 'jsn' file that is sent to the CoreSmoke
+   database -- from
+ -     which the web display draws its data -- the web page was only
+   showing this:
+ -	   Test failures:
+ -	   ~~ ../lib/locale.t ................................ FAILED
+   436-437
+ -     Cf. http://perl5.test-smoke.org/report/68034
+ -     This commit improves the regex capturing the numbers of failing unit
+   tests and
+ -     sequences of such tests.  In t/reporter.t one block of tests similar
+   to
+ -     existing blocks is added.
+ -     The commit also adds to .gitignore one file created during testing.
+ -     For: RTC 125932
+
+ - (James E Keenan, 1 year, 7 months ago) Correct typo in 4 log messages.
+ -     For: rt.cpan.org 126045
+
+ - (James E Keenan, 1 year, 7 months ago) Correct spelling of 'omitted' in
+   5 locations.
+
+ - (James E Keenan, 1 year, 7 months ago) Report all failing unit tests and
+   sequences thereof.
+ -     For: https://rt.cpan.org/Ticket/Display.html?id=125932
+ -     In directory logs/smokecurrent/, the '.log' and '.out' files were
+   correctly
+ -     identifying failed unit tests and sequences thereof, e.g.:
+ -	  
+   ../lib/locale.t.............................................FAILED
+ -	       436-437, 441, 444, 458
+ -     However, only the first of these unit test numbers or sequences was
+   being
+ -     captured by Test::Smoke::Reporter::_parse() -- called from within
+ -     Test::Smoke::Reporter::read_parse().  Hence, only the first was
+ -     available for recording in the '.jsn' file:
+ -	   "failures" : [
+ -	      {
+ -		 "status" : "FAILED",
+ -		 "extra" : [
+ -		    "436-437"
+ -		 ],
+ -		 "test" : "../lib/locale.t"
+ -	      }
+ -	   ],
+ -     And since it is the '.jsn' file that is sent to the CoreSmoke
+   database -- from
+ -     which the web display draws its data -- the web page was only
+   showing this:
+ -	   Test failures:
+ -	   ~~ ../lib/locale.t ................................ FAILED
+   436-437
+ -     Cf. http://perl5.test-smoke.org/report/68034
+ -     This commit improves the regex capturing the numbers of failing unit
+   tests and
+ -     sequences of such tests.  In t/reporter.t one block of tests similar
+   to
+ -     existing blocks is added.
+ -     The commit also adds to .gitignore one file created during testing.
+ -     For: RTC 125932
+
+ - (James E Keenan, 1 year, 7 months ago) Merge branch
+   'rt-125932-defective-json' of github.com:jkeenan/Test-Smoke into
+   rt-125932-defective-json
+
+ - (Abe Timmerman, 1 year, 6 months ago) Merge branch
+   'jkeenan-typo-omitted-20180814'
+
+ - (Abe Timmerman, 1 year, 6 months ago) Merge branch
+   'rtc-126045-exits-test-smoke-archiver-20180812' of
+   https://github.com/jkeenan/Test-Smoke into
+   jkeenan-rtc-126045-exits-test-smoke-archiver-20180812
+
+ - (Abe Timmerman, 1 year, 6 months ago) Merge branch
+   'jkeenan-rtc-126045-exits-test-smoke-archiver-20180812'
+
+ - (Abe Timmerman, 1 year, 6 months ago) Merge branch
+   'rt-125932-defective-json' of https://github.com/jkeenan/Test-Smoke into
+   jkeenan-rt-125932-defective-json
+
+ - (Abe Timmerman, 1 year, 6 months ago) Merge branch
+   'jkeenan-rt-125932-defective-json'
+
+ - (James E Keenan, 1 year, 6 months ago) Correct one typo in
+   Test::Smoke::App::Base docs.
+
+ - (Abe Timmerman, 1 year, 4 months ago) Set autoflush on STDOUT for all
+   the scripts
+ -     The output from the smoke-scripts was buffered, this resulted in
+ -     incomplete log files for the archive function.
+
+ - (Abe Timmerman, 1 year, 4 months ago) Merge branch
+   'feature/jkeenan_merges'
+
+ - (Abe Timmerman, 1 year, 4 months ago) Clean-up t/config.sh after tests
+
+ - (Abe Timmerman, 1 year, 4 months ago) Test::Smoke::Syncer::Git - reset
+   working dir before branch
+ -     We update the `patchlevel.h` file before the smoke. In some cases
+   this
+ -     changed file doesn't allow us to checkout the branch we want to
+   smoke,
+ -     so now before we start updating the working dir we `reset --hard
+   HEAD`
+ -     See also RT#127577
+
+ - (Abe Timmerman, 1 year, 4 months ago) Autocommit for distribution
+   Test::Smoke 1.72_06 (same)
+
+ - (Christian Walde, 1 year, 6 months ago) prevent git syncer from failing
+   on trying to log clone progress with %s
+
+ - (Christian Walde, 1 year, 6 months ago) throw an error if no makefile is
+   known for the specified win32 make
+
+ - (Christian Walde, 1 year, 6 months ago) ensure newlines of the munged
+   win32 makefile don't get mangled
+
+ - (Christian Walde, 1 year, 6 months ago) allow using gmake on win32
+
+ - (Christian Walde, 1 year, 6 months ago) recognize win32 gnumakefile
+   assignments in makefile preparation
+
+ - (Christian Walde, 1 year, 6 months ago) don't munge makefile lines that
+   remain uncommented in win32 makefile prep
+
+ - (Christian Walde, 1 year, 6 months ago) split Smoker::_make into os subs
+   and silence stderr with nul on win32
+
+ - (Christian Walde, 1 year, 6 months ago) switch _run from qx to
+   Capture::Tiny
+
+ - (Christian Walde, 1 year, 6 months ago) on windows, dump make stdout
+   under gcc as well
+
+ - (Christian Walde, 1 year, 6 months ago) add binmode so change_manifest
+   doesn't mangle the makefile too badly
+
+ - (Christian Walde, 1 year, 6 months ago) [HACK] convert set_skip_tests to
+   replace skipped tests with print ok 1
+ -     this works around a shitton of manifest- and manifest-test-related
+   issues,
+ -     but also breaks the unsetting. might needs to work by copying the
+   skipped
+ -     tests somewhere else.
+
+ - (Christian Walde, 1 year, 6 months ago) add w32args to general options
+   list for runsmoke
+ -     not sure if this is useful, was an attempt to get cchome into the
+   makefile,
+ -     but didn't work
+
+ - (H.Merijn Brand - Tux, 10 months ago) Revert "[HACK] convert
+   set_skip_tests to replace skipped tests with print ok 1"
+ -     This reverts commit 69aeba164af185eaaf93aba106dfaa4583ab104e.
+
+ - (Christian Walde, 10 months ago) skip tests by modifying them in place
+   instead of renaming them
+
+ - (H.Merijn Brand - Tux, 10 months ago) Using Test::Smoke out of the box
+   on Win32
+ -     Thank you Christian for the time and effort
+
+ - (H.Merijn Brand - Tux, 10 months ago) Correct minor typo in docs
+
+ - (Abe Timmerman, 10 months ago) Autocommit for distribution Test::Smoke
+   1.72_07 (test)
+
+ - (James E Keenan, 8 months ago) Correct spelling error in 3 places in
    documentation
  -     For: https://rt.cpan.org/Ticket/Display.html?id=129993
 
- - (Abe Timmerman, 6 months ago) Merge branch
+ - (Abe Timmerman, 7 months ago) Merge branch
    'typo-test-smoke-app-base-20180817' of
    https://github.com/jkeenan/Test-Smoke into
    jkeenan-typo-test-smoke-app-base-20180817
 
- - (Abe Timmerman, 6 months ago) Merge branch
+ - (Abe Timmerman, 7 months ago) Merge branch
    'jkeenan-typo-test-smoke-app-base-20180817'
 
- - (Abe Timmerman, 6 months ago) Merge branch
+ - (Abe Timmerman, 7 months ago) Merge branch
    'rtc-129993-test-smoke-reporter-typos' of
    https://github.com/jkeenan/Test-Smoke into
    jkeenan-rtc-129993-test-smoke-reporter-typos
 
- - (Abe Timmerman, 6 months ago) Merge branch
+ - (Abe Timmerman, 7 months ago) Merge branch
    'jkeenan-rtc-129993-test-smoke-reporter-typos'
-
- - (Abe Timmerman, 6 months ago) Autocommit for distribution Test::Smoke
-   1.72_07 (test)
 
 1.72_04 2018-04-22T13:09:44+02:00 (9868726 => abeltje)
  - (abeltje, 1 year, 10 months ago) Merge branch 'master' of
@@ -102,31 +301,31 @@ Enjoy!
  - (abeltje, 2 years, 9 months ago) Autocommit for distribution Test::Smoke
    1.71_01 (test)
 
- - (Nigel Horne, 2 years, 2 months ago) Better error message to help
+ - (Nigel Horne, 2 years, 3 months ago) Better error message to help
    diagnose what's wrong
 
- - (James E Keenan, 1 year, 11 months ago) Correct spelling error.
+ - (James E Keenan, 2 years ago) Correct spelling error.
 
- - (abeltje, 1 year, 11 months ago) Merge branch 'more-typo-20170514' of
+ - (abeltje, 2 years ago) Merge branch 'more-typo-20170514' of
    git://github.com/jkeenan/Test-Smoke into jkeenan-more-typo-20170514
 
- - (abeltje, 1 year, 11 months ago) Merge branch
-   'jkeenan-more-typo-20170514' into bugfix/github_pullrequests
-
- - (abeltje, 1 year, 11 months ago) Merge branch 'nigelhorne-master' into
+ - (abeltje, 2 years ago) Merge branch 'jkeenan-more-typo-20170514' into
    bugfix/github_pullrequests
 
- - (abeltje, 1 year, 11 months ago) Merge branch 'jkeenan-typo-20180303'
-   into bugfix/github_pullrequests
+ - (abeltje, 2 years ago) Merge branch 'nigelhorne-master' into
+   bugfix/github_pullrequests
+
+ - (abeltje, 2 years ago) Merge branch 'jkeenan-typo-20180303' into
+   bugfix/github_pullrequests
 
 1.71 2017-05-14T13:18:36+02:00 (7f2b993 => abeltje)
- - (abeltje, 2 years, 9 months ago) Autocommit for distribution Test::Smoke
-   1.71 (minor)
+ - (abeltje, 2 years, 10 months ago) Autocommit for distribution
+   Test::Smoke 1.71 (minor)
 
- - (abeltje, 2 years, 9 months ago) Reorganise directory structures...
+ - (abeltje, 2 years, 10 months ago) Reorganise directory structures...
  -     Change `use lib ...` statements
 
- - (James E Keenan, 2 years, 9 months ago) Correct typo in
+ - (James E Keenan, 2 years, 10 months ago) Correct typo in
    Test::Smoke::Syncer::Git.
 
  - (abeltje, 2 years, 9 months ago) Merge branch 'feature/no_dot_in_at_inc'
@@ -134,24 +333,24 @@ Enjoy!
  - (abeltje, 2 years, 9 months ago) Fix typo's and (extra)test logic
 
 1.70_12 2017-05-14T12:15:14+02:00 (eb7c599 => abeltje)
- - (abeltje, 2 years, 9 months ago) Autocommit for distribution Test::Smoke
-   1.70_12 (test)
+ - (abeltje, 2 years, 10 months ago) Autocommit for distribution
+   Test::Smoke 1.70_12 (test)
 
- - (abeltje, 2 years, 9 months ago) Add tsreport.pl to list of scripts.
+ - (abeltje, 2 years, 10 months ago) Add tsreport.pl to list of scripts.
 
 1.70_11 2017-05-12T18:14:37-04:00 (8191c13 => James E Keenan)
- - (James E Keenan, 2 years, 9 months ago) Correct multiple typos.
+ - (James E Keenan, 2 years, 10 months ago) Correct multiple typos.
  -     Also: some grammatical corrections and improvements in text flow.
 
- - (abeltje, 2 years, 9 months ago) Autocommit for distribution Test::Smoke
-   1.70_12 (test)
+ - (abeltje, 2 years, 10 months ago) Autocommit for distribution
+   Test::Smoke 1.70_12 (test)
 
- - (abeltje, 2 years, 9 months ago) Add tsreport.pl to list of scripts.
+ - (abeltje, 2 years, 10 months ago) Add tsreport.pl to list of scripts.
 
- - (abeltje, 2 years, 9 months ago) Autocommit for distribution Test::Smoke
-   1.71 (minor)
+ - (abeltje, 2 years, 10 months ago) Autocommit for distribution
+   Test::Smoke 1.71 (minor)
 
- - (abeltje, 2 years, 9 months ago) Reorganise directory structures...
+ - (abeltje, 2 years, 10 months ago) Reorganise directory structures...
  -     Change `use lib ...` statements
 
  - (abeltje, 2 years, 9 months ago) Fix typo's and (extra)test logic
@@ -159,16 +358,16 @@ Enjoy!
  - (abeltje, 2 years, 9 months ago) Autocommit for distribution Test::Smoke
    1.71_01 (test)
 
- - (James E Keenan, 2 years, 9 months ago) Correct typo in
+ - (James E Keenan, 2 years, 10 months ago) Correct typo in
    Test::Smoke::Syncer::Git.
 
- - (Nigel Horne, 2 years, 2 months ago) Better error message to help
+ - (Nigel Horne, 2 years, 3 months ago) Better error message to help
    diagnose what's wrong
 
- - (James E Keenan, 1 year, 11 months ago) Correct spelling error.
+ - (James E Keenan, 2 years ago) Correct spelling error.
 
- - (abeltje, 1 year, 11 months ago) Autocommit for distribution Test::Smoke
-   1.72 (minor)
+ - (abeltje, 2 years ago) Autocommit for distribution Test::Smoke 1.72
+   (minor)
 
  - (abeltje, 1 year, 10 months ago) Fix another victim of
    'No-dot-in-at-inc'
@@ -185,9 +384,9 @@ Enjoy!
  -     temporary directory.
 
 1.70_10 2017-05-13T15:57:58+02:00 (153b0a1 => abeltje)
- - (abeltje, 2 years, 9 months ago) Merge branch 'rt/39138'
+ - (abeltje, 2 years, 10 months ago) Merge branch 'rt/39138'
 
- - (abeltje, 2 years, 9 months ago) Fix get_avail_w32compilers() by Steve
+ - (abeltje, 2 years, 10 months ago) Fix get_avail_w32compilers() by Steve
    Hay:
  -     Test-Smoke-1.42 fails to detect the ccversion for my MSVC++
  -     installations, which all reside under "C:\Program Files\...". It
@@ -202,16 +401,16 @@ Enjoy!
  -     The attached patch fixes this.
  -     https://rt.cpan.org/Ticket/Display.html?id=54542
 
- - (abeltje, 2 years, 9 months ago) Handle 'development-releases' of
+ - (abeltje, 2 years, 10 months ago) Handle 'development-releases' of
    Test::Harness in core
  -     Sometimes a "_nm" release of Test::Harness in blead, we need to deal
  -     with it. eval("$version") seems the easiest way.
 
 1.70_09 2017-05-12T18:14:37-04:00 (70c7c73 => James E Keenan)
- - (James E Keenan, 2 years, 9 months ago) Correct multiple typos.
+ - (James E Keenan, 2 years, 10 months ago) Correct multiple typos.
  -     Also: some grammatical corrections and improvements in text flow.
 
- - (abeltje, 2 years, 9 months ago) Fix test syncer_rsync.t for Windows
+ - (abeltje, 2 years, 10 months ago) Fix test syncer_rsync.t for Windows
  -     (Cygwin)rsync doesn't understand Windows-paths (C:\Some\Path) but it
    handles UNC-paths (//localhost/C$/Some/Path), so we fix the test.
  -     Left the actual code unchanged, as we normally rsync from a remote
@@ -224,28 +423,28 @@ Enjoy!
  - (James E Keenan, 2 years, 10 months ago) Fix compilation error.
  -     For: https://rt.cpan.org/Ticket/Display.html?id=121283
 
- - (abeltje, 2 years, 9 months ago) Merge branch
+ - (abeltje, 2 years, 10 months ago) Merge branch
    'jkeenan-rt-121283-sendrpt-pl' into pr/sndrpt.pl
 
- - (abeltje, 2 years, 9 months ago) Autocommit for distribution Test::Smoke
-   1.70_08 (test)
+ - (abeltje, 2 years, 10 months ago) Autocommit for distribution
+   Test::Smoke 1.70_08 (test)
 
- - (abeltje, 2 years, 9 months ago) Autocommit for distribution Test::Smoke
-   1.70_09 (test)
+ - (abeltje, 2 years, 10 months ago) Autocommit for distribution
+   Test::Smoke 1.70_09 (test)
 
- - (abeltje, 2 years, 9 months ago) Autocommit for distribution Test::Smoke
-   1.70_08 (test)
+ - (abeltje, 2 years, 10 months ago) Autocommit for distribution
+   Test::Smoke 1.70_08 (test)
 
- - (abeltje, 2 years, 9 months ago) Try to resolve RT-120008 (sync with
+ - (abeltje, 2 years, 10 months ago) Try to resolve RT-120008 (sync with
    git)
  -     removed the `git pull` command and replaced with `git reset --hard
  -     origin/$branch` as advised by Yves.
 
 1.70_06 2017-03-06T19:48:10+01:00 (293dc07 => abeltje)
- - (abeltje, 2 years, 11 months ago) Autocommit for distribution
-   Test::Smoke 1.70_06 (same)
+ - (abeltje, 3 years ago) Autocommit for distribution Test::Smoke 1.70_06
+   (same)
 
- - (H.Merijn Brand - Tux, 3 years, 9 months ago) Replace
+ - (H.Merijn Brand - Tux, 3 years, 10 months ago) Replace
    Test::Smoke::SysInfo with System::Info
 
  - (H.Merijn Brand - Tux, 2 years, 11 months ago) Fix cpuinfo test results
@@ -257,62 +456,67 @@ Enjoy!
  - (abeltje, 2 years, 11 months ago) Merge branch 'System-Info'
 
 1.70_05 2017-01-30T22:45:55+01:00 (0c3df38 => abeltje)
- - (abeltje, 3 years ago) Autocommit for distribution Test::Smoke 1.70_05
+ - (abeltje, 3 years, 1 month ago) Autocommit for distribution Test::Smoke
+   1.70_05
+
+ - (James E Keenan, 3 years, 1 month ago) Correct one typo.
+
+ - (abeltje, 3 years, 1 month ago) Merge branch 'jkeenan-one-typo'
+
+ - (Andrew Fresh, 3 years, 1 month ago) Tests to get_patch from
+   git_version.h
+ -     Because the code supposedly supports that, but it doesn't work.
+
+ - (Andrew Fresh, 3 years, 1 month ago) Return arrayref as expected from
+   get_patch()
+ -     Even when we read the version from git_version.h
 
  - (James E Keenan, 3 years ago) Correct one typo.
 
- - (abeltje, 3 years ago) Merge branch 'jkeenan-one-typo'
-
- - (Andrew Fresh, 3 years ago) Tests to get_patch from git_version.h
- -     Because the code supposedly supports that, but it doesn't work.
-
- - (Andrew Fresh, 3 years ago) Return arrayref as expected from get_patch()
- -     Even when we read the version from git_version.h
-
- - (James E Keenan, 2 years, 11 months ago) Correct one typo.
-
- - (H.Merijn Brand, 2 years, 11 months ago) Merge pull request #29 from
+ - (H.Merijn Brand, 3 years ago) Merge pull request #29 from
    jkeenan/faq-spelling-20170303
  -     Correct one typo.
 
- - (H.Merijn Brand, 2 years, 11 months ago) Merge pull request #27 from
+ - (H.Merijn Brand, 3 years ago) Merge pull request #27 from
    jkeenan/one-typo
  -     Correct one typo.
 
- - (abeltje, 2 years, 11 months ago) Merge branch 'master' of
+ - (abeltje, 3 years ago) Merge branch 'master' of
    https://github.com/afresh1/Test-Smoke into afresh1-master
 
- - (abeltje, 2 years, 11 months ago) Merge branch 'afresh1-master'
-
- - (abeltje, 2 years, 11 months ago) Merge branch 'master' of
-   ssh://github.com/abeltje/Test-Smoke
-
- - (abeltje, 2 years, 11 months ago) Use annotated tags
-
-1.70_04 2017-01-30T22:08:49+01:00 (e956e35 => abeltje)
- - (abeltje, 3 years ago) Autocommit for distribution Test::Smoke 1.70_04
-
- - (abeltje, 3 years ago) Merge branch 'dcollins/normalize_testname' of
-   https://github.com/dcollinsn/Test-Smoke into
-   dcollinsn-dcollins/normalize_testname
-
-1.70_03 2017-01-30T22:06:31+01:00 (a655fa3 => abeltje)
- - (abeltje, 3 years ago) Autocommit for distribution Test::Smoke 1.70_03
+ - (abeltje, 3 years ago) Merge branch 'afresh1-master'
 
  - (abeltje, 3 years ago) Merge branch 'master' of
+   ssh://github.com/abeltje/Test-Smoke
+
+ - (abeltje, 3 years ago) Use annotated tags
+
+1.70_04 2017-01-30T22:08:49+01:00 (e956e35 => abeltje)
+ - (abeltje, 3 years, 1 month ago) Autocommit for distribution Test::Smoke
+   1.70_04
+
+ - (abeltje, 3 years, 1 month ago) Merge branch
+   'dcollins/normalize_testname' of https://github.com/dcollinsn/Test-Smoke
+   into dcollinsn-dcollins/normalize_testname
+
+1.70_03 2017-01-30T22:06:31+01:00 (a655fa3 => abeltje)
+ - (abeltje, 3 years, 1 month ago) Autocommit for distribution Test::Smoke
+   1.70_03
+
+ - (abeltje, 3 years, 1 month ago) Merge branch 'master' of
    ssh://github.com/abeltje/Test-Smoke
 
 1.70_02 2016-05-22T13:07:39+02:00 (47f479f => abeltje)
  - (abeltje, 3 years, 9 months ago) Autocommit for distribution Test::Smoke
    1.70_02 (t)
 
- - (H.Merijn Brand - Tux, 3 years, 5 months ago) Note DISTRIB_RELEASE in
+ - (H.Merijn Brand - Tux, 3 years, 6 months ago) Note DISTRIB_RELEASE in
    SysInfo
  -     (Also available in System::Info)
 
- - (H.Merijn Brand - Tux, 3 years, 5 months ago) Without parens
+ - (H.Merijn Brand - Tux, 3 years, 6 months ago) Without parens
 
- - (H.Merijn Brand - Tux, 3 years, 5 months ago) In Tumbleweed VERSION_ID
+ - (H.Merijn Brand - Tux, 3 years, 6 months ago) In Tumbleweed VERSION_ID
    is the most recent tag
  -	 ANSI_COLOR	     => '0;32',
  -	 BUG_REPORT_URL      => 'https://bugs.opensuse.org',
@@ -331,7 +535,7 @@ Enjoy!
  -	 VERSION_ID	     => 20160913,
  -     Welcome to openSUSE Tumbleweed 20160913 - Kernel \\r (\\l).
 
- - (Dan Collins, 3 years, 3 months ago) RT #118488: Proper normalization
+ - (Dan Collins, 3 years, 4 months ago) RT #118488: Proper normalization
    for tests in cpan/, dist
  -     There is a function that is intended to transform from the
    "stripped"
@@ -341,25 +545,25 @@ Enjoy!
  -     with ext/ or lib/, in which case it prepends only '../'. This patch
  -     adds cpan/ and dist/ to the list of special cases.
 
- - (James E Keenan, 3 years ago) Correct spelling errors.
+ - (James E Keenan, 3 years, 1 month ago) Correct spelling errors.
 
- - (H.Merijn Brand, 3 years ago) Merge pull request #25 from
+ - (H.Merijn Brand, 3 years, 1 month ago) Merge pull request #25 from
    jkeenan/correct-spelling
  -     Correct spelling errors.
 
- - (abeltje, 3 years ago) Rsync from a git-repository should run
+ - (abeltje, 3 years, 1 month ago) Rsync from a git-repository should run
    Porting/make_dot_patch.pl
  -     Pullrequest 18: https://github.com/abeltje/Test-Smoke/pull/18
  -     , implemented in a more general way (imo)
  -     - typo in configsmoke.pl
 
- - (H.Merijn Brand - Tux, 3 years, 5 months ago) Note DISTRIB_RELEASE in
+ - (H.Merijn Brand - Tux, 3 years, 6 months ago) Note DISTRIB_RELEASE in
    SysInfo
  -     (Also available in System::Info)
 
- - (H.Merijn Brand - Tux, 3 years, 5 months ago) Without parens
+ - (H.Merijn Brand - Tux, 3 years, 6 months ago) Without parens
 
- - (H.Merijn Brand - Tux, 3 years, 5 months ago) In Tumbleweed VERSION_ID
+ - (H.Merijn Brand - Tux, 3 years, 6 months ago) In Tumbleweed VERSION_ID
    is the most recent tag
  -	 ANSI_COLOR	     => '0;32',
  -	 BUG_REPORT_URL      => 'https://bugs.opensuse.org',
@@ -378,14 +582,14 @@ Enjoy!
  -	 VERSION_ID	     => 20160913,
  -     Welcome to openSUSE Tumbleweed 20160913 - Kernel \\r (\\l).
 
- - (James E Keenan, 3 years ago) Correct spelling errors.
+ - (James E Keenan, 3 years, 1 month ago) Correct spelling errors.
 
 1.70_01 2016-05-04T00:19:12+02:00 (eca7717 => abeltje)
- - (abeltje, 3 years, 9 months ago) Autocommit for distribution Test::Smoke
-   1.70_01 (test)
+ - (abeltje, 3 years, 10 months ago) Autocommit for distribution
+   Test::Smoke 1.70_01 (test)
 
- - (H.Merijn Brand - Tux, 3 years, 9 months ago) Skip testing git that does
-   not support "git init folder"
+ - (H.Merijn Brand - Tux, 3 years, 10 months ago) Skip testing git that
+   does not support "git init folder"
  -     There might be a higher bound than this, but at least git-1.6.4.2
    does
  -     NOT support this syntax
@@ -415,7 +619,7 @@ Enjoy!
 
  - (H.Merijn Brand - Tux, 3 years, 10 months ago) Spelling error
 
- - (abeltje, 3 years, 9 months ago) Resolve a backward incompatibilty
+ - (abeltje, 3 years, 10 months ago) Resolve a backward incompatibilty
  -     In pre 1.70 Test::Smoke 'sync_type' was the way to specify what sync
  -     method to use. In 1.70 this became 'syncer', now switched back to
  -     'sync_type'.
@@ -491,27 +695,27 @@ Enjoy!
    ssh://github.com/abeltje/Test-Smoke into Belin2015_Aftermath
 
 1.61_11 2015-05-31T12:26:56+02:00 (505f078 => abeltje)
- - (abeltje, 4 years, 8 months ago) Autocommit for distribution Test::Smoke
+ - (abeltje, 4 years, 9 months ago) Autocommit for distribution Test::Smoke
    1.61_11
 
- - (abeltje, 4 years, 8 months ago) BUGFIX: my Windows doesn't support
+ - (abeltje, 4 years, 9 months ago) BUGFIX: my Windows doesn't support
    strftime("%T")
  -     On strawberry it seems POSIX::strftime() has some issues:
  -     %z acts like %Z and %T doesn't work
 
- - (abeltje, 4 years, 8 months ago) ThinkoFIX: Set the correct dependency
+ - (abeltje, 4 years, 9 months ago) ThinkoFIX: Set the correct dependency
  -     For the "browser"-dependency we picked the wrong (and/or)
 
- - (abeltje, 4 years, 8 months ago) MergeFIX: restore MANIFEST
+ - (abeltje, 4 years, 9 months ago) MergeFIX: restore MANIFEST
 
- - (abeltje, 4 years, 8 months ago) BUGFIX: fix
+ - (abeltje, 4 years, 9 months ago) BUGFIX: fix
    a199fafaadf08a1c94c1a1a27f1732269afc0b33
 
 1.61_10 2015-05-31T11:44:01+02:00 (0446a2e => abeltje)
- - (abeltje, 4 years, 8 months ago) Autocommit for distribution Test::Smoke
+ - (abeltje, 4 years, 9 months ago) Autocommit for distribution Test::Smoke
    1.61_10
 
- - (abeltje, 4 years, 8 months ago) TestFIX: another path in a test that
+ - (abeltje, 4 years, 9 months ago) TestFIX: another path in a test that
    failed on MSWin32
 
 1.61_09 2015-05-24T12:16:03+02:00 (2936dc8 => abeltje)
@@ -526,12 +730,12 @@ Enjoy!
 
  - (abeltje, 4 years, 9 months ago) FIX: MANIFEST (new files)
 
- - (abeltje, 4 years, 8 months ago) Fix skip_tests
+ - (abeltje, 4 years, 9 months ago) Fix skip_tests
  -     The 'skip_tests' argument needs to be passed to
    Test::Smoke::App::RunSmoke
 
 1.61_08 2015-05-05T11:27:34+02:00 (0dd7e3e => Abe Timmerman)
- - (Abe Timmerman, 4 years, 9 months ago) Autocommit for distribution
+ - (Abe Timmerman, 4 years, 10 months ago) Autocommit for distribution
    Test::Smoke 1.61_08
 
  - (H.Merijn Brand - Tux, 4 years, 9 months ago) Add DSM-5.2
@@ -547,13 +751,13 @@ Enjoy!
  - (Abe Timmerman, 4 years, 10 months ago) Autocommit for distribution
    Test::Smoke 1.61_07
 
- - (H.Merijn Brand - Tux, 4 years, 9 months ago) SysInfo (CentOS 7.1)
+ - (H.Merijn Brand - Tux, 4 years, 10 months ago) SysInfo (CentOS 7.1)
 
- - (Abe Timmerman, 4 years, 9 months ago) TestFix: different approach
+ - (Abe Timmerman, 4 years, 10 months ago) TestFix: different approach
  -     We only need to test that the fallback directories are at the end of
  -     @INC, not interested in the rest of @INC.
 
- - (Abe Timmerman, 4 years, 9 months ago) TestFIX: problem with IPv6
+ - (Abe Timmerman, 4 years, 10 months ago) TestFIX: problem with IPv6
  -     It lookes like HTTP::Daemon->url resolves back to IPv6 on my
    machine,
  -     and the client gets a 'Connection refused', so now we replace the
@@ -634,13 +838,13 @@ Enjoy!
  - (Abe Timmerman, 4 years, 10 months ago) Autocommit for distribution
    Test::Smoke 1.61_07
 
- - (H.Merijn Brand - Tux, 4 years, 9 months ago) SysInfo (CentOS 7.1)
+ - (H.Merijn Brand - Tux, 4 years, 10 months ago) SysInfo (CentOS 7.1)
 
- - (Abe Timmerman, 4 years, 9 months ago) TestFix: different approach
+ - (Abe Timmerman, 4 years, 10 months ago) TestFix: different approach
  -     We only need to test that the fallback directories are at the end of
  -     @INC, not interested in the rest of @INC.
 
- - (Abe Timmerman, 4 years, 9 months ago) TestFIX: problem with IPv6
+ - (Abe Timmerman, 4 years, 10 months ago) TestFIX: problem with IPv6
  -     It lookes like HTTP::Daemon->url resolves back to IPv6 on my
    machine,
  -     and the client gets a 'Connection refused', so now we replace the
@@ -648,7 +852,7 @@ Enjoy!
    what
  -     CPANtesters make of that.
 
- - (Abe Timmerman, 4 years, 9 months ago) Autocommit for distribution
+ - (Abe Timmerman, 4 years, 10 months ago) Autocommit for distribution
    Test::Smoke 1.61_08
 
  - (H.Merijn Brand - Tux, 4 years, 9 months ago) Add DSM-5.2
@@ -665,39 +869,39 @@ Enjoy!
 
  - (abeltje, 4 years, 9 months ago) FIX: MANIFEST (new files)
 
- - (abeltje, 4 years, 8 months ago) Fix skip_tests
+ - (abeltje, 4 years, 9 months ago) Fix skip_tests
  -     The 'skip_tests' argument needs to be passed to
    Test::Smoke::App::RunSmoke
 
- - (abeltje, 4 years, 8 months ago) Autocommit for distribution Test::Smoke
+ - (abeltje, 4 years, 9 months ago) Autocommit for distribution Test::Smoke
    1.61_10
 
- - (abeltje, 4 years, 8 months ago) TestFIX: another path in a test that
+ - (abeltje, 4 years, 9 months ago) TestFIX: another path in a test that
    failed on MSWin32
 
- - (abeltje, 4 years, 8 months ago) Autocommit for distribution Test::Smoke
+ - (abeltje, 4 years, 9 months ago) Autocommit for distribution Test::Smoke
    1.61_11
 
- - (abeltje, 4 years, 8 months ago) BUGFIX: my Windows doesn't support
+ - (abeltje, 4 years, 9 months ago) BUGFIX: my Windows doesn't support
    strftime("%T")
  -     On strawberry it seems POSIX::strftime() has some issues:
  -     %z acts like %Z and %T doesn't work
 
- - (abeltje, 4 years, 8 months ago) ThinkoFIX: Set the correct dependency
+ - (abeltje, 4 years, 9 months ago) ThinkoFIX: Set the correct dependency
  -     For the "browser"-dependency we picked the wrong (and/or)
 
- - (abeltje, 4 years, 8 months ago) MergeFIX: restore MANIFEST
+ - (abeltje, 4 years, 9 months ago) MergeFIX: restore MANIFEST
 
- - (abeltje, 4 years, 8 months ago) BUGFIX: fix
+ - (abeltje, 4 years, 9 months ago) BUGFIX: fix
    a199fafaadf08a1c94c1a1a27f1732269afc0b33
 
- - (abeltje, 4 years, 8 months ago) Autocommit for distribution Test::Smoke
+ - (abeltje, 4 years, 9 months ago) Autocommit for distribution Test::Smoke
    1.61_12
 
- - (H.Merijn Brand - Tux, 4 years, 5 months ago) Add Redhat Enterprise
+ - (H.Merijn Brand - Tux, 4 years, 6 months ago) Add Redhat Enterprise
    Workstation 6.6 sysinfo
 
- - (H.Merijn Brand - Tux, 4 years, 5 months ago) fix get-lsb output
+ - (H.Merijn Brand - Tux, 4 years, 6 months ago) fix get-lsb output
 
  - (H.Merijn Brand - Tux, 4 years, 2 months ago) Prevent distribution code
    name appearing twice in description
@@ -711,7 +915,8 @@ Enjoy!
  - (H.Merijn Brand - Tux, 4 years, 2 months ago) Comment: two more
    .etc/issue lines
 
- - (H.Merijn Brand - Tux, 4 years ago) Add SysInfo for OpenSUSE Leap
+ - (H.Merijn Brand - Tux, 4 years, 1 month ago) Add SysInfo for OpenSUSE
+   Leap
 
  - (abeltje, 4 years, 9 months ago) FIX: MANIFEST (new files)
 
@@ -741,7 +946,7 @@ Enjoy!
    SysInfo branches from Tux
 
 1.61_03 2014-08-22T14:39:08+03:00 (9ba91d6 => Abe Timmerman)
- - (Abe Timmerman, 5 years ago) Autocommit for distribution Test::Smoke
+ - (Abe Timmerman, 6 years ago) Autocommit for distribution Test::Smoke
    1.61_03
 
  - (H.Merijn Brand - Tux, 5 years ago) Add CentOS-6.5 to distname checks
@@ -771,21 +976,21 @@ Enjoy!
 
  - (H.Merijn Brand - Tux, 5 years ago) Add Oracle Linux Server 7.0
 
- - (H.Merijn Brand - Tux, 4 years, 11 months ago) Add dsm-5.1
+ - (H.Merijn Brand - Tux, 5 years ago) Add dsm-5.1
 
- - (H.Merijn Brand - Tux, 4 years, 10 months ago) Added distcheck for
+ - (H.Merijn Brand - Tux, 4 years, 11 months ago) Added distcheck for
    Debian 8.0 (jessie)
 
- - (H.Merijn Brand - Tux, 4 years, 10 months ago) Add distcheck for
+ - (H.Merijn Brand - Tux, 4 years, 11 months ago) Add distcheck for
    centos-6.6
 
- - (H.Merijn Brand - Tux, 4 years, 10 months ago) notice *folders* in
+ - (H.Merijn Brand - Tux, 4 years, 11 months ago) notice *folders* in
    release info
  -     Most files are - both on SUSE and CentOS - empty in
    /etc/lsb-release.d/
  -     but things might change
 
- - (H.Merijn Brand - Tux, 4 years, 10 months ago) Add openSUSE 11.4 and
+ - (H.Merijn Brand - Tux, 4 years, 11 months ago) Add openSUSE 11.4 and
    more consistent nickname reporting
  -     openSUSE 11.2 "Emerald"	=> openSUSE 11.2 (Emerald)
  -     openSUSE 11.3 "Teal"	=> openSUSE 11.3 (Teal)
@@ -1052,12 +1257,12 @@ Enjoy!
 
  - (H.Merijn Brand - Tux, 6 years ago) Typo in instruction
 
- - (H.Merijn Brand - Tux, 5 years ago) AIX OS version analysis updated
+ - (H.Merijn Brand - Tux, 6 years ago) AIX OS version analysis updated
  -     As of AIX 5.3/ML05, the new "oslevel -s" will output the OS version
    in
  -     4 parts: OS version, TL (previous ML), SP and release date
 
- - (H.Merijn Brand - Tux, 5 years ago) Documentation for AIX OS version
+ - (H.Merijn Brand - Tux, 6 years ago) Documentation for AIX OS version
  -     "oslevel -s" output may say the system is older than it actually is.
  -     It by default reports the most recent consistent level. If a single
  -     fileset is missing  (for example /usr/include files)  at the latest
@@ -1075,18 +1280,18 @@ Enjoy!
  -     bos:bos.rte.install:6.1.9.16: : :C:F:LPP Install Commands: : : : : :
    :0:0:/:1415
 
- - (Abe Timmerman, 5 years ago) Fix nonfatalmessage()
+ - (Abe Timmerman, 6 years ago) Fix nonfatalmessage()
 
- - (abetim, 5 years ago) Pull SysInfo.pm from master.
+ - (abetim, 6 years ago) Pull SysInfo.pm from master.
 
- - (abetim, 5 years ago) Merge remote-tracking branch 'origin/master' into
+ - (abetim, 6 years ago) Merge remote-tracking branch 'origin/master' into
    Lyon2014
  -     Conflicts:
  -	   lib/Test/Smoke/Reporter.pm
 
- - (abetim, 5 years ago) Add files to the MANIFEST
+ - (abetim, 6 years ago) Add files to the MANIFEST
 
- - (Abe Timmerman, 5 years ago) New machine
+ - (Abe Timmerman, 6 years ago) New machine
 
 1.6 2013-05-06T17:15:26+02:00 (0f0e72f => abeltje)
  - (abeltje, 7 years ago) Autocommit for distribution Test::Smoke 1.6
@@ -1305,17 +1510,17 @@ Enjoy!
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@1375
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (hmbrand, 7 years ago) Tony's changes
+ - (hmbrand, 8 years ago) Tony's changes
  -     git-svn-id:
    https://source.test-smoke.org/svn/branches/tux-devel@1379
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (hmbrand, 7 years ago) Deal with space inside the set of dots
+ - (hmbrand, 8 years ago) Deal with space inside the set of dots
  -     git-svn-id:
    https://source.test-smoke.org/svn/branches/tux-devel@1380
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (hmbrand, 7 years ago) Be defensive for versions that might not be
+ - (hmbrand, 8 years ago) Be defensive for versions that might not be
    present during testing
  -     git-svn-id:
    https://source.test-smoke.org/svn/branches/tux-devel@1381
@@ -1578,7 +1783,7 @@ Enjoy!
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
 1.43_01 2010-08-29T21:21:59+00:00 (03c59c8 => abeltje)
- - (abeltje, 9 years ago) * [CHANGE]
+ - (abeltje, 10 years ago) * [CHANGE]
  -	 Update version
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@1283
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
@@ -1619,7 +1824,7 @@ Enjoy!
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@1270
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 9 years ago) * [CHANGE] merge from the Vienna branch
+ - (abeltje, 10 years ago) * [CHANGE] merge from the Vienna branch
  -	 Add (simple) support for smoking from a gitrepo
  -	 Update configsmoke for the 5.13
  -	 Some minor fixes
@@ -1798,12 +2003,12 @@ Enjoy!
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
 1.29_63 2008-08-14T13:03:35+00:00 (6407827 => abeltje)
- - (abeltje, 11 years ago) * [CHANGE]
+ - (abeltje, 12 years ago) * [CHANGE]
  -	 update version number!
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@1197
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 11 years ago) * [PRIVATE]
+ - (abeltje, 12 years ago) * [PRIVATE]
  -	 Small fixes to help the new develop machine
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@1202
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
@@ -1835,7 +2040,7 @@ Enjoy!
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@1195
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 11 years ago) * [CHANGE]
+ - (abeltje, 12 years ago) * [CHANGE]
  -	 update version number!
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@1196
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
@@ -2029,22 +2234,22 @@ Enjoy!
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
 1.20_50 2007-08-30T13:00:48+00:00 (14b07f0 => abeltje)
- - (abeltje, 12 years ago) * [CHANGE]
+ - (abeltje, 13 years ago) * [CHANGE]
  -	 We also need to keep up with devel releases...
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@1075
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 12 years ago) * [CHANGE]
+ - (abeltje, 13 years ago) * [CHANGE]
  -	 FIX: older (< 5.8) perls don't know C<use Exporter 'import';>
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@1080
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 12 years ago) * [CHANGE]
+ - (abeltje, 13 years ago) * [CHANGE]
  -	 FIX: multilocale bldenv_legend() thinko
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@1081
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 12 years ago) * [CHANGE]
+ - (abeltje, 13 years ago) * [CHANGE]
  -	 FIX: missed the 2 new .out files needed by t/reporter.t
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@1087
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
@@ -2121,24 +2326,24 @@ Enjoy!
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@1060
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 12 years ago) * [CHANGE] prompted Liu, XiaoLiang 
+ - (abeltje, 13 years ago) * [CHANGE] prompted Liu, XiaoLiang 
  -	 FIX: use '-version' not '--version' to find a version of 'patch'
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@1067
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 12 years ago) * [CHANGE] prompted by Liu, XiaoLiang
+ - (abeltje, 13 years ago) * [CHANGE] prompted by Liu, XiaoLiang
  -	 FIX: for synctype 'copy' enforce the source-dir to be a directory
  -	 FIX: do not allow the same source and destination dir for synctype
    'copy'
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@1070
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 12 years ago) * [CHANGE] request by Gabor Szabo
+ - (abeltje, 13 years ago) * [CHANGE] request by Gabor Szabo
  -	 Allow for multiple locales per run (needs testing)
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@1071
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
 
- - (abeltje, 12 years ago) * [CHANGE]
+ - (abeltje, 13 years ago) * [CHANGE]
  -	 FIX: undef-bug in the multi-locale code
  -     git-svn-id: https://source.test-smoke.org/svn/Test-Smoke@1074
    f9e6db9c-56bf-0310-a82a-abbfb51efdf0
