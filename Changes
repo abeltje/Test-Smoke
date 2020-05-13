@@ -4,12 +4,16 @@ Changes on 2020-05-13 for repository at:
 
 Enjoy!
 
-1.76_01 2020-05-13T15:51:25+02:00 (7b4e2ba => Abe Timmerman)
+1.77 2020-05-13T20:51:42+02:00 (1ed68da => Abe Timmerman)
  - (Abe Timmerman, 58 seconds ago) Autocommit for distribution Test::Smoke
+   1.77 (minor)
+
+1.76_01 2020-05-13T15:51:25+02:00 (c5bf6ca => Abe Timmerman)
+ - (Abe Timmerman, 5 hours ago) Autocommit for distribution Test::Smoke
    1.76_01 (test)
 
 1.76 2020-05-12T20:54:37+02:00 (0801dd6 => Abe Timmerman)
- - (Abe Timmerman, 19 hours ago) Autocommit for distribution Test::Smoke
+ - (Abe Timmerman, 24 hours ago) Autocommit for distribution Test::Smoke
    1.76 (minor)
 
  - (H.Merijn Brand, 1 year, 1 month ago) Add support for -Uxx and -Dxx=y on
@@ -35,13 +39,13 @@ Enjoy!
 
  - (H.Merijn Brand - Tux, 1 year, 1 month ago) Also allow -A options
 
- - (Abe Timmerman, 34 minutes ago) Add a Serialiser
+ - (Abe Timmerman, 6 hours ago) Add a Serialiser
  -     This is a simple serialiser, I still have to hunt the rest of the
    code
  -     for uses of Data::Dumper type serialisations and see if I can change
  -     them.
 
- - (Abe Timmerman, 29 minutes ago) Add a '--pass_option' switch to the
+ - (Abe Timmerman, 6 hours ago) Add a '--pass_option' switch to the
    runsmoke-applet
  -     This (repeatable) option will let one pass extra options to
    Configure
