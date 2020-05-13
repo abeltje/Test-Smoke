@@ -93,3 +93,4 @@ vmsmake
 w32args
 w32cc
 w32make
+pass_option
