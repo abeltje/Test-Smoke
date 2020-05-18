@@ -124,6 +124,7 @@ my %TEST_REQUIRES = (
     'Test::Fatal'      => 0,
     'HTTP::Daemon'     => 0,
     'HTTP::Message'    => 0,
+    'URI'              => 0,
 );
 
 my $test_requires = (

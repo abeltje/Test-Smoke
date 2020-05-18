@@ -19,6 +19,7 @@ use Test::Smoke::Util::FindHelpers 'has_module';
 if (!has_module('HTTP::Daemon')) {
     plan skip_all => "Need 'HTTP::Daemon' for this test!";
 }
+require URI;
 require HTTP::Daemon;
 require HTTP::Status; HTTP::Status->import('RC_OK', 'RC_NOT_IMPLEMENTED');
 require HTTP::Response;
@@ -32,8 +33,24 @@ my $timeout = 60;
 my $jsnfile = 'testsuite.jsn';
 {
     $daemon = HTTP::Daemon->new() || die "Could not initialize a Daemon";
-    # IPv6 doesn't work, so force IPv4 localhost
-    ($url = $daemon->url) =~ s{(http://)([^:]+)}{${1}127.0.0.1};
+    $url = URI->new($daemon->url);
+    note(
+        "HTTP::Daemon ($HTTP::Daemon::VERSION): ",
+        $daemon->sockhost eq '::' ? "IPv6" : "IPv4",
+        " (" , $url->host, ")"
+    );
+
+    # Some sockets are exclusive v4 or v6
+    # IPv6 doesn't work, so force IPv4 localhost HTTP::Daemon < 6.05
+    if ($HTTP::Daemon::VERSION <= 6.07) {
+        # Check $daemon->sockhost for either '0.0.0.0' (ipv4) or '::' (ipv6)
+        if ($daemon->sockhost eq '::') {
+            $url->host('[::1]');
+        }
+        else {
+            $url->host('127.0.0.1');
+        }
+    }
 
     $pid = fork();
     if ($pid) { # Continue
@@ -145,6 +162,8 @@ SKIP: {
 
 SKIP: {
     skip("Could not load HTTP::Lite", 3) if ! has_module('HTTP::Lite');
+    skip("Known bug (RT#100422) in HTTP::Lite: no ipv6 addresses", 3)
+        if $daemon->sockhost eq '::';
 
     my $poster = Test::Smoke::Poster->new(
         'HTTP::Lite',
