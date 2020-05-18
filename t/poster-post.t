@@ -5,8 +5,6 @@ $|++;
 # fork() and JSON::XS don't go well together on Windows
 BEGIN { $ENV{PERL_JSON_BACKEND} = 'JSON::PP' if $^O eq 'MSWin32'; }
 
-use fallback 'inc';
-
 use Test::More;
 use Test::NoWarnings ();
 

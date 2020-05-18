@@ -16,7 +16,6 @@ Test::Smoke::Util::FindHelpers - Functions to help find Helpers (modules/bins)
 
 use Config;
 use Test::Smoke::Util 'whereis';
-use fallback 'inc';
 
 =head1 EXPORT_OK/EXPORT_TAGS
 
