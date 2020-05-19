@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 use strict;
-use 5.008003;
+use v5.10;
 use ExtUtils::MakeMaker;
 use Config;
 
@@ -183,6 +183,7 @@ $mmver > 6.46 and $wm{META_ADD} = {
         x_IRC      => "irc://irc.perl.org/#smoke",
     },
 };
+$mmver >= 6.48 and $wm{MIN_PERL_VERSION} = '5.010';
 
 WriteMakefile(
     %wm,
