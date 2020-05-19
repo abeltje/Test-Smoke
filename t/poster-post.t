@@ -113,7 +113,7 @@ SKIP: {
     ok(write_json($poster->json_filename, $sysinfo), "write_json");
     my $response = eval { $poster->post() };
     $response = $@ if $@;
-    is($response, 42, "Got id (LWP::Useragent: $url/report)")
+    is($response, 42, "Got id (LWP::Useragent: ${url}report)")
         or diag(explain({poster => $poster, response => $response}));
 
     unlink $poster->json_filename;
@@ -127,8 +127,8 @@ SKIP: {
         'curl',
         ddir        => 't',
         jsnfile     => 'testsuite.jsn',
-        smokedb_url => "${url}report",
-        curlbin     => $curlbin,
+        smokedb_url => qq{"${url}report"},
+        curlbin     => "$curlbin --globoff", # older curls and v6-addresses
         v           => $debug ? 2 : 0,
     );
     isa_ok($poster, 'Test::Smoke::Poster::Curl');
@@ -136,7 +136,7 @@ SKIP: {
     ok(write_json($poster->json_filename, $sysinfo), "write_json");
     my $response = eval { $poster->post() };
     $response = $@ if $@;
-    is($response, 42, "Got id (curl: $url/report)")
+    is($response, 42, "Got id (curl: ${url}report)")
         or diag(explain({poster => $poster, response => $response}));
 
     unlink $poster->json_filename;
@@ -144,6 +144,8 @@ SKIP: {
 
 SKIP: {
     skip("Could not load HTTP::Tiny", 3) if ! has_module('HTTP::Tiny');
+    skip("HTTP::Tiny too old $HTTP::Tiny::VERSION (IPv6 support >= 0.042)", 3)
+        if $HTTP::Tiny::VERSION < 0.042 and $daemon->sockhost eq '::';
 
     my $poster = Test::Smoke::Poster->new(
         'HTTP::Tiny',
@@ -157,7 +159,7 @@ SKIP: {
     ok(write_json($poster->json_filename, $sysinfo), "write_json");
     my $response = eval { $poster->post() };
     $response = $@ if $@;
-    is($response, 42, "Got id (HTTP::Tiny: $url/report")
+    is($response, 42, "Got id (HTTP::Tiny: ${url}report")
         or diag(explain({poster => $poster, response => $response}));
 
     unlink $poster->json_filename;
