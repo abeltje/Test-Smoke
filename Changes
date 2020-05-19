@@ -4,15 +4,28 @@ Changes on 2020-05-19 for repository at:
 
 Enjoy!
 
-1.77_02 2020-05-19T15:20:21+02:00 (ef865f8 => Abe Timmerman)
- - (Abe Timmerman, 65 seconds ago) Autocommit for distribution Test::Smoke
+1.77_03 2020-05-19T23:11:59+02:00 (0999280 => Abe Timmerman)
+ - (Abe Timmerman, 63 seconds ago) Autocommit for distribution Test::Smoke
+   1.77_03 (test)
+
+1.77_02 2020-05-19T15:20:21+02:00 (e978fd4 => Abe Timmerman)
+ - (Abe Timmerman, 8 hours ago) Autocommit for distribution Test::Smoke
    1.77_02 (test)
 
-1.77_01 2020-05-18T18:05:00+02:00 (f2d8e20 => Abe Timmerman)
- - (Abe Timmerman, 21 hours ago) Autocommit for distribution Test::Smoke
-   1.77_01 (test)
+ - (Abe Timmerman, 8 hours ago) State MIN_PERL_VERSION in Makefile.PL
+ -     6 years overdue... sorry Neil
 
- - (Abe Timmerman, 3 hours ago) Test::Smoke::LogMixin: no sprintf without
+ - (Abe Timmerman, 7 hours ago) RT#132507: Remove the version number
+
+ - (Abe Timmerman, 16 minutes ago) More poster-post problems (curl)
+ -     Older curls do need some help to understand the 'http://[::1]:54321'
+ -     syntax, so quote the argument and use the '--globoff' switch
+
+ - (Abe Timmerman, 13 minutes ago) Merge branch
+   'cleanup/remove_support_HTTP_Lite'
+
+1.77_01 2020-05-19T11:52:30+02:00 (d959cb4 => Abe Timmerman)
+ - (Abe Timmerman, 11 hours ago) Test::Smoke::LogMixin: no sprintf without
    arguments
  -     The log_* routines use the sprintf() way of creating log-lines. When
  -     there are no arguments, there is no need to use sprintf() and risk
@@ -20,7 +33,7 @@ Enjoy!
    signs.
  -     (I ran into this with the output of `git clone`)
 
- - (Abe Timmerman, 2 hours ago) Test::Smoke::Syncer::Git: fix problem with
+ - (Abe Timmerman, 10 hours ago) Test::Smoke::Syncer::Git: fix problem with
    the branchfile
  -     The first line was read but not chomp()ed, so if one had
    (mistakenly)
@@ -30,61 +43,24 @@ Enjoy!
    out.
  -     I hope that this also resolves part of RT#128950
 
- - (Abe Timmerman, 38 minutes ago) Prefer JSON::PP over JSON::XS
+ - (Abe Timmerman, 8 hours ago) Prefer JSON::PP over JSON::XS
 
- - (Abe Timmerman, 35 minutes ago) Provide better flow and diagnostics for
-   the Posters
+ - (Abe Timmerman, 8 hours ago) Provide better flow and diagnostics for the
+   Posters
  -     Untangle the actual POST and json-decode in the `post`-method.
  -     Also make the clients die from the `_post_data`-method if the
    request
  -     didn't return a 2xx.
 
- - (Abe Timmerman, 37 minutes ago) Provide better diagnostics on failure
-   with TEST_VERBOSE
+ - (Abe Timmerman, 8 hours ago) Provide better diagnostics on failure with
+   TEST_VERBOSE
  -     This provides invalid TAP, but compile-errors are worse!
 
-1.77 2020-05-13T20:51:42+02:00 (1c81252 => Abe Timmerman)
- - (Abe Timmerman, 6 days ago) Autocommit for distribution Test::Smoke 1.77
-   (minor)
-
- - (H.Merijn Brand - Tux, 5 days ago) The core development people have
-   asked to NOT set $PERL_UNICODE
-
- - (Abe Timmerman, 5 days ago) Remove the Mail::Sendmail module from this
-   distribution
- -     1) p5p no longer prefers mailing reports, so there is no need to
-   ensure
- -     mail (mostly on non-unixy platforms)
- -     2) us distributing the way too old version of this module just
-   confuses
- -     the CPAN-indexer, so we shouldn't!
-
- - (Abe Timmerman, 22 hours ago) RT#132642: newer HTTP::Daemon broke my
-   workaround
- -     I used a workaround that replaced the hostname-part in $daemon->url
-   with
- -     the localhost IPv4 address (127.0.0.1).
- -     From HTTP::Daemon 6.05 they started using IO::Socket::IP that treats
-   the
- -     IPv6 differently and on some platforms exclusively (so IPv4 doesn't
-   work
- -     on that socket).
- -     From the [comments
- -     in](https://github.com/libwww-perl/HTTP-Daemon/pull/40) I took the
-   test
- -     for `$daemon->sockhost` to determine IPv4 or IPv6, and now
- -     replace the host part of the url with the correct address for
-   localhost.
- -     In the hope that HTTP::Daemon 6.08 will give a usable `$daemon->url`
-
- - (Abe Timmerman, 21 hours ago) Remove fallback, after removing
-   Mail::Sendmail
-
- - (Abe Timmerman, 21 hours ago) Merge branch 'cleanup/remove_fallback'
-
- - (Abe Timmerman, 21 hours ago) Merge branch 'tux/no-more-PERL_UNICODE'
-
- - (Abe Timmerman, 21 hours ago) Merge branch 'fix/http_daemon_issue'
+1.77 2020-05-18T18:55:53+02:00 (046d80a => Abe Timmerman)
+ - (Abe Timmerman, 28 hours ago) Remove support for HTTP::Lite
+ -     We ran into a bug for HTTP::Lite that was reported 6 years ago, that
+ -     will not be fixed anymore. No need to keep support for this module
+ -     around now that HTTP::Tiny is in core (>= 5.14).
 
 1.76_01 2020-05-13T15:51:25+02:00 (c5bf6ca => Abe Timmerman)
  - (Abe Timmerman, 6 days ago) Autocommit for distribution Test::Smoke
