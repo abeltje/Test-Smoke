@@ -51,7 +51,6 @@ lib/Test/Smoke/Policy.pm
 lib/Test/Smoke/Poster.pm
 lib/Test/Smoke/Poster/Base.pm
 lib/Test/Smoke/Poster/Curl.pm
-lib/Test/Smoke/Poster/HTTP_Lite.pm
 lib/Test/Smoke/Poster/HTTP_Tiny.pm
 lib/Test/Smoke/Poster/LWP_UserAgent.pm
 lib/Test/Smoke/Reporter.pm

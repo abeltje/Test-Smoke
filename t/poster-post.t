@@ -165,28 +165,6 @@ SKIP: {
     unlink $poster->json_filename;
 }
 
-SKIP: {
-    skip("Could not load HTTP::Lite", 3) if ! has_module('HTTP::Lite');
-    skip("Known bug (RT#100422) in HTTP::Lite: no ipv6 addresses", 3)
-        if $daemon->sockhost eq '::';
-
-    my $poster = Test::Smoke::Poster->new(
-        'HTTP::Lite',
-        ddir        => 't',
-        jsnfile     => 'testsuite.jsn',
-        smokedb_url => "${url}report",
-        v           => $debug ? 2 : 0,
-    );
-    isa_ok($poster, 'Test::Smoke::Poster::HTTP_Lite');
-
-    ok(write_json($poster->json_filename, $sysinfo), "write_json");
-    my $response = eval { $poster->post() };
-    $response = $@ if $@;
-    is($response, 42, "Got id");
-
-    unlink $poster->json_filename;
-}
-
 Test::NoWarnings::had_no_warnings();
 $Test::NoWarnings::do_end_test = 0;
 done_testing();
