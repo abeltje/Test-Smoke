@@ -1,3 +1,4 @@
+#! perl -w
 use strict;
 
 use lib 't';
@@ -11,23 +12,24 @@ use Cwd 'abs_path';
 use File::Temp 'tempdir';
 
 my $gitbin = whereis('git');
-plan $gitbin ? ('no_plan') : (skip_all => 'No gitbin found');
+plan skip_all => 'No gitbin found' if !$gitbin;
 
 my $verbose = $ENV{SMOKE_DEBUG} ? 3 : $ENV{TEST_VERBOSE} ? $ENV{TEST_VERBOSE} : 0;
 my $git = Test::Smoke::Util::Execute->new(command => $gitbin, verbose => $verbose);
 (my $gitversion = $git->run('--version')) =~ s/\s*\z//;
 $gitversion =~ s/^\s*git\s+version\s+//;
-pass("Git version $gitversion");
+
+plan skip_all => "Git version '$gitversion' is too old"
+    if ($gitversion =~ m/^1\.([0-5]|6\.[0-4])/);
 
 my $cwd = abs_path();
 my $tmpdir = tempdir(CLEANUP => ($ENV{SMOKE_DEBUG} ? 0 : 1));
 my $upstream = catdir($tmpdir, 'tsgit');
 my $playground = catdir($tmpdir, 'playground');
+my $branchfile = catfile($tmpdir, 'default.gitbranch');
 
-if ($gitversion =~ m/^1\.([0-5]|6\.[0-4])/) {
-    diag "Git version $gitversion is too old";
-}
-else {
+{
+    pass("Git version $gitversion");
     # Set up a basic git repository
     $git->run(init => $upstream);
     is($git->exitcode, 0, "git init $upstream");
@@ -50,23 +52,30 @@ print <>;
     $git->run(commit => '-m', "'We need a first file committed'", '2>&1');
 
     chdir catdir(updir, updir);
+    put_file("master\n" => $branchfile);
     mkpath($playground);
     {
         my $syncer = Test::Smoke::Syncer->new(
             git => (
-                gitbin      => $gitbin,
-                gitorigin   => $upstream,
-                gitdfbranch => 'master',
-                gitdir      => catdir($playground, 'git-perl'),
-                ddir        => catdir($playground, 'perl-current'),
-                v           => $verbose,
+                gitbin        => $gitbin,
+                gitorigin     => $upstream,
+                gitdfbranch   => 'blead',
+                gitbranchfile => $branchfile,
+                gitdir        => catdir($playground, 'git-perl'),
+                ddir          => catdir($playground, 'perl-current'),
+                v             => $verbose,
             ),
         );
         isa_ok($syncer, 'Test::Smoke::Syncer::Git');
         is(
             $syncer->{gitdfbranch},
-            'master',
+            'blead',
             "  Right defaultbranch: $syncer->{gitdfbranch}"
+        );
+        is(
+            $syncer->get_git_branch,
+            'master',
+            "  from branchfile: chomp()ed value"
         );
 
         $syncer->sync();
@@ -104,7 +113,7 @@ print <>;
         put_file('new content' => ($playground, qw/perl-current first.file/));
 
         # Change to 'branch' and sync
-        $syncer->{gitdfbranch} = 'smoke-me';
+        put_file('smoke-me' => $branchfile);
         $syncer->sync();
         ok(
             -e catfile(catdir($playground, 'perl-current'), 'branch_file'),
@@ -119,8 +128,10 @@ print <>;
     }
 }
 
+done_testing();
+
 END {
     chdir $cwd;
-    note("$playground: ", rmtree($playground, $ENV{TEST_VERBOSE}, 0));
-    note("$upstream: ", rmtree($upstream, $ENV{TEST_VERBOSE}, 0));
+    note("$playground: ", rmtree($playground, $ENV{SMOKE_DEBUG}, 0));
+    note("$upstream: ", rmtree($upstream, $ENV{SMOKE_DEBUG}, 0));
 }
