@@ -20,9 +20,9 @@ BEGIN {
 
 use Test::Simple tests => scalar @to_compile;
 
-my $dev_null = devnull();
+my $redirect1 = $ENV{TEST_VERBOSE} ? '' : '>' . devnull();
 
 foreach my $src ( @to_compile ) {
-    ok( system( qq{$^X  "-Ilib" "-c" "$src" > $dev_null 2>&1} ) == 0,
+    ok( system( qq{$^X  "-Ilib" "-wc" "$src" $redirect1 2>&1} ) == 0,
         "perl -c '$src'" );
 }
