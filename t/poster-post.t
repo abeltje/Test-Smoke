@@ -113,7 +113,8 @@ SKIP: {
     ok(write_json($poster->json_filename, $sysinfo), "write_json");
     my $response = eval { $poster->post() };
     $response = $@ if $@;
-    is($response, 42, "Got id");
+    is($response, 42, "Got id (LWP::Useragent: $url/report)")
+        or diag(explain({poster => $poster, response => $response}));
 
     unlink $poster->json_filename;
 }
@@ -135,7 +136,8 @@ SKIP: {
     ok(write_json($poster->json_filename, $sysinfo), "write_json");
     my $response = eval { $poster->post() };
     $response = $@ if $@;
-    is($response, 42, "Got id");
+    is($response, 42, "Got id (curl: $url/report)")
+        or diag(explain({poster => $poster, response => $response}));
 
     unlink $poster->json_filename;
 }
@@ -155,7 +157,8 @@ SKIP: {
     ok(write_json($poster->json_filename, $sysinfo), "write_json");
     my $response = eval { $poster->post() };
     $response = $@ if $@;
-    is($response, 42, "Got id");
+    is($response, 42, "Got id (HTTP::Tiny: $url/report")
+        or diag(explain({poster => $poster, response => $response}));
 
     unlink $poster->json_filename;
 }
