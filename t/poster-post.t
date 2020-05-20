@@ -1,5 +1,6 @@
 #! perl -w
 use strict;
+use version;
 $|++;
 
 # fork() and JSON::XS don't go well together on Windows
@@ -145,7 +146,8 @@ SKIP: {
 SKIP: {
     skip("Could not load HTTP::Tiny", 3) if ! has_module('HTTP::Tiny');
     skip("HTTP::Tiny too old $HTTP::Tiny::VERSION (IPv6 support >= 0.042)", 3)
-        if $HTTP::Tiny::VERSION < 0.042 and $daemon->sockhost eq '::';
+        if    $daemon->sockhost eq '::'
+          and version->parse($HTTP::Tiny::VERSION) < version->parse("0.042");
 
     my $poster = Test::Smoke::Poster->new(
         'HTTP::Tiny',
