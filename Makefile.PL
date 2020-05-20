@@ -96,7 +96,7 @@ else {
     $extra_deps{'JSON::XS'} = 0;
 }
 my %posters;
-my @ua_clients = qw/HTTP::Tiny LWP::UserAgent HTTP::Lite/;
+my @ua_clients = qw/HTTP::Tiny LWP::UserAgent/;
 for my $poster (@ua_clients) {
     eval "require $poster;";
     if ($@) { $posters{$poster} = 0 }
