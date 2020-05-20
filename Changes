@@ -4,15 +4,23 @@ Changes on 2020-05-20 for repository at:
 
 Enjoy!
 
-1.77_04 2020-05-20T12:28:49+02:00 (604e26a => Abe Timmerman)
- - (Abe Timmerman, 64 seconds ago) Autocommit for distribution Test::Smoke
+1.78 2020-05-20T16:50:59+02:00 (d4bd262 => Abe Timmerman)
+ - (Abe Timmerman, 65 seconds ago) Autocommit for distribution Test::Smoke
+   1.78 (minor)
+
+1.77_04 2020-05-20T12:28:49+02:00 (9c4724d => Abe Timmerman)
+ - (Abe Timmerman, 4 hours ago) Autocommit for distribution Test::Smoke
    1.77_04 (test)
 
+ - (Abe Timmerman, 6 minutes ago) More cleanup of HTTP::Lite: 28f09320
+   wasn't enough
+ -     We really dropped support for HTTP::Lite
+
 1.77_03 2020-05-19T23:11:59+02:00 (40678ef => Abe Timmerman)
- - (Abe Timmerman, 13 hours ago) Autocommit for distribution Test::Smoke
+ - (Abe Timmerman, 18 hours ago) Autocommit for distribution Test::Smoke
    1.77_03 (test)
 
- - (Abe Timmerman, 7 minutes ago)  More poster-post problems (HTTP::Tiny)
+ - (Abe Timmerman, 4 hours ago)  More poster-post problems (HTTP::Tiny)
  -	IPv6 is not supported in HTTP::Tiny < 0.042. Alas 5.24.[1-4]
    shipped
  -	with a DEV-version of the module. We must now use
@@ -20,23 +28,23 @@ Enjoy!
  -	compare `$HTTP::Tiny::VERSION`
 
 1.77_02 2020-05-19T15:20:21+02:00 (e978fd4 => Abe Timmerman)
- - (Abe Timmerman, 21 hours ago) Autocommit for distribution Test::Smoke
+ - (Abe Timmerman, 26 hours ago) Autocommit for distribution Test::Smoke
    1.77_02 (test)
 
- - (Abe Timmerman, 21 hours ago) State MIN_PERL_VERSION in Makefile.PL
+ - (Abe Timmerman, 25 hours ago) State MIN_PERL_VERSION in Makefile.PL
  -     6 years overdue... sorry Neil
 
- - (Abe Timmerman, 20 hours ago) RT#132507: Remove the version number
+ - (Abe Timmerman, 25 hours ago) RT#132507: Remove the version number
 
- - (Abe Timmerman, 14 hours ago) More poster-post problems (curl)
+ - (Abe Timmerman, 18 hours ago) More poster-post problems (curl)
  -     Older curls do need some help to understand the 'http://[::1]:54321'
  -     syntax, so quote the argument and use the '--globoff' switch
 
- - (Abe Timmerman, 14 hours ago) Merge branch
+ - (Abe Timmerman, 18 hours ago) Merge branch
    'cleanup/remove_support_HTTP_Lite'
 
 1.77_01 2020-05-19T11:52:30+02:00 (d959cb4 => Abe Timmerman)
- - (Abe Timmerman, 25 hours ago) Test::Smoke::LogMixin: no sprintf without
+ - (Abe Timmerman, 29 hours ago) Test::Smoke::LogMixin: no sprintf without
    arguments
  -     The log_* routines use the sprintf() way of creating log-lines. When
  -     there are no arguments, there is no need to use sprintf() and risk
@@ -44,7 +52,7 @@ Enjoy!
    signs.
  -     (I ran into this with the output of `git clone`)
 
- - (Abe Timmerman, 23 hours ago) Test::Smoke::Syncer::Git: fix problem with
+ - (Abe Timmerman, 28 hours ago) Test::Smoke::Syncer::Git: fix problem with
    the branchfile
  -     The first line was read but not chomp()ed, so if one had
    (mistakenly)
@@ -54,16 +62,16 @@ Enjoy!
    out.
  -     I hope that this also resolves part of RT#128950
 
- - (Abe Timmerman, 22 hours ago) Prefer JSON::PP over JSON::XS
+ - (Abe Timmerman, 26 hours ago) Prefer JSON::PP over JSON::XS
 
- - (Abe Timmerman, 22 hours ago) Provide better flow and diagnostics for
+ - (Abe Timmerman, 26 hours ago) Provide better flow and diagnostics for
    the Posters
  -     Untangle the actual POST and json-decode in the `post`-method.
  -     Also make the clients die from the `_post_data`-method if the
    request
  -     didn't return a 2xx.
 
- - (Abe Timmerman, 22 hours ago) Provide better diagnostics on failure with
+ - (Abe Timmerman, 26 hours ago) Provide better diagnostics on failure with
    TEST_VERBOSE
  -     This provides invalid TAP, but compile-errors are worse!
 
