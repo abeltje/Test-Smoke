@@ -2,7 +2,7 @@ Changes
 MANIFEST			This list of files
 MANIFEST.SKIP
 Makefile.PL
-README
+README.pod
 ReleaseNotes
 bin/W32Configure.pl
 bin/archiverpt.pl
