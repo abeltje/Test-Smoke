@@ -46,7 +46,7 @@ For the mirror-repository we do:
 
 For the working-repository we do:
 
-    git clone $gitdir $ddir # if not set up
+    git clone --local $gitdir $ddir # if not set up
     git reset --hard HEAD
     git clean -dfx
     git fetch --all
@@ -101,7 +101,7 @@ sub sync {
     if ( ! -d $self->{ddir} || ! -d catdir($self->{ddir}, '.git') ) {
         # It needs to be empty ...
         my $cloneout = $gitbin->run(
-            clone => $self->{gitdir},
+            clone => '--local' => $self->{gitdir},
             $self->{ddir},
             '2>&1'
         );
