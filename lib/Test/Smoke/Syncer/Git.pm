@@ -36,17 +36,18 @@ Do the actual syncing.
 
 There are 2 repositories, they both need to be updated:
 
-The first (proxy) repository has the github.com/Perl repository as its
+The first (mirror) repository has the github.com/Perl repository as its
 (origin) remote. The second repository is used to run the smoker from.
 
-For the proxy-repository we do:
+For the mirror-repository we do:
 
-    git fetch --all
-    git remote prune origin
-    git reset --hard origin/$gitbranch
+    git clone --mirror $gitorigin $gitdir # if not set up
+    git remote update --prune
 
 For the working-repository we do:
 
+    git clone $gitdir $ddir # if not set up
+    git reset --hard HEAD
     git clean -dfx
     git fetch --all
     git reset --hard origin/$gitbranch
@@ -62,10 +63,20 @@ sub sync {
     );
     use Carp;
     my $cwd = cwd();
+
+    # Clean up if we weren't using a "bare" repo previously
+    if ( -d catdir($self->{gitdir}, '.git') ) {
+        require File::Path;
+        File::Path::remove_tree( $self->{gitdir}, {
+            verbose => $self->verbose,
+        } );
+        $self->log_debug("[Removed legacy gitdir]: $self->{gitdir}");
+    }
+
     # Handle the proxy-clone
-    if ( ! -d $self->{gitdir} || ! -d catdir($self->{gitdir}, '.git') ) {
+    if ( ! -d $self->{gitdir} || ! -d catdir($self->{gitdir}, 'objects') ) {
         my $cloneout = $gitbin->run(
-            clone => $self->{gitorigin},
+            clone => '--mirror' => $self->{gitorigin},
             $self->{gitdir},
             '2>&1'
         );
@@ -75,18 +86,13 @@ sub sync {
         $self->log_debug("[git clone from $self->{gitorigin}]: $cloneout");
     }
 
-    my $gitbranch = $self->get_git_branch;
     chdir $self->{gitdir} or croak("Cannot chdir($self->{gitdir}): $!");
     $self->log_debug("chdir($self->{gitdir})");
 
     my $gitout = $gitbin->run(remote => 'update', '--prune', '2>&1');
     $self->log_debug("gitorigin(update --prune): $gitout");
 
-    $gitout = $gitbin->run(checkout => $gitbranch, '2>&1');
-    $self->log_debug("gitorigin(checkout): $gitout");
-
-    $gitout = $gitbin->run(reset => '--hard', "origin/$gitbranch", '2>&1');
-    $self->log_debug("gitorigin(reset --hard): $gitout");
+    my $gitbranch = $self->get_git_branch;
 
     # Now handle the working-clone
     chdir $cwd or croak("Cannot chdir($cwd): $!");
@@ -95,7 +101,7 @@ sub sync {
     if ( ! -d $self->{ddir} || ! -d catdir($self->{ddir}, '.git') ) {
         # It needs to be empty ...
         my $cloneout = $gitbin->run(
-            clone         => $self->{gitdir},
+            clone => $self->{gitdir},
             $self->{ddir},
             '2>&1'
         );
@@ -117,8 +123,8 @@ sub sync {
     $self->log_debug("working-dir(clean -dfx): $gitout");
 
     # update from origin
-    $gitout = $gitbin->run(fetch => 'origin', '2>&1');
-    $self->log_debug("working-dir(fetch origin): $gitout");
+    $gitout = $gitbin->run(fetch => '--all', '2>&1');
+    $self->log_debug("working-dir(fetch --all): $gitout");
 
     # now checkout the branch we want smoked
     $gitout = $gitbin->run(checkout => $gitbranch, '2>&1');
