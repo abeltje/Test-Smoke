@@ -1,5 +1,8 @@
 #! /usr/bin/perl -w
 use strict;
+select(STDERR);
+$|++;
+select(STDOUT);
 $|++;
 
 use File::Spec::Functions;

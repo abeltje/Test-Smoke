@@ -1,5 +1,8 @@
 #! /usr/bin/perl -w
 use strict;
+select(STDERR);
+$| = 1;
+select(STDOUT);
 $| = 1;
 
 # $Id$

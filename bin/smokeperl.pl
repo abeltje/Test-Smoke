@@ -3,6 +3,9 @@
 eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}'
     if 0; # not running under some shell
 use strict;
+select(STDERR);
+$|=1;
+select(STDOUT);
 $|=1;
 
 # $Id$
