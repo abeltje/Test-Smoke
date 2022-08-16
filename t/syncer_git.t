@@ -27,11 +27,12 @@ my $tmpdir = tempdir(CLEANUP => ($ENV{SMOKE_DEBUG} ? 0 : 1));
 my $upstream = catdir($tmpdir, 'tsgit');
 my $playground = catdir($tmpdir, 'playground');
 my $branchfile = catfile($tmpdir, 'default.gitbranch');
+my $branchname = 'main'; # instead of "master" to prevent warnings
 
 {
     pass("Git version $gitversion");
     # Set up a basic git repository
-    $git->run(init => $upstream);
+    $git->run(init => '-b', $branchname, $upstream);
     is($git->exitcode, 0, "git init $upstream");
 
     mkpath("$upstream/Porting");
@@ -52,7 +53,7 @@ print <>;
     $git->run(commit => '-m', "'We need a first file committed'", '2>&1');
 
     chdir catdir(updir, updir);
-    put_file("master\n" => $branchfile);
+    put_file("$branchname\n" => $branchfile);
     mkpath($playground);
     {
         my $syncer = Test::Smoke::Syncer->new(
@@ -74,7 +75,7 @@ print <>;
         );
         is(
             $syncer->get_git_branch,
-            'master',
+            $branchname,
             "  from branchfile: chomp()ed value"
         );
 
