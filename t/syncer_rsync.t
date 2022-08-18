@@ -90,9 +90,12 @@ SKIP: {
     (my $gitversion = $git->run('--version')) =~ s/git version (\S+).+/$1/si;
     put_file($gitversion => 'first.file');
     $git->run(add => 'first.file');
+    is($git->exitcode, 0, "git add first.file");
     put_file("#! $^X -w\nsystem q/cat first.file/" => qw/Porting make_dot_patch.pl/);
     $git->run(add => 'Porting/make_dot_patch.pl');
+    is($git->exitcode, 0, "git add Porting/make_dot_patch.pl");
     $git->run(commit => '-m', "'We need a first file committed'");
+    is($git->exitcode, 0, "git commit");
 
     my $rsync_bin = whereis('rsync', $verbose);
     skip "No rsync binary found...", 3 if !$rsync_bin;

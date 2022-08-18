@@ -39,6 +39,7 @@ my $branchname = 'main'; # instead of "master" to prevent warnings
     chdir $upstream;
     put_file($gitversion => 'first.file');
     $git->run(add => q/first.file/);
+    is($git->exitcode, 0, "git add first.file");
 
     put_file(<<"    CAT" => qw/Porting make_dot_patch.pl/);
 #! $^X -w
@@ -46,11 +47,14 @@ my $branchname = 'main'; # instead of "master" to prevent warnings
 print <>;
     CAT
     $git->run(add => 'Porting/make_dot_patch.pl');
+    is($git->exitcode, 0, "git add Porting/make_dot_patch.pl");
 
     put_file(".patch" => q/.gitignore/);
     $git->run(add => '.gitignore');
+    is($git->exitcode, 0, "git add .gitignore");
 
     $git->run(commit => '-m', "'We need a first file committed'", '2>&1');
+    is($git->exitcode, 0, "git commit");
 
     chdir catdir(updir, updir);
     put_file("$branchname\n" => $branchfile);
@@ -87,7 +91,9 @@ print <>;
         chdir $upstream;
         put_file('any content' => q/new_file/);
         $git->run(add => 'new_file', '2>&1');
+        is($git->exitcode, 0, "git add new_file");
         $git->run(commit => '-m', "'2nd commit message'", '2>&1');
+        is($git->exitcode, 0, "git commit");
         chdir catdir(updir, updir);
 
         $syncer->sync();
@@ -97,9 +103,12 @@ print <>;
         # Create upstream/smoke-me
         chdir $upstream;
         $git->run(checkout => '-b', 'smoke-me', '2>&1');
+        is($git->exitcode, 0, "git checkout -b 'smoke-me'");
         put_file('new file in branch' => 'branch_file');
         $git->run(add => 'branch_file', '2>&1');
+        is($git->exitcode, 0, "git add branch_file");
         $git->run(commit => '-m', "File in branch!", '2>&1');
+        is($git->exitcode, 0, "git commit");
         chdir catdir(updir, updir);
 
         # Sync master.
@@ -123,6 +132,7 @@ print <>;
         {
             chdir(catdir($playground, 'perl-current'));
             my $git_out = $git->run('branch');
+            is($git->exitcode, 0, "git branch");
             like($git_out, qr/\* \s+ smoke-me/x, "We're on the smoke-me branch");
             chdir(catdir(updir, updir));
         }
