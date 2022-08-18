@@ -77,13 +77,15 @@ SKIP: {
     my $gitbin = whereis('git');
     skip("No git found :(", 10) if ! $gitbin;
 
-    my $branchname = 'main'; # instead of "master" to prevent warnings
+    my $branchname = 'master'; # for compatibility with old and new git version
     my $cwd = abs_path();
     # Set up a basic git repository
     my $git = Test::Smoke::Util::Execute->new(command => $gitbin);
     my $repopath = 't/tsgit';
-    $git->run(init => "-b", $branchname, $repopath);
-    is($git->exitcode, 0, "git init $repopath");
+    $git->run('-c' => "init.defaultBranch=$branchname", init => "-q", $repopath);
+    unless (is($git->exitcode, 0, "git init $repopath")) {
+        skip "git init failed! The tests require an empty/different repo";
+    }
 
     mkpath("$repopath/Porting");
     chdir $repopath;
