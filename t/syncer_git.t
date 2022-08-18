@@ -41,6 +41,11 @@ my $branchname = 'main'; # instead of "master" to prevent warnings
         ok(0, "chdir upstream");
         die "chdir failed! Can't run the other tests (wrong cwd)";
     }
+    $git->run('config', 'user.name' => "syncer_git.t");
+    is($git->exitcode, 0, "git config user.name");
+    $git->run('config', 'user.email' => "syncer_git.t\@test-smoke.org");
+    is($git->exitcode, 0, "git config user.email");
+
     put_file($gitversion => 'first.file');
     $git->run(add => q/first.file/);
     is($git->exitcode, 0, "git add first.file");
