@@ -27,12 +27,12 @@ my $tmpdir = tempdir(CLEANUP => ($ENV{SMOKE_DEBUG} ? 0 : 1));
 my $upstream = catdir($tmpdir, 'tsgit');
 my $playground = catdir($tmpdir, 'playground');
 my $branchfile = catfile($tmpdir, 'default.gitbranch');
-my $branchname = 'main'; # instead of "master" to prevent warnings
+my $branchname = 'master'; # for compatibility with old and new git version
 
 SKIP: {
     pass("Git version $gitversion");
     # Set up a basic git repository
-    $git->run(init => '-b', $branchname, $upstream);
+    $git->run('-c' => "init.defaultBranch=$branchname", init => '-q',$upstream);
     unless (is($git->exitcode, 0, "git init $upstream")) {
         skip "git init failed! The tests require an empty/different repo";
     }
