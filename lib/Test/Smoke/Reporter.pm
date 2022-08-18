@@ -821,7 +821,7 @@ sub smokedb_data {
         (my $ncpu      = $si->ncpu          || "?") =~ s/^\s*(\d+)\s*/$1/;
         (my $user_note = $self->{user_note} || "")  =~ s/(\S)[\s\r\n]*\z/$1\n/;
         {
-            architecture     => $si->cpu_type,
+            architecture     => lc $si->cpu_type,
             config_count     => $self->{_rpt}{count},
             cpu_count        => $ncpu,
             cpu_description  => $si->cpu,
@@ -1130,7 +1130,7 @@ sub preamble {
         version libc gnulibc_version
     ));
     my $si = System::Info->new;
-    my $archname  = $si->cpu_type;
+    my $archname  = lc $si->cpu_type;
 
     (my $ncpu = $si->ncpu || "") =~ s/^(\d+)\s*/$1 cpu/;
     $archname .= "/$ncpu";
