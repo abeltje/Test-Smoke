@@ -86,6 +86,10 @@ SKIP: {
     unless (is($git->exitcode, 0, "git init $repopath")) {
         skip "git init failed! The tests require an empty/different repo";
     }
+    $git->run('config', 'user.name' => "syncer_rsync.t");
+    is($git->exitcode, 0, "git config user.name");
+    $git->run('config', 'user.email' => "syncer_rsync.t\@test-smoke.org");
+    is($git->exitcode, 0, "git config user.email");
 
     mkpath("$repopath/Porting");
     chdir $repopath;
