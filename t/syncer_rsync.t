@@ -107,7 +107,11 @@ SKIP: {
     is($git->exitcode, 0, "git commit");
 
     my $rsync_bin = whereis('rsync', $verbose);
-    skip "No rsync binary found...", 3 if !$rsync_bin;
+    if (not $rsync_bin) {
+        chdir $cwd;
+        rmtree($repopath);
+        skip "No rsync binary found...", 3;
+    }
 
     my $source = catdir($cwd, 't', 'ftppub', 'perl-current');
     $source = UNCify_path($source) if $^O eq 'MSWin32';
