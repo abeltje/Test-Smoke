@@ -1,12 +1,210 @@
-Changes on 2022-08-17 for repository at:
+Changes on 2022-08-18 for repository at:
   Fetch URL: git@github.com:abeltje/Test-Smoke.git
   Push  URL: git@github.com:abeltje/Test-Smoke.git
 
 Enjoy!
 
-1.79_01 2022-08-17T08:59:35+02:00 (638f7f0 => Abe Timmerman)
+1.79_02 2022-08-18T20:47:54+02:00 (960dc93 => Abe Timmerman)
+ - (Abe Timmerman, Thu, 18 Aug 2022 20:47:54 +0200) Autocommit for
+   distribution Test::Smoke 1.79_02 (test)
+
+1.79_01 2022-08-17T08:59:35+02:00 (f05cccd => Abe Timmerman)
  - (Abe Timmerman, Wed, 17 Aug 2022 08:59:35 +0200) Autocommit for
    distribution Test::Smoke 1.79_01 (test)
+
+ - (Bram, Mon, 15 Aug 2022 21:07:39 +0200) Include custom hostname in smoke
+   report
+ -     In commit 5920e4cbcef17d7b00206d52dddd5b8ba33aafea
+ -	   Author: abeltje <abeltje@test-smoke.org>
+ -	   Date:   Fri Apr 20 22:38:11 2018 +0200
+ -	       Solve https://github.com/abeltje/Test-Smoke/pull/37
+ -	       I don't like using ENVironment vars for legitimate settings
+   in the
+ -	       software, so I'd rather use the configfile for that.
+ -	       Add a question in  configsmoke.pl
+ -     The option was added to set a custom hostname in the configfile.
+ -     In that commit the custom hostname is used when sending the report
+   to
+ -     the smokedb (that is: in `Test::Smoke::Reporter::smokedb_data`).
+ -     But the hostname is also used in the preamble of the report and that
+ -     code was left unchanged so the real hostname still leaked in the
+   report.
+ -     Fix this and (also) use the custom hostname in the `preamble`
+   function.
+ -     (+ add a test for it, test file is based on t/report-usernote.t)
+ -     (Note: commit 5920e4c was based on a PR and in the original commit
+ -	      the preamble function was also updated. That part of the
+ -	      change got lost when converting it to a config option.)
+
+ - (Bram, Mon, 15 Aug 2022 21:24:06 +0200) Use `done_testing()` in
+   t/report-usernote.t
+ -     The test file was added in commit
+   792da5b7176f3141f5c45e54e16a4fa1d0b34230
+ -	   Author: Abe Timmerman <abeltje@diefenbaker.local>
+ -	   Date:   Mon Apr 15 00:27:00 2013 +0200
+ -	       Implement variable position for the user_note:
+ -		 - un_position == 'top' => at the start of the report
+ -		 - un_position == <!top> => at the end of the report
+ -     My guess: `done_testing()` was commented support older perls (with
+   an
+ -		 oder versions of  Test::More which lacked support for it).
+ -     Today: plenty of other files in the repo are using `done_testing()`
+   so
+ -     there is no reason why t/report-usernote.t shouldn't be using it.
+
+ - (Bram, Thu, 18 Aug 2022 16:00:55 +0200) Skip tests with git when `git
+   init fails`
+ -     When `git init` failed then the test would continue which is
+   undesirable.
+ -     When running `make test` in the Test-Smoke git repo I observed:
+ -     - `git init` failed (because of the '-b' option, unknown in my git
+   version)
+ -     - there was a test failure since it checks the exit code
+ -     - it continues running git commands, including `git commit`
+ -     Result: changes were committed to the Test-Smoke git repo and *not*
+   to the
+ -	       test repo that is normally used inside the test.
+ -     Fix this by skipping the git tests when `git init` fails.
+
+ - (Bram, Thu, 18 Aug 2022 16:07:57 +0200) Silence default branch name
+   warning
+ -     On a more recent version of git there is a warning about the
+ -     default branch name. The warning can be silenced by
+ -     - using the '-b' option to set a (different) default branch name
+ -     - using the '-q' option
+ -     In commit 0f7ceb8c4aa1f2f64a14b86f2fcbef32c7981787 the '-b' option
+ -     was added to `git init` but that breaks compatibility with older git
+ -     versions. These do not know the '-b' option and thus fail.
+ -     To preserve backwards and future compatibility:
+ -     - use the '-q' option to silence the warning
+ -     - use `git -c init.defaultBranch=master init` to ensure the default
+   branch
+ -	 name is master for the test repo.
+ -	 (Older git versions use 'master' by default, newer versions
+   currently
+ -	  use 'master' but that may change in the future. So git-upstream
+   decides
+ -	  to change default name then the '-c' should do the trick to keep
+   it as
+ -	  'master')
+
+ - (Abe Timmerman, Thu, 18 Aug 2022 17:21:50 +0200) Merge branch
+   'bram-perl-bram/git-init'
+ -	   https://github.com/abeltje/Test-Smoke/pull/61
+
+ - (Abe Timmerman, Thu, 18 Aug 2022 17:32:32 +0200) Merge branch
+   'bram/custom-hostname' of https://github.com/bram-perl/Test-Smoke into
+   bram-perl-bram/custom-hostname
+ -	   https://github.com/abeltje/Test-Smoke/pull/58
+
+ - (Abe Timmerman, Thu, 18 Aug 2022 17:36:54 +0200) Merge branch
+   'bram-perl-bram/custom-hostname' into bugfixes/by-bram
+ -	   https://github.com/abeltje/Test-Smoke/pull/58
+
+ - (Abe Timmerman, Thu, 18 Aug 2022 17:38:30 +0200) Merge branch
+   'bram/usernote-done-testing' of https://github.com/bram-perl/Test-Smoke
+   into bram-perl-bram/usernote-done-testing
+
+ - (Abe Timmerman, Thu, 18 Aug 2022 17:39:06 +0200) Merge branch
+   'bram-perl-bram/usernote-done-testing' into bugfixes/by-bram
+ -	   https://github.com/abeltje/Test-Smoke/pull/59
+
+ - (Abe Timmerman, Thu, 18 Aug 2022 18:17:52 +0200) Make sure all
+   filehandles are AUTOFLUSH during smoke
+ -     Inspired by: https://github.com/abeltje/Test-Smoke/pull/60
+ -     It appears that Windows likes it better if the filehandles are on
+ -     autoflush during the actual smoke.
+
+ - (Abe Timmerman, Thu, 18 Aug 2022 18:21:19 +0200) Merge branch
+   'bugfixes/by-bram'
+ -     Merge work by Bram:
+ -     - fix on Tux's fix for the git-defaultBranch (#61)
+ -     - autoflush for filehandles used during the actual smoke (not #60)
+ -     - fix forgotten `done_testing()` (#59(
+ -     - fix leak of actual hostname in the smoke-report (#58)
+
+ - (Bram, Thu, 18 Aug 2022 19:00:23 +0200) Cache `$daemon->sockhost` in
+   t/poster-post.t
+ -     On my Windows 10 system 't/poster-post.t' was stuck.
+ -     Debugging showed that this *apparently* happened when it tried to
+   get
+ -     the value of `$daemon->sockhost` for the test with 'HTTP::Tiny'.
+ -     Earlier calls for `$daemon->sockhost` (for the curl test) did
+   succeed
+ -     and did behave as expected...
+ -     Sample output of a run that was stuck:
+ -	   # HTTP::Daemon (6.12): IPv6 (::1)
+ -	   # Temporary daemon at: http://[::1]:57965/
+ -	   ok 1 - An object of class 'Test::Smoke::Poster::LWP_UserAgent'
+   isa 'Test::Smoke::Poster::LWP_UserAgent'
+ -	   ok 2 - write_json
+ -	   [2022-08-18 16:47:15Z] Posting to http://[::1]:57965/report via
+   LWP::UserAgent.
+ -	   [2022-08-18 16:47:15Z] Reading from
+   (C:\Perl\Test-Smoke\t\testsuite.jsn)
+ -	   [2022-08-18 16:47:15Z] Report data: {"sysinfo":"MSWin32"}
+ -	   [2022-08-18 16:47:15Z] [CoreSmokeDB] {"id":42}
+ -	   ok 3 - Got id (LWP::Useragent: http://[::1]:57965/report)
+ -	   ok 4 - An object of class 'Test::Smoke::Poster::Curl' isa
+   'Test::Smoke::Poster::Curl'
+ -	   ok 5 - write_json
+ -	   [2022-08-18 16:47:15Z] Posting to "http://[::1]:57965/report"
+   via curl.
+ -	   [2022-08-18 16:47:15Z] Reading from
+   (C:\Perl\Test-Smoke\t\testsuite.jsn)
+ -	   [2022-08-18 16:47:15Z] Report data: {"sysinfo":"MSWin32"}
+ -	   [2022-08-18 16:47:15Z] In pwd(C:/Perl/Test-Smoke) running:
+ -	   [2022-08-18 16:47:15Z] qx[C:\Windows\system32\curl.EXE --globoff
+   -A "Test::Smoke/1.79_01 (Test::Smoke::Poster::Curl)" -d
+   json=%7B%22sysinfo%22%3A%22MSWin32%22%7D "http://[::1]:57965/report"]
+ -	     % Total	% Received % Xferd  Average Speed   Time    Time   
+    Time  Current
+ -					    Dload  Upload   Total   Spent  
+    Left  Speed
+ -	   100	  49  100     9  100	40    522   2322 --:--:-- --:--:--
+   --:--:--  3062
+ -	   [2022-08-18 16:47:15Z] [CoreSmokeDB] {"id":42}
+ -	   ok 6 - Got id (curl: http://[::1]:57965/report)
+ -     And then it kept on waiting..
+ -     Caching the value of `$daemon->sockhost` appears to fix it..
+ -     (I've got no idea why tho)
+ -     With this patch applied and re-running the test it continues:
+ -	   ok 7 - An object of class 'Test::Smoke::Poster::HTTP_Tiny' isa
+   'Test::Smoke::Poster::HTTP_Tiny'
+ -	   ok 8 - write_json
+ -	   [2022-08-18 16:56:15Z] Posting to http://[::1]:57990/report via
+   HTTP::Tiny.
+ -	   [2022-08-18 16:56:15Z] Reading from
+   (C:\Perl\Test-Smoke\t\testsuite.jsn)
+ -	   [2022-08-18 16:56:15Z] Report data: {"sysinfo":"MSWin32"}
+ -	   [2022-08-18 16:56:15Z] [CoreSmokeDB] {"id":42}
+ -	   ok 9 - Got id (HTTP::Tiny: http://[::1]:57990/report
+ -	   ok 10 - no warnings
+ -	   1..10
+
+ - (Abe Timmerman, Thu, 18 Aug 2022 19:20:38 +0200) Merge branch
+   'bram/windows-poster_post.t' of https://github.com/bram-perl/Test-Smoke
+   into bram-perl-bram/windows-poster_post.t
+
+ - (Abe Timmerman, Thu, 18 Aug 2022 19:21:05 +0200) Merge branch
+   'bram-perl-bram/windows-poster_post.t' into bugfixes/by-bram
+ -	   https://github.com/abeltje/Test-Smoke/pull/63
+
+ - (Abe Timmerman, Thu, 18 Aug 2022 20:24:53 +0200) Add a target to the
+   makefile to run the xt/ tests
+ -     No convention but on IRC#smoke:
+ -	   17:41:14    Bram | Is there a make target to run the tests in
+   xt/?
+ -	   19:26:26 abeltje | no make target for running tests in xt/; is
+   there a convention for that?
+ -	   19:29:36  ilmari | dzil has an `xtest` command to run them
+ -     So I named it 'xtest' and used XTEST_FILES to select files to run:
+ -	   make xtest TEST_VERBOSE=1 XTEST_FILES=xt/0*.t
+ -     but this also works:
+ -	   make xtest
+
+ - (Abe Timmerman, Thu, 18 Aug 2022 20:41:55 +0200) Merge branch
+   'feature/xtest-make-target'
 
 1.79 2022-03-30T11:19:47+02:00 (6c102ab => Abe Timmerman)
  - (Abe Timmerman, Wed, 30 Mar 2022 11:19:47 +0200) Autocommit for
