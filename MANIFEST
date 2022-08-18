@@ -149,6 +149,7 @@ t/pc09.out
 t/policy.t
 t/poster-post.t
 t/regenstuff.t
+t/report-hostname.t
 t/report-usernote.t
 t/reporter.t
 t/skip_config.t

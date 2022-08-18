@@ -12,6 +12,7 @@ use Test::Smoke::LogMixin;
 use Test::Smoke::Util qw( get_smoked_Config skip_filter );
 
 BEGIN { eval q{ use Time::HiRes qw( time ) } }
+{ my $_orig_dft = select(STDERR); $|++; select(STDOUT); $|++; select($_orig_dft); $|++ }
 
 my %CONFIG = (
     df_ddir           => curdir(),

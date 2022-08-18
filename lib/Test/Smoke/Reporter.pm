@@ -1137,7 +1137,7 @@ sub preamble {
 
     my $cpu = $si->cpu;
 
-    my $this_host = $si->host;
+    my $this_host = $self->{hostname} || $si->host;
     my $time_msg  = time_in_hhmm( $self->{_rpt}{secs} );
     my $savg_msg  = time_in_hhmm( $self->{_rpt}{avg}  );
 
