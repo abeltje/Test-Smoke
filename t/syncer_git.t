@@ -29,11 +29,13 @@ my $playground = catdir($tmpdir, 'playground');
 my $branchfile = catfile($tmpdir, 'default.gitbranch');
 my $branchname = 'main'; # instead of "master" to prevent warnings
 
-{
+SKIP: {
     pass("Git version $gitversion");
     # Set up a basic git repository
     $git->run(init => '-b', $branchname, $upstream);
-    is($git->exitcode, 0, "git init $upstream");
+    unless (is($git->exitcode, 0, "git init $upstream")) {
+        skip "git init failed! The tests require an empty/different repo";
+    }
 
     mkpath("$upstream/Porting");
     chdir $upstream;
