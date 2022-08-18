@@ -32,12 +32,14 @@ my ($pid, $daemon, $url);
 
 my $timeout = 60;
 my $jsnfile = 'testsuite.jsn';
+my $sockhost;
 {
     $daemon = HTTP::Daemon->new() || die "Could not initialize a Daemon";
     $url = URI->new($daemon->url);
+    $sockhost = $daemon->sockhost;
     note(
         "HTTP::Daemon ($HTTP::Daemon::VERSION): ",
-        $daemon->sockhost eq '::' ? "IPv6" : "IPv4",
+        $sockhost eq '::' ? "IPv6" : "IPv4",
         " (" , $url->host, ")"
     );
 
@@ -45,7 +47,7 @@ my $jsnfile = 'testsuite.jsn';
     # IPv6 doesn't work, so force IPv4 localhost HTTP::Daemon < 6.05
     if ($HTTP::Daemon::VERSION <= 6.07) {
         # Check $daemon->sockhost for either '0.0.0.0' (ipv4) or '::' (ipv6)
-        if ($daemon->sockhost eq '::') {
+        if ($sockhost eq '::') {
             $url->host('[::1]');
         }
         else {
@@ -146,7 +148,7 @@ SKIP: {
 SKIP: {
     skip("Could not load HTTP::Tiny", 3) if ! has_module('HTTP::Tiny');
     skip("HTTP::Tiny too old $HTTP::Tiny::VERSION (IPv6 support >= 0.042)", 3)
-        if    $daemon->sockhost eq '::'
+        if    $sockhost eq '::'
           and version->parse($HTTP::Tiny::VERSION) < version->parse("0.042");
 
     my $poster = Test::Smoke::Poster->new(
