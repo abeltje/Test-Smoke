@@ -7,7 +7,7 @@ our $VERSION = '0.046';
 use Config;
 use Cwd;
 use File::Spec::Functions qw( :DEFAULT abs2rel rel2abs );
-use Capture::Tiny 'capture';
+use Capture::Tiny 'capture', 'tee';
 use Test::Smoke::LogMixin;
 use Test::Smoke::Util qw( get_smoked_Config skip_filter );
 
@@ -761,6 +761,8 @@ sub _run_harness3_target {
     my $file;
     my $found = 0;
     while ( $line = <$tst> ) {
+        print STDOUT $line;
+
         #$self->log_debug($line);
 
         # This line with timings only has to be logged to .out.
@@ -834,6 +836,9 @@ sub _run_harness3_target {
     }
 
     my @dump = <$tst>; # Read trailing output from pipe
+    for my $line (@dump) {
+        print STDOUT $line;
+    }
 
     close $tst or do {
         my $error = $! || ( $? >> 8);
@@ -1196,8 +1201,7 @@ sub _run {
     $self->log_debug("[$command]");
     defined $sub and return &$sub( $command, @args );
 
-    my ( $out, $err, $res ) = capture { system $command };
-    $self->log($err) if $err;
+    my ( $out, $err, $res ) = tee { system $command };
     $self->{_run_exit} = $res >> 8;
     return wantarray ? split /(\r\n|\r|\n)/, $out : $out;
 }
