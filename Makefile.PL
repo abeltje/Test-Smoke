@@ -190,18 +190,6 @@ WriteMakefile(
     %install
 );
 
-#sub MY::libscan {
-#    my( $self, $path ) = @_;
-#    my @nopaths = qw( .svn t private investigate );
-#    my $patt = join '|', map {
-#        /^\w/ and $_ = "\\b$_";
-#        /\w$/ and $_ = "$_\\b";
-#        $_;
-#    } @nopaths;
-#
-#    return $path =~ m:$patt: ? "" : $path;
-#}
-
 sub dir_prompt {
 
     GETDIR: {
@@ -226,3 +214,23 @@ sub dir_prompt {
         return $dir;
     }
 }
+
+package MY;
+
+sub test {
+    my $orig = shift->SUPER::test(@_);
+
+    $orig .= <<"EOM";
+
+XTEST_FILES = xt/*.t
+xtest ::
+ifeq (\$(TEST_VERBOSE), 1)
+\tprove -wlv \$(XTEST_FILES)
+else
+\tprove -wl \$(XTEST_FILES)
+endif
+EOM
+
+    return $orig;
+}
+1;
