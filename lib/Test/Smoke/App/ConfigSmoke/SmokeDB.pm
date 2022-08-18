@@ -54,7 +54,7 @@ sub config_smoke_db {
 
 =head1 COPYRIGHT
 
-(c) 2020, All rights reserved.
+E<copy> MMXX - All rights reserved.
 
   * Abe Timmerman <abeltje@cpan.org>
 

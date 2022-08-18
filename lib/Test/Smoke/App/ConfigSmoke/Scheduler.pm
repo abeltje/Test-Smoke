@@ -80,7 +80,7 @@ sub config_scheduler {
             }
 
             my $new_entry = $self->schedule_entry_crontab($cronbin, $crontime);
-            @current_cron = grep { m{^$new_entry$} } @current_cron;
+            @current_cron = grep { $_ !~ m{^$new_entry$} } @current_cron;
             s{^ (?<!\#) \s* (.+?(?:$jcl)) }{# $1}x for @current_cron;
 
             my $cronout_file = $self->prefix . '.crontab';
@@ -88,6 +88,7 @@ sub config_scheduler {
                 print {$cronout} $_ for @current_cron;
                 print {$cronout} "\n# Test::Smoke\n$new_entry\n";
                 close($cronout);
+                print "\n    >> Created '$cronout_file'.\n";
 
                 my $add2cron = $self->handle_option(add2cron_option($new_entry));
                 system($cronbin, $cronout_file) if $add2cron;

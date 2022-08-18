@@ -18,6 +18,7 @@ use Test::Smoke::App::ConfigSmoke::MakeOptions;
 use Test::Smoke::App::ConfigSmoke::Reporter;
 use Test::Smoke::App::ConfigSmoke::Scheduler;
 use Test::Smoke::App::ConfigSmoke::SmokeDB;
+use Test::Smoke::App::ConfigSmoke::Mail;
 use Test::Smoke::App::ConfigSmoke::SmokeEnv;
 use Test::Smoke::App::ConfigSmoke::Smokedir;
 use Test::Smoke::App::ConfigSmoke::Sync;
@@ -103,6 +104,7 @@ sub run {
     $self->config_sync();
     $self->config_make_options();
     $self->config_smoke_db();
+    $self->config_mail();
     $self->config_files();
     $self->config_reporter_options();
     $self->config_scheduler();
@@ -251,11 +253,11 @@ sub default_for_option {
         $debug and printf "  ^^$caller^^ '%s' from config-file: '$value'\n", $option->name;
         return $value;
     }
-    if ( my $value = $option->configdft->($self) ) {
+    if ( defined(my $value = $option->configdft->($self)) ) {
         $debug and printf "  ^^$caller^^ '%s' from config-default: '$value'\n", $option->name;
         return $value;
     }
-    if ( my $value = $option->default ) {
+    if ( defined(my $value = $option->default) ) {
         $debug and printf "  ^^$caller^^ '%s' from option-default: '$value'\n", $option->name;
         return $value;
     }
@@ -325,7 +327,13 @@ sub prompt {
             $input = $df_val unless length $input;
         }
 
-        print "Input does not OK\n" and redo INPUT
+        my $_allow = do {
+            local ($Data::Dumper::Indent, $Data::Dumper::Terse) = (0, 1);
+            defined($option->allow)
+                ? Data::Dumper::Dumper($option->allow)
+                : '*';
+        };
+        printf "Input is not OK (%s)\n", $_allow and redo INPUT
             if !$option->allowed($input, @_);
 
         last INPUT unless %ok_val;
@@ -357,6 +365,67 @@ sub prompt_yn {
     print "Got [$yesno]\n";
     ( my $retval = $yesno ) =~ tr/ny/01/;
     return 0 + $retval;
+}
+
+=head2 prompt_noecho
+
+Ask for a password type of string
+
+=cut
+
+sub prompt_noecho {
+    my $self = shift;
+    my $option = shift;
+
+    eval "use Term::ReadKey";
+    if ($@) {
+        print "\n\t!!! Please install Term::ReadKey !!!\n";
+        return;
+    }
+
+    (my $message = $option->configtext || '') =~ s{\s+$}{};
+    print "\n$message\n";
+
+    my $cur_value = $self->default_for_option($option);
+    my $show_default = defined($cur_value) ? '******' : 'undef';
+    my $new_value;
+    GETPWD: {
+        my $input;
+        if ( $self->usedft ) {
+            $input = defined $cur_value ? $cur_value : " ";
+        } else {
+            print "[$show_default] \$ ";
+            ReadMode('noecho');
+            chomp( $input = ReadLine(0) );
+            ReadMode('restore');
+        }
+
+        if ($input eq "") {
+            $new_value = $cur_value;
+        }
+        elsif ($input eq " ") {
+            $new_value = '';
+        }
+        elsif ($input eq '&-d') { # WHY ???
+            $self->usedft(1);
+            $new_value = $cur_value;
+        }
+        else {
+            $new_value = $input;
+        }
+
+        if (! $option->allowed($new_value) ) {
+            my $_allow = do {
+                local ($Data::Dumper::Indent, $Data::Dumper::Terse) = (0, 1);
+                defined($option->allow)
+                    ? Data::Dumper::Dumper($option->allow)
+                    : '*';
+            };
+            printf "Input is not OK (%s)\n", $_allow;
+            redo GETPWD;
+        }
+    }
+    return $new_value;
 }
 
 =head2 prompt_file
@@ -460,14 +529,15 @@ sub _sort_configkeys {
         qw( w32cc w32make w32args ),
 
         # Test environment related
-        qw( force_c_locale locale defaultenv ),
+        qw( force_c_locale locale defaultenv skip_tests ),
+
+        # SmokeDB
+        qw( smokedb_url poster send_log send_out ua_timeout curlbin ),
 
         # Report related
-        qw( mail mail_type mserver muser mpass from to ccp5p_onfail
+        qw( mail mail_type mailbin mailxbin sendmailbin sendemailbin
+            mserver msport msuser mspass from to ccp5p_onfail
             swcc cc swbcc bcc ),
-
-        #SmokeDB
-        qw( smokedb_url poster send_log send_out ua_timeout curlbin ),
 
         # Archive reports and logfile
         qw( adir lfile ),
@@ -478,8 +548,11 @@ sub _sort_configkeys {
         # user_notes
         qw( hostname user_note un_file un_position ),
 
+        # internal files
+        qw( outfile rptfile jsnfile ),
+
         # ENV stuff
-        qw( perl5lib delay_report ),
+        qw( perl5lib perl5opt delay_report ),
     );
 
     my $i = 0;

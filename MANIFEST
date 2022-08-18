@@ -26,6 +26,7 @@ lib/Test/Smoke/App/Base.pm
 lib/Test/Smoke/App/ConfigSmoke.pm
 lib/Test/Smoke/App/ConfigSmoke/Files.pm
 lib/Test/Smoke/App/ConfigSmoke/MSWin32.pm
+lib/Test/Smoke/App/ConfigSmoke/Mail.pm
 lib/Test/Smoke/App/ConfigSmoke/MakeOptions.pm
 lib/Test/Smoke/App/ConfigSmoke/Reporter.pm
 lib/Test/Smoke/App/ConfigSmoke/Scheduler.pm

@@ -61,6 +61,8 @@ msuser
 opt_continue
 outfile
 patchlevel
+perl5lib
+perl5opt
 poster
 poster_config
 report

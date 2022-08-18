@@ -62,8 +62,12 @@ sub mailer_config { # mailing reports
             report(0),
         ],
         special_options => {
-            mail => [mailbin()],
-            mailx => [mailxbin()],
+            mail => [ mailbin() ],
+            mailx => [
+                mailxbin(),
+                swcc(),
+                swbcc(),
+            ],
             sendemail => [
                 sendemailbin(),
                 from(),
@@ -341,19 +345,27 @@ sub archive {
 
 sub bcc {
     return $opt->new(
-        name => 'bcc',
-        option => '=s',
-        default => '',
-        helptext => 'Where to send a bcc of the reports.',
+        name       => 'bcc',
+        option     => '=s',
+        default    => '',
+        helptext   => 'Where to send a bcc of the reports.',
+        allow      => [ undef, '', qr/@/ ],
+        configtype => 'prompt',
+        configtext => 'This is the email address used to send BlindCarbonCopy:',
+        configdft  => sub {''},
     );
 }
 
 sub cc {
     return $opt->new(
-        name => 'cc',
-        option => '=s',
-        default => '',
-        helptext => 'Where to send a cc of the reports.',
+        name       => 'cc',
+        option     => '=s',
+        default    => '',
+        helptext   => 'Where to send a cc of the reports.',
+        allow      => [ undef, '', qr/@/ ],
+        configtype => 'prompt',
+        configtext => 'This is the email address used to send CarbonCopy:',
+        configdft  => sub {''},
     );
 }
 
@@ -455,10 +467,14 @@ sub fdir { # mdir => fdir => ddir
 
 sub from {
     return $opt->new(
-        name => 'from',
-        option => '=s',
-        default => '',
-        helptext => 'Where to send the reports from.',
+        name       => 'from',
+        option     => '=s',
+        default    => '',
+        allow      => [ '', qr/@/ ],
+        helptext   => 'Where to send the reports from.',
+        configtype => 'prompt',
+        configtext => 'This is the email address used to send FROM:',
+        configdft  => sub {''},
     );
 }
 
@@ -690,9 +706,15 @@ sub locale {
 
 sub mail {
     return $opt->new(
-        name => 'mail',
-        option => '!',
-        helptext => "Send report via mail.",
+        name       => 'mail',
+        option     => '!',
+        allow      => [ 0, 1 ],
+        default    => 0,
+        helptext   => "Send report via mail.",
+        configtext => 'The existence of the mailing-list is not guarenteed',
+        configtype => 'prompt_yn',
+        configalt  => sub { [qw/ y N /] },
+        configdft  => sub {'n'},
     );
 }
 
@@ -703,24 +725,30 @@ sub mail_type {
         allow  => [qw/sendmail mail mailx sendemail Mail::Sendmail MIME::Lite/],
         default  => 'Mail::Sendmail',
         helptext => "The type of mailsystem to use.",
+        configalt  => _helper('get_avail_mailers'),
+        configdft  => sub { (_helper('get_avail_mailers')->())[0] },
     );
 }
 
 sub mailbin {
     return $opt->new(
-        name => 'mailbin',
-        option => '=s',
-        default => 'mail',
-        helptext => "The name of the 'mail' program.",
+        name       => 'mailbin',
+        option     => '=s',
+        default    => 'mail',
+        helptext   => "The name of the 'mail' program.",
+        configtext => 'The fully qualified name of the executable.',
+        configdft  => sub { (_helper(whereis => ['mail'])->())->[0] },
     );
 }
 
 sub mailxbin {
     return $opt->new(
-        name => 'mailxbin',
-        option => '=s',
-        default => 'mailx',
-        helptext => "The name of the 'mailx' program.",
+        name       => 'mailxbin',
+        option     => '=s',
+        default    => 'mailx',
+        helptext   => "The name of the 'mailx' program.",
+        configtext => 'The fully qualified name of the executable.',
+        configdft  => sub { (_helper(whereis => ['mailx'])->())->[0] },
     );
 }
 
@@ -764,35 +792,43 @@ sub minus_des {
 
 sub mspass {
     return $opt->new(
-        name => 'mspass',
-        option => '=s',
-        helptext => 'Password for <msuser> for SMTP server.',
+        name       => 'mspass',
+        option     => '=s',
+        helptext   => 'Password for <msuser> for SMTP server.',
+        configtext => "Type the password: 'noecho' but plain-text in config file!",
+        configtype => 'prompt_noecho',
     );
 }
 
 sub msport {
     return $opt->new(
-        name => 'msport',
-        option => '=i',
-        default => 25,
-        helptext => 'Which port for SMTP server to send reports.',
+        name       => 'msport',
+        option     => '=i',
+        default    => 25,
+        helptext   => 'Which port for SMTP server to send reports.',
+        configtext => "Some SMTP servers use port 465 or 587",
     );
 }
 
 sub msuser {
     return $opt->new(
-        name => 'msuser',
-        option => '=s',
-        helptext => 'Username for SMTP server.',
+        name       => 'msuser',
+        option     => '=s',
+        default    => undef,
+        allow      => [ undef, '', qr/\w+/ ],
+        helptext   => 'Username for SMTP server.',
+        configtext => "This is the username for logging into the SMTP server\n"
+                    . "    leave empty if you don't have to login",
     );
 }
 
 sub mserver {
     return $opt->new(
-        name => 'mserver',
-        option => '=s',
-        default => 'localhost',
-        helptext => 'Which SMTP server to send reports.',
+        name       => 'mserver',
+        option     => '=s',
+        default    => 'localhost',
+        helptext   => 'Which SMTP server to send reports.',
+        configtext => "SMTP server to use for sending reports",
     );
 }
 
@@ -845,6 +881,28 @@ sub perl_version {
         option => '=s',
         allow  => qr{^ (?:blead | 5 [.] (?: [2][68] | [3-9][02468] ) [.] x+ ) $}x,
         dft    => 'blead',
+    );
+}
+
+sub perl5lib {
+    return $opt->new(
+        name       => 'perl5lib',
+        option     => '=s',
+        dft        => exists($ENV{PERL5LIB}) ? $ENV{PERL5LIB} : '',
+        helptext   => "What value should be used for PERL5LIB in the jcl wrapper?\n",
+        configtext => "\$PERL5LIB will be set to this value during the smoke\n"
+                    . "\t(Make empty, with single space, to not set it.)",
+    );
+}
+
+sub perl5opt {
+    return $opt->new(
+        name       => 'perl5opt',
+        option     => '=s',
+        dft        => exists($ENV{PERL5OPT}) ? $ENV{PERL5OPT} : '',
+        helptext   => "What value should be used for PERL5OPT in the jcl wrapper?\n",
+        configtext => "\$PERL5OPT will be set to this value during the smoke\n"
+                    . "\t(Make empty, with single space, to not set it.)",
     );
 }
 
@@ -950,19 +1008,23 @@ sub send_out {
 
 sub sendemailbin {
     return $opt->new(
-        name => 'sendemailbin',
-        option => '=s',
-        default => 'sendemail',
-        helptext => "The name of the 'sendemail' program.",
+        name       => 'sendemailbin',
+        option     => '=s',
+        default    => 'sendemail',
+        helptext   => "The name of the 'sendemail' program.",
+        configtext => 'The fully qualified name of the executable.',
+        configdft  => sub { (_helper(whereis => ['sendemail'])->())->[0] },
     );
 }
 
 sub sendmailbin {
     return $opt->new(
-        name => 'sendmailbin',
-        option => '=s',
-        default => 'sendmail',
-        helptext => "The name of the 'sendmail' program.",
+        name       => 'sendmailbin',
+        option     => '=s',
+        default    => 'sendmail',
+        helptext   => "The name of the 'sendmail' program.",
+        configtext => 'The fully qualified name of the executable.',
+        configdft  => sub { (_helper(whereis => ['sendmail'])->())->[0] },
     );
 }
 
@@ -1015,7 +1077,7 @@ sub smartsmoke {
 }
 
 sub smokedb_url {
-    my $default = 'http://perl5.test-smoke.org/report';
+    my $default = 'https://perl5.test-smoke.org/report';
     return $opt->new(
         name       => 'smokedb_url',
         option     => '=s',
@@ -1082,11 +1144,16 @@ sub testmake { # This was an Alan Burlison request.
 }
 
 sub to {
+    my $mailing_list = 'daily-build-reports@perl.org';
     return $opt->new(
-        name => 'to',
-        option => '=s',
-        default => 'daily-build-reports@perl.org',
-        helptext => 'Where to send the reports.',
+        name       => 'to',
+        option     => '=s',
+        default    => $mailing_list,
+        allow      => [qr/@/],
+        helptext   => 'Where to send the reports to.',
+        configtype => 'prompt',
+        configtext => 'This is the email address used to send TO:',
+        configdft  => sub {$mailing_list},
     );
 }
 
@@ -1193,7 +1260,14 @@ sub _helper {
     return sub {
         require Test::Smoke::Util::FindHelpers;
         my $run_helper = Test::Smoke::Util::FindHelpers->can($helper);
-        my @values = $run_helper->( @$args );
+        my @values;
+        if ($helper =~ m{(?:mailers)}) {
+            my %helpers = $run_helper->(@$args);
+            @values = sort keys %helpers;
+        }
+        else {
+            @values = $run_helper->( @$args );
+        }
 
         return [ @values ];
     }
