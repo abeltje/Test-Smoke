@@ -36,7 +36,11 @@ my $branchname = 'main'; # instead of "master" to prevent warnings
     is($git->exitcode, 0, "git init $upstream");
 
     mkpath("$upstream/Porting");
-    chdir $upstream;
+    unless(chdir $upstream) {
+        diag("chdir to '$upstream' failed with error: $!");
+        ok(0, "chdir upstream");
+        die "chdir failed! Can't run the other tests (wrong cwd)";
+    }
     put_file($gitversion => 'first.file');
     $git->run(add => q/first.file/);
     is($git->exitcode, 0, "git add first.file");

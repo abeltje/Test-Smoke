@@ -86,7 +86,12 @@ SKIP: {
     is($git->exitcode, 0, "git init $repopath");
 
     mkpath("$repopath/Porting");
-    chdir $repopath;
+    unless(chdir $repopath) {
+        diag("chdir to '$repopath' failed with error: $!");
+        ok(0, "chdir repopath");
+        die "chdir failed! Can't run the other tests (wrong cwd)";
+    }
+
     (my $gitversion = $git->run('--version')) =~ s/git version (\S+).+/$1/si;
     put_file($gitversion => 'first.file');
     $git->run(add => 'first.file');
