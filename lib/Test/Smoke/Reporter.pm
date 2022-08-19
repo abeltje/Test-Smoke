@@ -1034,7 +1034,11 @@ sub user_skipped_tests {
     if ($self->{skip_tests} && -f $self->{skip_tests} and open my $fh,
         "<", $self->{skip_tests})
     {
-        @skipped = map { chomp; "    $_" } <$fh>;
+        while (my $raw = <$fh>) {
+            next, if $raw =~ m/^# One test name on a line/;
+            chomp($raw);
+            push @skipped,  "    $raw";
+        }
         close $fh;
     }
     wantarray and return @skipped;
