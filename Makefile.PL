@@ -218,18 +218,20 @@ sub dir_prompt {
 package MY;
 
 sub test {
-    my $orig = shift->SUPER::test(@_);
+    my $self = shift;
+    my $orig = $self->SUPER::test(@_);
 
     $orig .= <<"EOM";
 
 XTEST_FILES = xt/*.t
 xtest ::
-ifeq (\$(TEST_VERBOSE), 1)
-\tprove -wlv \$(XTEST_FILES)
-else
-\tprove -wl \$(XTEST_FILES)
-endif
 EOM
+
+    my $varpfx = $^O eq 'MSWin32' ? '$$' : '\$$';
+    $orig .= "\t"
+           . qq{\$(FULLPERLRUN) "-e" "my ${varpfx}sw=q[-wl]; }
+           . qq{${varpfx}sw .= q[v] if \$(TEST_VERBOSE); }
+           . qq{system qq[prove ${varpfx}sw \$(XTEST_FILES)]"};
 
     return $orig;
 }
