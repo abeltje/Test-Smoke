@@ -83,13 +83,7 @@ SKIP: {
     my $git = Test::Smoke::Util::Execute->new(command => $gitbin);
     my $repopath = 't/tsgit';
     $git->run('-c' => "init.defaultBranch=$branchname", init => "-q", $repopath);
-    unless (is($git->exitcode, 0, "git init $repopath")) {
-        skip "git init failed! The tests require an empty/different repo";
-    }
-    $git->run('config', 'user.name' => "syncer_rsync.t");
-    is($git->exitcode, 0, "git config user.name");
-    $git->run('config', 'user.email' => "syncer_rsync.t\@test-smoke.org");
-    is($git->exitcode, 0, "git config user.email");
+    is($git->exitcode, 0, "git init $repopath");
 
     mkpath("$repopath/Porting");
     unless(chdir $repopath) {
@@ -97,6 +91,10 @@ SKIP: {
         ok(0, "chdir repopath");
         die "chdir failed! Can't run the other tests (wrong cwd)";
     }
+    $git->run('config', 'user.name' => "syncer_rsync.t");
+    is($git->exitcode, 0, "git config user.name");
+    $git->run('config', 'user.email' => "syncer_rsync.t\@test-smoke.org");
+    is($git->exitcode, 0, "git config user.email");
 
     (my $gitversion = $git->run('--version')) =~ s/git version (\S+).+/$1/si;
     put_file($gitversion => 'first.file');
