@@ -4,9 +4,9 @@ Changes on 2022-08-24 for repository at:
 
 Enjoy!
 
-1.79_03 2022-08-24T11:41:29+02:00 (8bb8db9 => syncer_rsync.t)
- - (syncer_rsync.t, Wed, 24 Aug 2022 11:41:29 +0200) Autocommit for
-   distribution Test::Smoke 1.79_03 (test)
+1.79_04 2022-08-24T14:10:34+02:00 (5cbfdce => Abe Timmerman)
+ - (Abe Timmerman, Wed, 24 Aug 2022 14:10:34 +0200) Autocommit for
+   distribution Test::Smoke 1.79_04 (test)
 
 1.79_02 2022-08-18T20:47:54+02:00 (dac3861 => Abe Timmerman)
  - (Abe Timmerman, Thu, 18 Aug 2022 20:47:54 +0200) Autocommit for
@@ -95,6 +95,15 @@ Enjoy!
  -     message. If there are comments in the file then they could be useful
  -     to include in the report (i.e. if they explain why a test file is
    skipped)
+
+ - (Abe Timmerman, Wed, 24 Aug 2022 12:34:58 +0200) Autocommit for
+   distribution Test::Smoke 1.79_03 (test)
+
+ - (Abe Timmerman, Wed, 24 Aug 2022 14:06:54 +0200) FIX: the test cluttered
+   Test-Smoke/.git/config
+ -     I don't know what happened, but I guess I cherry-picked the commits
+   in
+ -     the wrong order. Sorry everyone; please check your local git config!
 
 1.79_01 2022-08-17T08:59:35+02:00 (f05cccd => Abe Timmerman)
  - (Abe Timmerman, Wed, 17 Aug 2022 08:59:35 +0200) Autocommit for

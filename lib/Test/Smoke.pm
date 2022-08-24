@@ -2,7 +2,7 @@ package Test::Smoke;
 use strict;
 
 use vars qw($VERSION $conf @EXPORT);
-$VERSION  = '1.79_03';
+$VERSION  = '1.79_04';
 
 use base 'Exporter';
 @EXPORT  = qw( $conf &read_config &run_smoke );
