@@ -83,7 +83,10 @@ SKIP: {
     my $git = Test::Smoke::Util::Execute->new(command => $gitbin);
     my $repopath = 't/tsgit';
     $git->run('-c' => "init.defaultBranch=$branchname", init => "-q", $repopath);
-    is($git->exitcode, 0, "git init $repopath");
+    unless (is($git->exitcode, 0, "git init $repopath")) {
+        skip "git init failed! The tests require an empty/different repo";
+    }
+
 
     mkpath("$repopath/Porting");
     unless(chdir $repopath) {
