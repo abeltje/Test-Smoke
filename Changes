@@ -1,12 +1,100 @@
-Changes on 2022-08-18 for repository at:
+Changes on 2022-08-24 for repository at:
   Fetch URL: git@github.com:abeltje/Test-Smoke.git
   Push  URL: git@github.com:abeltje/Test-Smoke.git
 
 Enjoy!
 
-1.79_02 2022-08-18T20:47:54+02:00 (960dc93 => Abe Timmerman)
+1.79_03 2022-08-24T11:41:29+02:00 (8bb8db9 => syncer_rsync.t)
+ - (syncer_rsync.t, Wed, 24 Aug 2022 11:41:29 +0200) Autocommit for
+   distribution Test::Smoke 1.79_03 (test)
+
+1.79_02 2022-08-18T20:47:54+02:00 (dac3861 => Abe Timmerman)
  - (Abe Timmerman, Thu, 18 Aug 2022 20:47:54 +0200) Autocommit for
    distribution Test::Smoke 1.79_02 (test)
+
+ - (Abe Timmerman, Wed, 24 Aug 2022 10:37:18 +0200) FIX: xtest Makefile
+   target
+ -     83dafe7e6effe5489 was too gnu-make specific and broke bsd-make
+ -     It looks that this is a portable solution, it's just a developer
+   helper
+
+ - (Bram, Thu, 18 Aug 2022 18:20:12 +0200) Remove test repository when
+   rsync isn't found
+ -     In t/syncer_rsync.t a fixed test directory (t/tsgit) is used.
+ -     At the end of the test it normally removes this directory but when
+ -     some of the tests are skipped then it left this directory in place
+ -     which caused the next test run to have a failure (on `git commit`).
+ -     Alternative fixes:
+ -     - use a tmp dir like t/syncer_git.t does
+ -     - remove the directory at the start of the test if it exist
+
+ - (Bram, Thu, 18 Aug 2022 18:19:54 +0200) Configure git user/emailaddress
+   for the test repo
+ -     The test create their own git repo and then adds some files in it
+   and
+ -     then it does a `git commit`.
+ -     On Windows the `git commit` failed because it was unable to
+   determine a valid
+ -     username/email-address. This resulted in extra test failures.
+ -     -> After creating a repo set a username and emailaddress in the
+   config of
+ -	  that repo.
+
+ - (Bram, Thu, 18 Aug 2022 18:18:30 +0200) Abort tests when chdir to repo
+   dir failed
+ -     The test init their own git repo and then does a `chdir()` to that
+ -     directory.
+ -     If that `chdir()` would fail then abort the test since it
+   would/could otherwise
+ -     be modifying the Test-Smoke repo.
+ -     (I haven't seen failures with `chdir()`, it's more a safe-guard to
+   prevent
+ -	against altering the wrong repo)
+ -     (Using `die` instead of `skip` at the request of @abeltje)
+
+ - (Bram, Thu, 18 Aug 2022 18:18:23 +0200) Check exit status of every git
+   command
+ -     During testing (on Windows) several git commands failed but this
+ -     wasn't obvious from the test output.
+ -     -> Adapt the test to check the exit status of git after every
+   command.
+
+ - (Bram, Thu, 18 Aug 2022 22:25:47 +0200) Lowercase cpu type in smoke
+   report
+ -     On my Windows laptop System::Info reports the cpu_type as 'AMD64'.
+ -     Looking at the smoke db: other platforms appear to report it as
+   'amd64'.
+ -     Lowercase it so that the Windows reports also show as 'amd64'.
+
+ - (Bram, Thu, 18 Aug 2022 22:39:31 +0200) Add '.mailmap' to ignore list of
+   MANIFEST check
+ -     The '.mailmap' file is not included in the MANIFEST, it's also
+ -     special cased in perl5.git/t/porting/manifest.t.
+ -     The manifest test of Test::Smoke should also ignore it.
+ -     All reports currently contain:
+ -	   MANIFEST messages:
+ -	     MANIFEST did not declare '.mailmap'
+ -     which is irrelevant noise.
+
+ - (Bram, Fri, 19 Aug 2022 13:37:52 +0200) Filter out the default msg in
+   `user_skiped_tests`
+ -     `bin/configsmoke.pl` adds a default message when creating the 'skip
+   tests' file.
+ -     Filter out that message in the report to reduce some 'useless' info.
+ -     For reference: the 'skip tests' file is used by
+   `...::Smoker::set_skip_tests`
+ -     which does some more filtering (skip comments, ...).
+ -     Exact Filtering that it does:
+ -	       $raw =~ m/^\s*#/ and next;
+ -	       $raw =~ s/(\S+).*/$1/s;
+ -	       if ($raw !~ m/\.t$/ and $raw !~ m/test\.pl$/) {
+ -		   next;
+ -	       }
+ -     I opted not to do the same filtering and instead just filter the
+   default
+ -     message. If there are comments in the file then they could be useful
+ -     to include in the report (i.e. if they explain why a test file is
+   skipped)
 
 1.79_01 2022-08-17T08:59:35+02:00 (f05cccd => Abe Timmerman)
  - (Abe Timmerman, Wed, 17 Aug 2022 08:59:35 +0200) Autocommit for
