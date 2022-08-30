@@ -157,10 +157,7 @@ hunk.
 #  endif
 static const char * const local_patches[] = {
         NULL
-#ifdef PERL_GIT_UNCOMMITTED_CHANGES
-        ,"uncommitted-changes"
-#endif
-        PERL_GIT_UNPUSHED_COMMITS    	/* do not remove this line */
+        ,"DEVEL19999"
         ,NULL
 };
 
