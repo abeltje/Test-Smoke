@@ -45,7 +45,7 @@ C<Configure_win32()> alters the settings of the makefile for MSWin32.
 
 C<$command> is in the form of './Configure -des -Dusedevel ...'
 
-C<$win32_maker> should either be C<nmake> or C<dmake>, the default
+C<$win32_maker> should either be C<nmake> or C<gmake>, the default
 is C<nmake>.
 
 C<@args> is a list of C<< option=value >> pairs that will (eventually)
@@ -104,7 +104,7 @@ sets INST_DRV to a new value (default is "c:")
 =item * B<-DINST_TOP=...>
 
 sets INST_DRV to a new value (default is "$(INST_DRV)\perl"), this is
-where perl will be installed when C<< [nd]make install >> is run.
+where perl will be installed when C<< [ng]make install >> is run.
 
 =item * B<-DINST_VER=...>
 
@@ -144,7 +144,7 @@ Set the cf_email option (Config.pm)
 =item * B<-Accflags=...>
 
 Adds the option to BUILDOPT. This is implemented differently for
-B<nmake> and B<dmake>.
+B<nmake> and B<gmake>.
 Returns the name of the outputfile.
 
 =back
@@ -153,14 +153,12 @@ Returns the name of the outputfile.
 
 my %win32_makefile_map = (
     nmake => "Makefile",
-    dmake => "makefile.mk",
     gmake => "GNUmakefile",
 );
 
 sub Configure_win32 {
     my($command, $win32_maker, @args ) = @_;
     $win32_maker ||= 'nmake'; $win32_maker = lc $win32_maker;
-    my $is_dmake = $win32_maker eq 'dmake';
     my $is_nmake = $win32_maker eq 'nmake';
     my $is_gmake = $win32_maker eq 'gmake';
 
@@ -289,7 +287,6 @@ sub Configure_win32 {
     while (<ORG>) {
         if ( $donot_change ) {
             # need to help the Win95 build
-            $is_dmake and s/\b$win32_makefile_map{ $win32_maker }\b/smoke.mk/;
             if (m/^\s*CFG_VARS\s*=/) {
                 my( $extra_char, $quote ) = ($is_nmake || $is_gmake)
                     ? ( "\t", '"' ) : ("~", "" );
@@ -1408,8 +1405,7 @@ sub skip_filter {
     m,\d+\s+[Ff]ile\(s\) copied, ||
     m,[/\\](?:mini)?perl\.exe ,||
     m,^\t?cd , ||
-    m,^\b[nd]make\b, ||
-    m,dmake\.exe:?\s+-S, ||
+    m,^\b[ng]make\b, ||
     m,^\s+\d+/\d+ skipped: , ||
     m,^\s+all skipped: , ||
     m,^\s*pl2bat\.bat [\w\\]+, ||
