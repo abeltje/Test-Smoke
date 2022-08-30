@@ -4,7 +4,6 @@ use strict;
 use File::Spec;
 use File::Temp 'tempdir';
 use File::Copy 'copy';
-use Test::LongString;
 
 use Test::More tests => 77;
 BEGIN { use_ok( 'Test::Smoke::Util' ); }
@@ -55,7 +54,7 @@ SKIP: {
     like($makefile, qr/^USE_IMP_SYS\s*:= define/m,  '#$(USE_IMP_SYS)');
 
     # These should be unset
-    like_string($makefile, qr/^#USE_LARGE_FILES\s*:= define/m, '#$(USE_LARGE_FILES)');
+    like($makefile, qr/^#USE_LARGE_FILES\s*:= define/m, '#$(USE_LARGE_FILES)');
 
 }
 
