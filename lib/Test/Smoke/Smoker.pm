@@ -1198,7 +1198,8 @@ sub _run {
     defined $sub and return &$sub( $command, @args );
 
     my ( $out, $err, $res ) = capture { system $command };
-    $self->log($err) if $err;
+    $self->tty($out);
+    $self->ttylog($err) if $err;
     $self->{_run_exit} = $res >> 8;
     return wantarray ? split /(\r\n|\r|\n)/, $out : $out;
 }
