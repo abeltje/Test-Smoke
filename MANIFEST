@@ -94,6 +94,7 @@ t/app/140-synctree.t
 t/app/150-reporter.t
 t/buildcfg.t
 t/cfgstuff.t
+t/for_gmake.t
 t/for_nmake.t
 t/ftppub/bugtst01.out
 t/ftppub/bugtst02.out
@@ -168,4 +169,5 @@ t/util-execute.t
 t/util_times.t
 t/vms_rl.t
 t/win32/Makefile
+t/win32/GNUmakefile
 t/win32_error_mode.t

@@ -77,13 +77,37 @@ sets USE_MULTI = define (also sets USE_ITHREADS and USE_IMP_SYS)
 
 sets USE_IMP_SYS = define (also sets USE_ITHREADS and USE_MULTI)
 
+=item * B<-Uusethreads> or B<-Uuseithreads>
+
+unset C<USE_MULTI>, C<USE_IMP_SYS> and C<USE_ITHREADS>
+
 =item * B<-Dusemymalloc>
 
-set PERL_MALLOC = define
+set C<PERL_MALLOC := define>
 
 =item * B<-Duselargefiles>
 
-set USE_LARGE_FILES = define
+set C<USE_LARGE_FILES := define>
+
+=item * B<-Duse64bint>
+
+set C<USE_64_BIT_INT := define> (always for win64, needed for -UWIN64)
+
+=item * B<-Duselongdouble>
+
+set C<USE_LONG_DOUBLE := define> (GCC only)
+
+=item * B<-Dusequadmath>
+
+set both C<USE_QUADMATH := define> and C<I_QUADMATH := define> (GCC only)
+
+=item  * B<-Dusesitecustomize>
+
+set C<USE_SITECUST := define>
+
+=item * B<-Udefault_inc_excludes_dot>
+
+unsets C<# DEFAULT_INC_EXCLUDES_DOT := define> (comments out the line)
 
 =item * B<-Dbccold>
 
@@ -164,33 +188,40 @@ sub Configure_win32 {
 
     local $_;
     my %opt_map = (
-        "-Dusethreads"          => "USE_ITHREADS",
-        "-Duseithreads"         => "USE_ITHREADS",
-        "-Duseperlio"           => "USE_PERLIO",
-        "-Dusemultiplicity"     => "USE_MULTI",
-        "-Duseimpsys"           => "USE_IMP_SYS",
-        "-Uuseimpsys"           => "USE_IMP_SYS",
-        "-Dusemymalloc"         => "PERL_MALLOC",
-        "-Duselargefiles"       => "USE_LARGE_FILES",
-        "-Uuseshrplib"          => "BUILD_STATIC",
-        "-UWIN64"               => "WIN64",
-        "-DDEBUGGING"           => "USE_DEBUGGING",
-        "-DINST_DRV"            => "INST_DRV",
-        "-DINST_TOP"            => "INST_TOP",
-        "-DINST_VER"            => "INST_VER",
-        "-DINST_ARCH"           => "INST_ARCH",
-        "-Dcf_email"            => "EMAIL",
-        "-DCCTYPE"              => "CCTYPE",
-        "-Dgcc_v3_2"            => "USE_GCC_V3_2",
-        "-DGCC_4XX"             => "GCC_4XX",
-        "-DGCCWRAPV"            => "GCCWRAPV",
-        "-DGCCHELPERDLL"        => "GCCHELPERDLL",
-        "-Dbccold"              => "BCCOLD",
-        "-DCCHOME"              => "CCHOME",
-        "-DIS_WIN95"            => "IS_WIN95",
-        "-DCRYPT_SRC"           => "CRYPT_SRC",
-        "-DCRYPT_LIB"           => "CRYPT_LIB",
-        "-DEXTRALIBDIRS"        => "EXTRALIBDIRS",
+        "-Dusethreads"               => "USE_ITHREADS",
+        "-Duseithreads"              => "USE_ITHREADS",
+        "-Duseperlio"                => "USE_PERLIO",
+        "-Dusemultiplicity"          => "USE_MULTI",
+        "-Duseimpsys"                => "USE_IMP_SYS",
+        "-Uuseimpsys"                => "USE_IMP_SYS",
+        "-Dusemymalloc"              => "PERL_MALLOC",
+        "-Duselargefiles"            => "USE_LARGE_FILES",
+        "-Duse64bitint"              => "USE_64_BIT_INT",
+        "-Duselongdouble"            => "USE_LONG_DOUBLE",
+        "-Dusequadmath"              => "USE_QUADMATH",
+        "-Dusesitecustomize"         => "USE_SITECUST",
+        "-Uuseshrplib"               => "BUILD_STATIC",
+        "-Udefault_inc_excludes_dot" => "DEFAULT_INC_EXCLUDES_DOT",
+        "-UWIN64"                    => "WIN64",
+        "-Uusethreads"               => "USE_ITHREADS",
+        "-Uuseithraeds"              => "USE_ITHREADS",
+        "-DDEBUGGING"                => "USE_DEBUGGING",
+        "-DINST_DRV"                 => "INST_DRV",
+        "-DINST_TOP"                 => "INST_TOP",
+        "-DINST_VER"                 => "INST_VER",
+        "-DINST_ARCH"                => "INST_ARCH",
+        "-Dcf_email"                 => "EMAIL",
+        "-DCCTYPE"                   => "CCTYPE",
+        "-Dgcc_v3_2"                 => "USE_GCC_V3_2",
+        "-DGCC_4XX"                  => "GCC_4XX",
+        "-DGCCWRAPV"                 => "GCCWRAPV",
+        "-DGCCHELPERDLL"             => "GCCHELPERDLL",
+        "-Dbccold"                   => "BCCOLD",
+        "-DCCHOME"                   => "CCHOME",
+        "-DIS_WIN95"                 => "IS_WIN95",
+        "-DCRYPT_SRC"                => "CRYPT_SRC",
+        "-DCRYPT_LIB"                => "CRYPT_LIB",
+        "-DEXTRALIBDIRS"             => "EXTRALIBDIRS",
     );
 # %opts hash-values:
 # undef  => leave option as-is when no override (makefile default)
@@ -198,38 +229,44 @@ sub Configure_win32 {
 # (true) => enable option when no override (change value, unless
 #           $key =~ /^(?:PERL|USE)_/) (forced default)
     my %opts = (
-        USE_MULTI       => 0, # default define
-        USE_ITHREADS    => 0, # default define
-        USE_IMP_SYS     => 0, # default define
-        USE_PERLIO      => 1, # useperlio should be the default!
-        USE_LARGE_FILES => 0, # default define
-        PERL_MALLOC     => 0,
-        BUILD_STATIC    => 0,
-        USE_DEBUGGING   => 0,
-        INST_DRV        => undef,
-        INST_TOP        => undef,
-        INST_VER        => '',
-        INST_ARCH       => '',
-        EMAIL           => undef,  # used to be $smoker,
-        CCTYPE          => undef,  # used to be $win32_cctype,
-        USE_GCC_V3_2    => 0,
-        GCC_4XX         => 0,
-        GCCWRAPV        => 0,
-        GCCHELPERDLL    => undef,
-        BCCOLD          => 0,
-        CCHOME          => undef,
-        WIN64           => 1,
-        IS_WIN95        => 0,
-        CRYPT_SRC       => undef,
-        CRYPT_LIB       => undef,
-        EXTRALIBDIRS    => undef,
+        USE_MULTI                => 1,
+        USE_ITHREADS             => 1,
+        USE_IMP_SYS              => 1,
+        USE_PERLIO               => 1,
+        USE_LARGE_FILES          => 0,        # default define
+        PERL_MALLOC              => 0,
+        BUILD_STATIC             => 0,
+        USE_64_BIT_INT           => 0,
+        USE_LONG_DOUBLE          => 0,
+        USE_QUADMATH             => 0,
+        I_QUADMATH               => 0,
+        WIN64                    => 1,
+        USE_SITECUST             => 0,
+        DEFAULT_INC_EXCLUDES_DOT => 1,
+        USE_DEBUGGING            => 0,
+        INST_DRV                 => undef,
+        INST_TOP                 => undef,
+        INST_VER                 => '',
+        INST_ARCH                => '',
+        EMAIL                    => undef,    # used to be $smoker,
+        CCTYPE                   => undef,    # used to be $win32_cctype,
+        USE_GCC_V3_2             => 0,
+        GCC_4XX                  => 0,
+        GCCWRAPV                 => 0,
+        GCCHELPERDLL             => undef,
+        BCCOLD                   => 0,
+        CCHOME                   => undef,
+        IS_WIN95                 => 0,
+        CRYPT_SRC                => undef,
+        CRYPT_LIB                => undef,
+        EXTRALIBDIRS             => undef,
     );
 
     # $undef_re: regex for options that should be UNcommented for -Uxxx
     my $undef_re  = qr/WIN64/;
 
     # $def_re: regex for options that should be UNcommented for -Dxxx
-    my $def_re = qr/((?:(?:PERL|USE|IS|GCC)_\w+)|BCCOLD|GCCWRAPV)/;
+    my $def_re = qr/((?:(?:DEFAULT|PERL|USE|IS|GCC|I)_\w+)|BCCOLD|GCCWRAPV)/;
 
     my @w32_opts = grep ! /^$def_re/, keys %opts;
     my $config_args = join " ",
@@ -252,13 +289,22 @@ sub Configure_win32 {
         $option =~ /^-U/ and $opts{$opt_map{$option}} = 0;
     }
 
+    # Handle some switches that impact more make-vars
+    if ( $cmdln =~ /-Uusei?threads\b/ ) {
+        $opts{USE_MULTI} = $opts{USE_ITHREADS} = $opts{USE_IMP_SYS} = 0;
+
+    }
+    if ( $cmdln =~ /-Dusequadmath\b/ ) {
+        $opts{USE_QUADMATH} = $opts{I_QUADMATH} = 1;
+    }
     # If you set one, we do all, so you can have fork()
     # unless you set -Uuseimpsys
     if ( $cmdln !~ /-Uuseimpsys\b/ ) {
         if ( $opts{USE_MULTI} || $opts{USE_ITHREADS} || $opts{USE_IMP_SYS} ) {
             $opts{USE_MULTI} = $opts{USE_ITHREADS} = $opts{USE_IMP_SYS} = 1;
         }
-    } else {
+    }
+    else {
         if ( $opts{USE_MULTI} || $opts{USE_ITHREADS} ) {
             $opts{USE_MULTI} = $opts{USE_ITHREADS} = 1;
         }
@@ -273,16 +319,16 @@ sub Configure_win32 {
     # If you -Dbccold you 'll *want* CCTYPE = BORLAND
     $opts{CCTYPE} = "BORLAND" if $opts{BCCOLD};
 
+    printf "* %-25s = %s\n", $_, $opts{$_} for grep $opts{$_}, sort keys  %opts;
+
     local (*ORG, *NEW);
     my $maker = $win32_makefile_map{ $win32_maker }
       or die "no make file for $win32_maker";
     my $in =  "win32/$maker";
     my $out = "win32/smoke.mk";
 
-    open ORG, "< $in"  or die "unable to open '$in': $!";
-    binmode ORG;
-    open NEW, "> $out" or die "unable to open '$out': $!";
-    binmode NEW;
+    open ORG, "<:crlf", $in  or die "unable to open '$in': $!";
+    open NEW, ">:crlf", $out or die "unable to open '$out': $!";
     my $donot_change = 0;
     while (<ORG>) {
         if ( $donot_change ) {
@@ -307,19 +353,19 @@ sub Configure_win32 {
         }
 
         # Only change config stuff _above_ that line!
-        if ( m/^\s*#?\s*$def_re(\s*\*?=\s*define)$/ ) {
+        if ( m/^\s*#?\s*$def_re(\s*[\*:]?=\s*define)$/ ) {
             $_ = ($opts{$1} ? "" : "#") . $1 . $2 . "\n";
         }
-        elsif (m/\s*#?\s*($undef_re)(\s*\*?=\s*undef)$/) {
+        elsif (m/\s*#?\s*($undef_re)(\s*[*:]?=\s*undef)$/) {
             $_ = ($opts{$1} ? "#" : "") . "$1$2\n";
         }
-        elsif (m/^\s*#?\s*(CFG\s*\*?=\s*Debug)$/) {
+        elsif (m/^\s*#?\s*(CFG\s*[*:]?=\s*Debug)$/) {
             $_ = ($opts{USE_DEBUGGING} ? "" : "#") . $1 . "\n";
         }
-        elsif (m/^\s*#?\s*(BUILD_STATIC)\s*=\s*(.*)$/) {
-            my( $macro, $mval ) = ( $1, $2 );
+        elsif (m/^\s*#?\s*(BUILD_STATIC)\s*([*:]?=)\s*(.*)$/) {
+            my( $macro, $op, $mval ) = ( $1, $2, $3);
             if ( $config_args =~ /-([UD])useshrplib\b/ ) {
-                $_ = ( $1 eq 'D' ? "#" : "" ) . "$macro = $mval\n";
+                $_ = ( $1 eq 'D' ? "#" : "" ) . "$macro $op $mval\n";
             }
         }
         else {
@@ -511,13 +557,13 @@ sub grepccmsg {
             # Error Ennn:: error description
             '(^(?:(?:Warning W)|(?:Error E))\d+ .+? \d+: .+?$)',
 
-	'icc' => # Intel C on Linux
-	    # pp_sys.c(4412): warning #num: text
+        'icc' => # Intel C on Linux
+            # pp_sys.c(4412): warning #num: text
             #       SETi( getpriority(which, who) );
             #       ^
-	    '(^.*?\([0-9]+\): (?:warning #[0-9]+|error): .+$)',
-	'icpc' => # Intel C++
-	    '(^.*?\([0-9]+\): (?:warning #[0-9]+|error): .+$)',
+            '(^.*?\([0-9]+\): (?:warning #[0-9]+|error): .+$)',
+        'icpc' => # Intel C++
+            '(^.*?\([0-9]+\): (?:warning #[0-9]+|error): .+$)',
     );
     exists $OS2PAT{ lc $cc } or $cc = 'gcc';
     my $pat = $OS2PAT{ lc $cc };
@@ -703,9 +749,9 @@ sub get_config {
     # Cheat. Force a break marker as a line after the last line.
     foreach (<CONF>, "=") {
         m/^#/ and next;
-        s/\s+$// if m/\s/;	# Blanks, new-lines and carriage returns. M$
+        s/\s+$// if m/\s/;      # Blanks, new-lines and carriage returns. M$
         if (m:^/:) {
-      	    m:^/(.*)/$:;
+            m:^/(.*)/$:;
             defined $1 or die "Policy target line didn't end with '/': '$_'";
             push @target, $1;
             next;
@@ -720,7 +766,7 @@ sub get_config {
         # Break marker, so process the lines we have.
         if (@target > 1) {
             warn "Multiple policy target lines " .
-       	         join (", ", map {"'$_'"} @target) . " - will use first";
+                 join (", ", map {"'$_'"} @target) . " - will use first";
         }
         my %conf = map { $_ => 1 } @conf;
         if (keys %conf == 1 and exists $conf{""} and !@target) {
@@ -783,7 +829,7 @@ sub get_patch {
                 (my $short_describe = $describe) =~ s/^GitLive-//;
                 return [$sha, $short_describe, $branch];
             }
-	    return [$patch_level];
+            return [$patch_level];
         }
         return [ '' ];
     }
@@ -1362,11 +1408,11 @@ sub skip_filter {
     return m,^ *$, ||
     m,^\t, ||
     m,^PERL=./perl\s+./runtests choose, ||
-    m,^	AutoSplitting, ||
+    m,^\s+AutoSplitting, ||
     m,^\./miniperl , ||
     m,^\s*autosplit_lib, ||
     m,^\s*PATH=\S+\s+./miniperl, ||
-    m,^	Making , ||
+    m,^\s+Making , ||
     m,^make\[[12], ||
     m,make( TEST_ARGS=)? (_test|TESTFILE=|lib/\w+.pm), ||
     m,^make:.*Error\s+\d, ||
