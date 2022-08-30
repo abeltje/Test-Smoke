@@ -1,12 +1,53 @@
-Changes on 2022-08-24 for repository at:
+Changes on 2022-08-30 for repository at:
   Fetch URL: git@github.com:abeltje/Test-Smoke.git
   Push  URL: git@github.com:abeltje/Test-Smoke.git
 
 Enjoy!
 
-1.79_04 2022-08-24T14:10:34+02:00 (5cbfdce => Abe Timmerman)
+1.79_05 2022-08-30T11:43:29+02:00 (29628b7 => Abe Timmerman)
+ - (Abe Timmerman, Tue, 30 Aug 2022 11:43:29 +0200) Autocommit for
+   distribution Test::Smoke 1.79_05 (test)
+
+1.79_04 2022-08-24T14:10:34+02:00 (1d9a306 => Abe Timmerman)
  - (Abe Timmerman, Wed, 24 Aug 2022 14:10:34 +0200) Autocommit for
    distribution Test::Smoke 1.79_04 (test)
+
+ - (Abe Timmerman, Wed, 24 Aug 2022 14:25:39 +0200) Restore another patch
+   that I removed
+
+ - (Abe Timmerman, Tue, 30 Aug 2022 10:07:18 +0200) Drop support for
+   dmake.exe (MSWin32)
+ -     dmake.exe is no longer supported where gmake.exe is, so we drop the
+ -     support for dmake.
+
+ - (Abe Timmerman, Tue, 30 Aug 2022 10:18:05 +0200) FIX: Configure_win32()
+   was broken!
+ -     With the introduction of gmake on MSWin32 Configure_win32() has been
+ -     broken quite badly (assignments went from `*=` in dmake to `:=` in
+ -     gmake; the regexen didn't look at that).
+ -     I've also introduced more Configure switches to the platform:
+ -     CHANGE:
+ -	 -Duseithreads is now on by default,
+ -	 -Uuseithreads to switch it explicitly off
+ -     FIX:
+ -	 -UWIN64 now works as it should
+ -	ADD:
+ -	 -Duse64bitint	 (-UWIN64)
+ -	 -Duselongdouble (gcc)
+ -	 -Dusequadmath	 (gcc)
+ -	 -Dusesitecustomize
+ -	 -Udefault_inc_excludes_dot
+
+ - (Abe Timmerman, Tue, 30 Aug 2022 11:28:49 +0200) Put the compiler
+   messages in the .out-file
+ -     https://github.com/abeltje/Test-Smoke/issues/54
+ -     Test::Smoke was relying on the logfile (created from STDOUT and
+   STDERR
+ -     redirecting) for its compilermessages. I now moved them to the
+   .out-file
+ -     - which should be more reliable - and adjusted the calls to
+   `grepccmsg`
+ -	 and `grepnonfatal`.
 
 1.79_02 2022-08-18T20:47:54+02:00 (dac3861 => Abe Timmerman)
  - (Abe Timmerman, Thu, 18 Aug 2022 20:47:54 +0200) Autocommit for
