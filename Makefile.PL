@@ -61,11 +61,10 @@ unless ( @ARGV ) {
     );
 }
 my @scripts = qw(
-    synctree.pl patchtree.pl mailrpt.pl W32Configure.pl
-    configsmoke.pl smokeperl.pl runsmoke.pl sendrpt.pl
-    archiverpt.pl smokestatus.pl chkbcfg.pl sysinfo.pl
+    configsmoke.pl smokestatus.pl chkbcfg.pl sysinfo.pl
     tssynctree.pl tsrunsmoke.pl tssendrpt.pl tsarchive.pl
     tssmokeperl.pl tsreport.pl tsrepostjsn.pl
+    tsw32configure.pl tsconfigsmoke.pl
 );
 
 my %extra_deps;
@@ -113,9 +112,12 @@ if (keys %posters == 3) {
         print "Found $curlbin\n";
     }
 }
-else {
+else { # we have a perl module, so we need extra stuff
     exists $posters{$_} or $extra_deps{$_} = 0, last
         for @ua_clients;
+    $extra_deps{'Net::SSLeay'} = 0;
+    $extra_deps{'IO::Socket::SSL'} = 0;
+    $extra_deps{'LWP::Protocol::https'} = 6 if exists($posters{'LWP::UserAgent'});
 }
 
 my %TEST_REQUIRES = (

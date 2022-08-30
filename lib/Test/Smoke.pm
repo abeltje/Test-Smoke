@@ -9,6 +9,7 @@ use base 'Exporter';
 
 my $ConfigError;
 
+use File::Spec;
 use Test::Smoke::Policy;
 use Test::Smoke::BuildCFG;
 use Test::Smoke::Smoker;
@@ -52,6 +53,7 @@ sub read_config {
         unless $config_name =~ /_config$/ || -f $config_name;
 
     # Enable reloading by hackery
+    local @INC = ( File::Spec->curdir, @INC );
     delete $INC{ $config_name } if exists $INC{ $config_name };
     eval { require $config_name };
     $ConfigError = $@ ? $@ : undef;
