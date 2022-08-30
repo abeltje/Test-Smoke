@@ -680,8 +680,10 @@ sub set_local_patch {
     open PLIN,  "< $plh" or return 0;
     open PLOUT, "> $pln" or return 0;
     my $seen=0;
+    my $done=0;
     while ( <PLIN> ) {
         if ( /^(\s+),NULL/ and $seen ) {
+            $done++;
             while ( my $c = shift @descr ) {
                 print PLOUT qq{$1,"$c"\n};
            }
@@ -691,6 +693,10 @@ sub set_local_patch {
     }
     close PLIN;
     close PLOUT or return 0;
+
+    if ( not $done ) {
+        die "Failed to update patchlevel.h. Content not as expected?";
+    }
 
     -e $plb and 1 while unlink $plb;
     my $errno = "$!";
