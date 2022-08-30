@@ -681,9 +681,9 @@ sub set_local_patch {
     open PLOUT, "> $pln" or return 0;
     my $seen=0;
     while ( <PLIN> ) {
-        if ( /\t,NULL/ and $seen ) {
+        if ( /^(\s+),NULL/ and $seen ) {
             while ( my $c = shift @descr ) {
-                print PLOUT qq{\t,"$c"\n};
+                print PLOUT qq{$1,"$c"\n};
            }
         }
         $seen++ if /local_patches\[\]/;
