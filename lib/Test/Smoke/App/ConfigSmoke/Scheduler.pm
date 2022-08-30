@@ -3,7 +3,7 @@ use warnings;
 use strict;
 
 use Exporter 'import';
-our @EXPORT = qw/ config_scheduler /;
+our @EXPORT = qw/ config_scheduler schedule_entry_ms_at schedule_entry_crontab /;
 
 use Test::Smoke::App::Options;
 use Test::Smoke::Util::FindHelpers 'whereis';
@@ -35,6 +35,7 @@ sub config_scheduler {
         return;
     }
 
+    $self->current_values->{cronbin} = $cronbin;
     my $docron = $self->handle_option(docron_option($cronbin));
     return unless $docron;
 
@@ -44,7 +45,14 @@ sub config_scheduler {
     if ($^O eq 'MSWin32') {
         $self->{_jcl} = $self->prefix . '.cmd';
         $self->{_jcl_abs} = Cwd::abs_path($self->jcl);
-        if (open(my $crontab, "$cronbin |")) {
+        if ($cronbin =~ m{schtasks}i) {
+
+            my $new_entry = $self->schedule_entry_ms_at($cronbin, $crontime);
+            my $add2cron = $self->handle_option(add2cron_option($new_entry));
+
+            system $new_entry if $add2cron;
+        }
+        elsif (open(my $crontab, "$cronbin |")) {
             @current_cron = <$crontab>;
             close($crontab) or warn "Error reading schedule: $!\n";
 
@@ -71,8 +79,8 @@ sub config_scheduler {
                 splice @current_cron, 0, 3;
             }
 
-            my $new_entry = schedule_entry_crontab($self, $cronbin, $crontime);
-            @current_cron =grep { m{^$new_entry$} } @current_cron;
+            my $new_entry = $self->schedule_entry_crontab($cronbin, $crontime);
+            @current_cron = grep { m{^$new_entry$} } @current_cron;
             s{^ (?<!\#) \s* (.+?(?:$jcl)) }{# $1}x for @current_cron;
 
             my $cronout_file = $self->prefix . '.crontab';
@@ -96,11 +104,17 @@ sub config_scheduler {
     }
 }
 
+=head2 get_avail_scheduler
+
+Looks for F<at.exe> on C<MSWin32> or F<cron(tab)> on other systems.
+
+=cut
+
 sub get_avail_scheduler {
     my( $scheduler, $has_crond );
 
-    if ( $^O eq 'MSWin32' ) { # We're looking for 'at.exe'
-        $scheduler = whereis( 'at' );
+    if ( $^O eq 'MSWin32' ) { # We're looking for 'SchTasks.exe' or 'at.exe'
+        $scheduler = whereis( 'schtasks') || whereis( 'at' );
     }
     else { # We're looking for 'crontab' or 'cron'
         $scheduler = whereis( 'crontab' ) || whereis( 'cron' );
@@ -109,9 +123,28 @@ sub get_avail_scheduler {
     return ( $scheduler, $has_crond );
 }
 
+=head2 schedule_entry_ms_schtasks
+
+Return an etry for MS-C<SchTasks>
+
+=cut
+
+sub schedule_entry_ms_schtasks {
+    my $self = shift;
+    my ($cron, $crontime) = @_;
+    my $script = $self->jcl_abs;
+
+    return '' unless $crontime;
+
+    return sprintf(
+        qq[%s /Create /SC DAILY /ST %s /TN P5SmokeRun /TR "%s"],
+        $cron, $crontime, $script
+    );
+}
+
 =head2 schedule_entry_ms_at
 
-Return an entry for MS-C<at>.
+Return an entry for MS-C<AT>.
 
 =cut
 
@@ -167,6 +200,12 @@ sub docron_option {
     );
 }
 
+=head2 crontime_option
+
+This option C<crontime> will be in the config-file, but only as a reminder.
+
+=cut
+
 sub crontime_option {
     return Test::Smoke::App::AppOption->new(
         name      => 'crontime',
@@ -175,6 +214,12 @@ sub crontime_option {
         chk       => '(?:random|(?:[012]?\d:[0-5]?\d))',
     );
 }
+
+=head2 add2cron_option
+
+This option C<add2cron> will not be in the config-file.
+
+=cut
 
 sub add2cron_option {
     my ($new_entry) = @_;

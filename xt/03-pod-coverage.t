@@ -97,3 +97,9 @@ w32args
 w32cc
 w32make
 pass_option
+configsmoke_config
+minus_des
+perl_version
+smokestatus_config
+v
+w32configure_config

@@ -344,7 +344,7 @@ sub Configure_win32 {
             print NEW $_;
             next;
         } else {
-            if ( $donot_change = /^#+ CHANGE THESE ONLY IF YOU MUST #+$/ ) {
+            if ( $donot_change = /^#+ CHANGE THESE ONLY IF YOU MUST #+/ ) {
                 # We will now insert the BULDOPT lines
                 my $bo_tmpl = $win32_maker eq 'nmake'
                     ? "BUILDOPT\t= \$(BUILDOPT) %s" : "BUILDOPT\t+= %s";

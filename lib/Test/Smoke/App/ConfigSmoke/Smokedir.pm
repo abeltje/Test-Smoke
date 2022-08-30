@@ -56,6 +56,14 @@ sub check_smokedir {
     return 1;
 }
 
+=head2 use_smokedir_option
+
+This option C<use_smokedir> will not be in the config-file. We use it for the
+flow of the configuration, to see if an existing source-directory should be
+(re)used.
+
+=cut
+
 sub use_smokedir_option {
     return Test::Smoke::App::AppOption->new(
         name       => 'use_smokedir',

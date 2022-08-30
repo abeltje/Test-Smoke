@@ -12,6 +12,7 @@ use Test::NoWarnings ();
 use URI::Escape qw/uri_unescape/;
 use Config;
 use Errno qw/EINTR/;
+use URI;
 use Test::Smoke::Util::LoadAJSON;
 use Test::Smoke::Poster;
 use Test::Smoke::Util qw/whereis/;

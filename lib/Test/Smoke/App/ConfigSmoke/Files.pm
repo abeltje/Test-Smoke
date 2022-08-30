@@ -17,7 +17,7 @@ Test::Smoke::App::ConfigSmoke::Files - Mixin for L<Test::Smoke::App::ConfigSmoke
 
 These methods will be added to the L<Test::Smoke::App::ConfigSmoke> class.
 
-=head2 config_make_options
+=head2 config_files
 
 Configure options C<outfile>, C<rptfile>, C<jsnfile>, C<lfile> and C<adir>.
 

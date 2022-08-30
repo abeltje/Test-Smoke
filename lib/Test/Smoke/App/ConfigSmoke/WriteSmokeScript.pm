@@ -21,24 +21,29 @@ These methods will be added to the L<Test::Smoke::App::ConfigSmoke> class.
 
 =head2 write_smoke_script
 
+General method to write the smoke-script for different "shells".
+
 =cut
 
 sub write_smoke_script {
     my $self = shift;
+    my ($cronbin, $crontime) = @_;
 
     if ($^O eq 'MSWin32') {
         $self->{_smoke_script} = $self->prefix . '.cmd';
+        $self->{_smoke_script_abs} = Cwd::abs_path($self->smoke_script);
         $self->write_as_cmd();
     }
     elsif ($^O eq 'VMS') {
         $self->{_smoke_script} = $self->prefix . '.com';
+        $self->{_smoke_script_abs} = Cwd::abs_path($self->smoke_script);
         print "$^O not (fully) supported yet.\n";
     }
     else {
         $self->{_smoke_script} = $self->prefix . '.sh';
-        $self->write_as_shell();
+        $self->{_smoke_script_abs} = Cwd::abs_path($self->smoke_script);
+        $self->write_as_shell($cronbin, $crontime);
     }
-    $self->{_smoke_script_abs} = Cwd::abs_path($self->smoke_script);
 }
 
 =head2 write_as_shell
@@ -49,13 +54,11 @@ Configure options C<makeopt>, C<testmake>, C<harnessonly>, C<hasharness3> and C<
 
 sub write_as_shell {
     my $self = shift;
+    my ($cronbin, $crontime) = @_;
 
     print "\n-- Write shell script --\n";
 
-#    my $cronline = schedule_entry(
-#        File::Spec->catfile( $cwd, $jcl ),
-#        $cron, $crontime
-#    );
+    my $cronline = schedule_entry($self->smoke_script_abs, $cronbin, $crontime);
 
     my $p5env = '';
     for my $env (qw/ PERL5LIB PERL5OPT /) {
@@ -67,7 +70,7 @@ sub write_as_shell {
 
     my $handle_lock = '    echo "We seem to be running (or remove $LOCKFILE)" >& 2'
                     . "\n    exit 200";
-    if ($self->current_values->{killtime}) { 
+    if ($self->current_values->{killtime}) {
         $handle_lock = "    # Not sure about this, so I will keep the old behaviour\n"
                      . "    # tssmokeperl.pl will exit(42) on timeout\n"
                      . "    # continue='--continue'\n"
@@ -77,7 +80,7 @@ sub write_as_shell {
         $self->smoke_script, $0, $self->VERSION,
         strftime("%Y-%m-%dT%H:%M:%S%z", localtime),
         $self->dollar_0,
-        # $cronline,
+        $cronline,
         ($self->current_values->{renice} ? "" : "# ") . "renice " . $self->current_values->{renice},
         Cwd::abs_path(File::Spec->curdir),
         $self->configfile,
@@ -85,7 +88,7 @@ sub write_as_shell {
         $handle_lock,
         $p5env,
         $self->current_values->{umask},
-        $FindBin::Bin,
+        $FindBin::Bin, $ENV{PATH},
         $^X, File::Spec->catfile($FindBin::Bin, 'tssmokeperl.pl'), $self->current_values->{lfile},
     );
 
@@ -97,11 +100,11 @@ sub write_as_shell {
 # NOTE: Changes made in this file will be \*lost\*
 #       after rerunning %s
 #
-# \$cronline
+# %s
 %s
 cd %s
 CFGNAME=${CFGNAME:-%s}
-LOCKFILE=\${LOCKFILE:-%s}
+LOCKFILE=${LOCKFILE:-%s}
 continue=''
 if test -f "$LOCKFILE" && test -s "$LOCKFILE" ; then
 %s
@@ -110,7 +113,7 @@ echo "$CFGNAME" > "$LOCKFILE"
 
 %s
 umask %s
-PATH=%s:$ENV{PATH}
+PATH=%s:%s
 export PATH
 %s %s -c "$CFGNAME" $continue $* > "%s" 2>&1
 
@@ -133,6 +136,12 @@ EO_SH
         die "Please, fix yourself.\n";
     }
 }
+
+=head2 write_as_cmd
+
+Write the smoke-script as a MS-cmd script.
+
+=cut
 
 sub write_as_cmd {
     my $self = shift;
@@ -211,6 +220,30 @@ EO_BAT
         print "!!!!!\nProblem: cannot create($jcl): $!\n!!!!!\n";
         die "Please, fix yourself.\n";
     }
+}
+
+=head2 schedule_entry
+
+Returns a string that can be used to add the entry to the scheduler.
+
+=cut
+
+sub schedule_entry {
+    my( $script, $cron, $crontime ) = @_;
+
+    return '' unless $crontime;
+    my ($hour, $min) = $crontime =~ /(\d+):(\d+)/;
+
+    my $entry;
+    if ($^O eq 'MSWin32') {
+        $entry = sprintf(
+            qq[$cron %02d:%02d /EVERY:M,T,W,Th,F,S,Su "%s"],
+            $hour, $min, $script
+        );
+    } else {
+        $entry = sprintf(qq[%02d %02d * * * '%s'], $min, $hour, $script);
+    }
+    return $entry;
 }
 
 1;

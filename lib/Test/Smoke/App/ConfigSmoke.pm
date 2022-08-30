@@ -83,12 +83,23 @@ sub _set_prefix {
     return $self;
 }
 
+=head2 run
+
+Configure the Test::Smoke suite and write the configfile.
+
+=cut
+
 sub run {
     my $self = shift;
 
     $self->say_hi();
 
     $self->config_smokedir();
+    if ($^O eq 'MSWin32') {
+        require Test::Smoke::App::ConfigSmoke::MSWin32;
+        Test::Smoke::App::ConfigSmoke::MSWin32->import('config_mswin32');
+        $self->config_mswin32();
+    }
     $self->config_sync();
     $self->config_make_options();
     $self->config_smoke_db();
@@ -108,6 +119,12 @@ sub run {
 
     $self->say_bye();
 }
+
+=head2 say_hi
+
+Show introductory text.
+
+=cut
 
 sub say_hi {
     my $self = shift;
@@ -134,6 +151,12 @@ in case you do not understand a question.
 EOHI
 }
 
+=head2 say_bye
+
+Configuration has finshed, show some of the results and say goodbye.
+
+=cut
+
 sub say_bye {
     my $self = shift;
 
@@ -155,11 +178,17 @@ Finished configuration of Test::Smoke!
 EOBYE
 }
 
+=head2 write_config
+
+This method writes all the relevant values to the config-file.
+
+=cut
+
 sub write_config {
     my $self = shift;
 
     # Filter some values we don't want:
-    my @donot_save = qw( add2cron docron );
+    my @donot_save = qw( cronbin add2cron docron );
     my %current_config = %{ $self->current_values };
     delete($current_config{$_}) for @donot_save;
 
@@ -180,6 +209,12 @@ sub write_config {
     }
 }
 
+=head2 handle_option
+
+Shows the help-text for an option and handles input for it.
+
+=cut
+
 sub handle_option {
     my $self = shift;
     my $option = shift;
@@ -190,6 +225,14 @@ sub handle_option {
     my $value = $self->$prompt_type($option);
     $self->current_values->{$option->name} = $value;
 }
+
+=head2 default_for_option
+
+Default values can come from differnt sources:
+
+I<app-option>, I<config-file>, I<config-default> or I<option-default>.
+
+=cut
 
 sub default_for_option {
     my $self = shift;
@@ -219,6 +262,12 @@ sub default_for_option {
     $debug and printf "  ^^$caller^^ '%s' no default found\n", $option->name;
     return;
 }
+
+=head2 prompt
+
+Ask for a text answer.
+
+=cut
 
 sub prompt {
     my $self = shift;
@@ -290,6 +339,12 @@ sub prompt {
     return $retval;
 }
 
+=head2 prompt_yn
+
+Ask for a Yes/No answer.
+
+=cut
+
 sub prompt_yn {
     my $self = shift;
     my $option = shift;
@@ -303,6 +358,12 @@ sub prompt_yn {
     ( my $retval = $yesno ) =~ tr/ny/01/;
     return 0 + $retval;
 }
+
+=head2 prompt_file
+
+Ask for an existing filename.
+
+=cut
 
 sub prompt_file {
     my $self = shift;
@@ -325,6 +386,12 @@ sub prompt_file {
         return $file;
     }
 }
+
+=head2 prompt_dir
+
+Ask for a directory name.
+
+=cut
 
 sub prompt_dir {
     my $self = shift;
@@ -390,7 +457,7 @@ sub _sort_configkeys {
             gitbin gitdir gitorigin gitdfbranch gitbranchfile ),
 
         # OS specific make related
-        qw( w32args w32cc w32make ),
+        qw( w32cc w32make w32args ),
 
         # Test environment related
         qw( force_c_locale locale defaultenv ),
