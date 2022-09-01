@@ -204,7 +204,7 @@ sub Configure_win32 {
         "-Udefault_inc_excludes_dot" => "DEFAULT_INC_EXCLUDES_DOT",
         "-UWIN64"                    => "WIN64",
         "-Uusethreads"               => "USE_ITHREADS",
-        "-Uuseithraeds"              => "USE_ITHREADS",
+        "-Uuseithreads"              => "USE_ITHREADS",
         "-DDEBUGGING"                => "USE_DEBUGGING",
         "-DINST_DRV"                 => "INST_DRV",
         "-DINST_TOP"                 => "INST_TOP",
