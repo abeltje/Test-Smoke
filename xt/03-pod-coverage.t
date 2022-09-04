@@ -20,6 +20,7 @@ cc
 ccp5p_onfail
 cdir
 cfg
+commit_sha
 curlbin
 ddir
 defaultenv
@@ -51,6 +52,7 @@ mailbin
 mailer_config
 mailxbin
 makeopt
+max_reports
 mdir
 mserver
 mspass
@@ -63,6 +65,7 @@ poster
 poster_config
 report
 reporter_config
+reposter_config
 rptfile
 rsyncbin
 rsyncopts

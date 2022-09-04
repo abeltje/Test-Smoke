@@ -383,7 +383,10 @@ sub _post_process_options {
         $value = '<undef>' if !defined $value;
         push(
             @errors,
-            sprintf("Invalid value '%s' for option '%s'", $value, $opt)
+            sprintf(
+                "Invalid value '%s' for option '%s'",
+                $self->_show_option_value($opt), $opt
+            )
         ) if !$oo->allowed($self->final_options->{$opt});
     }
     if (@errors) {

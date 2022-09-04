@@ -107,9 +107,12 @@ sub poster_config { # posting to CoreSmokeDB
             'LWP::UserAgent' => [
                 ua_timeout(),
             ],
-            'HTTP::Tiny' => [],
+            'HTTP::Tiny' => [
+                ua_timeout(),
+            ],
             'curl' => [
                 curlbin(),
+                ua_timeout(),
             ],
         },
     );
@@ -139,6 +142,24 @@ sub reporter_config { # needed for sending out reports
             un_file(),
             un_position(),
         ],
+    );
+}
+
+sub reposter_config {
+    my %pc = poster_config();
+    my $pc_so = $pc{special_options};
+    return (
+        main_options => [
+            poster(),
+        ],
+        general_options => [
+            adir(),
+            commit_sha(),
+            jsnfile(),
+            max_reports(),
+            smokedb_url(),
+        ],
+        special_options => $pc_so,
     );
 }
 
@@ -321,6 +342,21 @@ sub cfg {
         option => '=s',
         default => undef,
         helptext => "The name of the BuildCFG file.",
+    );
+}
+
+sub commit_sha {
+    return $opt->new(
+        name => 'commit_sha',
+        option => 'sha=s@',
+        allow => sub {
+            my $values = shift;
+            my $ok = 1;
+            $ok &&= m{^ [0-9a-f]+ $}x for @$values;
+            return $ok;
+        },
+        default => [ ],
+        helptext => "A (partial) commit SHA (repeatable!)",
     );
 }
 
@@ -579,6 +615,15 @@ sub makeopt {
         name => 'makeopt',
         option => '=s',
         helptext => "Extra option to pass to make.",
+    );
+}
+
+sub max_reports {
+    return $opt->new(
+        name => 'max_reports',
+        option => 'max-reports|max=i',
+        default => 10,
+        helptext => "Maximum number of reports to pick from",
     );
 }
 
@@ -845,9 +890,9 @@ sub to {
 sub ua_timeout {
     return $opt->new(
         name => 'ua_timeout',
-        option => '=i',
-        default => 30,
-        helptext => "The timeout to set the UserAgent.",
+        option => '=f',
+        default => 30, # 30 seconds
+        helptext => "Set the max time (fractional seconds) a http request should take."
     );
 }
 

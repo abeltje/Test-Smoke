@@ -30,7 +30,8 @@ sub new {
 
     require HTTP::Tiny;
     $self->{_ua} = HTTP::Tiny->new(
-        agent => $self->agent_string()
+        agent => $self->agent_string(),
+        ( $self->ua_timeout ? (timeout => $self->ua_timeout) : () ),
     );
 
     return $self;
@@ -62,14 +63,16 @@ sub _post_data {
 
     if (!$response->{success}) {
         $self->log_warn(
-            "POST failed: %s %s",
+            "POST failed: %s %s%s",
             $response->{status},
-            $response->{reason}
+            $response->{reason},
+            ($response->{content} ? " ($response->{content})" : ""),
         );
         die sprintf(
-            "POST to '%s' failed: %s %s\n",
+            "POST to '%s' failed: %s %s%s\n",
             $self->smokedb_url,
-            $response->{status}, $response->{reason}
+            $response->{status}, $response->{reason},
+            ($response->{content} ? " ($response->{content})" : ""),
         );
     }
 
