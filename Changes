@@ -1,12 +1,78 @@
-Changes on 2022-08-30 for repository at:
+Changes on 2022-09-05 for repository at:
   Fetch URL: git@github.com:abeltje/Test-Smoke.git
   Push  URL: git@github.com:abeltje/Test-Smoke.git
 
 Enjoy!
 
-1.79_06 2022-08-30T13:37:30+02:00 (7252fb2 => Abe Timmerman)
+1.79_07 2022-09-05T11:36:00+02:00 (ce86bd4 => Abe Timmerman)
+ - (Abe Timmerman, Mon, 5 Sep 2022 11:36:00 +0200) Autocommit for
+   distribution Test::Smoke 1.79_07 (test)
+
+1.79_06 2022-08-30T13:37:30+02:00 (e5ff85e => Abe Timmerman)
  - (Abe Timmerman, Tue, 30 Aug 2022 13:37:30 +0200) Autocommit for
    distribution Test::Smoke 1.79_06 (test)
+
+ - (Abe Timmerman, Thu, 1 Sep 2022 08:43:49 +0200) FIX: typo
+ -     -Duseithreads (e before a)
+
+ - (Bram, Tue, 30 Aug 2022 22:13:13 +0200) Fix
+   `Test::Smoke::Util::set_local_patch`
+ -     The `set_local_patch` function got 'broken' when the 'patchlevel.h'
+ -     in the perl5 repo got detabified (committed on 17 Jan 2021).
+ -     It no longer worked because the code was using: `/\t,NULL/`
+ -     That worked fine when the tabs were used for indentation but it
+ -     got silently broken when the tabs were replaces with spaces.
+
+ - (Bram, Tue, 30 Aug 2022 23:02:54 +0200) Update 'patchlevel.h' file used
+   in the test
+ -     This was using an old patchlevel.h file, update it to a more
+ -     recent version.
+ -     Also add xt/perl/git_version.h, this is used by xt/perl/patchlevel.h
+ -     and is needed for the compiling tests. (Without tests in xt/ fail.)
+
+ - (Bram, Tue, 30 Aug 2022 23:08:10 +0200) Patch the patchlevel.h copy
+ -     Other test still expect the old format of patchlevel.h which
+ -     contains a patchnum... Even the number is important for the
+ -     tests...
+ -     So re-add the patchnum and remove 'uncommitted-changes' (the tests
+ -     can't deal with it..)
+ -     Another option would be to clean up the other tests but that is
+ -     a bigger task...
+
+ - (Abe Timmerman, Thu, 1 Sep 2022 09:10:29 +0200) carp() when setting
+   local patch fails
+ -     This code was silently broken for about 20 months because
+ -     patchlevel.h was detabified.
+ -     To avoid the same problem in the future: carp() when adding
+ -     the local patch to patchlevel.h fails we should keep an eye on the
+ -     logfiles.
+
+ - (Abe Timmerman, Thu, 1 Sep 2022 13:40:47 +0200) Merge branch
+   'bram-perl-bram/windows-git-test-fixes'
+
+ - (Abe Timmerman, Fri, 2 Sep 2022 11:53:18 +0200) Add USE_MINGW_ANSI_STDIO
+   as default for Configure_win32()
+ -	   https://github.com/Perl/perl5/issues/20214
+ -     I guess this is a case of "Doctor, it hurts when I do this...".
+   We'll
+ -     just switch it on (it won't hurt MSVC and benefits gcc) and provide
+   and
+ -     escape with `-UUSE_MINGW_ANSI_STDIO`. We should aim to build the
+   best
+ -     possible Perl on Windows that we can imo.
+
+ - (Abe Timmerman, Sun, 4 Sep 2022 20:48:14 +0200) New helper programme:
+   tsrepostjsn.pl
+ -     Sometimes the reportserver isn't there or won't accept a report,
+   now,
+ -     one can repost that report with this tool.
+ -     It can be interactive and will look in the archive directory (adir)
+   for
+ -     the jsn files one wants to resend.
+
+ - (Abe Timmerman, Mon, 5 Sep 2022 11:05:47 +0200) Also install the new
+   tsrepostjsn.pl script
+ -     I forgot to put it in the EXE_FILES key for WriteMakefile().
 
 1.79_05 2022-08-30T11:43:29+02:00 (e117112 => Abe Timmerman)
  - (Abe Timmerman, Tue, 30 Aug 2022 11:43:29 +0200) Autocommit for
@@ -268,6 +334,13 @@ Enjoy!
  -     - fix forgotten `done_testing()` (#59(
  -     - fix leak of actual hostname in the smoke-report (#58)
 
+ - (Bram, Thu, 18 Aug 2022 18:18:23 +0200) Check exit status of every git
+   command
+ -     During testing (on Windows) several git commands failed but this
+ -     wasn't obvious from the test output.
+ -     -> Adapt the test to check the exit status of git after every
+   command.
+
  - (Bram, Thu, 18 Aug 2022 19:00:23 +0200) Cache `$daemon->sockhost` in
    t/poster-post.t
  -     On my Windows 10 system 't/poster-post.t' was stuck.
@@ -347,6 +420,40 @@ Enjoy!
  -	   make xtest TEST_VERBOSE=1 XTEST_FILES=xt/0*.t
  -     but this also works:
  -	   make xtest
+
+ - (Bram, Thu, 18 Aug 2022 18:18:30 +0200) Abort tests when chdir to repo
+   dir failed
+ -     The test init their own git repo and then does a `chdir()` to that
+ -     directory.
+ -     If that `chdir()` would fail then abort the test since it
+   would/could otherwise
+ -     be modifying the Test-Smoke repo.
+ -     (I haven't seen failures with `chdir()`, it's more a safe-guard to
+   prevent
+ -	against altering the wrong repo)
+ -     (Using `die` instead of `skip` at the request of @abeltje)
+
+ - (Bram, Thu, 18 Aug 2022 18:19:54 +0200) Configure git user/emailaddress
+   for the test repo
+ -     The test create their own git repo and then adds some files in it
+   and
+ -     then it does a `git commit`.
+ -     On Windows the `git commit` failed because it was unable to
+   determine a valid
+ -     username/email-address. This resulted in extra test failures.
+ -     -> After creating a repo set a username and emailaddress in the
+   config of
+ -	  that repo.
+
+ - (Bram, Thu, 18 Aug 2022 18:20:12 +0200) Remove test repository when
+   rsync isn't found
+ -     In t/syncer_rsync.t a fixed test directory (t/tsgit) is used.
+ -     At the end of the test it normally removes this directory but when
+ -     some of the tests are skipped then it left this directory in place
+ -     which caused the next test run to have a failure (on `git commit`).
+ -     Alternative fixes:
+ -     - use a tmp dir like t/syncer_git.t does
+ -     - remove the directory at the start of the test if it exist
 
  - (Abe Timmerman, Thu, 18 Aug 2022 20:41:55 +0200) Merge branch
    'feature/xtest-make-target'
