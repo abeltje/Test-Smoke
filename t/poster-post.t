@@ -125,13 +125,15 @@ SKIP: {
 SKIP: {
     my $curlbin = whereis('curl');
     skip("Could not find curl", 3) if !$curlbin;
+    my $curl_version = qx{$curlbin --version};
+    my $cv = $curl_version =~ m{curl ([0-9.]+)} ? $1 : '?';
 
     my $poster = Test::Smoke::Poster->new(
         'curl',
         ddir        => 't',
         jsnfile     => 'testsuite.jsn',
         smokedb_url => qq{"${url}report"},
-        curlbin     => "$curlbin --globoff", # older curls and v6-addresses
+        curlbin     => $curlbin,
         v           => $debug ? 2 : 0,
     );
     isa_ok($poster, 'Test::Smoke::Poster::Curl');
@@ -139,7 +141,7 @@ SKIP: {
     ok(write_json($poster->json_filename, $sysinfo), "write_json");
     my $response = eval { $poster->post() };
     $response = $@ if $@;
-    is($response, 42, "Got id (curl: ${url}report)")
+    is($response, 42, "Got id (curl: ${url}report) curl v$cv")
         or diag(explain({poster => $poster, response => $response}));
 
     unlink $poster->json_filename;
