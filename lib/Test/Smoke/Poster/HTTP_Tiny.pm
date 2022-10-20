@@ -6,7 +6,7 @@ our $VERSION = '0.001';
 
 use base 'Test::Smoke::Poster::Base';
 
-use CGI::Util;                   # escape() for HTML
+use URI::Escape qw(uri_escape);
 
 =head1 NAME
 
@@ -49,7 +49,7 @@ sub _post_data {
     $self->log_info("Posting to %s via %s.", $self->smokedb_url, $self->poster);
     $self->log_debug("Report data: %s", my $json = $self->get_json);
 
-    my $form_data = sprintf("json=%s", CGI::Util::escape($json));
+    my $form_data = sprintf("json=%s", uri_escape($json));
     my $response = $self->ua->request(
         POST => $self->smokedb_url,
         {

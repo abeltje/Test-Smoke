@@ -9,7 +9,7 @@ BEGIN { $ENV{PERL_JSON_BACKEND} = 'JSON::PP' if $^O eq 'MSWin32'; }
 use Test::More;
 use Test::NoWarnings ();
 
-use CGI::Util qw/unescape/;
+use URI::Escape qw/uri_unescape/;
 use Config;
 use Errno qw/EINTR/;
 use Test::Smoke::Util::LoadAJSON;
@@ -63,7 +63,7 @@ my $sockhost;
         while (my $c = $daemon->accept) {
             while (my $r = $c->get_request) {
                 if ($r->method eq 'POST' && $r->uri->path eq '/report') {
-                    (my $json = unescape($r->decoded_content)) =~ s/^json=//;
+                    (my $json = uri_unescape($r->decoded_content)) =~ s/^json=//;
                     my $data;
                     $data  =  2 if $r->header('User-Agent') =~ /Test::Smoke/;
                     eval {
@@ -81,7 +81,7 @@ my $sockhost;
                     my $response = HTTP::Response->new(
                         RC_NOT_IMPLEMENTED(), 'NOT IMPLEMENTED',
                         HTTP::Headers->new('Content-Type', 'application/json'),
-                        unescape($r->decoded_content),
+                        uri_unescape($r->decoded_content),
                     );
                     $c->send_response($response);
                     diag("<<<Error: @{[$r->as_string]}>>>");

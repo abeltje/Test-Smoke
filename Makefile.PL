@@ -124,7 +124,6 @@ my %TEST_REQUIRES = (
     'Test::Fatal'      => 0,
     'HTTP::Daemon'     => 0,
     'HTTP::Message'    => 0,
-    'URI'              => 0,
 );
 
 my $test_requires = (
@@ -148,8 +147,8 @@ my %wm = (
         COMPRESS => "gzip -9f",
         SUFFIX   => ".gz",
     },
-    PREREQ_PM     => {
-        'CGI::Util'     => 0,
+    PREREQ_PM => {
+        'URI'           => '1.53',
         'Capture::Tiny' => 0,
         'File::Spec'    => 0.82,
         'POSIX'         => 0,
