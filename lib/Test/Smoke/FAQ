@@ -74,7 +74,7 @@ perls:
 
 =over 4
 
-=item * with C<< $ENV{PERLIO}=stdio >> (allways)
+=item * with C<< $ENV{PERLIO}=stdio >> (always)
 
 =item * with C<< $ENV{PERLIO}=perlio >> (unless -Uuseperlio)
 
