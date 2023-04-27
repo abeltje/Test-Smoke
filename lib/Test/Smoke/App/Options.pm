@@ -911,7 +911,7 @@ sub poster {
         name       => 'poster',
         option     => '=s',
         allow      => [qw/HTTP::Tiny LWP::UserAgent curl/],
-        default    => 'LWP::UserAgent',
+        default    => 'HTTP::Tiny',
         helptext   => "The type of HTTP post system to use.",
         configtext => "Which HTTP client do you want to use?",
         configalt  => _helper('get_avail_posters'),
