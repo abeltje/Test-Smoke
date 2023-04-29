@@ -127,7 +127,11 @@ SKIP: {
     my $curlbin = whereis('curl');
     skip("Could not find curl", 3) if !$curlbin;
     my $curl_version = qx{$curlbin --version};
-    my $cv = $curl_version =~ m{curl ([0-9.]+)} ? $1 : '?';
+    my $cv = $curl_version =~ m{curl ([0-9.]+)} ? $1 : '0';
+
+    my $is_v6_address = $url =~ m{^ https?://\[ [0-9a-fA-F:]+ \] /? }x;
+    my $needs_globoff = $is_v6_address &&
+        (version->parse($cv) < version->parse("7.68.0"));
 
     my $poster = Test::Smoke::Poster->new(
         'curl',
@@ -135,6 +139,7 @@ SKIP: {
         jsnfile     => 'testsuite.jsn',
         smokedb_url => qq{"${url}report"},
         curlbin     => $curlbin,
+        ($needs_globoff ? (curlargs => ['--globoff']) : ()),
         v           => $debug ? 2 : 0,
     );
     isa_ok($poster, 'Test::Smoke::Poster::Curl');

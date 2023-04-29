@@ -116,6 +116,7 @@ sub poster_config { # posting to CoreSmokeDB
             ],
             'curl' => [
                 curlbin(),
+                curlargs(),
                 ua_timeout(),
             ],
         },
@@ -415,6 +416,15 @@ sub commit_sha {
         },
         default => [ ],
         helptext => "A (partial) commit SHA (repeatable!)",
+    );
+}
+
+sub curlargs {
+    return $opt->new(
+        name     => 'curlargs',
+        option   => '=s@',
+        default  => [ ],
+        helptext => "Extra switches to pass to curl (repeatable!)",
     );
 }
 

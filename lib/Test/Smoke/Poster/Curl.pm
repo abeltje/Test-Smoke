@@ -65,6 +65,7 @@ sub _post_data {
         '-d' => "\@$filename",
         ($self->ua_timeout    ? ('--max-time' => $self->ua_timeout) : ()),
         ($self->curl->verbose ? () : '--silent'),
+        @{ $self->curlargs },
         $self->smokedb_url,
     );
     1 while unlink($filename);
