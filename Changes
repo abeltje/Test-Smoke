@@ -1,12 +1,76 @@
-Changes on 2022-09-05 for repository at:
-  Fetch URL: git@github.com:abeltje/Test-Smoke.git
-  Push  URL: git@github.com:abeltje/Test-Smoke.git
+Changes on 2023-04-29 for repository at:
+  Fetch URL: ssh://git@source.test-smoke.org:9999/~/Test-Smoke
+  Push  URL: ssh://git@source.test-smoke.org:9999/~/Test-Smoke
 
 Enjoy!
 
-1.79_07 2022-09-05T11:36:00+02:00 (ce86bd4 => Abe Timmerman)
+1.79_09 2023-04-29T15:14:46+02:00 (edb0106 => Abe Timmerman)
+ - (Abe Timmerman, Sat, 29 Apr 2023 15:14:46 +0200) Autocommit for
+   distribution Test::Smoke 1.79_09 (same)
+
+1.79_08 2022-10-20T14:48:13+02:00 (7b0ce0d => Abe Timmerman)
+ - (Abe Timmerman, Thu, 20 Oct 2022 14:48:13 +0200) Autocommit for
+   distribution Test::Smoke 1.79_08 (same)
+
+ - (Abe Timmerman, Thu, 27 Apr 2023 10:14:41 +0200) Change the default
+   poster module to HTTP::Tiny
+ -     The default for config is HTTP::Tiny, but the "sane default" was
+ -     LWP::UserAgent, this is now also HTTP::Tiny.
+
+ - (Abe Timmerman, Sat, 29 Apr 2023 11:43:52 +0200) tsrepostjsn.pl: add
+   option to re-post a specific file
+ -     We now have a new option '--jsonreport' that lets one post a
+   specific
+ -     file to the reports server.
+ -     Also fixed a bug for the case where no '--configfile' was specified
+   and
+ -     the 'configfile_error' attribute didn't exist.
+
+ - (Abe Timmerman, Sat, 29 Apr 2023 14:22:38 +0200) BUGFIX:
+   https://github.com/abeltje/Test-Smoke/issues/74
+ -     Older 'curl' versions (before 7.68.0) needed the '--globoff' switch
+   to
+ -     make the IPv6 syntax for [::1] work. We now check the version of
+   curl to
+ -     see if we need to add the switch.
+ -     See also commit: f4b90b293a2e163f49b55fa2996a6368115e08b9
+
+ - (Abe Timmerman, Sat, 29 Apr 2023 15:10:33 +0200) Add 'curlargs' to
+   exceptions
+ -     New app-options should be excluded from the pod-coverage test, they
+   are
+ -     not documented in POD.
+
+1.79_07 2022-09-05T11:36:00+02:00 (440f671 => Abe Timmerman)
  - (Abe Timmerman, Mon, 5 Sep 2022 11:36:00 +0200) Autocommit for
    distribution Test::Smoke 1.79_07 (test)
+
+ - (abeltje, Thu, 20 Oct 2022 14:01:17 +0200) Remove '--globoff' for curl
+ -     Some of the cpantesters (and my Ubuntu Jammy) failed the test for
+   IPv6,
+ -     so I try to see if this has something to do with curl version.
+
+ - (Abe Timmerman, Thu, 20 Oct 2022 14:25:06 +0200) Replace CGI::Util with
+   URI::Escape
+ -     CGI::Util doesn't support escape/unescape officially, and as we
+   already
+ -     had a dependency on URI it is better to use the supported
+ -     uri_escape/uri_unescape from URI::Escape.
+
+ - (abeltje, Tue, 30 Aug 2022 12:53:27 +0200) Introduce the new
+   tsconfigsmoke.pl
+ -     A reimplementation of configsmoke.pl as a Test::Smoke::App with the
+ -     existing options extended for configuration. Now App-Options are the
+ -     same as Config-Options.
+
+ - (abeltje, Tue, 30 Aug 2022 12:55:05 +0200) More work on tsconfigsmoke.pl
+
+ - (Abe Timmerman, Thu, 18 Aug 2022 17:09:39 +0200) Add the Mailer-config
+ -     Mail config is now also part of ConfigSmoke.
+ -     Fix a problem with the Scheduler:
+ -     - the grep rejected all existing cron lines
+ -     Fix a problem with false but defined default values in prompt().
+ -     Update the mail options with stuff for ConfigSmoke.
 
 1.79_06 2022-08-30T13:37:30+02:00 (e5ff85e => Abe Timmerman)
  - (Abe Timmerman, Tue, 30 Aug 2022 13:37:30 +0200) Autocommit for
