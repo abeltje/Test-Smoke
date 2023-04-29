@@ -426,6 +426,7 @@ sub _show_option_value {
 sub _obtain_config_file {
     my $self = shift;
     $self->{_from_configfile} = {};
+    $self->{_configfile_error} = undef;
 
     my $cf_name = $self->cli_options->{'configfile'};
     return if !$cf_name;

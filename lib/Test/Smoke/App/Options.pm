@@ -159,7 +159,7 @@ sub reposter_config {
         general_options => [
             adir(),
             commit_sha(),
-            jsnfile(),
+            jsonreport(),
             max_reports(),
             smokedb_url(),
         ],
@@ -663,6 +663,16 @@ sub jsnfile {
         option => '=s',
         default => 'mktest.jsn',
         helptext => 'Name of the file to store the JSON report in.',
+    );
+}
+
+sub jsonreport {
+    return $opt->new(
+        name     => 'jsonreport',
+        option   => '=s',
+        default  => undef,
+        helptext => "Name of json report file to re-post to the server"
+                  . " (Takes precedence over '--adir' and '--sha')",
     );
 }
 

@@ -4,6 +4,7 @@ use strict;
 use Test::More;
 use Test::NoWarnings ();
 
+use File::Temp 'tempfile';
 use Test::Smoke::App::RepostFromArchive;
 use Test::Smoke::App::Options;
 use Test::Smoke::Util::FindHelpers 'get_avail_posters';
@@ -22,7 +23,7 @@ my @reports = qw(
     jsn29b290ccaa79f40de7d941c9a79810119f5c6363.jsn
 );
 
-my $poster = (get_avail_posters())[0];
+my $poster = (get_avail_posters())[0] || 'HTTP::Tiny';
 note("using poster: $poster");
 
 {
@@ -118,6 +119,55 @@ note("using poster: $poster");
 
     my @selected = $app->pick_reports();
     is(scalar(@selected), 5, "Passed reports via command line");
+}
+
+{
+    my ($fh, $single_json) = tempfile();
+    note("testing --jsonreport $single_json");
+    print {$fh} "{}";
+    close($fh);
+
+    no warnings 'redefine';
+    my $counter = 42;
+    local *Test::Smoke::Poster::Base::post = sub {
+        return $counter++;
+    };
+    local @ARGV = (
+        '--smokedb_url' => 'http://localhost:3030/report',
+        '--poster'      => $poster,
+        '--jsonreport'  => $single_json,
+        '--verbose'     => 1,
+    );
+    my $app = Test::Smoke::App::RepostFromArchive->new(
+        Test::Smoke::App::Options::reposter_config(),
+    );
+    isa_ok($app, 'Test::Smoke::App::RepostFromArchive');
+
+    my @selected = $app->pick_reports();
+    is(scalar(@selected), 1, "Passed reports via command line");
+    is($selected[0], $single_json, "Correct file-name");
+
+    local $Test::Smoke::LogMixin::USE_TIMESTAMP = 0;
+    my $buffer = '';
+    {
+        local *STDOUT;
+        open STDOUT, '>>', \$buffer;
+        $app->run;
+    }
+    my $remote = $app->option('smokedb_url');
+    like(
+        $buffer,
+        qr{^Reposting '$single_json' to $remote}m,
+        "Log: Reposter line"
+    );
+    like(
+        $buffer,
+        qr{^Report posted with id: 42}m,
+        "Log: Report id ok"
+    );
+
+    is($counter, 43, "Posted a single json");
+    unlink($single_json);
 }
 
 Test::NoWarnings::had_no_warnings();

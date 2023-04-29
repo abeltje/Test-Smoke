@@ -2,11 +2,11 @@ package Test::Smoke::App::RepostFromArchive;
 use warnings;
 use strict;
 
-our $VERSION = '0.001';
+our $VERSION = '0.002';
 
 use base 'Test::Smoke::App::Base';
 
-use File::Spec::Functions qw(catfile);
+use File::Spec::Functions qw(catfile curdir);
 use Test::Smoke::Poster;
 use POSIX qw(strftime);
 
@@ -38,9 +38,11 @@ Or direct:
 
 =head1 OPTIONS
 
-  --max-reports <cnt>  Number of reports to choose from (10)
+  --max-reports <cnt>     Number of reports to choose from (10)
 
-  --sha <commit-sha>   Commit SHA for the smoke (repeat for more reports)
+  --sha <commit-sha>      Commit SHA for the smoke (repeat for more reports)
+
+  --jsonreport <filename> The actual json-file to re-post
 
 Override the config:
 
@@ -105,6 +107,17 @@ A list of filenames representing the json files from the archive.
 
 sub pick_reports {
     my $self = shift;
+
+    if (my $jsonreport = $self->option('jsonreport')) {
+        die("Cannot find '$jsonreport'") unless -f $jsonreport;
+        if ($jsonreport =~ m{^ / }x) {
+            $self->poster->ddir('');
+        }
+        else {
+            $self->poster->ddir(curdir());
+        }
+        return ($jsonreport);
+    }
 
     my $entries = $self->fetch_jsn_from_archive;
     my $max_entries = scalar(keys %$entries);
