@@ -21,6 +21,7 @@ ccp5p_onfail
 cdir
 cfg
 commit_sha
+curlargs
 curlbin
 ddir
 defaultenv
