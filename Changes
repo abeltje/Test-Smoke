@@ -1,12 +1,24 @@
-Changes on 2023-04-29 for repository at:
+Changes on 2023-04-30 for repository at:
   Fetch URL: ssh://git@source.test-smoke.org:9999/~/Test-Smoke
   Push  URL: ssh://git@source.test-smoke.org:9999/~/Test-Smoke
 
 Enjoy!
 
-1.79_09 2023-04-29T15:14:46+02:00 (edb0106 => Abe Timmerman)
+1.79_10 2023-04-30T13:30:06+02:00 (31a22dc => Abe Timmerman)
+ - (Abe Timmerman, Sun, 30 Apr 2023 13:30:06 +0200) Autocommit for
+   distribution Test::Smoke 1.79_10 (test)
+
+1.79_09 2023-04-29T15:14:46+02:00 (59570a0 => Abe Timmerman)
  - (Abe Timmerman, Sat, 29 Apr 2023 15:14:46 +0200) Autocommit for
    distribution Test::Smoke 1.79_09 (same)
+
+ - (Abe Timmerman, Sun, 30 Apr 2023 13:18:23 +0200) Fix some
+   ExtUtils::MakeMaker problems
+ -     - PERL_MM_OPT='INSTALL_BASE=...' interferes with our use of PREFIX,
+   we
+ -	 now take that into account (and honour INSTALL_BASE)
+ -     - Set a minimum version for ExtUtils::MakeMaker to 6.55_03
+ -	 (BUILD_REQUIRES)
 
 1.79_08 2022-10-20T14:48:13+02:00 (7b0ce0d => Abe Timmerman)
  - (Abe Timmerman, Thu, 20 Oct 2022 14:48:13 +0200) Autocommit for
