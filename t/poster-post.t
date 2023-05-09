@@ -101,6 +101,10 @@ END {
     }
 }
 
+# We want to address our daemon directly
+delete($ENV{HTTP_PROXY})  if exists($ENV{HTTP_PROXY});
+delete($ENV{HTTPS_PROXY}) if exists($ENV{HTTPS_PROXY});
+
 my $sysinfo = { sysinfo => $^O };
 SKIP: {
     skip("Could not load LWP::UserAgent", 3) if !has_module('LWP::UserAgent');
