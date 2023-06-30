@@ -553,8 +553,9 @@ sub make_test {
             # make default 'make test' runs possible
             delete $ENV{PERLIO} if $self->{defaultenv};
         } else {
-            $ENV{LC_ALL} = $self->{locale};
-            $perlio_logmsg .= ":" . pop @locales;
+            my $this_locale = pop(@locales);
+            $ENV{LC_ALL} = $this_locale;
+            $perlio_logmsg .= ":$this_locale";
         }
         $self->ttylog( "TSTENV = $perlio_logmsg\t" );
 
