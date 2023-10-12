@@ -275,6 +275,16 @@ sub Configure_win32 {
         grep /^-[DU][a-z_]+/, quotewords( '\s+', 1, $command );
     push @args, "config_args=$config_args";
 
+    my @adjust_opts = grep { /^-A(?:ccflags|ldflags)=/ } quotewords('\s+', 1, $command);
+    my $adjust_ccflags = join(
+        " ",
+        map { s/^-Accflags=(["']?)(.+?)\1// ? $2 : () } grep { /^-Accflags=/ } @adjust_opts
+    );
+    my $adjust_ldflags = join(
+        " ",
+        map { s/^-Aldflags=(["']?)(.+?)\1// ? $2 : () } grep { /^-Aldflags=/ } @adjust_opts
+    );
+
     my @buildopt;
     $command =~ m{^\s*\./Configure\s+(.*)} or die "unable to parse command";
     my $cmdln = $1;
@@ -328,8 +338,12 @@ sub Configure_win32 {
       or die "no make file for $win32_maker";
     my $in =  "win32/$maker";
     my $out = "win32/smoke.mk";
+    open(ORG, "<:raw", $in) or die "Cannot line-end-check '$in': $!";
+    my $dummy = <ORG>;
+    close(ORG); undef(*ORG);
+    my $layer = $dummy =~ /\015\012\Z/ ? ':crlf' : '';
 
-    open ORG, "<:crlf", $in  or die "unable to open '$in': $!";
+    open ORG, "<$layer", $in  or die "unable to open '$in': $!";
     open NEW, ">:crlf", $out or die "unable to open '$out': $!";
     my $donot_change = 0;
     while (<ORG>) {
@@ -369,6 +383,18 @@ sub Configure_win32 {
             if ( $config_args =~ /-([UD])useshrplib\b/ ) {
                 $_ = ( $1 eq 'D' ? "#" : "" ) . "$macro $op $mval\n";
             }
+        }
+        elsif (m/^\s*#?\s*(BUILDOPT)\s*([*:]?)=/) {
+            next if !$adjust_ccflags;
+            # Set BUILDOPTEXTRA to $adjust_ccflags
+            s/^\s*#\s*//;
+            $_ = "BUILDOPTEXTRA$2= $adjust_ccflags\n$_";
+        }
+        elsif (m/^\s*#?\s*(LINK_FLAGS)\s*([*:]?)=/) { # perl 5.39.5+
+            next if !$adjust_ldflags;
+            # Set LINK_FLAGSEXTRA to $adjust_ldflags
+            s/^\s*#\s*//;
+            $_ = "LINK_FLAGSTEXTRA$2= $adjust_ldflags\n$_";
         }
         else {
             foreach my $cfg_var ( grep defined $opts{ $_ }, @w32_opts ) {
