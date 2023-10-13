@@ -2,7 +2,7 @@ package Test::Smoke::App::ConfigSmoke;
 use warnings;
 use strict;
 
-our $VERSION = '0.101';
+our $VERSION = '0.102';
 
 use base 'Test::Smoke::App::Base';
 
@@ -529,7 +529,7 @@ sub _sort_configkeys {
         qw( w32cc w32make w32args ),
 
         # Test environment related
-        qw( force_c_locale locale defaultenv skip_tests ),
+        qw( force_c_locale locale defaultenv perlio_only skip_tests ),
 
         # SmokeDB
         qw( smokedb_url poster send_log send_out ua_timeout curlbin ),
