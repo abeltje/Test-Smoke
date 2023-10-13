@@ -73,8 +73,6 @@ None
 
 A string with quotes around the elements/arguments that need them.
 
-=back
-
 =cut
 
 sub full_command {
