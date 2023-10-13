@@ -1242,7 +1242,8 @@ sub whereis {
             $logger->log_debug("    check executable %s", $fname);
             if ( -x $fname ) {
                 $logger->log_info("Found %s as %s", $prog, $fname);
-                return $fname =~ /\s/ ? qq/"$fname"/ : $fname;
+                return $fname;
+                #return $fname =~ /\s/ ? qq/"$fname"/ : $fname;
             }
         }
     }
