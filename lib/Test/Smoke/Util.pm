@@ -125,9 +125,9 @@ sets CFG = Debug
 
 sets INST_DRV to a new value (default is "c:")
 
-=item * B<-DINST_TOP=...>
+=item * B<-DINST_TOP=...> or B<-Dprefix=...>
 
-sets INST_DRV to a new value (default is "$(INST_DRV)\perl"), this is
+sets INST_TOp to a new value (default is "$(INST_DRV)\perl"), this is
 where perl will be installed when C<< [ng]make install >> is run.
 
 =item * B<-DINST_VER=...>
@@ -167,9 +167,11 @@ Set the cf_email option (Config.pm)
 
 =item * B<-Accflags=...>
 
-Adds the option to BUILDOPT. This is implemented differently for
-B<nmake> and B<gmake>.
-Returns the name of the outputfile.
+Sets C<BUILDOPTEXTRA>
+
+=item * B<-Aldflags=...>
+
+Adds and sets C<PRIV_LINK_FLAGS>
 
 =back
 
@@ -209,6 +211,7 @@ sub Configure_win32 {
         "-DDEBUGGING"                => "USE_DEBUGGING",
         "-DINST_DRV"                 => "INST_DRV",
         "-DINST_TOP"                 => "INST_TOP",
+        "-Dprefix"                   => "INST_TOP",
         "-DINST_VER"                 => "INST_VER",
         "-DINST_ARCH"                => "INST_ARCH",
         "-Dcf_email"                 => "EMAIL",
@@ -219,6 +222,7 @@ sub Configure_win32 {
         "-DGCCHELPERDLL"             => "GCCHELPERDLL",
         "-Dbccold"                   => "BCCOLD",
         "-DCCHOME"                   => "CCHOME",
+        "-DGCCBIN"                   => "GCCBIN",
         "-DIS_WIN95"                 => "IS_WIN95",
         "-DCRYPT_SRC"                => "CRYPT_SRC",
         "-DCRYPT_LIB"                => "CRYPT_LIB",
@@ -258,6 +262,7 @@ sub Configure_win32 {
         GCCHELPERDLL             => undef,
         BCCOLD                   => 0,
         CCHOME                   => undef,
+        GCCBIN                   => 'GCC',
         IS_WIN95                 => 0,
         CRYPT_SRC                => undef,
         CRYPT_LIB                => undef,
@@ -275,30 +280,33 @@ sub Configure_win32 {
         grep /^-[DU][a-z_]+/, quotewords( '\s+', 1, $command );
     push @args, "config_args=$config_args";
 
-    my @adjust_opts = grep { /^-A(?:ccflags|ldflags)=/ } quotewords('\s+', 1, $command);
+    my @adjust_opts = grep {
+        /^-A(?:ccflags|ldflags)=/
+    } quotewords('\s+', 1, $command);
     my $adjust_ccflags = join(
         " ",
-        map { s/^-Accflags=(["']?)(.+?)\1// ? $2 : () } grep { /^-Accflags=/ } @adjust_opts
+        map {
+            s/^-Accflags=(["']?)(.+?)\1// ? $2 : ()
+        } grep { /^-Accflags=/ } @adjust_opts
     );
     my $adjust_ldflags = join(
         " ",
-        map { s/^-Aldflags=(["']?)(.+?)\1// ? $2 : () } grep { /^-Aldflags=/ } @adjust_opts
+        map {
+            s/^-Aldflags=(["']?)(.+?)\1// ? $2 : ()
+        } grep { /^-Aldflags=/ } @adjust_opts
     );
 
-    my @buildopt;
     $command =~ m{^\s*\./Configure\s+(.*)} or die "unable to parse command";
     my $cmdln = $1;
     foreach ( quotewords( '\s+', 1, $cmdln ) ) {
         m/^-[des]{1,3}$/ and next;
         m/^-Dusedevel$/  and next;
-        if ( /^-Accflags=(['"]?)(.+)\1/ ) { #emacs' syntaxhighlite
-           push @buildopt, $2;
-           next;
+        m/^-A(ccflags|ldflags)/ and next;
+        if (my( $option, $value ) = /^(-[DU]\w+)(?:=(.+))?$/) {
+            die "invalid option '$_'" unless exists $opt_map{$option};
+            $opts{$opt_map{$option}} = $value ? $value : 1;
+            $option =~ /^-U/ and $opts{$opt_map{$option}} = 0;
         }
-        my( $option, $value ) = /^(-[DU]\w+)(?:=(.+))?$/;
-        die "invalid option '$_'" unless exists $opt_map{$option};
-        $opts{$opt_map{$option}} = $value ? $value : 1;
-        $option =~ /^-U/ and $opts{$opt_map{$option}} = 0;
     }
 
     # Handle some switches that impact more make-vars
@@ -346,6 +354,7 @@ sub Configure_win32 {
     open ORG, "<$layer", $in  or die "unable to open '$in': $!";
     open NEW, ">:crlf", $out or die "unable to open '$out': $!";
     my $donot_change = 0;
+    my $check_linkflags = $adjust_ldflags ? 1 : 0;
     while (<ORG>) {
         if ( $donot_change ) {
             # need to help the Win95 build
@@ -358,14 +367,7 @@ sub Configure_win32 {
             print NEW $_;
             next;
         } else {
-            if ( $donot_change = /^#+ CHANGE THESE ONLY IF YOU MUST #+/ ) {
-                # We will now insert the BULDOPT lines
-                my $bo_tmpl = $win32_maker eq 'nmake'
-                    ? "BUILDOPT\t= \$(BUILDOPT) %s" : "BUILDOPT\t+= %s";
-                my $buildopt = join "\n",
-                                    map sprintf( $bo_tmpl, $_ ) => @buildopt;
-                $buildopt and $_ = "$buildopt\n$_\n"
-            };
+            $donot_change = /^#+ CHANGE THESE ONLY IF YOU MUST #+/;
         }
 
         # Only change config stuff _above_ that line!
@@ -384,17 +386,17 @@ sub Configure_win32 {
                 $_ = ( $1 eq 'D' ? "#" : "" ) . "$macro $op $mval\n";
             }
         }
-        elsif (m/^\s*#?\s*(BUILDOPT)\s*([*:]?)=/) {
-            next if !$adjust_ccflags;
-            # Set BUILDOPTEXTRA to $adjust_ccflags
-            s/^\s*#\s*//;
-            $_ = "BUILDOPTEXTRA$2= $adjust_ccflags\n$_";
-        }
-        elsif (m/^\s*#?\s*(LINK_FLAGS)\s*([*:]?)=/) { # perl 5.39.5+
-            next if !$adjust_ldflags;
-            # Set LINK_FLAGSEXTRA to $adjust_ldflags
-            s/^\s*#\s*//;
-            $_ = "LINK_FLAGSTEXTRA$2= $adjust_ldflags\n$_";
+        elsif (m/^\s*#?\s*(BUILDOPT)\s*([*:]?)=\s*\$\(BUILDOPTEXTRA\)/) {
+            my $prf = $2 ? $2 : '';
+            if ($adjust_ccflags) {
+                # Set BUILDOPTEXTRA to $adjust_ccflags
+                s/^\s*#\s*//;
+                $_ = "BUILDOPTEXTRA\t${prf}= $adjust_ccflags\n$_";
+             }
+             if ($adjust_ldflags) {
+                $_ .= "\n# Additional linker flags\n"
+                    . "PRIV_LINK_FLAGS\t${prf}= $adjust_ldflags\n";
+             }
         }
         else {
             foreach my $cfg_var ( grep defined $opts{ $_ }, @w32_opts ) {
