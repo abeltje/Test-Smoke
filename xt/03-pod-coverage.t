@@ -64,6 +64,7 @@ outfile
 patchlevel
 perl5lib
 perl5opt
+perlio_only
 poster
 poster_config
 report
