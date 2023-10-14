@@ -1377,6 +1377,10 @@ sub time_in_hhmm {
     $diff -=  60 * $mins;
     $diff = sprintf "%.${digits}f", $diff;
 
+    # GH#78 that sprintf() can round up to 60 secs
+    # that can look strange: 18 minutes 60 seconds
+    $mins++, $diff -= 60 if $diff >= 60;
+
     my @parts;
     $days and push @parts, sprintf "%d day%s",   $days, $days == 1 ? "" : 's';
     $hour and push @parts, sprintf "%d hour%s",  $hour, $hour == 1 ? "" : 's';
