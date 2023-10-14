@@ -81,9 +81,9 @@ sub full_command {
     my $command = join(
         " ",
         map {
-            /^(["']).*\1$/
-                ? $_
-                : / /
+            /^(["'])(.*)\1$/
+                ? qq/"$2"/
+                : /\s/
                     ? qq/"$_"/
                     : $_
         } $self->{command}, $self->arguments(@_)

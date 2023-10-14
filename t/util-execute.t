@@ -18,6 +18,11 @@ local $Test::Smoke::LogMixin::USE_TIMESTAMP = 0;
     my $prg2 = Test::Smoke::Util::Execute->new(command => qq/$cmd/);
     isa_ok($prg2, 'Test::Smoke::Util::Execute');
     is($prg2->full_command(), qq/"$cmd"/, "full_command() no extra quotes");
+    is(
+        $prg2->full_command(commit => blah => -m => "'Inner apostrophe gone'"),
+        qq{"$cmd" commit blah -m "Inner apostrophe gone"},
+        "full_command() changes ' into \" around arguments"
+    );
 }
 {
     my @numbers = map "$_\n", 1..3;
