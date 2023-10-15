@@ -1,6 +1,23 @@
-1.80_01 2023-10-13T22:12:09+02:00 (427dddd => Abe Timmerman)
+1.80_02 2023-10-15T11:47:28+02:00 (76bc372 => Abe Timmerman)
+ - (Abe Timmerman, Sun, 15 Oct 2023 11:47:28 +0200) Autocommit for
+   distribution Test-Smoke 1.80_02 (test)
+
+1.80_01 2023-10-13T22:12:09+02:00 (7ea15ed => Abe Timmerman)
  - (Abe Timmerman, Fri, 13 Oct 2023 22:12:09 +0200) Autocommit for
    distribution Test-Smoke 1.80_01 (test)
+ - (Abe Timmerman, Sat, 14 Oct 2023 13:53:36 +0200) Make sure we always use
+   (double) quotes(")
+ -     Commands and arguments that contain spaces or are allready
+   delimited,
+ -     should always go out to the "shell" with quotes(") (not
+   apostrophes(')).
+ - (Abe Timmerman, Sat, 14 Oct 2023 19:57:41 +0200) FIX: GitHubIssue #78
+ -     The `sprintf()` rounds-up all numbers with a fraction-bit >= 0.5, so
+   it
+ -     can round-up to 60 again. We now check that and correct.
+ - (Abe Timmerman, Sat, 14 Oct 2023 20:01:55 +0200) Merge branch
+   'metacpan-20230214' of https://github.com/jkeenan/Test-Smoke into
+   jkeenan-metacpan-20230214
 
 1.80 2023-05-01T08:56:06+02:00 (3b74d8a => Abe Timmerman)
  - (Abe Timmerman, Mon, 1 May 2023 08:56:06 +0200) Autocommit for
@@ -97,9 +114,7 @@
  -     Set a minimum version for ExtUtils::MakeMaker to 6.55_03
  -	 (BUILD_REQUIRES)
 
-1.79_08 2022-10-20T14:48:13+02:00 (7b0ce0d => Abe Timmerman)
- - (Abe Timmerman, Thu, 20 Oct 2022 14:48:13 +0200) Autocommit for
-   distribution Test::Smoke 1.79_08 (same)
+1.79_08 2023-04-27T10:14:41+02:00 (9889db4 => Abe Timmerman)
  - (Abe Timmerman, Thu, 27 Apr 2023 10:14:41 +0200) Change the default
    poster module to HTTP::Tiny
  -     The default for config is HTTP::Tiny, but the "sane default" was
@@ -126,31 +141,12 @@
    are
  -     not documented in POD.
 
-1.79_07 2022-09-05T11:36:00+02:00 (440f671 => Abe Timmerman)
- - (Abe Timmerman, Mon, 5 Sep 2022 11:36:00 +0200) Autocommit for
-   distribution Test::Smoke 1.79_07 (test)
- - (abeltje, Thu, 20 Oct 2022 14:01:17 +0200) Remove '--globoff' for curl
- -     Some of the cpantesters (and my Ubuntu Jammy) failed the test for
-   IPv6,
- -     so I try to see if this has something to do with curl version.
- - (Abe Timmerman, Thu, 20 Oct 2022 14:25:06 +0200) Replace CGI::Util with
-   URI::Escape
- -     CGI::Util doesn't support escape/unescape officially, and as we
-   already
- -     had a dependency on URI it is better to use the supported
- -     uri_escape/uri_unescape from URI::Escape.
- - (abeltje, Tue, 30 Aug 2022 12:53:27 +0200) Introduce the new
-   tsconfigsmoke.pl
- -     A reimplementation of configsmoke.pl as a Test::Smoke::App with the
- -     existing options extended for configuration. Now App-Options are the
- -     same as Config-Options.
- - (abeltje, Tue, 30 Aug 2022 12:55:05 +0200) More work on tsconfigsmoke.pl
- - (Abe Timmerman, Thu, 18 Aug 2022 17:09:39 +0200) Add the Mailer-config
- -     Mail config is now also part of ConfigSmoke.
- -     Fix a problem with the Scheduler:
- -     the grep rejected all existing cron lines
- -     Fix a problem with false but defined default values in prompt().
- -     Update the mail options with stuff for ConfigSmoke.
+1.79_07 2023-02-14T20:04:05+00:00 (3bfc222 => James E Keenan)
+ - (James E Keenan, Tue, 14 Feb 2023 20:04:05 +0000) Replace
+   search.cpan.org URLs with metacpan.org URLs
+ -     ... since search.cpan.org has been gone for several years now.
+ - (James E Keenan, Tue, 14 Feb 2023 20:17:43 +0000) FAQ: Correct spelling
+   error
 
 1.79_06 2022-08-30T13:37:30+02:00 (e5ff85e => Abe Timmerman)
  - (Abe Timmerman, Tue, 30 Aug 2022 13:37:30 +0200) Autocommit for
