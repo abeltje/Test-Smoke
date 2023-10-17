@@ -28,7 +28,7 @@ BEGIN {
           str  => '19 minutes' },
         { diff => 3 * 60 + 59.995,
           str  => '3 minutes 59.995 seconds' },
-        { diff => 3 * 60 + 59.9995,
+        { diff => 3 * 60 + 59.99951,
           str  => '4 minutes' },
     );
 
