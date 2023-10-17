@@ -102,8 +102,10 @@ END {
 }
 
 # We want to address our daemon directly
-delete($ENV{HTTP_PROXY})  if exists($ENV{HTTP_PROXY});
-delete($ENV{HTTPS_PROXY}) if exists($ENV{HTTPS_PROXY});
+for my $envv (qw<ALL_PROXY HTTP_PROXY HTTPS_PROXY>) {
+    delete($ENV{$envv})     if exists($ENV{$envv});
+    delete($ENV{lc($envv)}) if exists($ENV{lc($envv)});
+}
 
 my $sysinfo = { sysinfo => $^O };
 SKIP: {
