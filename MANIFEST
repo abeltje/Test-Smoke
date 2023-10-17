@@ -173,6 +173,7 @@ t/smoker.t
 t/syncer_copy.t
 t/syncer_ftp.t
 t/syncer_ftpclient.t
+t/syncer_git.t
 t/syncer_link.t
 t/syncer_rsync.t
 t/syncer_snap.t
