@@ -1,6 +1,24 @@
-1.80_02 2023-10-15T11:47:28+02:00 (76bc372 => Abe Timmerman)
+1.80_03 2023-10-17T12:08:02+02:00 (4ec4a32 => Abe Timmerman)
+ - (Abe Timmerman, Tue, 17 Oct 2023 12:08:02 +0200) Autocommit for
+   distribution Test-Smoke 1.80_03 (test)
+
+1.80_02 2023-10-15T11:47:28+02:00 (4448a59 => Abe Timmerman)
  - (Abe Timmerman, Sun, 15 Oct 2023 11:47:28 +0200) Autocommit for
    distribution Test-Smoke 1.80_02 (test)
+ - (Abe Timmerman, Tue, 17 Oct 2023 10:00:23 +0200) Add t/syncer_git.t that
+   got forgotten
+ - (Abe Timmerman, Tue, 17 Oct 2023 10:01:44 +0200) FIX: iffy rounding test
+   by adding more digits
+ - (Abe Timmerman, Tue, 17 Oct 2023 10:03:31 +0200) Update the
+   example-config for MSWin32
+ -     We now have 64-bit and loads of other stuff.
+ -     Test::Smoke::Util::Configure_win32() was updated to understand more
+ -     switches, this is reflected here.
+ - (Abe Timmerman, Tue, 17 Oct 2023 11:47:27 +0200) There seem to be more
+   ways to set a proxy
+ -     After more failing tests with a proxy, it turns out `ALL_PROXY` is
+   also
+ -     looked at by HTTP::Tiny (and in both upper- and lower-case).
 
 1.80_01 2023-10-13T22:12:09+02:00 (7ea15ed => Abe Timmerman)
  - (Abe Timmerman, Fri, 13 Oct 2023 22:12:09 +0200) Autocommit for
