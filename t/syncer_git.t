@@ -19,33 +19,53 @@ my $git = Test::Smoke::Util::Execute->new(command => $gitbin, verbose => $verbos
 (my $gitversion = $git->run('--version')) =~ s/\s*\z//;
 $gitversion =~ s/^\s*git\s+version\s+//;
 
-plan skip_all => "Git version '$gitversion' is too old"
-    if ($gitversion =~ m/^1\.([0-5]|6\.[0-4])/);
+if ($gitversion =~ m/^1\.([0-5]|6\.[0-4])/) {
+    $gitbin = "";
+    plan skip_all => "Git version '$gitversion' is too old";
+}
 
 my $cwd = abs_path();
 my $tmpdir = tempdir(CLEANUP => ($ENV{SMOKE_DEBUG} ? 0 : 1));
-my $upstream = catdir($tmpdir, 'tsgit');
+my $upstream = catdir($tmpdir, 'upstream');
+my $working  = catdir($tmpdir, 'working');
 my $playground = catdir($tmpdir, 'playground');
 my $branchfile = catfile($tmpdir, 'default.gitbranch');
 my $branchname = 'master'; # for compatibility with old and new git version
 
+diag("Testing with git($gitbin) version: $gitversion");
+my $diag;
 SKIP: {
     pass("Git version $gitversion");
-    # Set up a basic git repository
-    $git->run('-c' => "init.defaultBranch=$branchname", init => '-q',$upstream);
+
+    # Set up a git repository in bare format to use for "upstream"
+    $diag = $git->run(
+        '-c', "init.defaultBranch=$branchname", init => '-q', '--bare', $upstream
+    );
     unless (is($git->exitcode, 0, "git init $upstream")) {
-        skip "git init failed! The tests require an empty/different repo";
+        diag($diag);
+        skip "git init failed!";
     }
 
-    mkpath("$upstream/Porting");
-    unless(chdir $upstream) {
-        diag("chdir to '$upstream' failed with error: $!");
-        ok(0, "chdir upstream");
+    # Set up a working clone of upstream to add/change/remove files
+    # we will push to "upstream" at the end of each "dev-cycle"
+    $diag = $git->run(clone => $upstream, $working, '2>&1');
+    unless (is($git->exitcode, 0, "git clone $upstream $working")) {
+        diag($diag);
+        skip "git clone failed!";
+    }
+    unless(chdir($working)) {
+        diag("chdir to '$working' failed with error: $!");
+        ok(0, "chdir working");
         die "chdir failed! Can't run the other tests (wrong cwd)";
     }
+    unless (ok(-d catdir($working, '.git'), "Found .git directory")) {
+        skip "git init failed! cannot find .git directory";
+    }
+    ok(mkpath(catdir($working, "Porting")), "mkdir $working/Porting");
+
     $git->run('config', 'user.name' => "syncer_git.t");
     is($git->exitcode, 0, "git config user.name");
-    $git->run('config', 'user.email' => "syncer_git.t\@test-smoke.org");
+    $git->run('config', 'user.email' => "syncer_git.t\@example.com");
     is($git->exitcode, 0, "git config user.email");
 
     put_file($gitversion => 'first.file');
@@ -57,7 +77,7 @@ SKIP: {
 (\@ARGV,\$/)=q/first.file/;
 print <>;
     CAT
-    $git->run(add => 'Porting/make_dot_patch.pl');
+    $git->run(add => catfile('Porting', 'make_dot_patch.pl'));
     is($git->exitcode, 0, "git add Porting/make_dot_patch.pl");
 
     put_file(".patch" => q/.gitignore/);
@@ -67,7 +87,10 @@ print <>;
     $git->run(commit => '-m', "'We need a first file committed'", '2>&1');
     is($git->exitcode, 0, "git commit");
 
-    chdir catdir(updir, updir);
+    $git->run(push => '--all', '2>&1');
+    is($git->exitcode, 0, "git push --all");
+
+    chdir(catdir(updir, updir));
     put_file("$branchname\n" => $branchfile);
     mkpath($playground);
     {
@@ -77,7 +100,7 @@ print <>;
                 gitorigin     => $upstream,
                 gitdfbranch   => 'blead',
                 gitbranchfile => $branchfile,
-                gitdir        => catdir($playground, 'git-perl'),
+                gitdir        => catdir($playground, 'perl-from-upstream'),
                 ddir          => catdir($playground, 'perl-current'),
                 v             => $verbose,
             ),
@@ -99,20 +122,28 @@ print <>;
         ok(-e catfile(catdir($playground, 'perl-current'), '.patch'), "  .patch created");
 
         # Update upstream/master
-        chdir $upstream;
+        chdir($working);
         put_file('any content' => q/new_file/);
         $git->run(add => 'new_file', '2>&1');
         is($git->exitcode, 0, "git add new_file");
         $git->run(commit => '-m', "'2nd commit message'", '2>&1');
         is($git->exitcode, 0, "git commit");
-        chdir catdir(updir, updir);
+        $git->run(push => '--all', '2>&1');
+        is($git->exitcode, 0, "git push --all");
+        chdir(catdir(updir, updir));
 
         $syncer->sync();
-        ok(-e catfile(catdir($playground, 'git-perl'), 'new_file'), "new_file exits after sync()");
-        ok(-e catfile(catdir($playground, 'perl-current'), 'new_file'), "new_file exits after sync()");
+        ok(
+            -e catfile(catdir($playground, 'perl-from-upstream'), 'new_file'),
+            "new_file exits after sync()"
+        );
+        ok(
+            -e catfile(catdir($playground, 'perl-current'), 'new_file'),
+            "new_file exits after sync()"
+        );
 
         # Create upstream/smoke-me
-        chdir $upstream;
+        chdir($working);
         $git->run(checkout => '-b', 'smoke-me', '2>&1');
         is($git->exitcode, 0, "git checkout -b 'smoke-me'");
         put_file('new file in branch' => 'branch_file');
@@ -120,7 +151,9 @@ print <>;
         is($git->exitcode, 0, "git add branch_file");
         $git->run(commit => '-m', "File in branch!", '2>&1');
         is($git->exitcode, 0, "git commit");
-        chdir catdir(updir, updir);
+        $git->run(push => '--all', '2>&1');
+        is($git->exitcode, 0, "git push --all");
+        chdir(catdir(updir, updir));
 
         # Sync master.
         $syncer->sync();
@@ -153,7 +186,10 @@ print <>;
 done_testing();
 
 END {
-    chdir $cwd;
-    note("$playground: ", rmtree($playground, $ENV{SMOKE_DEBUG}, 0));
-    note("$upstream: ", rmtree($upstream, $ENV{SMOKE_DEBUG}, 0));
+    if ($gitbin && $cwd) {
+        chdir($cwd);
+        note("$playground: ", rmtree($playground, $ENV{SMOKE_DEBUG}, 0));
+        note("$upstream: ",   rmtree($upstream,   $ENV{SMOKE_DEBUG}, 0));
+        note("$working ",     rmtree($working,    $ENV{SMOKE_DEBUG}, 0));
+    }
 }
