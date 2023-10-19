@@ -2,7 +2,7 @@ package Test::Smoke::App::ConfigSmoke;
 use warnings;
 use strict;
 
-our $VERSION = '0.102';
+our $VERSION = '0.103';
 
 use base 'Test::Smoke::App::Base';
 
@@ -117,7 +117,11 @@ sub run {
 
     $self->write_config();
 
-    $self->write_smoke_script();
+    my ($cronbin, $crontime) = (
+        $self->current_values->{cronbin},
+        $self->current_values->{crontime}
+    );
+    $self->write_smoke_script($cronbin, $crontime);
 
     $self->say_bye();
 }
@@ -190,7 +194,7 @@ sub write_config {
     my $self = shift;
 
     # Filter some values we don't want:
-    my @donot_save = qw( cronbin add2cron docron );
+    my @donot_save = qw( cronbin docron );
     my %current_config = %{ $self->current_values };
     delete($current_config{$_}) for @donot_save;
 

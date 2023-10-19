@@ -44,18 +44,19 @@ sub config_scheduler {
     }
 
     $self->current_values->{cronbin} = $cronbin;
-    my $docron = $self->handle_option(docron_option($cronbin));
+    my $has_crontime = $self->default_for_option(crontime_option());
+    my $docron = $self->handle_option(docron_option($cronbin, $has_crontime));
     return unless $docron;
 
     my $crontime = $self->handle_option(crontime_option());
 
     my @current_cron;
     if ($^O eq 'MSWin32') {
-        $self->{_jcl} = $self->prefix . '.cmd';
-        $self->{_jcl_abs} = Cwd::abs_path($self->jcl);
+        $self->{_smoke_script} = $self->prefix . '.cmd';
+        $self->{_smoke_script_abs} = Cwd::abs_path($self->smoke_script);
         if ($cronbin =~ m{schtasks}i) {
 
-            my $new_entry = $self->schedule_entry_ms_at($cronbin, $crontime);
+            my $new_entry = $self->schedule_entry_ms_schtasks($cronbin, $crontime);
             my $add2cron = $self->handle_option(add2cron_option($new_entry));
 
             system $new_entry if $add2cron;
@@ -77,8 +78,8 @@ sub config_scheduler {
         }
     }
     else {
-        my $jcl = $self->{_jcl} = $self->prefix . '.sh';
-        $self->{_jcl_abs} = Cwd::abs_path($self->jcl);
+        my $jcl = $self->{_smoke_script} = $self->prefix . '.sh';
+        $self->{_smoke_script_abs} = Cwd::abs_path($self->smoke_script);
         if (open(my $crontab, "$cronbin -l |")) {
             @current_cron = <$crontab>;
             close($crontab) or warn "Error reading schedule: $!\n";
@@ -163,7 +164,7 @@ sub query_entry_ms_schtasks {
     my ($cronbin) = @_;
     my $tn = "P5Smoke-" . $self->prefix;
 
-    return sprintf(qq<"%s" /query /tn %s /v /fo list>, $cronbin, $tn);
+    return sprintf(qq<"%s" /Query /TN %s /V /FO list>, $cronbin, $tn);
 }
 
 =head2 schedule_entry_ms_at
@@ -211,7 +212,7 @@ on the scheduler path.
 =cut
 
 sub docron_option {
-    my ($scheduler) = @_;
+    my ($scheduler, $schedule_time) = @_;
     return Test::Smoke::App::AppOption->new(
         name       => 'docron',
         allow      => undef,
@@ -220,7 +221,7 @@ sub docron_option {
         configtext => 'Should the smoke be scheduled?',
         configtype => 'prompt_yn',
         configalt  => sub { [qw/ N y /] },
-        configdft  => sub {'N'},
+        configdft  => sub { defined($schedule_time) ? 'Y' : 'N' },
     );
 }
 

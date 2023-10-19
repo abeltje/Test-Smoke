@@ -172,7 +172,7 @@ sub write_as_cmd {
         Cwd::abs_path(File::Spec->curdir),
         $self->configfile,
         $self->prefix. ".lck",
-        $FindBin::Bin, $ENV{PATH},
+        File::Spec->canonpath($FindBin::Bin), $ENV{PATH},
         $^X, File::Spec->catfile($FindBin::Bin, 'tssmokeperl.pl'), $self->current_values->{lfile},
     );
 
@@ -190,7 +190,7 @@ REM the next line might fix it?
 REM set COPYCMD=/Y %%COPYCMD%%
 REM .
 %s
-REM query schuduler: %s
+REM query scheduler: %s
 
 set WD=%s\
 REM Change drive-Letter, then directory
