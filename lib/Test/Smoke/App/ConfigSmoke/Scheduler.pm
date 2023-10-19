@@ -2,8 +2,16 @@ package Test::Smoke::App::ConfigSmoke::Scheduler;
 use warnings;
 use strict;
 
+our $VERSION = '0.002';
+
 use Exporter 'import';
-our @EXPORT = qw/ config_scheduler schedule_entry_ms_at schedule_entry_crontab /;
+our @EXPORT = qw/
+    config_scheduler
+    schedule_entry_ms_schtasks
+    schedule_entry_ms_at
+    schedule_entry_crontab
+    query_entry_ms_schtasks
+/;
 
 use Test::Smoke::App::Options;
 use Test::Smoke::Util::FindHelpers 'whereis';
@@ -133,14 +141,29 @@ Return an etry for MS-C<SchTasks>
 sub schedule_entry_ms_schtasks {
     my $self = shift;
     my ($cron, $crontime) = @_;
-    my $script = $self->jcl_abs;
+    my $script = $self->smoke_script_abs;
 
     return '' unless $crontime;
 
+    my $tn = "P5Smoke-" . $self->prefix;
     return sprintf(
-        qq[%s /Create /SC DAILY /ST %s /TN P5SmokeRun /TR "%s"],
-        $cron, $crontime, $script
+        qq[%s /Create /SC DAILY /ST %s /TN %s /TR "%s"],
+        $cron, $crontime, $tn, $script
     );
+}
+
+=head2 query_entry_ms_schtasks {
+
+Return the command to query the scheduler.
+
+=cut
+
+sub query_entry_ms_schtasks {
+    my $self = shift;
+    my ($cronbin) = @_;
+    my $tn = "P5Smoke-" . $self->prefix;
+
+    return sprintf(qq<"%s" /query /tn %s /v /fo list>, $cronbin, $tn);
 }
 
 =head2 schedule_entry_ms_at
@@ -152,7 +175,7 @@ Return an entry for MS-C<AT>.
 sub schedule_entry_ms_at {
     my $self = shift;
     my ($cron, $crontime) = @_;
-    my $script = $self->jcl;
+    my $script = $self->smoke_script_abs;
 
     return '' unless $crontime;
     my ($hour, $min) = $crontime =~ /(\d+):(\d+)/;
@@ -160,7 +183,7 @@ sub schedule_entry_ms_at {
 
     return sprintf(
         qq[$cron %02d:%02d /EVERY:M,T,W,Th,F,S,Su "%s"],
-        $hour, $min, $self->jcl_abs
+        $hour, $min, $script
     );
 }
 
@@ -177,7 +200,7 @@ sub schedule_entry_crontab {
     return '' unless $crontime;
     my ($hour, $min) = $crontime =~ /(\d+):(\d+)/;
 
-    return sprintf(qq[%02d %02d * * * '%s'], $min, $hour, $self->jcl_abs);
+    return sprintf(qq[%02d %02d * * * '%s'], $min, $hour, $self->smoke_script_abs);
 }
 
 =head2 docron_option
