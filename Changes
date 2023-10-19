@@ -1,6 +1,24 @@
-1.80_03 2023-10-17T12:08:02+02:00 (4ec4a32 => Abe Timmerman)
+1.80_04 2023-10-19T13:53:17+02:00 (8619a35 => Abe Timmerman)
+ - (Abe Timmerman, Thu, 19 Oct 2023 13:53:17 +0200) Autocommit for
+   distribution Test-Smoke 1.80_04 (test)
+
+1.80_03 2023-10-17T12:08:02+02:00 (b6eaf1f => Abe Timmerman)
  - (Abe Timmerman, Tue, 17 Oct 2023 12:08:02 +0200) Autocommit for
    distribution Test-Smoke 1.80_03 (test)
+ - (Abe Timmerman, Thu, 19 Oct 2023 11:23:39 +0200) Change the syncer_git
+   test a bit
+ -     Use a bare repo for upstream and edit stuff in a working clone
+ -     Add some diagnostics
+ -     Smoothen the set-up flow a bit
+ - (Abe Timmerman, Thu, 19 Oct 2023 11:25:48 +0200) FIX: Some MSWin32
+   scheduler and smoke-script stuff
+ -     Change the name of the Task for MS schtasks (include prefix)
+ -     Add a note about querying MS schtasks in the .cmd
+ -     Make the .sh and .cmd version equal wrt. PATH
+ -	 keep the PATH that was set during tsconfigsmoke.pl
+ - (Abe Timmerman, Thu, 19 Oct 2023 13:38:17 +0200) FIX: ConfigSmoke stuff
+ -     The MSWin32 schtasks wasn't used correctly
+ -     Use of the wrong variable in write_as_<shell|bat>()
 
 1.80_02 2023-10-15T11:47:28+02:00 (4448a59 => Abe Timmerman)
  - (Abe Timmerman, Sun, 15 Oct 2023 11:47:28 +0200) Autocommit for
