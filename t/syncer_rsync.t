@@ -89,18 +89,19 @@ SKIP: {
     # Set up a basic git repository
     my $git = Test::Smoke::Util::Execute->new(command => $gitbin);
     my $repopath = tempdir(CLEANUP => 1);
-    $git->run('-c' => "init.defaultBranch=$branchname", init => "-q", $repopath);
+    my $diag = $git->run('-c' => "init.defaultBranch=$branchname", init => "-q", $repopath);
     unless (is($git->exitcode, 0, "$gitbin init $repopath")) {
+        diag("git init: $diag");
         skip "git init failed! The tests require an empty/different repo";
     }
 
-
-    mkpath(catdir($repopath, "Porting"));
     unless(chdir $repopath) {
         diag("chdir to '$repopath' failed with error: $!");
         ok(0, "chdir repopath");
         die "chdir failed! Can't run the other tests (wrong cwd)";
     }
+    ok(mkpath(catdir($repopath, "Porting")), "mkpath($repopath/Porting)");
+
     $git->run('config', 'user.name' => "syncer_rsync.t");
     is($git->exitcode, 0, "git config user.name");
     $git->run('config', 'user.email' => "syncer_rsync.t\@example.com");
