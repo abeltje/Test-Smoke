@@ -366,7 +366,6 @@ sub prompt_yn {
     $option->configdft( sub { $default } );
 
     my $yesno = lc($self->prompt($option, qr{^[ny]$}i)) || 0;
-    print "Got [$yesno]\n";
     ( my $retval = $yesno ) =~ tr/ny/01/;
     return 0 + $retval;
 }
