@@ -55,8 +55,16 @@ sub config_scheduler {
         $self->{_smoke_script} = $self->prefix . '.cmd';
         $self->{_smoke_script_abs} = Cwd::abs_path($self->smoke_script);
         if ($cronbin =~ m{schtasks}i) {
+            my $task_name = sprintf("P5Smoke-%s", $self->prefix);
+            my @old_schedule = qx{"$cronbin" /nh /tn "$task_name" 2>&1};
+            my ($curr_shedule) = grep { m{\Q$task_name\E} } @old_schedule;
 
             my $new_entry = $self->schedule_entry_ms_schtasks($cronbin, $crontime);
+            if ($curr_shedule) {
+                printf "\n!!! I see you already have:\n\t%s\n", $curr_shedule;
+                $new_entry .= " /F";
+            }
+
             my $add2cron = $self->handle_option(add2cron_option($new_entry));
 
             system $new_entry if $add2cron;
@@ -248,12 +256,18 @@ This option C<add2cron> will not be in the config-file.
 
 sub add2cron_option {
     my ($new_entry) = @_;
+    my $df = $new_entry =~ m{schtasks}i
+        ? $new_entry =~ m{/F$}
+            ? 'N'
+            : 'Y'
+        : 'Y';
+    my %ndf = ( N => 'y', Y => 'n' );
     return Test::Smoke::App::AppOption->new(
         name => 'add2cron',
         configtext => "Add this line to your schedule?\n\t$new_entry\n",
         configtype => 'prompt_yn',
-        configalt => sub { [qw/ Y n /] },
-        configdft => sub { 'Y' },
+        configalt => sub { [ $df, $ndf{$df}] },
+        configdft => sub { $df },
     );
 }
 
