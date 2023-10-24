@@ -1,6 +1,6 @@
 # NAME
 
-tsconfigsmoke - Explain the options during configuration.
+configsmoke - Explain the options during configuration.
 
 # VERSION
 
@@ -10,12 +10,15 @@ This is version: **0.093**
 
 Software installed in `~/perl5coresmoke/smoke`
 
+    $ cd ~/perl5coresmoke 
     $ mkdir etc
     $ cd etc
     $ ../smoke/tsconfigsmoke.pl -c <prefix>
 
 or on MSWin32 (installed in `%HOMEDRIVE%%HOMEPATH%\perl5coresmoke\smoke`):
 
+    %HOMEDRIVE%
+    cd %HOMEPATH%\perl5coresmoke
     md etc
     cd etc
     ..\smoke\tsconfigsmoke.bat -c <prefix>

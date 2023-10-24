@@ -4,13 +4,13 @@
 
 After editing, please do not forget to run:
 
-    pod2markdown bin/configsmoke.pod > README2.md
+    pod2markdown lib/configsmoke.pod > README2.md
 
 =end Instruction
 
 =head1 NAME
 
-tsconfigsmoke - Explain the options during configuration.
+configsmoke - Explain the options during configuration.
 
 =head1 VERSION
 
@@ -20,12 +20,15 @@ This is version: B<0.093>
 
 Software installed in C<~/perl5coresmoke/smoke>
 
+    $ cd ~/perl5coresmoke 
     $ mkdir etc
     $ cd etc
     $ ../smoke/tsconfigsmoke.pl -c <prefix>
 
 or on MSWin32 (installed in C<%HOMEDRIVE%%HOMEPATH%\perl5coresmoke\smoke>):
 
+    %HOMEDRIVE%
+    cd %HOMEPATH%\perl5coresmoke
     md etc
     cd etc
     ..\smoke\tsconfigsmoke.bat -c <prefix>

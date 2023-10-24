@@ -75,6 +75,11 @@ my @scripts = qw(
     tssmokeperl.pl tsreport.pl tsrepostjsn.pl
     tsw32configure.pl tsconfigsmoke.pl
 );
+my @pod_scripts = grep {
+    local (@ARGV, $/) = (catfile('bin', $_));
+    my $content = <>;
+    $content =~ m/^=(?:head[1-6]|cut)/m ? 1 : ();
+} @scripts;
 
 my %extra_deps;
 for ($^O) {
@@ -175,6 +180,10 @@ my %wm = (
     },
     PMLIBDIRS => [qw/ lib /],
     EXE_FILES => [ map "bin/$_", @scripts ],
+    MAN1PODS  => {
+        'lib/configsmoke.pod' => 'blib/man1/configsmoke.1',
+        map { ("bin/$_" => "blib/man1/$_.1") } @pod_scripts,
+    },
     test      => {
         TESTS => 't/*.t t/app/*.t',
     },

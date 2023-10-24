@@ -6,7 +6,6 @@ README
 README2.md
 ReleaseNotes
 bin/chkbcfg.pl
-bin/configsmoke.pod
 bin/patchtree.pl
 bin/smokestatus.pl
 bin/sysinfo.pl
@@ -19,6 +18,7 @@ bin/tssmokeperl.pl
 bin/tssynctree.pl
 bin/tsconfigsmoke.pl
 bin/tsw32configure.pl
+lib/configsmoke.pod
 lib/Test/Smoke.pm
 lib/Test/Smoke/App/AppOption.pm
 lib/Test/Smoke/App/AppOptionCollection.pm
