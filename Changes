@@ -1,6 +1,28 @@
-1.80_05 2023-10-21T17:06:05+02:00 (d7fb6b6 => Abe Timmerman)
+1.80_06 2023-10-24T18:03:34+02:00 (c7dc594 => Abe Timmerman)
+ - (Abe Timmerman, Tue, 24 Oct 2023 18:03:34 +0200) Autocommit for
+   distribution Test-Smoke 1.80_06 (test)
+
+1.80_05 2023-10-21T17:06:05+02:00 (4c6b101 => Abe Timmerman)
  - (Abe Timmerman, Sat, 21 Oct 2023 17:06:05 +0200) Autocommit for
    distribution Test-Smoke 1.80_05 (test)
+ - (Abe Timmerman, Mon, 23 Oct 2023 23:27:43 +0200) Restore the default
+   'smokecurrent' for config-prefix
+ - (Abe Timmerman, Tue, 24 Oct 2023 12:22:27 +0200) Default build configs
+   should be OS dependend
+ -     We have these example/default build configurations files in the
+ -     distribution, so we should use them during configsmoke.
+ - (Abe Timmerman, Tue, 24 Oct 2023 12:25:47 +0200) FIX some POD.
+ - (Abe Timmerman, Tue, 24 Oct 2023 13:16:31 +0200) Remove configsmoke.pl,
+   add configsmoke.pod and README2.md
+ -     We have gathered all the information from the old `configsmoke.pl`
+   and
+ -     put it in a new `configsmoke.pod` file, this file is converted to
+ -     README2.md
+ - (Abe Timmerman, Tue, 24 Oct 2023 17:58:41 +0200) Make sure
+   'configsmoke.pod' is installed on make install
+ -     We refer to that documentation, so it should be available after
+ -     installation.
+ -     Also regenerate the README2.md
 
 1.80_04 2023-10-19T13:53:17+02:00 (120827f => Abe Timmerman)
  - (Abe Timmerman, Thu, 19 Oct 2023 13:53:17 +0200) Autocommit for
