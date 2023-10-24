@@ -194,7 +194,7 @@ sub write_config {
     my $self = shift;
 
     # Filter some values we don't want:
-    my @donot_save = qw( cronbin docron );
+    my @donot_save = qw( cronbin docron add2cron );
     my %current_config = %{ $self->current_values };
     delete($current_config{$_}) for @donot_save;
 

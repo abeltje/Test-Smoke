@@ -26,7 +26,7 @@ These methods will be added to the L<Test::Smoke::App::ConfigSmoke> class.
 
 =head2 config_scheduler
 
-Configure options C<hostname>, C<usernote> and C<usernote_pos>
+Configure options C<crontime>, C<add2cron> (and temporarily C<cronbin> and C<docron>).
 
 =cut
 
@@ -124,7 +124,7 @@ sub config_scheduler {
 
 =head2 get_avail_scheduler
 
-Looks for F<at.exe> on C<MSWin32> or F<cron(tab)> on other systems.
+Looks for F<at.exe> or F<schtasks.exe> on C<MSWin32> or F<cron(tab)> on other systems.
 
 =cut
 
@@ -143,7 +143,7 @@ sub get_avail_scheduler {
 
 =head2 schedule_entry_ms_schtasks
 
-Return an etry for MS-C<SchTasks>
+Return the command to create a new entry for a MS-C<SchTasks> task.
 
 =cut
 
@@ -177,7 +177,7 @@ sub query_entry_ms_schtasks {
 
 =head2 schedule_entry_ms_at
 
-Return an entry for MS-C<AT>.
+Return the command to create a new entry for MS-C<AT>.
 
 =cut
 
