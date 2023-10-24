@@ -70,7 +70,7 @@ unless ( @ARGV ) {
     );
 }
 my @scripts = qw(
-    configsmoke.pl smokestatus.pl chkbcfg.pl sysinfo.pl
+    smokestatus.pl chkbcfg.pl sysinfo.pl
     tssynctree.pl tsrunsmoke.pl tssendrpt.pl tsarchive.pl
     tssmokeperl.pl tsreport.pl tsrepostjsn.pl
     tsw32configure.pl tsconfigsmoke.pl

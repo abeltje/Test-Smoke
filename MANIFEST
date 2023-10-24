@@ -3,9 +3,10 @@ MANIFEST			This list of files
 MANIFEST.SKIP
 Makefile.PL
 README
+README2.md
 ReleaseNotes
 bin/chkbcfg.pl
-bin/configsmoke.pl
+bin/configsmoke.pod
 bin/patchtree.pl
 bin/smokestatus.pl
 bin/sysinfo.pl
