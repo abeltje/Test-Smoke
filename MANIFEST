@@ -67,6 +67,7 @@ lib/Test/Smoke/Poster/Base.pm
 lib/Test/Smoke/Poster/Curl.pm
 lib/Test/Smoke/Poster/HTTP_Tiny.pm
 lib/Test/Smoke/Poster/LWP_UserAgent.pm
+lib/Test/Smoke/PostQueue.pm
 lib/Test/Smoke/Reporter.pm
 lib/Test/Smoke/Smoker.pm
 lib/Test/Smoke/SourceTree.pm
@@ -163,6 +164,7 @@ t/patcher_forest.t
 t/pc09.out
 t/policy.t
 t/poster-post.t
+t/postqueue.t
 t/regenstuff.t
 t/report-hostname.t
 t/report-usernote.t

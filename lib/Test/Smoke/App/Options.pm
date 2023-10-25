@@ -105,6 +105,7 @@ sub poster_config { # posting to CoreSmokeDB
             ddir(),
             smokedb_url(),
             jsnfile(),
+            qfile(),
             report(0),
         ],
         special_options => {
@@ -955,6 +956,19 @@ sub poster {
     );
 }
 
+sub qfile {
+    return $opt->new(
+        name       => 'qfile',
+        option     => '=s',
+        allow      => qr{^[\w.-]+$},
+        default    => undef,
+        helptext   => 'The qfile keeps the queue of reports to resend.',
+        configtext => "One can now queue reports if they couldn't be delevered.\n"
+                    . "\tLeave empty for no queue.",
+        configdft => sub {undef},
+    );
+}
+
 sub report {
     my $default = @_ ? shift : 1;
     return $opt->new(
@@ -1112,7 +1126,7 @@ sub smartsmoke {
 }
 
 sub smokedb_url {
-    my $default = 'https://perl5.test-smoke.org/report';
+    my $default = 'https://perl5.test-smoke.org/api/report';
     return $opt->new(
         name       => 'smokedb_url',
         option     => '=s',
