@@ -99,14 +99,20 @@ for ($^O) {
     };
 }
 
-# We won't enforce JSON::PP if JSON::XS is installed.
+# We won't enforce JSON::PP if Cpanel::JSON::XS or JSON::XS is installed.
 # But JSON serialisation is needed.
-eval { require JSON::XS };
+eval {require Cpanel::JSON::XS };
 if ( $@ ) {
-    $extra_deps{'JSON::PP'} = 0;
+    eval { require JSON::XS };
+    if ( $@ ) {
+        $extra_deps{'JSON::PP'} = 0;
+    }
+    else {
+        $extra_deps{'JSON::XS'} = 0;
+    }
 }
 else {
-    $extra_deps{'JSON::XS'} = 0;
+    $extra_deps{'Cpanel::JSON::XS'} = 0;
 }
 my %posters;
 my @ua_clients = qw/HTTP::Tiny LWP::UserAgent/;
