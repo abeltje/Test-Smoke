@@ -34,6 +34,7 @@ gitbranchfile
 gitdfbranch
 gitdir
 gitorigin
+handlequeue_config
 harness3opts
 harness_destruct
 harnessonly
@@ -67,6 +68,7 @@ perl5opt
 perlio_only
 poster
 poster_config
+qfile
 report
 reporter_config
 reposter_config

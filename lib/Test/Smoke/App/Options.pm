@@ -317,6 +317,20 @@ sub smokestatus_config {
     );
 }
 
+sub handlequeue_config {
+    my %pc = poster_config();
+    my $pc_so = $pc{special_options};
+    return (
+        main_options => [ poster() ],
+        general_options => [
+            adir(),
+            smokedb_url(),
+            qfile(),
+        ],
+        special_options => $pc_so,
+    );
+}
+
 ###########################################################
 #####              Individual options                 #####
 ###########################################################
@@ -960,7 +974,7 @@ sub qfile {
     return $opt->new(
         name       => 'qfile',
         option     => '=s',
-        allow      => qr{^[\w.-]+$},
+        allow      => [undef, '', qr{^[\w./\\-]+$}],
         default    => undef,
         helptext   => 'The qfile keeps the queue of reports to resend.',
         configtext => "One can now queue reports if they couldn't be delevered.\n"
