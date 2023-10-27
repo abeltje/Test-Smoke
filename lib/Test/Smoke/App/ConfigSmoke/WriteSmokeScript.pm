@@ -174,7 +174,7 @@ sub write_as_cmd {
         $cronline,
         Cwd::abs_path(File::Spec->curdir),
         $self->configfile,
-        ($self->current_values->{qfile} ? qq["$^X"] : qq[# "$^X"]),
+        ($self->current_values->{qfile} ? qq["$^X"] : qq[REM "$^X"]),
         File::Spec->catfile($FindBin::Bin, 'tshandlequeue.pl')
         $self->prefix. ".lck",
         File::Spec->canonpath($FindBin::Bin), $ENV{PATH},
