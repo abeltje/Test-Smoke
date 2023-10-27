@@ -1,6 +1,13 @@
-1.80_06 2023-10-24T18:03:34+02:00 (c7dc594 => Abe Timmerman)
+1.81 2023-10-27T09:21:36+02:00 (7b91007 => Abe Timmerman)
+ - (Abe Timmerman, Fri, 27 Oct 2023 09:21:36 +0200) Autocommit for
+   distribution Test-Smoke 1.81 (minor)
+
+1.80_06 2023-10-24T18:03:34+02:00 (f194172 => Abe Timmerman)
  - (Abe Timmerman, Tue, 24 Oct 2023 18:03:34 +0200) Autocommit for
    distribution Test-Smoke 1.80_06 (test)
+ - (Abe Timmerman, Wed, 25 Oct 2023 15:50:22 +0200) Add a separate AUTHORS
+   file
+ -     mostly: git shortlog --summary --email
 
 1.80_05 2023-10-21T17:06:05+02:00 (4c6b101 => Abe Timmerman)
  - (Abe Timmerman, Sat, 21 Oct 2023 17:06:05 +0200) Autocommit for
