@@ -44,7 +44,7 @@ if (my $perl_mm_opt = $ENV{PERL_MM_OPT}) {
 }
 
 my %install = ( );
-unless ( @ARGV ) {
+if (!@ARGV and !$ENV{SMOKE_INST_SITE_LIB}) {
     my $dft_install = exists $ENV{SMOKE_INSTDIR} && $ENV{SMOKE_INSTDIR} ne ""
         ? $ENV{SMOKE_INSTDIR}
         : catdir( updir(), 'smoke' );
@@ -69,6 +69,12 @@ unless ( @ARGV ) {
         ),
     );
 }
+else { # this will be the default in some time
+    if (my ($switch) = grep { m{^--site-lib$} } @ARGV) {
+        @ARGV = grep { $_ !~ m{^--site-lib$} } @ARGV;
+    }
+}
+
 my @scripts = qw(
     smokestatus.pl chkbcfg.pl sysinfo.pl
     tssynctree.pl tsrunsmoke.pl tssendrpt.pl tsarchive.pl
