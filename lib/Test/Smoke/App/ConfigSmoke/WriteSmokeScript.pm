@@ -88,7 +88,7 @@ sub write_as_shell {
         Cwd::abs_path(File::Spec->curdir),
         $self->configfile,
         ($self->current_values->{qfile} ? $^X : "# $^X"),
-        File::Spec->catfile($FindBin::Bin, 'tshandlequeue.pl')
+        File::Spec->catfile($FindBin::Bin, 'tshandlequeue.pl'),
         $self->prefix. ".lck",
         $handle_lock,
         $p5env,
@@ -175,7 +175,7 @@ sub write_as_cmd {
         Cwd::abs_path(File::Spec->curdir),
         $self->configfile,
         ($self->current_values->{qfile} ? qq["$^X"] : qq[REM "$^X"]),
-        File::Spec->catfile($FindBin::Bin, 'tshandlequeue.pl')
+        File::Spec->catfile($FindBin::Bin, 'tshandlequeue.pl'),
         $self->prefix. ".lck",
         File::Spec->canonpath($FindBin::Bin), $ENV{PATH},
         $^X, File::Spec->catfile($FindBin::Bin, 'tssmokeperl.pl'), $self->current_values->{lfile},
