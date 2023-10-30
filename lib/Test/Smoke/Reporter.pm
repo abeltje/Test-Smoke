@@ -2,8 +2,7 @@ package Test::Smoke::Reporter;
 use warnings;
 use strict;
 
-use vars qw( $VERSION );
-$VERSION = '0.054';
+our $VERSION = '0.054';
 
 require File::Path;
 require Test::Smoke;
