@@ -1255,6 +1255,7 @@ SKIP_TESTS: {
     if ($config{$arg} && !-f $config{$arg}) {
         if (open my $toskip, '>', $config{$arg}) {
             print $toskip "# One test name on a line\n";
+            print $toskip "t/porting/pending-author.t\n" if is_win32;
             close $toskip;
             print "Created skeleton '$config{$arg}'...\n";
         }
@@ -2350,6 +2351,34 @@ sub default_buildcfg {
                "($basename is missing)!\n";
     copy $dftbcfg, $file_name
         and print "\nCreated buildconfig '$file_name'";
+
+    _inject_dcchome_for_strawberry($file_name)
+        if is_win32 and $Config{myuname} =~ /strawberry/;
+}
+
+sub _inject_dcchome_for_strawberry {
+    my ($file_name) = @_;
+
+    my $dcchome = $^X;
+    $dcchome =~ s/perl.bin.perl.*$//;
+    $dcchome="-DCCHOME=${dcchome}c";
+    print "\nStrawberry on Windows detected, injecting: '$dcchome'";
+
+    use autodie;
+
+    open my $cfg_fh_r, "<:raw", $file_name;
+    my $body = do { local $/; <$cfg_fh_r> };
+    close $cfg_fh_r;
+
+    $body =~ s/(DCCHOME.*\n)/$1$dcchome\n/;
+
+    chmod 0666, $file_name;
+    open my $cfg_fh_w, ">:raw", $file_name;
+    print $cfg_fh_w $body;
+    close $cfg_fh_w;
+    chmod 0550, $file_name;
+
+    return;
 }
 
 =item check_buildcfg
