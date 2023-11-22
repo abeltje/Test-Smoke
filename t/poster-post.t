@@ -356,7 +356,7 @@ SKIP: {
     select($old_out);
 
     is($outbuffer, <<EOL, "Logfile ok");
-POST failed: 501 NOT IMPLEMENTED ({"report_data": {"sysinfo":"darwin"}})
+POST failed: 501 NOT IMPLEMENTED ({"report_data": {"sysinfo":"$^O"}})
 Posted 654321 from queue: report_id = 42
 EOL
 
