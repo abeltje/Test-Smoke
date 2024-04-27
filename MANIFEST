@@ -3,8 +3,8 @@ Changes
 MANIFEST			This list of files
 MANIFEST.SKIP
 Makefile.PL
-README
 README2.md
+README.pod
 ReleaseNotes
 bin/chkbcfg.pl
 bin/patchtree.pl
