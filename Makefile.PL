@@ -155,6 +155,7 @@ my %TEST_REQUIRES = (
     'Test::Fatal'      => 0,
     'HTTP::Daemon'     => 0,
     'HTTP::Message'    => 0,
+    'JSON'             => 4.10,
     ($mmver > 6.64 ? (%BUILD_REQUIRES) : ()),
 );
 

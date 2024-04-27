@@ -23,6 +23,7 @@ prepare_queue($qfile, $commit, $non_commit);
 
 
 {
+    no warnings 'redefine';
     my $id = 42;
     local *Test::Smoke::Poster::Base::post = sub {
         my $self = shift;
