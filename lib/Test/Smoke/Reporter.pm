@@ -2,8 +2,7 @@ package Test::Smoke::Reporter;
 use warnings;
 use strict;
 
-use vars qw( $VERSION );
-$VERSION = '0.054';
+our $VERSION = '0.054';
 
 require File::Path;
 require Test::Smoke;
@@ -885,7 +884,7 @@ sub smokedb_data {
     }
     delete $rpt{$_} for qw/from send_log send_out user_note/, grep m/^_/ => keys %rpt;
 
-    my $json = Test::Smoke::Util::LoadAJSON->new->utf8(1)->pretty(1)->encode(\%rpt);
+    my $json = JSON->new->utf8(1)->pretty(1)->encode(\%rpt);
 
     # write the json to file:
     my $jsn_file = catfile($self->{ddir}, $self->{jsnfile});
