@@ -1343,7 +1343,12 @@ sub bldenv_legend {
     }
 
     my $locale = ''; # XXX
-    return  $locale ? <<EOL : $self->{defaultenv} ? <<EOS : <<EOE;
+    my %l;
+@l{qw( EOS EOaL EOpL EOaE EOpE )} = (<<"EOS", <<"EOaL", <<"EOpL", <<"EOaE", <<"EOpE");
+| +--------- $debugging
++----------- no debugging
+
+EOS
 | | | | | +- LC_ALL = $locale $debugging
 | | | | +--- PERLIO = perlio $debugging
 | | | +----- PERLIO = stdio  $debugging
@@ -1351,17 +1356,26 @@ sub bldenv_legend {
 | +--------- PERLIO = perlio
 +----------- PERLIO = stdio
 
-EOL
-| +--------- $debugging
-+----------- no debugging
+EOaL
+| | | +----- LC_ALL = $locale $debugging
+| | +------- PERLIO = perlio $debugging
+| +--------- LC_ALL = $locale
++----------- PERLIO = perlio
 
-EOS
+EOpL
 | | | +----- PERLIO = perlio $debugging
 | | +------- PERLIO = stdio  $debugging
 | +--------- PERLIO = perlio
 +----------- PERLIO = stdio
 
-EOE
+EOaE
+| +--------- PERLIO = perlio $debugging
++----------- PERLIO = perlio
+
+EOpE
+    return  $self->{perlio_only}
+        ? $locale ? $l{EOaL} : $self->{defaultenv} ? $l{EOS} : $l{EOaE}
+        : $locale ? $l{EOpL} : $self->{defaultenv} ? $l{EOS} : $l{EOpE};
 }
 
 =head2 $reporter->letter_legend( )
