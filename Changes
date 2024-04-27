@@ -1,6 +1,12 @@
-1.81_01 2024-04-27T16:44:46+01:00 (09dcb75 => Abe Timmerman)
+1.81_02 2024-04-27T17:34:20+01:00 (818d297 => Abe Timmerman)
+ - (Abe Timmerman, Sat, 27 Apr 2024 17:34:20 +0100) Autocommit for
+   distribution Test-Smoke 1.81_02 (same)
+
+1.81_01 2024-04-27T16:44:46+01:00 (cb4aff5 => Abe Timmerman)
  - (Abe Timmerman, Sat, 27 Apr 2024 16:44:46 +0100) Autocommit for
    distribution Test-Smoke 1.81_01 (same)
+ - (Abe Timmerman, Sat, 27 Apr 2024 17:31:58 +0100) Add JSON as test
+   dependency, work around perl bug
 
 1.81 2023-10-27T09:21:36+02:00 (c932d7e => Abe Timmerman)
  - (Abe Timmerman, Fri, 27 Oct 2023 09:21:36 +0200) Autocommit for
