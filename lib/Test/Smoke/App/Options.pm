@@ -974,7 +974,7 @@ sub qfile {
     return $opt->new(
         name       => 'qfile',
         option     => '=s',
-        allow      => [undef, '', qr{^[\w./\\-]+$}],
+        allow      => [undef, '', qr{^[\w./:\\-]+$}],
         default    => undef,
         helptext   => 'The qfile keeps the queue of reports to resend.',
         configtext => "One can now queue reports if they couldn't be delevered.\n"
