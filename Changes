@@ -1,6 +1,12 @@
-1.81_02 2024-04-27T17:34:20+01:00 (818d297 => Abe Timmerman)
+1.81_03 2024-04-28T10:03:23+01:00 (db0181f => Abe Timmerman)
+ - (Abe Timmerman, Sun, 28 Apr 2024 10:03:23 +0100) Autocommit for
+   distribution Test-Smoke 1.81_03 (same)
+
+1.81_02 2024-04-27T17:34:20+01:00 (5d04dd4 => Abe Timmerman)
  - (Abe Timmerman, Sat, 27 Apr 2024 17:34:20 +0100) Autocommit for
    distribution Test-Smoke 1.81_02 (same)
+ - (Abe Timmerman, Sun, 28 Apr 2024 10:00:50 +0100) Allow ':' in paths (for
+   Win32)
 
 1.81_01 2024-04-27T16:44:46+01:00 (cb4aff5 => Abe Timmerman)
  - (Abe Timmerman, Sat, 27 Apr 2024 16:44:46 +0100) Autocommit for
